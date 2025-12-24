@@ -39,18 +39,29 @@ Run this command to install the required packages (`lxml`, `Faker`, `tqdm`, etc.
 pip install -r requirements.txt
 ```
 
-## 🏃‍♂️ How to Run
+## 🏃‍♂️ How to Run (Easy Method)
 
-To start the interactive wizard:
+Simply double-click **`start_generator.bat`** in the project folder.
 
-```bash
-python -m crs_generator.wizard
-```
+This script will automatically:
+1.  Check if Python is installed.
+2.  Set up the virtual environment.
+3.  Install all required dependencies.
+4.  Launch the wizard.
 
-Follow the on-screen prompts to configure your file generation.
-*   **Transmitting Country:** The country sending the report (e.g., `MH`).
-*   **ReportingFIs:** How many financial institutions to simulate.
-*   **Parallel Processing:** Enable for large files (>10,000 accounts) to speed up generation.
+## 💻 Manual Run Method
+
+If you prefer using the command line:
+
+1.  **Activate Environment:**
+    ```powershell
+    .\.venv\Scripts\Activate.ps1
+    ```
+
+2.  **Run Wizard:**
+    ```bash
+    python -m crs_generator.wizard
+    ```
 
 The generated XML file will be saved in the `out/` directory.
 
