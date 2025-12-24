@@ -1,0 +1,18 @@
+<crs:ControllingPerson xmlns:crs="urn:oecd:ties:crs:v2" xmlns:stf="urn:oecd:ties:crsstf:v5" xmlns:cfc="urn:oecd:ties:commontypesfatcacrs:v2">
+	<crs:Individual>
+		<crs:ResCountryCode>RECEIVINGCOUNTRY</crs:ResCountryCode>
+		<crs:TIN issuedBy="RECEIVINGCOUNTRY">TIN</crs:TIN>
+		<crs:Name>
+			<crs:FirstName>FIRSTNAME</crs:FirstName>
+			<crs:LastName>LASTNAME</crs:LastName>
+		</crs:Name>
+		<crs:Address>
+			<cfc:CountryCode>RECEIVINGCOUNTRY</cfc:CountryCode>
+			<cfc:AddressFree>ControllingPerson.Address.Free</cfc:AddressFree>
+		</crs:Address>
+		<crs:BirthInfo>
+			<crs:BirthDate>BIRTHDATE</crs:BirthDate>
+		</crs:BirthInfo>
+	</crs:Individual>
+	<crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+</crs:ControllingPerson>

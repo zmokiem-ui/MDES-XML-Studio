@@ -1,0 +1,19 @@
+<crs:ReportingFI xmlns:crs="urn:oecd:ties:crs:v2" xmlns:stf="urn:oecd:ties:crsstf:v5" xmlns:cfc="urn:oecd:ties:commontypesfatcacrs:v2">
+    <crs:ResCountryCode>SENDINGCOUNTRY</crs:ResCountryCode>
+    <crs:IN issuedBy="SENDINGCOUNTRY">MYTIN</crs:IN>
+    <crs:Name>Financial Institution FI_INDEX</crs:Name>
+    <crs:Address legalAddressType="OECD301">
+        <cfc:CountryCode>SENDINGCOUNTRY</cfc:CountryCode>
+        <cfc:AddressFix>
+            <cfc:Street>STREET</cfc:Street>
+            <cfc:BuildingIdentifier>BUILDING</cfc:BuildingIdentifier>
+            <cfc:PostCode>POSTCODE</cfc:PostCode>
+            <cfc:City>CITY</cfc:City>
+        </cfc:AddressFix>
+        <cfc:AddressFree>STREET BUILDING, CITY POSTCODE</cfc:AddressFree>
+    </crs:Address>
+    <crs:DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>SENDINGCOUNTRYTAXYEARMYTINRFIRANDOMID0001</stf:DocRefId>
+    </crs:DocSpec>
+</crs:ReportingFI>

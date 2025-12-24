@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<crs:CRS_OECD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:crs="urn:oecd:ties:crs:v2" xmlns:ftc="urn:oecd:ties:fatca:v1" xmlns:cfc="urn:oecd:ties:commontypesfatcacrs:v2" xmlns:stf="urn:oecd:ties:crsstf:v5" xmlns:iso="urn:oecd:ties:isocrstypes:v1" xsi:schemaLocation="urn:oecd:ties:crs:v1 CrsXML_v2.0.xsd" version="2.0">
+	<crs:MessageSpec>
+		<crs:SendingCompanyIN>MYTIN</crs:SendingCompanyIN>
+		<crs:TransmittingCountry>SENDINGCOUNTRY</crs:TransmittingCountry>
+		<crs:ReceivingCountry>RECEIVINGCOUNTRY</crs:ReceivingCountry>
+		<crs:MessageType>CRS</crs:MessageType>
+		<crs:MessageRefId>SENDINGCOUNTRYTAXYEARMYTINRANDOMID000000001</crs:MessageRefId>
+		<crs:MessageTypeIndic>CRS701</crs:MessageTypeIndic>
+		<crs:ReportingPeriod>TAXYEAR-12-31</crs:ReportingPeriod>
+		<crs:Timestamp>TAXYEAR-03-19T18:12:53Z</crs:Timestamp>
+	</crs:MessageSpec>
+	<crs:CrsBody>
+		<crs:ReportingFI>
+			<crs:ResCountryCode>SENDINGCOUNTRY</crs:ResCountryCode>
+			<crs:IN issuedBy="SENDINGCOUNTRY">MYTIN</crs:IN>
+			<crs:Name>Naam Financiele instelling. abc</crs:Name>
+			<crs:Address legalAddressType="OECD301">
+				<cfc:CountryCode>RECEIVINGCOUNTRY</cfc:CountryCode>
+				<cfc:AddressFix>
+					<cfc:Street>AddressAddressFixStreet. abc</cfc:Street>
+					<cfc:BuildingIdentifier>AddressAddressFixBuildingIdentifier. abc</cfc:BuildingIdentifier>
+					<cfc:SuiteIdentifier>AddressAddressFixSuiteIdentifier. abc</cfc:SuiteIdentifier>
+					<cfc:FloorIdentifier>AddressAddressFixFloorIdentifier. abc</cfc:FloorIdentifier>
+					<cfc:DistrictName>AddressAddressFixDistrictName. abc</cfc:DistrictName>
+					<cfc:POB>AddressAddressFixPOB. abc</cfc:POB>
+					<cfc:PostCode>AddressAddressFixPostcode. abc</cfc:PostCode>
+					<cfc:City>AddressAddressFixCity. abc</cfc:City>
+					<cfc:CountrySubentity>AddressAddressFixCountrySubentity. abc</cfc:CountrySubentity>
+				</cfc:AddressFix>
+				<cfc:AddressFree>AddresAddressFixAddressfree. abc</cfc:AddressFree>
+			</crs:Address>
+			<crs:DocSpec>
+				<stf:DocTypeIndic>RFIDOCTYPEINDIC</stf:DocTypeIndic>
+				<stf:DocRefId>SENDINGCOUNTRYTAXYEARMYTINRFIRANDOMID0001</stf:DocRefId>
+			</crs:DocSpec>
+		</crs:ReportingFI>
+		<!-- REPORTING_GROUP_PLACEHOLDER -->
+	</crs:CrsBody>
+</crs:CRS_OECD>

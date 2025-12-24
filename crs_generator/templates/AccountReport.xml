@@ -1,0 +1,30 @@
+<crs:AccountReport xmlns:crs="urn:oecd:ties:crs:v2" xmlns:stf="urn:oecd:ties:crsstf:v5" xmlns:cfc="urn:oecd:ties:commontypesfatcacrs:v2">
+	<crs:DocSpec>
+		<stf:DocTypeIndic>ARDOCTYPEINDIC</stf:DocTypeIndic>
+		<stf:DocRefId>SENDINGCOUNTRYTAXYEARMYTINARRANDOMID0001</stf:DocRefId>
+	</crs:DocSpec>
+	<crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACCOUNTNUMBER</crs:AccountNumber>
+	<crs:AccountHolder>
+		<crs:Individual>
+			<crs:ResCountryCode>RECEIVINGCOUNTRY</crs:ResCountryCode>
+			<crs:TIN issuedBy="RECEIVINGCOUNTRY">TIN</crs:TIN>
+			<crs:Name>
+				<crs:FirstName>FIRSTNAME</crs:FirstName>
+				<crs:LastName>LASTNAME</crs:LastName>
+			</crs:Name>
+			<crs:Address>
+				<cfc:CountryCode>RECEIVINGCOUNTRY</cfc:CountryCode>
+				<cfc:AddressFree>AccountHolder.Individual.Address.Free</cfc:AddressFree>
+			</crs:Address>
+			<crs:BirthInfo>
+				<crs:BirthDate>BIRTHDATE</crs:BirthDate>
+			</crs:BirthInfo>
+		</crs:Individual>					
+	</crs:AccountHolder>
+	<crs:AccountBalance currCode="EUR">50000000.00</crs:AccountBalance>
+	<crs:Payment>
+		<crs:Type>CRS502</crs:Type>
+		<crs:PaymentAmnt currCode="USD">2569.25</crs:PaymentAmnt>
+	</crs:Payment>
+	<!-- CONTROLLING_PERSONS_PLACEHOLDER -->
+</crs:AccountReport>

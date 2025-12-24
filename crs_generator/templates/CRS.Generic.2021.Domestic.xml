@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<crs:CRS_OECD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:crs="urn:oecd:ties:crs:v2" xmlns:ftc="urn:oecd:ties:fatca:v1" xmlns:cfc="urn:oecd:ties:commontypesfatcacrs:v2" xmlns:stf="urn:oecd:ties:crsstf:v5" xmlns:iso="urn:oecd:ties:isocrstypes:v1" xsi:schemaLocation="urn:oecd:ties:crs:v1 CrsXML_v2.0.xsd" version="2.0">
+	<crs:MessageSpec>
+		<crs:SendingCompanyIN>MYTIN</crs:SendingCompanyIN>
+		<crs:TransmittingCountry>SENDINGCOUNTRY</crs:TransmittingCountry>
+		<crs:ReceivingCountry>RECEIVINGCOUNTRY</crs:ReceivingCountry>
+		<crs:MessageType>CRS</crs:MessageType>
+		<crs:MessageRefId>SENDINGCOUNTRYTAXYEARMYTINRANDOMID000000001</crs:MessageRefId>
+		<crs:MessageTypeIndic>CRS701</crs:MessageTypeIndic>
+		<crs:ReportingPeriod>TAXYEAR-12-31</crs:ReportingPeriod>
+		<crs:Timestamp>TAXYEAR-03-19T18:12:53Z</crs:Timestamp>
+	</crs:MessageSpec>
+	<crs:CrsBody>
+		<crs:ReportingFI>
+			<crs:ResCountryCode>SENDINGCOUNTRY</crs:ResCountryCode>
+			<crs:IN issuedBy="SENDINGCOUNTRY">MYTIN</crs:IN>
+			<crs:Name>Naam Financiele instelling. abc</crs:Name>
+			<crs:Address legalAddressType="OECD301">
+				<cfc:CountryCode>RECEIVINGCOUNTRY</cfc:CountryCode>
+				<cfc:AddressFix>
+					<cfc:Street>AddressAddressFixStreet. abc</cfc:Street>
+					<cfc:BuildingIdentifier>AddressAddressFixBuildingIdentifier. abc</cfc:BuildingIdentifier>
+					<cfc:SuiteIdentifier>AddressAddressFixSuiteIdentifier. abc</cfc:SuiteIdentifier>
+					<cfc:FloorIdentifier>AddressAddressFixFloorIdentifier. abc</cfc:FloorIdentifier>
+					<cfc:DistrictName>AddressAddressFixDistrictName. abc</cfc:DistrictName>
+					<cfc:POB>AddressAddressFixPOB. abc</cfc:POB>
+					<cfc:PostCode>AddressAddressFixPostcode. abc</cfc:PostCode>
+					<cfc:City>AddressAddressFixCity. abc</cfc:City>
+					<cfc:CountrySubentity>AddressAddressFixCountrySubentity. abc</cfc:CountrySubentity>
+				</cfc:AddressFix>
+				<cfc:AddressFree>AddresAddressFixAddressfree. abc</cfc:AddressFree>
+			</crs:Address>
+			<crs:DocSpec>
+				<stf:DocTypeIndic>RFIDOCTYPEINDIC</stf:DocTypeIndic>
+				<stf:DocRefId>SENDINGCOUNTRYTAXYEARMYTINRFIRANDOMID0001</stf:DocRefId>
+			</crs:DocSpec>
+		</crs:ReportingFI>
+		
+		<crs:ReportingGroup>
+			<crs:AccountReport>
+				<crs:DocSpec>
+					<stf:DocTypeIndic>AR1DOCTYPEINDIC</stf:DocTypeIndic>
+					<stf:DocRefId>SENDINGCOUNTRYTAXYEARMYTINARRANDOMID0001</stf:DocRefId>
+				</crs:DocSpec>
+				
+				<crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACCOUNTNUMBER</crs:AccountNumber>
+				
+				<crs:AccountHolder>
+					<crs:Individual>
+						<crs:ResCountryCode>NL</crs:ResCountryCode>
+						<crs:TIN issuedBy="NL">1234567</crs:TIN>
+						<crs:Name>
+							<crs:FirstName>FIRSTNAME</crs:FirstName>
+							<crs:LastName>LASTNAME</crs:LastName>
+						</crs:Name>
+						<crs:Address>
+							<cfc:CountryCode>NL</cfc:CountryCode>
+							<cfc:AddressFree>STREET BUILDING, CITY POSTCODE</cfc:AddressFree>
+						</crs:Address>
+						<crs:BirthInfo>
+							<crs:BirthDate>BIRTHDATE</crs:BirthDate>
+						</crs:BirthInfo>
+					</crs:Individual>
+				</crs:AccountHolder>
+				
+				<crs:AccountBalance currCode="EUR">50000000.00</crs:AccountBalance>
+				
+				<crs:Payment>
+					<crs:Type>CRS502</crs:Type>
+					<crs:PaymentAmnt currCode="USD">2569.25</crs:PaymentAmnt>
+				</crs:Payment>
+			</crs:AccountReport>
+			
+			<crs:AccountReport>
+				<crs:DocSpec>
+					<stf:DocTypeIndic>AR2DOCTYPEINDIC</stf:DocTypeIndic>
+					<stf:DocRefId>SENDINGCOUNTRYTAXYEARMYTINARRANDOMID0002</stf:DocRefId>
+				</crs:DocSpec>
+				
+				<crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACCOUNTNUMBER</crs:AccountNumber>
+				
+				<crs:AccountHolder>
+					<crs:Organisation>
+						<crs:ResCountryCode>NL</crs:ResCountryCode>
+						<crs:IN issuedBy="NL">CW123456789AH2</crs:IN>
+						<crs:Name>ORGNAME</crs:Name>
+						<crs:Address>
+							<cfc:CountryCode>NL</cfc:CountryCode>
+							<cfc:AddressFree>STREET BUILDING, CITY POSTCODE</cfc:AddressFree>
+						</crs:Address>
+					</crs:Organisation>
+					<crs:AcctHolderType>CRS101</crs:AcctHolderType>
+				</crs:AccountHolder>
+				
+				<crs:ControllingPerson>
+					<crs:Individual>
+						<crs:ResCountryCode>NL</crs:ResCountryCode>
+						<crs:TIN issuedBy="NL">123456789CP2</crs:TIN>
+						<crs:Name>
+							<crs:FirstName>CP_FIRSTNAME</crs:FirstName>
+							<crs:LastName>CP_ASTNAME</crs:LastName>
+						</crs:Name>
+						<crs:Address>
+							<cfc:CountryCode>NL</cfc:CountryCode>
+							<cfc:AddressFix>
+								<cfc:Street>CP_STREET</cfc:Street>
+								<cfc:BuildingIdentifier>CP_BUILDING</cfc:BuildingIdentifier>
+								<cfc:SuiteIdentifier>AddressAddressFixSuiteIdentifier. abc</cfc:SuiteIdentifier>
+								<cfc:FloorIdentifier>AddressAddressFixFloorIdentifier. abc</cfc:FloorIdentifier>
+								<cfc:DistrictName>AddressAddressFixDistrictName. abc</cfc:DistrictName>
+								<cfc:POB>AddressAddressFixPOB. abc</cfc:POB>
+								<cfc:PostCode>CP_POSTCODE</cfc:PostCode>
+								<cfc:City>CP_CITY</cfc:City>
+								<cfc:CountrySubentity>AddressAddressFixCountrySubentity. abc</cfc:CountrySubentity>
+							</cfc:AddressFix>
+						</crs:Address>
+					</crs:Individual>
+					<crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+				</crs:ControllingPerson>
+				
+				<crs:AccountBalance currCode="EUR">50000000.00</crs:AccountBalance>
+			</crs:AccountReport>
+		</crs:ReportingGroup>
+	</crs:CrsBody>
+</crs:CRS_OECD>
