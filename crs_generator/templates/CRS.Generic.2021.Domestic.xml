@@ -119,6 +119,19 @@
 				</crs:ControllingPerson>
 				
 				<crs:AccountBalance currCode="EUR">50000000.00</crs:AccountBalance>
+				
+				<crs:Payment>
+					<crs:Type>CRS502</crs:Type>
+					<crs:PaymentAmnt currCode="EUR">2569.25</crs:PaymentAmnt>
+				</crs:Payment>
+				<crs:Payment>
+					<crs:Type>CRS503</crs:Type>
+					<crs:PaymentAmnt currCode="EUR">1000.00</crs:PaymentAmnt>
+				</crs:Payment>
+				<crs:Payment>
+					<crs:Type>CRS504</crs:Type>
+					<crs:PaymentAmnt currCode="EUR">500.00</crs:PaymentAmnt>
+				</crs:Payment>
 			</crs:AccountReport>
 		</crs:ReportingGroup>
 	</crs:CrsBody>

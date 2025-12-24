@@ -114,6 +114,14 @@
 					<sfa_ftc:Type>CRS501</sfa_ftc:Type>
 					<sfa_ftc:PaymentAmnt currCode="USD">1200.50</sfa_ftc:PaymentAmnt>
 				</sfa_ftc:Payment>
+				<sfa_ftc:Payment>
+					<sfa_ftc:Type>CRS502</sfa_ftc:Type>
+					<sfa_ftc:PaymentAmnt currCode="USD">800.00</sfa_ftc:PaymentAmnt>
+				</sfa_ftc:Payment>
+				<sfa_ftc:Payment>
+					<sfa_ftc:Type>CRS503</sfa_ftc:Type>
+					<sfa_ftc:PaymentAmnt currCode="USD">450.25</sfa_ftc:PaymentAmnt>
+				</sfa_ftc:Payment>
 			</sfa_ftc:AccountReport>
 		</sfa_ftc:ReportingGroup>
 	</oecd_ftc:MessageBody>

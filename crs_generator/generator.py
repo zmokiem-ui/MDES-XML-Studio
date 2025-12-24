@@ -341,7 +341,7 @@ class CRSGenerator:
         elem.text = text
     
     def _randomize_balance_and_payment(self, account: etree._Element, ns: dict):
-        """Randomize account balance and payment amounts."""
+        """Randomize account balance and create 1-5 random payment nodes."""
         currency = self.data_gen.rng.choice(self.config.currencies)
         balance = self.data_gen.balance()
         
@@ -351,12 +351,50 @@ class CRSGenerator:
             balance_elem.set('currCode', currency)
             balance_elem.text = f"{balance:.2f}"
         
-        # Update payment
-        payment_elem = account.find('.//crs:Payment/crs:PaymentAmnt', namespaces=ns)
-        if payment_elem is not None:
+        # Find existing payment nodes and remove all but the first one (template)
+        payment_nodes = account.findall('.//crs:Payment', namespaces=ns)
+        if not payment_nodes:
+            return  # No payment template found
+        
+        # Keep first payment as template, remove the rest
+        template_payment = payment_nodes[0]
+        for payment in payment_nodes[1:]:
+            payment.getparent().remove(payment)
+        
+        # Determine number of payments (1-5 random)
+        num_payments = self.data_gen.rng.randint(1, 5)
+        
+        # Payment types available in CRS
+        payment_types = ['CRS501', 'CRS502', 'CRS503', 'CRS504']
+        
+        # Update first payment
+        payment_type_elem = template_payment.find('crs:Type', namespaces=ns)
+        payment_amnt_elem = template_payment.find('crs:PaymentAmnt', namespaces=ns)
+        
+        if payment_type_elem is not None and payment_amnt_elem is not None:
+            payment_type_elem.text = self.data_gen.rng.choice(payment_types)
             payment_amount = self.data_gen.payment_amount(balance)
-            payment_elem.set('currCode', currency)
-            payment_elem.text = f"{payment_amount:.2f}"
+            payment_amnt_elem.set('currCode', currency)
+            payment_amnt_elem.text = f"{payment_amount:.2f}"
+        
+        # Create additional payments if needed
+        parent = template_payment.getparent()
+        for i in range(1, num_payments):
+            new_payment = deepcopy(template_payment)
+            
+            # Randomize payment type and amount
+            payment_type_elem = new_payment.find('crs:Type', namespaces=ns)
+            payment_amnt_elem = new_payment.find('crs:PaymentAmnt', namespaces=ns)
+            
+            if payment_type_elem is not None:
+                payment_type_elem.text = self.data_gen.rng.choice(payment_types)
+            
+            if payment_amnt_elem is not None:
+                payment_amount = self.data_gen.payment_amount(balance)
+                payment_amnt_elem.set('currCode', currency)
+                payment_amnt_elem.text = f"{payment_amount:.2f}"
+            
+            parent.append(new_payment)
     
     def _create_individual_account(self, template: etree._Element, ns: dict) -> etree._Element:
         """Create an individual account from template."""
@@ -410,9 +448,9 @@ class CRSGenerator:
                 balance_elem.set('currCode', currency)
                 balance_elem.text = "0.00"
             
-            # Also set payment to zero for closed accounts
-            payment_elem = account.find('.//crs:Payment/crs:PaymentAmnt', namespaces=ns)
-            if payment_elem is not None:
+            # Also set all payments to zero for closed accounts
+            payment_nodes = account.findall('.//crs:Payment/crs:PaymentAmnt', namespaces=ns)
+            for payment_elem in payment_nodes:
                 currency = payment_elem.get('currCode', 'EUR')
                 payment_elem.set('currCode', currency)
                 payment_elem.text = "0.00"
@@ -502,12 +540,14 @@ class CRSGenerator:
                 balance_elem.set('currCode', currency)
                 balance_elem.text = "0.00"
             
-            # Also set payment to zero for closed accounts
-            payment_elem = account.find('.//crs:Payment/crs:PaymentAmnt', namespaces=ns)
-            if payment_elem is not None:
-                currency = payment_elem.get('currCode', 'EUR')
-                payment_elem.set('currCode', currency)
-                payment_elem.text = "0.00"
+            # Also set all payments to zero for closed accounts
+            payment_nodes = account.findall('.//crs:Payment', namespaces=ns)
+            for payment in payment_nodes:
+                payment_amnt_elem = payment.find('crs:PaymentAmnt', namespaces=ns)
+                if payment_amnt_elem is not None:
+                    currency = payment_amnt_elem.get('currCode', 'EUR')
+                    payment_amnt_elem.set('currCode', currency)
+                    payment_amnt_elem.text = "0.00"
         else:
             self._randomize_balance_and_payment(account, ns)
         
