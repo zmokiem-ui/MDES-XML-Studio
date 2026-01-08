@@ -408,23 +408,31 @@ ipcMain.handle('validate-csv', async (event, csvPath) => {
 
 // Download CSV template
 ipcMain.handle('download-csv-template', async () => {
-  const projectRoot = path.join(__dirname, '../..');
-  const templatePath = path.join(projectRoot, 'templates', 'crs_data_template.csv');
-  
   const result = await dialog.showSaveDialog(mainWindow, {
-    title: 'Save CSV Template',
-    defaultPath: 'crs_data_template.csv',
+    title: 'Save CRS 701 CSV Template',
+    defaultPath: 'crs_701_template.csv',
     filters: [
       { name: 'CSV Files', extensions: ['csv'] },
       { name: 'All Files', extensions: ['*'] }
     ]
   });
   
-  if (result.filePath) {
-    fs.copyFileSync(templatePath, result.filePath);
-    return result.filePath;
+  if (!result.filePath) {
+    return null;
   }
-  return null;
+
+  // Generate template with all required columns
+  const template = `SendingCompanyIN,TransmittingCountry,ReceivingCountry,TaxYear,ReportingFI_TIN,ReportingFI_Name,ReportingFI_Address_Street,ReportingFI_Address_BuildingNumber,ReportingFI_Address_City,ReportingFI_Address_PostCode,ReportingFI_Address_CountryCode,AccountNumber,AccountBalance,AccountCurrency,AccountClosed,AccountDormant,Individual_FirstName,Individual_LastName,Individual_BirthDate,Individual_TIN,Individual_TIN_CountryCode,Individual_Address_Street,Individual_Address_City,Individual_Address_PostCode,Individual_Address_CountryCode,Individual_ResCountryCode,Organisation_Name,Organisation_TIN,Organisation_TIN_CountryCode,Organisation_Address_Street,Organisation_Address_City,Organisation_Address_PostCode,Organisation_Address_CountryCode,Organisation_ResCountryCode,ControllingPerson_FirstName,ControllingPerson_LastName,ControllingPerson_BirthDate,ControllingPerson_TIN,ControllingPerson_TIN_CountryCode,ControllingPerson_Address_Street,ControllingPerson_Address_City,ControllingPerson_Address_CountryCode,ControllingPerson_ResCountryCode,Payment_Type,Payment_Amount,Payment_Currency
+"NL123456789","NL","DE","2024","FI001","Example Bank NL","Main Street","100","Amsterdam","1012AB","NL","ACC000001","50000.00","EUR","false","false","John","Doe","1985-03-15","DE123456789","DE","Berliner Str 45","Berlin","10115","DE","DE","","","","","","","","","","","","","","","","","CRS501","2500.00","EUR"
+"NL123456789","NL","DE","2024","FI001","Example Bank NL","Main Street","100","Amsterdam","1012AB","NL","ACC000002","125000.00","EUR","false","false","","","","","","","","","","","ACME Corporation GmbH","DE987654321","DE","Business Ave 200","Munich","80331","DE","DE","Jane","Smith","1978-07-22","DE111222333","DE","Corporate Lane 50","Munich","DE","DE","CRS502","8500.00","EUR"`;
+
+  try {
+    fs.writeFileSync(result.filePath, template, 'utf-8');
+    return result.filePath;
+  } catch (err) {
+    console.error('Error writing template:', err);
+    throw new Error(`Failed to save template: ${err.message}`);
+  }
 });
 
 // Select XML file for correction

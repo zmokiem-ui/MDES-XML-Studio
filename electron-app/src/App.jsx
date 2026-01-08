@@ -153,6 +153,9 @@ function App() {
   const [correctionCsvPreview, setCorrectionCsvPreview] = useState(null)
   const [showCorrectionCsvPreview, setShowCorrectionCsvPreview] = useState(false)
   
+  // CRS701 CSV template preview modal state
+  const [showCrs701CsvPreview, setShowCrs701CsvPreview] = useState(false)
+  
   // Global statistics and history
   const [globalStats, setGlobalStats] = useState(() => {
     const saved = localStorage.getItem('crs-global-stats')
@@ -1183,15 +1186,16 @@ function App() {
 
                   <div className="flex gap-2">
                     <button
-                      onClick={handleDownloadTemplate}
-                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 ${
-                        darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
+                      onClick={() => setShowCrs701CsvPreview(true)}
+                      className="text-sm px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-1"
                     >
-                      <Download className="w-4 h-4" />
-                      Download Template
+                      <Eye className="w-4 h-4" />
+                      Preview & Download Template
                     </button>
                   </div>
+                  <p className={`text-xs ${theme.textMuted}`}>
+                    View the required CSV format and download a template file for CRS 701 data.
+                  </p>
                 </div>
               </div>
             )}
@@ -2408,6 +2412,94 @@ function App() {
               </button>
               <button
                 onClick={() => setShowPreviewModal(false)}
+                className={`flex-1 py-3 rounded-lg font-semibold ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CRS701 CSV Template Preview Modal */}
+      {showCrs701CsvPreview && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className={`${theme.card} rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col ${settings.animationsEnabled ? 'animate-slide-up' : ''}`}>
+            <div className="p-6 bg-green-600 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Table className="w-8 h-8" />
+                  <h3 className="text-xl font-bold">CRS 701 CSV Template</h3>
+                </div>
+                <button onClick={() => setShowCrs701CsvPreview(false)} className="hover:bg-green-700 p-2 rounded-lg">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              <div className={`${darkMode ? 'bg-green-900/20 border-green-700' : 'bg-green-50 border-green-200'} border rounded-lg p-4 mb-4`}>
+                <p className={`font-medium ${darkMode ? 'text-green-300' : 'text-green-800'} mb-2`}>CRS 701 - New Account Report</p>
+                <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-700'}`}>
+                  Use this template to create CSV files for generating CRS 701 (new account) XML reports. 
+                  Each row represents one account holder. You can have multiple accounts per Reporting FI.
+                </p>
+              </div>
+              
+              <h4 className={`font-medium ${theme.text} mb-2`}>Required Columns</h4>
+              <div className="overflow-x-auto mb-4">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className={`${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                      <th className={`px-3 py-2 text-left font-medium ${theme.text} border`}>Column</th>
+                      <th className={`px-3 py-2 text-left font-medium ${theme.text} border`}>Description</th>
+                      <th className={`px-3 py-2 text-left font-medium ${theme.text} border`}>Example</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>SendingCompanyIN</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>Your company TIN/identifier</td><td className={`px-3 py-2 border ${theme.textMuted}`}>NL123456789</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>TransmittingCountry</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>2-letter country code of sender</td><td className={`px-3 py-2 border ${theme.textMuted}`}>NL</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>ReceivingCountry</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>2-letter country code of receiver</td><td className={`px-3 py-2 border ${theme.textMuted}`}>DE</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>TaxYear</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>Reporting tax year</td><td className={`px-3 py-2 border ${theme.textMuted}`}>2024</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>ReportingFI_*</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>Reporting Financial Institution details</td><td className={`px-3 py-2 border ${theme.textMuted}`}>TIN, Name, Address</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>AccountNumber</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>Account identifier</td><td className={`px-3 py-2 border ${theme.textMuted}`}>ACC123456</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>AccountBalance</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>Account balance amount</td><td className={`px-3 py-2 border ${theme.textMuted}`}>50000.00</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>AccountCurrency</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>3-letter currency code</td><td className={`px-3 py-2 border ${theme.textMuted}`}>EUR</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>Individual_*</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>Individual account holder fields</td><td className={`px-3 py-2 border ${theme.textMuted}`}>FirstName, LastName, BirthDate, TIN, Address</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>Organisation_*</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>Organisation account holder fields</td><td className={`px-3 py-2 border ${theme.textMuted}`}>Name, TIN, Address</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>ControllingPerson_*</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>Required for Organisation accounts</td><td className={`px-3 py-2 border ${theme.textMuted}`}>FirstName, LastName, BirthDate</td></tr>
+                    <tr><td className={`px-3 py-2 border ${theme.text}`}><code>Payment_Type</code></td><td className={`px-3 py-2 border ${theme.textMuted}`}>CRS501, CRS502, CRS503, or CRS504</td><td className={`px-3 py-2 border ${theme.textMuted}`}>CRS501</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className={`${darkMode ? 'bg-blue-900/20 border-blue-700' : 'bg-blue-50 border-blue-200'} border rounded-lg p-4 mb-4`}>
+                <p className={`font-medium ${darkMode ? 'text-blue-300' : 'text-blue-800'} mb-2`}>Individual vs Organisation</p>
+                <p className={`text-sm ${darkMode ? 'text-blue-400' : 'text-blue-700'}`}>
+                  Each row must have either <strong>Individual_*</strong> fields OR <strong>Organisation_*</strong> fields filled in, not both.
+                  Organisation accounts require a Controlling Person.
+                </p>
+              </div>
+
+              <h4 className={`font-medium ${theme.text} mb-2`}>Example Rows</h4>
+              <div className={`${darkMode ? 'bg-gray-800' : 'bg-gray-50'} rounded-lg p-4 overflow-x-auto font-mono text-xs`}>
+                <pre className={theme.textMuted}>{`SendingCompanyIN,TransmittingCountry,ReceivingCountry,TaxYear,ReportingFI_TIN,ReportingFI_Name,...
+"NL123456789","NL","DE","2024","FI001","Bank ABC","Main St","10","Amsterdam","1012AB","NL",...
+"NL123456789","NL","DE","2024","FI001","Bank ABC","Main St","10","Amsterdam","1012AB","NL",...`}</pre>
+              </div>
+            </div>
+            <div className="p-6 border-t flex gap-3">
+              <button
+                onClick={async () => {
+                  await handleDownloadTemplate()
+                  setShowCrs701CsvPreview(false)
+                }}
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg flex items-center gap-2"
+              >
+                <Download className="w-5 h-5" />
+                Download Template
+              </button>
+              <button
+                onClick={() => setShowCrs701CsvPreview(false)}
                 className={`flex-1 py-3 rounded-lg font-semibold ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
               >
                 Close
