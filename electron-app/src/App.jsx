@@ -18,11 +18,310 @@ function App() {
   // Navigation within module
   const [currentPage, setCurrentPage] = useState('generator')
   
-  // Theme
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('crs-dark-mode')
-    return saved === 'true'
+  // Theme system with distinct, vibrant color schemes
+  const THEMES = {
+    light: {
+      name: 'Light',
+      icon: '☀️',
+      isDark: false,
+      // Backgrounds
+      bg: 'bg-gray-50',
+      card: 'bg-white border-gray-200',
+      cardHover: 'hover:bg-gray-50 hover:border-gray-300',
+      header: 'bg-white border-gray-200',
+      // Text
+      text: 'text-gray-900',
+      textMuted: 'text-gray-500',
+      // Inputs
+      input: 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500',
+      inputFocus: 'focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20',
+      // Primary buttons
+      buttonPrimary: 'bg-blue-600 hover:bg-blue-700 text-white',
+      buttonSecondary: 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300',
+      buttonDanger: 'bg-red-600 hover:bg-red-700 text-white',
+      buttonSuccess: 'bg-green-600 hover:bg-green-700 text-white',
+      // Accents
+      accent: 'bg-blue-600',
+      accentHover: 'hover:bg-blue-700',
+      accentText: 'text-blue-600',
+      accentLight: 'bg-blue-50 border-blue-200 text-blue-700',
+      // Icons
+      icon: 'text-gray-500',
+      iconHover: 'hover:text-blue-600',
+      iconActive: 'text-blue-600',
+      // Badges & Tags
+      badge: 'bg-blue-100 text-blue-700',
+      badgeSuccess: 'bg-green-100 text-green-700',
+      badgeWarning: 'bg-amber-100 text-amber-700',
+      badgeError: 'bg-red-100 text-red-700',
+      // Borders
+      border: 'border-gray-200',
+      borderHover: 'hover:border-gray-300',
+      borderFocus: 'focus:border-blue-500',
+      // Toggle
+      toggleOn: 'bg-blue-600',
+      toggleOff: 'bg-gray-300',
+      // Preview gradient
+      preview: 'from-blue-500 to-indigo-600'
+    },
+    dark: {
+      name: 'Dark',
+      icon: '🌙',
+      isDark: true,
+      bg: 'bg-gray-950',
+      card: 'bg-gray-900 border-gray-800',
+      cardHover: 'hover:bg-gray-800 hover:border-gray-700',
+      header: 'bg-gray-900 border-gray-800',
+      text: 'text-gray-100',
+      textMuted: 'text-gray-400',
+      input: 'bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500',
+      inputFocus: 'focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20',
+      buttonPrimary: 'bg-blue-600 hover:bg-blue-500 text-white',
+      buttonSecondary: 'bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700',
+      buttonDanger: 'bg-red-600 hover:bg-red-500 text-white',
+      buttonSuccess: 'bg-green-600 hover:bg-green-500 text-white',
+      accent: 'bg-blue-600',
+      accentHover: 'hover:bg-blue-500',
+      accentText: 'text-blue-400',
+      accentLight: 'bg-blue-950 border-blue-800 text-blue-300',
+      icon: 'text-gray-400',
+      iconHover: 'hover:text-blue-400',
+      iconActive: 'text-blue-400',
+      badge: 'bg-blue-900/60 text-blue-300',
+      badgeSuccess: 'bg-green-900/60 text-green-300',
+      badgeWarning: 'bg-amber-900/60 text-amber-300',
+      badgeError: 'bg-red-900/60 text-red-300',
+      border: 'border-gray-800',
+      borderHover: 'hover:border-gray-700',
+      borderFocus: 'focus:border-blue-500',
+      toggleOn: 'bg-blue-600',
+      toggleOff: 'bg-gray-700',
+      preview: 'from-blue-600 to-indigo-800'
+    },
+    midnight: {
+      name: 'Midnight',
+      icon: '🌌',
+      isDark: true,
+      bg: 'bg-[#0f0f23]',
+      card: 'bg-[#1a1a2e] border-[#2d2d44]',
+      cardHover: 'hover:bg-[#252542] hover:border-[#3d3d5c]',
+      header: 'bg-[#1a1a2e] border-[#2d2d44]',
+      text: 'text-[#e0e0ff]',
+      textMuted: 'text-[#8888aa]',
+      input: 'bg-[#252542] border-[#3d3d5c] text-[#e0e0ff] focus:border-violet-500 focus:ring-violet-500',
+      inputFocus: 'focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20',
+      buttonPrimary: 'bg-violet-600 hover:bg-violet-500 text-white',
+      buttonSecondary: 'bg-[#252542] hover:bg-[#2d2d55] text-[#c0c0dd] border border-[#3d3d5c]',
+      buttonDanger: 'bg-rose-600 hover:bg-rose-500 text-white',
+      buttonSuccess: 'bg-emerald-600 hover:bg-emerald-500 text-white',
+      accent: 'bg-violet-600',
+      accentHover: 'hover:bg-violet-500',
+      accentText: 'text-violet-400',
+      accentLight: 'bg-violet-950/50 border-violet-800 text-violet-300',
+      icon: 'text-[#8888aa]',
+      iconHover: 'hover:text-violet-400',
+      iconActive: 'text-violet-400',
+      badge: 'bg-violet-900/60 text-violet-300',
+      badgeSuccess: 'bg-emerald-900/60 text-emerald-300',
+      badgeWarning: 'bg-amber-900/60 text-amber-300',
+      badgeError: 'bg-rose-900/60 text-rose-300',
+      border: 'border-[#2d2d44]',
+      borderHover: 'hover:border-[#3d3d5c]',
+      borderFocus: 'focus:border-violet-500',
+      toggleOn: 'bg-violet-600',
+      toggleOff: 'bg-[#3d3d5c]',
+      preview: 'from-violet-600 to-purple-900'
+    },
+    ocean: {
+      name: 'Ocean',
+      icon: '🌊',
+      isDark: true,
+      bg: 'bg-[#0a192f]',
+      card: 'bg-[#112240] border-[#1d3a5f]',
+      cardHover: 'hover:bg-[#1a3050] hover:border-[#2a4a70]',
+      header: 'bg-[#112240] border-[#1d3a5f]',
+      text: 'text-[#ccd6f6]',
+      textMuted: 'text-[#8892b0]',
+      input: 'bg-[#1a3050] border-[#2a4a70] text-[#ccd6f6] focus:border-cyan-400 focus:ring-cyan-400',
+      inputFocus: 'focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20',
+      buttonPrimary: 'bg-cyan-600 hover:bg-cyan-500 text-white',
+      buttonSecondary: 'bg-[#1a3050] hover:bg-[#234060] text-[#a8b2d1] border border-[#2a4a70]',
+      buttonDanger: 'bg-red-500 hover:bg-red-400 text-white',
+      buttonSuccess: 'bg-teal-500 hover:bg-teal-400 text-white',
+      accent: 'bg-cyan-500',
+      accentHover: 'hover:bg-cyan-400',
+      accentText: 'text-cyan-400',
+      accentLight: 'bg-cyan-950/50 border-cyan-800 text-cyan-300',
+      icon: 'text-[#8892b0]',
+      iconHover: 'hover:text-cyan-400',
+      iconActive: 'text-cyan-400',
+      badge: 'bg-cyan-900/60 text-cyan-300',
+      badgeSuccess: 'bg-teal-900/60 text-teal-300',
+      badgeWarning: 'bg-amber-900/60 text-amber-300',
+      badgeError: 'bg-red-900/60 text-red-300',
+      border: 'border-[#1d3a5f]',
+      borderHover: 'hover:border-[#2a4a70]',
+      borderFocus: 'focus:border-cyan-400',
+      toggleOn: 'bg-cyan-500',
+      toggleOff: 'bg-[#2a4a70]',
+      preview: 'from-cyan-500 to-blue-700'
+    },
+    sunset: {
+      name: 'Sunset',
+      icon: '🌅',
+      isDark: false,
+      bg: 'bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50',
+      card: 'bg-white/95 border-orange-200',
+      cardHover: 'hover:bg-orange-50/50 hover:border-orange-300',
+      header: 'bg-white/95 border-orange-200',
+      text: 'text-gray-900',
+      textMuted: 'text-orange-700',
+      input: 'bg-white border-orange-300 text-gray-900 focus:border-orange-500 focus:ring-orange-500',
+      inputFocus: 'focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20',
+      buttonPrimary: 'bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white',
+      buttonSecondary: 'bg-orange-100 hover:bg-orange-200 text-orange-800 border border-orange-300',
+      buttonDanger: 'bg-red-600 hover:bg-red-700 text-white',
+      buttonSuccess: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+      accent: 'bg-orange-500',
+      accentHover: 'hover:bg-orange-600',
+      accentText: 'text-orange-600',
+      accentLight: 'bg-orange-100 border-orange-300 text-orange-800',
+      icon: 'text-orange-500',
+      iconHover: 'hover:text-rose-500',
+      iconActive: 'text-rose-500',
+      badge: 'bg-orange-100 text-orange-700',
+      badgeSuccess: 'bg-emerald-100 text-emerald-700',
+      badgeWarning: 'bg-amber-100 text-amber-700',
+      badgeError: 'bg-red-100 text-red-700',
+      border: 'border-orange-200',
+      borderHover: 'hover:border-orange-300',
+      borderFocus: 'focus:border-orange-500',
+      toggleOn: 'bg-gradient-to-r from-orange-500 to-rose-500',
+      toggleOff: 'bg-orange-200',
+      preview: 'from-orange-400 to-rose-500'
+    },
+    forest: {
+      name: 'Forest',
+      icon: '🌲',
+      isDark: true,
+      bg: 'bg-[#1a2f1a]',
+      card: 'bg-[#243524] border-[#2f4a2f]',
+      cardHover: 'hover:bg-[#2a4029] hover:border-[#3a5a3a]',
+      header: 'bg-[#243524] border-[#2f4a2f]',
+      text: 'text-[#d4e6d4]',
+      textMuted: 'text-[#8faa8f]',
+      input: 'bg-[#2a4029] border-[#3a5a3a] text-[#d4e6d4] focus:border-emerald-400 focus:ring-emerald-400',
+      inputFocus: 'focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20',
+      buttonPrimary: 'bg-emerald-600 hover:bg-emerald-500 text-white',
+      buttonSecondary: 'bg-[#2a4029] hover:bg-[#345034] text-[#b4d4b4] border border-[#3a5a3a]',
+      buttonDanger: 'bg-red-600 hover:bg-red-500 text-white',
+      buttonSuccess: 'bg-green-500 hover:bg-green-400 text-white',
+      accent: 'bg-emerald-600',
+      accentHover: 'hover:bg-emerald-500',
+      accentText: 'text-emerald-400',
+      accentLight: 'bg-emerald-950/50 border-emerald-800 text-emerald-300',
+      icon: 'text-[#8faa8f]',
+      iconHover: 'hover:text-emerald-400',
+      iconActive: 'text-emerald-400',
+      badge: 'bg-emerald-900/60 text-emerald-300',
+      badgeSuccess: 'bg-green-900/60 text-green-300',
+      badgeWarning: 'bg-amber-900/60 text-amber-300',
+      badgeError: 'bg-red-900/60 text-red-300',
+      border: 'border-[#2f4a2f]',
+      borderHover: 'hover:border-[#3a5a3a]',
+      borderFocus: 'focus:border-emerald-400',
+      toggleOn: 'bg-emerald-600',
+      toggleOff: 'bg-[#3a5a3a]',
+      preview: 'from-emerald-500 to-green-700'
+    },
+    lavender: {
+      name: 'Lavender',
+      icon: '💜',
+      isDark: false,
+      bg: 'bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-50',
+      card: 'bg-white/95 border-purple-200',
+      cardHover: 'hover:bg-purple-50/50 hover:border-purple-300',
+      header: 'bg-white/95 border-purple-200',
+      text: 'text-gray-900',
+      textMuted: 'text-purple-600',
+      input: 'bg-white border-purple-300 text-gray-900 focus:border-purple-500 focus:ring-purple-500',
+      inputFocus: 'focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20',
+      buttonPrimary: 'bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 text-white',
+      buttonSecondary: 'bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300',
+      buttonDanger: 'bg-red-600 hover:bg-red-700 text-white',
+      buttonSuccess: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+      accent: 'bg-purple-500',
+      accentHover: 'hover:bg-purple-600',
+      accentText: 'text-purple-600',
+      accentLight: 'bg-purple-100 border-purple-300 text-purple-800',
+      icon: 'text-purple-500',
+      iconHover: 'hover:text-fuchsia-500',
+      iconActive: 'text-fuchsia-500',
+      badge: 'bg-purple-100 text-purple-700',
+      badgeSuccess: 'bg-emerald-100 text-emerald-700',
+      badgeWarning: 'bg-amber-100 text-amber-700',
+      badgeError: 'bg-red-100 text-red-700',
+      border: 'border-purple-200',
+      borderHover: 'hover:border-purple-300',
+      borderFocus: 'focus:border-purple-500',
+      toggleOn: 'bg-gradient-to-r from-purple-500 to-fuchsia-500',
+      toggleOff: 'bg-purple-200',
+      preview: 'from-purple-500 to-fuchsia-500'
+    },
+    spaceGalaxy: {
+      name: 'Space Galaxy',
+      icon: '🚀',
+      isDark: true,
+      isSpaceTheme: true,
+      // Deep space backgrounds
+      bg: 'bg-[#0a0e27]',
+      card: 'bg-[#1a1f3a]/80 border-[#00d9ff]/20 backdrop-blur-xl',
+      cardHover: 'hover:bg-[#1a1f3a]/90 hover:border-[#00d9ff]/40 hover:shadow-[0_0_30px_rgba(0,217,255,0.15)]',
+      header: 'bg-[#0a0e27]/95 border-[#00d9ff]/20 backdrop-blur-xl',
+      // Crisp text for readability
+      text: 'text-[#f0f6ff]',
+      textMuted: 'text-[#8892b0]',
+      // Glowing inputs
+      input: 'bg-[#0a0e27]/80 border-[#00d9ff]/30 text-[#f0f6ff] focus:border-[#00d9ff] focus:ring-[#00d9ff] focus:shadow-[0_0_20px_rgba(0,217,255,0.2)]',
+      inputFocus: 'focus:border-[#00d9ff] focus:ring-2 focus:ring-[#00d9ff]/20',
+      // Cosmic buttons with glow effects
+      buttonPrimary: 'bg-gradient-to-r from-[#00d9ff] to-[#4d7cff] hover:from-[#00e5ff] hover:to-[#5d8cff] text-[#0a0e27] font-semibold shadow-[0_0_20px_rgba(0,217,255,0.4)] hover:shadow-[0_0_30px_rgba(0,217,255,0.6)]',
+      buttonSecondary: 'bg-[#1a1f3a]/60 hover:bg-[#00d9ff]/10 text-[#f0f6ff] border border-[#00d9ff]/30 hover:border-[#00d9ff]/60 backdrop-blur-sm',
+      buttonDanger: 'bg-gradient-to-r from-[#ff3366] to-[#cc2952] hover:from-[#ff4477] hover:to-[#dd3a63] text-white shadow-[0_0_20px_rgba(255,51,102,0.4)]',
+      buttonSuccess: 'bg-gradient-to-r from-[#00ff88] to-[#00cc6a] hover:from-[#00ff99] hover:to-[#00dd7b] text-[#0a0e27] font-semibold shadow-[0_0_20px_rgba(0,255,136,0.4)]',
+      // Cosmic accents
+      accent: 'bg-[#00d9ff]',
+      accentHover: 'hover:bg-[#00e5ff]',
+      accentText: 'text-[#00d9ff]',
+      accentLight: 'bg-[#00d9ff]/10 border-[#00d9ff]/30 text-[#00d9ff]',
+      // Glowing icons
+      icon: 'text-[#8892b0]',
+      iconHover: 'hover:text-[#00d9ff] hover:drop-shadow-[0_0_8px_rgba(0,217,255,0.6)]',
+      iconActive: 'text-[#00d9ff] drop-shadow-[0_0_8px_rgba(0,217,255,0.6)]',
+      // Cosmic badges
+      badge: 'bg-[#4d7cff]/20 text-[#4d7cff] border border-[#4d7cff]/30',
+      badgeSuccess: 'bg-[#00ff88]/15 text-[#00ff88] border border-[#00ff88]/30 shadow-[0_0_10px_rgba(0,255,136,0.1)]',
+      badgeWarning: 'bg-[#ffaa00]/15 text-[#ffaa00] border border-[#ffaa00]/30',
+      badgeError: 'bg-[#ff3366]/15 text-[#ff3366] border border-[#ff3366]/30',
+      // Glowing borders
+      border: 'border-[#00d9ff]/20',
+      borderHover: 'hover:border-[#00d9ff]/40',
+      borderFocus: 'focus:border-[#00d9ff]',
+      // Cosmic toggles
+      toggleOn: 'bg-gradient-to-r from-[#00d9ff] to-[#4d7cff] shadow-[0_0_15px_rgba(0,217,255,0.4)]',
+      toggleOff: 'bg-[#1a1f3a] border border-[#00d9ff]/30',
+      // Preview gradient
+      preview: 'from-[#00d9ff] via-[#ff006e] to-[#4d7cff]'
+    }
+  }
+
+  const [selectedTheme, setSelectedTheme] = useState(() => {
+    const saved = localStorage.getItem('crs-theme')
+    return saved && THEMES[saved] ? saved : 'light'
   })
+
+  // Backward compatibility helper
+  const darkMode = THEMES[selectedTheme]?.isDark ?? false
 
   // Settings - merge saved with defaults to ensure new fields get default values
   const [settings, setSettings] = useState(() => {
@@ -178,15 +477,15 @@ function App() {
     return saved ? JSON.parse(saved) : []
   })
 
-  // Apply dark mode
+  // Apply theme
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')
     }
-    localStorage.setItem('crs-dark-mode', darkMode.toString())
-  }, [darkMode])
+    localStorage.setItem('crs-theme', selectedTheme)
+  }, [selectedTheme, darkMode])
 
   // Save settings
   useEffect(() => {
@@ -710,15 +1009,8 @@ function App() {
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 12 }, (_, i) => currentYear - 10 + i)
 
-  // Theme classes
-  const theme = {
-    bg: darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-gray-100',
-    card: darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200',
-    text: darkMode ? 'text-gray-100' : 'text-gray-900',
-    textMuted: darkMode ? 'text-gray-400' : 'text-gray-600',
-    input: darkMode ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-white border-gray-300 text-gray-900',
-    header: darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200',
-  }
+  // Theme classes - use selected theme
+  const theme = THEMES[selectedTheme] || THEMES.light
 
   // Module configuration
   const modules = {
@@ -742,10 +1034,70 @@ function App() {
     }
   }
 
+  // Space Galaxy Background Component
+  const SpaceGalaxyBackground = () => {
+    const [shootingStars, setShootingStars] = useState([])
+    
+    useEffect(() => {
+      if (!theme.isSpaceTheme || !settings.animationsEnabled) return
+      
+      // Spawn shooting stars periodically
+      const spawnShootingStar = () => {
+        const id = Date.now()
+        const star = {
+          id,
+          top: Math.random() * 50 + '%',
+          left: Math.random() * 50 + '%',
+        }
+        setShootingStars(prev => [...prev, star])
+        
+        // Remove after animation
+        setTimeout(() => {
+          setShootingStars(prev => prev.filter(s => s.id !== id))
+        }, 1500)
+      }
+      
+      // Random interval between 3-8 seconds
+      const scheduleNext = () => {
+        const delay = 3000 + Math.random() * 5000
+        return setTimeout(() => {
+          spawnShootingStar()
+          scheduleNext()
+        }, delay)
+      }
+      
+      const timeoutId = scheduleNext()
+      return () => clearTimeout(timeoutId)
+    }, [theme.isSpaceTheme, settings.animationsEnabled])
+    
+    if (!theme.isSpaceTheme) return null
+    
+    return (
+      <>
+        {/* Deep space background */}
+        <div className="space-galaxy-bg" />
+        {/* Twinkling stars layer */}
+        <div className="space-galaxy-stars" />
+        {/* Nebula clouds */}
+        <div className="space-galaxy-nebula" />
+        {/* Shooting stars */}
+        {shootingStars.map(star => (
+          <div
+            key={star.id}
+            className="space-galaxy-shooting-star active"
+            style={{ top: star.top, left: star.left }}
+          />
+        ))}
+      </>
+    )
+  }
+
   // Module selection screen
   if (!activeModule) {
     return (
-      <div className={`min-h-screen ${theme.bg} transition-colors duration-300`}>
+      <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${theme.isSpaceTheme ? 'space-galaxy' : ''}`}>
+        {/* Space Galaxy Background */}
+        <SpaceGalaxyBackground />
         {/* Simple header for module selection */}
         <header className={`${theme.header} border-b shadow-sm`}>
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -760,12 +1112,17 @@ function App() {
                 </div>
               </div>
               <button
-                onClick={() => setDarkMode(!darkMode)}
-                className={`p-2 rounded-lg transition-colors ${
-                  darkMode ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                onClick={() => {
+                  const themeKeys = Object.keys(THEMES)
+                  const currentIndex = themeKeys.indexOf(selectedTheme)
+                  const nextIndex = (currentIndex + 1) % themeKeys.length
+                  setSelectedTheme(themeKeys[nextIndex])
+                }}
+                className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
+                title={`Current: ${THEMES[selectedTheme]?.name} - Click to change`}
               >
-                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                <span className="text-lg">{THEMES[selectedTheme]?.icon}</span>
+                <span className={`text-sm font-medium hidden sm:inline`}>{THEMES[selectedTheme]?.name}</span>
               </button>
             </div>
           </div>
@@ -839,7 +1196,9 @@ function App() {
   const ModuleIcon = currentModule?.icon || Globe
 
   return (
-    <div className={`min-h-screen ${theme.bg} transition-colors duration-300`}>
+    <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${theme.isSpaceTheme ? 'space-galaxy' : ''}`}>
+      {/* Space Galaxy Background */}
+      <SpaceGalaxyBackground />
       {/* Header */}
       <header className={`${theme.header} border-b shadow-sm sticky top-0 z-40`}>
         <div className="max-w-7xl mx-auto px-6 py-3">
@@ -889,14 +1248,19 @@ function App() {
               ))}
             </nav>
 
-            {/* Dark mode toggle */}
+            {/* Theme toggle */}
             <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`p-2 rounded-lg transition-colors ${
-                darkMode ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              onClick={() => {
+                const themeKeys = Object.keys(THEMES)
+                const currentIndex = themeKeys.indexOf(selectedTheme)
+                const nextIndex = (currentIndex + 1) % themeKeys.length
+                setSelectedTheme(themeKeys[nextIndex])
+              }}
+              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
+              title={`Current: ${THEMES[selectedTheme]?.name} - Click to change`}
             >
-              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              <span className="text-lg">{THEMES[selectedTheme]?.icon}</span>
+              <span className="text-sm font-medium hidden sm:inline">{THEMES[selectedTheme]?.name}</span>
             </button>
           </div>
         </div>
@@ -910,7 +1274,7 @@ function App() {
             {/* FATCA Message Header */}
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 border-l-green-500`}>
               <div className="flex items-center gap-3 mb-4">
-                <DollarSign className={`w-6 h-6 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                <DollarSign className={`w-6 h-6 ${theme.accentText}`} />
                 <h2 className={`text-lg font-semibold ${theme.text}`}>FATCA Message Header</h2>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -1074,7 +1438,7 @@ function App() {
             <button
               onClick={handleGenerateFATCA}
               disabled={isGenerating}
-              className="w-full py-4 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 disabled:from-gray-400 disabled:to-gray-400 text-white font-bold text-lg rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-3"
+              className={`w-full py-4 ${theme.buttonSuccess} disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-3`}
             >
               {isGenerating ? (
                 <>
@@ -1114,10 +1478,8 @@ function App() {
                       onClick={() => setDataMode(id)}
                       className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
                         dataMode === id
-                          ? 'bg-primary-600 text-white shadow-md'
-                          : darkMode 
-                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? `${theme.buttonPrimary} shadow-md`
+                          : theme.buttonSecondary
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -1415,7 +1777,7 @@ function App() {
               <button
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="w-full px-6 py-4 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
+                className={`w-full px-6 py-4 ${theme.buttonPrimary} disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl`}
               >
                 {isGenerating ? (
                   <>
@@ -2064,7 +2426,7 @@ function App() {
                             </span>
                             <button
                               onClick={() => window.electronAPI.openFileLocation(entry.filePath)}
-                              className="p-2 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors"
+                              className={`p-2 ${theme.accentText} ${theme.cardHover} rounded-lg transition-colors`}
                             >
                               <FolderOpen className="w-4 h-4" />
                             </button>
@@ -2094,22 +2456,79 @@ function App() {
         {currentPage === 'settings' && (
           <div className={`space-y-6 ${settings.animationsEnabled ? 'animate-fade-in' : ''}`}>
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>Theme</h3>
+              <p className={`text-sm ${theme.textMuted} mb-6`}>Choose your preferred color scheme</p>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {Object.entries(THEMES).map(([key, themeOption]) => (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedTheme(key)}
+                    className={`relative rounded-xl border-2 transition-all overflow-hidden ${
+                      selectedTheme === key 
+                        ? `ring-2 ring-offset-2 ${themeOption.isDark ? 'ring-offset-gray-900' : 'ring-offset-white'} ${
+                            key === 'sunset' ? 'border-orange-500 ring-orange-500' :
+                            key === 'lavender' ? 'border-purple-500 ring-purple-500' :
+                            key === 'ocean' ? 'border-cyan-500 ring-cyan-500' :
+                            key === 'forest' ? 'border-emerald-500 ring-emerald-500' :
+                            key === 'midnight' ? 'border-violet-500 ring-violet-500' :
+                            key === 'spaceGalaxy' ? 'border-[#00d9ff] ring-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.3)]' :
+                            'border-blue-500 ring-blue-500'
+                          }` 
+                        : `border-transparent ${themeOption.isDark ? 'hover:border-gray-600' : 'hover:border-gray-300'}`
+                    }`}
+                  >
+                    {/* Theme preview card */}
+                    <div className={`${themeOption.bg} p-3`}>
+                      {/* Mini header */}
+                      <div className={`${themeOption.header} rounded-t-lg border-b p-2 flex items-center gap-2`}>
+                        <div className={`w-2 h-2 rounded-full bg-gradient-to-br ${themeOption.preview}`}></div>
+                        <div className={`h-1.5 w-12 rounded ${themeOption.isDark ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                      </div>
+                      {/* Mini content */}
+                      <div className={`${themeOption.card} rounded-b-lg border-x border-b p-2 space-y-1.5`}>
+                        <div className={`h-1.5 w-full rounded ${themeOption.isDark ? 'bg-gray-600' : 'bg-gray-200'}`}></div>
+                        <div className={`h-1.5 w-3/4 rounded ${themeOption.isDark ? 'bg-gray-700' : 'bg-gray-100'}`}></div>
+                        <div className="flex gap-1 pt-1">
+                          <div className={`h-4 w-8 rounded bg-gradient-to-r ${themeOption.preview}`}></div>
+                          <div className={`h-4 w-6 rounded ${themeOption.isDark ? 'bg-gray-700' : 'bg-gray-200'}`}></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Theme name */}
+                    <div className={`py-3 px-2 ${themeOption.isDark ? 'bg-gray-800' : 'bg-white'} border-t ${themeOption.isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-xl">{themeOption.icon}</span>
+                        <span className={`font-semibold text-sm ${themeOption.isDark ? 'text-gray-100' : 'text-gray-800'}`}>
+                          {themeOption.name}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Selected indicator */}
+                    {selectedTheme === key && (
+                      <div className={`absolute top-2 right-2 p-1 rounded-full ${themeOption.isDark ? 'bg-gray-800' : 'bg-white'}`}>
+                        <CheckCircle2 className={`w-5 h-5 ${
+                          key === 'sunset' ? 'text-orange-500' :
+                          key === 'lavender' ? 'text-purple-500' :
+                          key === 'ocean' ? 'text-cyan-500' :
+                          key === 'forest' ? 'text-emerald-500' :
+                          key === 'midnight' ? 'text-violet-500' :
+                          key === 'spaceGalaxy' ? 'text-[#00d9ff] drop-shadow-[0_0_8px_rgba(0,217,255,0.8)]' :
+                          'text-blue-500'
+                        }`} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
               <h3 className={`text-lg font-semibold ${theme.text} mb-6`}>Appearance</h3>
               
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`font-medium ${theme.text}`}>Dark Mode</p>
-                    <p className={`text-sm ${theme.textMuted}`}>Use dark theme for the application</p>
-                  </div>
-                  <button
-                    onClick={() => setDarkMode(!darkMode)}
-                    className={`w-12 h-6 rounded-full transition-colors relative ${darkMode ? 'bg-primary-600' : 'bg-gray-300'}`}
-                  >
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${darkMode ? 'translate-x-6' : 'translate-x-0.5'}`} />
-                  </button>
-                </div>
-
                 <div className="flex items-center justify-between">
                   <div>
                     <p className={`font-medium ${theme.text}`}>Animations</p>
@@ -2117,9 +2536,9 @@ function App() {
                   </div>
                   <button
                     onClick={() => setSettings(prev => ({ ...prev, animationsEnabled: !prev.animationsEnabled }))}
-                    className={`w-12 h-6 rounded-full transition-colors relative ${settings.animationsEnabled ? 'bg-primary-600' : 'bg-gray-300'}`}
+                    className={`w-12 h-6 rounded-full transition-all relative ${settings.animationsEnabled ? theme.toggleOn : theme.toggleOff}`}
                   >
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${settings.animationsEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform shadow-sm ${settings.animationsEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
                   </button>
                 </div>
               </div>
@@ -2136,9 +2555,9 @@ function App() {
                   </div>
                   <button
                     onClick={() => setSettings(prev => ({ ...prev, autoValidateCsv: !prev.autoValidateCsv }))}
-                    className={`w-12 h-6 rounded-full transition-colors relative ${settings.autoValidateCsv ? 'bg-primary-600' : 'bg-gray-300'}`}
+                    className={`w-12 h-6 rounded-full transition-all relative ${settings.autoValidateCsv ? theme.toggleOn : theme.toggleOff}`}
                   >
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${settings.autoValidateCsv ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform shadow-sm ${settings.autoValidateCsv ? 'translate-x-6' : 'translate-x-0.5'}`} />
                   </button>
                 </div>
               </div>
@@ -2187,7 +2606,7 @@ function App() {
                             setJurisdictionSearch('')
                             setShowJurisdictionDropdown(false)
                           }}
-                          className={`w-full px-4 py-2 text-left hover:bg-primary-50 dark:hover:bg-primary-900/20 flex items-center justify-between ${theme.text}`}
+                          className={`w-full px-4 py-2 text-left ${theme.cardHover} flex items-center justify-between ${theme.text}`}
                         >
                           <span>{country.name}</span>
                           <span className={`text-sm font-mono ${theme.textMuted}`}>{country.code}</span>
@@ -2208,18 +2627,16 @@ function App() {
                   </span>
                   <button
                     onClick={() => setSettings(prev => ({ ...prev, partnerJurisdictions: DEFAULT_PARTNER_JURISDICTIONS }))}
-                    className="text-sm text-primary-600 hover:text-primary-700"
+                    className={`text-sm ${theme.accentText} hover:opacity-80`}
                   >
                     Reset to Default
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <div className={`flex flex-wrap gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg ${theme.card}`}>
                   {(settings.partnerJurisdictions || []).sort().map(code => (
                     <span
                       key={code}
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm ${
-                        darkMode ? 'bg-primary-900/30 text-primary-300' : 'bg-primary-100 text-primary-700'
-                      }`}
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm ${theme.badge}`}
                     >
                       <span className="font-mono font-medium">{code}</span>
                       <span className="text-xs opacity-75">({getCountryName(code)})</span>
