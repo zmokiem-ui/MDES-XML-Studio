@@ -90,7 +90,7 @@ def generate_correction_mode(args):
 def validate_csv_mode(args):
     """Validate CSV file and return validation results as JSON"""
     from pathlib import Path
-    from .csv_parser import CRSCSVParser
+    from .csv_parser import CRSCSVParser, CSVValidationError
     
     csv_path = Path(args.csv_input)
     if not csv_path.exists():
@@ -144,6 +144,11 @@ def validate_csv_mode(args):
                 'receiving_country': data.message_spec.receiving_country,
                 'tax_year': data.message_spec.tax_year
             }
+        }
+    except CSVValidationError as e:
+        return {
+            'valid': False,
+            'errors': e.errors
         }
     except Exception as e:
         return {

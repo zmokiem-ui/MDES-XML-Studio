@@ -173,15 +173,9 @@ class CRSCSVParser:
         
         columns = set(rows[0].keys())
         
-        # Check required columns
-        all_required = (
-            self.REQUIRED_COLUMNS + 
-            self.INDIVIDUAL_COLUMNS + 
-            self.ORGANISATION_COLUMNS + 
-            self.CONTROLLING_PERSON_COLUMNS
-        )
-        
-        missing = set(all_required) - columns
+        # Only check base required columns (not Individual/Organisation specific ones)
+        # Those will be validated per-row based on what data is present
+        missing = set(self.REQUIRED_COLUMNS) - columns
         if missing:
             self.errors.append(f"Missing required columns: {', '.join(sorted(missing))}")
     
@@ -189,6 +183,36 @@ class CRSCSVParser:
         """Safely get a value from row, handling None"""
         val = row.get(key)
         return val.strip() if val else ''
+    
+    def _parse_date(self, date_str: str) -> Optional[str]:
+        """
+        Parse date from multiple common formats and return normalized YYYY-MM-DD format.
+        Returns None if date cannot be parsed.
+        Accepts: YYYY-MM-DD, M/D/YYYY, D/M/YYYY, DD-MM-YYYY, DD/MM/YYYY, MM-DD-YYYY
+        """
+        if not date_str:
+            return None
+        
+        date_str = date_str.strip()
+        
+        # List of formats to try (order matters - more specific first)
+        formats = [
+            '%Y-%m-%d',    # 2024-01-15 (ISO format - preferred)
+            '%d-%m-%Y',    # 15-01-2024
+            '%d/%m/%Y',    # 15/01/2024
+            '%m/%d/%Y',    # 01/15/2024 (US format)
+            '%m-%d-%Y',    # 01-15-2024
+            '%Y/%m/%d',    # 2024/01/15
+        ]
+        
+        for fmt in formats:
+            try:
+                parsed = datetime.strptime(date_str, fmt)
+                return parsed.strftime('%Y-%m-%d')
+            except ValueError:
+                continue
+        
+        return None
 
     def _validate_row(self, row: Dict[str, str], row_num: int) -> bool:
         """Validate a single row and return True if valid"""
@@ -240,22 +264,48 @@ class CRSCSVParser:
             self.errors.append(f"Row {row_num}: Must have either Individual or Organisation data.")
             valid = False
         
-        # Check Controlling Person for Organisation
+        # Validate Individual required fields if Individual data is present
+        if has_individual:
+            for col in self.INDIVIDUAL_COLUMNS:
+                if col not in row:
+                    self.errors.append(f"Row {row_num}: Missing column '{col}' required for Individual accounts.")
+                    valid = False
+                elif not self._safe_get(row, col):
+                    self.errors.append(f"Row {row_num}: Missing required Individual field '{col}'")
+                    valid = False
+        
+        # Validate Organisation required fields if Organisation data is present
         if has_organisation:
+            for col in self.ORGANISATION_COLUMNS:
+                if col not in row:
+                    self.errors.append(f"Row {row_num}: Missing column '{col}' required for Organisation accounts.")
+                    valid = False
+                elif not self._safe_get(row, col):
+                    self.errors.append(f"Row {row_num}: Missing required Organisation field '{col}'")
+                    valid = False
+            
+            # Check Controlling Person for Organisation
             has_cp = bool(self._safe_get(row, 'ControllingPerson_FirstName'))
             if not has_cp:
                 self.errors.append(f"Row {row_num}: Organisation accounts must have a Controlling Person.")
                 valid = False
+            else:
+                # Validate Controlling Person required fields
+                for col in self.CONTROLLING_PERSON_COLUMNS:
+                    if col not in row:
+                        self.errors.append(f"Row {row_num}: Missing column '{col}' required for Controlling Person.")
+                        valid = False
+                    elif not self._safe_get(row, col):
+                        self.errors.append(f"Row {row_num}: Missing required Controlling Person field '{col}'")
+                        valid = False
         
-        # Validate date formats
+        # Validate date formats (accept multiple common formats)
         date_cols = ['Individual_BirthDate', 'ControllingPerson_BirthDate']
         for col in date_cols:
             val = self._safe_get(row, col)
             if val:
-                try:
-                    datetime.strptime(val, '%Y-%m-%d')
-                except ValueError:
-                    self.errors.append(f"Row {row_num}: '{col}' must be in YYYY-MM-DD format, got '{val}'")
+                if not self._parse_date(val):
+                    self.errors.append(f"Row {row_num}: '{col}' must be a valid date, got '{val}'")
                     valid = False
         
         # Validate numeric fields
@@ -352,7 +402,7 @@ class CRSCSVParser:
             individual = IndividualData(
                 first_name=self._get_value(row, 'Individual_FirstName'),
                 last_name=self._get_value(row, 'Individual_LastName'),
-                birth_date=self._get_value(row, 'Individual_BirthDate'),
+                birth_date=self._parse_date(self._get_value(row, 'Individual_BirthDate')) or '',
                 tin=self._get_value(row, 'Individual_TIN'),
                 tin_country_code=self._get_value(row, 'Individual_TIN_CountryCode').upper(),
                 address_street=self._get_value(row, 'Individual_Address_Street'),
@@ -366,7 +416,7 @@ class CRSCSVParser:
             cp = ControllingPersonData(
                 first_name=self._get_value(row, 'ControllingPerson_FirstName'),
                 last_name=self._get_value(row, 'ControllingPerson_LastName'),
-                birth_date=self._get_value(row, 'ControllingPerson_BirthDate'),
+                birth_date=self._parse_date(self._get_value(row, 'ControllingPerson_BirthDate')) or '',
                 tin=self._get_value(row, 'ControllingPerson_TIN'),
                 tin_country_code=self._get_value(row, 'ControllingPerson_TIN_CountryCode').upper(),
                 address_street=self._get_value(row, 'ControllingPerson_Address_Street'),
