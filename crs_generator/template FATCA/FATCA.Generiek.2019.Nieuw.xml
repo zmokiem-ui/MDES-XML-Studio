@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ftc:FATCA_OECD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns:ftc="urn:oecd:ties:fatca:v2"
+                xmlns:sfa="urn:oecd:ties:stffatcatypes:v2"
+                xmlns:html="http://www.w3.org/1999/xhtml"
+                xsi:schemaLocation="urn:oecd:ties:fatca:v2 FatcaXML_v2.0.xsd"
+                version="2.0">
+   <ftc:MessageSpec>
+      <sfa:SendingCompanyIN>000000.00000.TA.531</sfa:SendingCompanyIN>
+      <sfa:TransmittingCountry>US</sfa:TransmittingCountry>
+      <sfa:ReceivingCountry>LANDCODE</sfa:ReceivingCountry>
+      <sfa:MessageType>FATCA</sfa:MessageType>
+      <sfa:MessageRefId>US2019LANDCODERANDOMID</sfa:MessageRefId>
+      <sfa:ReportingPeriod>2019-12-31</sfa:ReportingPeriod>
+      <sfa:Timestamp>2019-03-12T16:24:51Z</sfa:Timestamp>
+   </ftc:MessageSpec>
+   <ftc:FATCA>
+      <ftc:ReportingFI>
+         <sfa:ResCountryCode>US</sfa:ResCountryCode>
+         <sfa:TIN issuedBy="US">KTQDFL.99999.SL.532</sfa:TIN>
+         <sfa:Name>Name</sfa:Name>
+         <sfa:Address>
+            <sfa:CountryCode>US</sfa:CountryCode>
+            <sfa:AddressFix>
+               <sfa:Street>StreetFormalAddress</sfa:Street>
+               <sfa:BuildingIdentifier>12 AdditionalAddress</sfa:BuildingIdentifier>
+               <sfa:City>CityFormalAddress</sfa:City>
+            </sfa:AddressFix>
+         </sfa:Address>
+         <ftc:FilerCategory>FATCA601</ftc:FilerCategory>
+         <ftc:DocSpec>
+            <ftc:DocTypeIndic>RFIDOCTYPEINDIC</ftc:DocTypeIndic>
+            <ftc:DocRefId>KTQDFL.99999.SL.532.2019.10191.RANDOMID</ftc:DocRefId>
+         </ftc:DocSpec>
+      </ftc:ReportingFI>
+      <ftc:ReportingGroup>
+         <ftc:AccountReport>
+            <ftc:DocSpec>
+               <ftc:DocTypeIndic>AR1DOCTYPEINDIC</ftc:DocTypeIndic>
+               <ftc:DocRefId>KTQDFL.99999.SL.532.2019.10192.RANDOMID</ftc:DocRefId>
+            </ftc:DocSpec>
+            <ftc:AccountNumber AcctNumberType="OECD605">1000000000</ftc:AccountNumber>
+            <ftc:AccountClosed>false</ftc:AccountClosed>
+            <ftc:AccountHolder>
+               <ftc:Individual>
+                  <sfa:ResCountryCode>CW</sfa:ResCountryCode>
+                  <sfa:TIN issuedBy="CW">999999999</sfa:TIN>
+                  <sfa:Name>
+                     <sfa:FirstName>First</sfa:FirstName>
+                     <sfa:LastName>Last</sfa:LastName>
+                  </sfa:Name>
+                  <sfa:Address>
+                     <sfa:CountryCode>CW</sfa:CountryCode>
+                     <sfa:AddressFree>freee</sfa:AddressFree>
+                  </sfa:Address>
+                  <sfa:BirthInfo>
+                     <sfa:BirthDate>1999-03-12</sfa:BirthDate>
+                  </sfa:BirthInfo>
+               </ftc:Individual>
+            </ftc:AccountHolder>
+            <ftc:AccountBalance currCode="USD">54234534534.00</ftc:AccountBalance>
+         </ftc:AccountReport>
+      </ftc:ReportingGroup>
+   </ftc:FATCA>
+</ftc:FATCA_OECD>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<crs:CRS_OECD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:crs="urn:oecd:ties:crs:v2" xmlns:ftc="urn:oecd:ties:fatca:v1" xmlns:cfc="urn:oecd:ties:commontypesfatcacrs:v2" xmlns:stf="urn:oecd:ties:crsstf:v5" xmlns:iso="urn:oecd:ties:isocrstypes:v1" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:oecd_ftc="urn:fatcacrsesrr:ties:v1" xmlns:sfa_ftc="urn:oecd:ties:fatcacrsesrrtypes:v1" xmlns:sfa="urn:oecd:ties:stffatcatypes:v1" xsi:schemaLocation="urn:oecd:ties:crs:v1 CrsXML_v2.0.xsd" version="2.0">
+	<crs:MessageSpec>
+		<crs:TransmittingCountry>SENDINGCOUNTRY</crs:TransmittingCountry>
+		<crs:ReceivingCountry>RECEIVINGCOUNTRY</crs:ReceivingCountry>
+		<crs:MessageType>CRS</crs:MessageType>
+		<crs:MessageRefId>SENDINGCOUNTRY2019RECEIVINGCOUNTRYRANDOMID000000001</crs:MessageRefId>
+		<crs:MessageTypeIndic>CRS702</crs:MessageTypeIndic>
+		<crs:CorrMessageRefId>ORIGINALMESSAGEREFID</crs:CorrMessageRefId>
+		<crs:ReportingPeriod>2019-12-31</crs:ReportingPeriod>
+		<crs:Timestamp>2019-03-19T18:12:53Z</crs:Timestamp>
+	</crs:MessageSpec>
+	<crs:CrsBody>
+		<crs:ReportingFI>
+			<crs:ResCountryCode>SENDINGCOUNTRY</crs:ResCountryCode>
+			<crs:IN issuedBy="SENDINGCOUNTRY">27GBG5.99999.SL.531</crs:IN>
+			<crs:Name>Naam Financiele instelling. abc</crs:Name>
+			<crs:Address legalAddressType="OECD301">
+				<cfc:CountryCode>CW</cfc:CountryCode>
+				<cfc:AddressFix>
+					<cfc:Street>AddressAddressFixStreet. abc</cfc:Street>
+					<cfc:BuildingIdentifier>AddressAddressFixBuildingIdentifier. abc</cfc:BuildingIdentifier>
+					<cfc:SuiteIdentifier>AddressAddressFixSuiteIdentifier. abc</cfc:SuiteIdentifier>
+					<cfc:FloorIdentifier>AddressAddressFixFloorIdentifier. abc</cfc:FloorIdentifier>
+					<cfc:DistrictName>AddressAddressFixDistrictName. abc</cfc:DistrictName>
+					<cfc:POB>AddressAddressFixPOB. abc</cfc:POB>
+					<cfc:PostCode>AddressAddressFixPostcode. abc</cfc:PostCode>
+					<cfc:City>AddressAddressFixCity. abc</cfc:City>
+					<cfc:CountrySubentity>AddressAddressFixCountrySubentity. abc</cfc:CountrySubentity>
+				</cfc:AddressFix>
+				<cfc:AddressFree>AddresAddressFixAddressfree. abc</cfc:AddressFree>
+			</crs:Address>
+			<crs:DocSpec>
+				<stf:DocTypeIndic>RFIDOCTYPEINDIC</stf:DocTypeIndic>
+				<stf:DocRefId>SENDINGCOUNTRY2019RECEIVINGCOUNTRYRFIRANDOMID0001</stf:DocRefId>
+				<stf:CorrDocRefId>RFICORRDOCREFID</stf:CorrDocRefId>
+			</crs:DocSpec>
+		</crs:ReportingFI>
+		<crs:ReportingGroup>
+			<crs:AccountReport>
+				<crs:DocSpec>
+					<stf:DocTypeIndic>AR1DOCTYPEINDIC</stf:DocTypeIndic>
+					<stf:DocRefId>SENDINGCOUNTRY2019RECEIVINGCOUNTRYARRANDOMID0001</stf:DocRefId>
+					<stf:CorrDocRefId>AR1CORRDOCREFID</stf:CorrDocRefId>
+				</crs:DocSpec>
+				<crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">12345678</crs:AccountNumber>
+				<crs:AccountHolder>
+          <crs:Individual>            
+            <crs:ResCountryCode>RECEIVINGCOUNTRY</crs:ResCountryCode>
+            <crs:TIN issuedBy="RECEIVINGCOUNTRY">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>First</crs:FirstName>
+              <crs:LastName>Last</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>RECEIVINGCOUNTRY</cfc:CountryCode>
+              <cfc:AddressFree>Freeeeeee</cfc:AddressFree>
+            </crs:Address>
+			<crs:BirthInfo>
+							<crs:BirthDate>1990-09-19</crs:BirthDate>
+						</crs:BirthInfo>
+          </crs:Individual>					
+				</crs:AccountHolder>
+				<crs:AccountBalance currCode="USD">50000000.00</crs:AccountBalance>
+			</crs:AccountReport>
+			<crs:AccountReport>
+				<crs:DocSpec>
+					<stf:DocTypeIndic>AR2DOCTYPEINDIC</stf:DocTypeIndic>
+					<stf:DocRefId>SENDINGCOUNTRY2019RECEIVINGCOUNTRYARRANDOMID0002</stf:DocRefId>
+					<stf:CorrDocRefId>AR2CORRDOCREFID</stf:CorrDocRefId>
+				</crs:DocSpec>
+				<crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">12345678</crs:AccountNumber>
+				<crs:AccountHolder>
+					<crs:Organisation>
+						<crs:ResCountryCode>RECEIVINGCOUNTRY</crs:ResCountryCode>
+						<crs:IN issuedBy="RECEIVINGCOUNTRY">CW123456789AH2</crs:IN>
+						<crs:Name>Organisation 2</crs:Name>
+						<crs:Address>
+							<cfc:CountryCode>RECEIVINGCOUNTRY</cfc:CountryCode>
+							<cfc:AddressFree>Freeeeeeeee</cfc:AddressFree>
+						</crs:Address>
+					</crs:Organisation>
+					<crs:AcctHolderType>CRS101</crs:AcctHolderType>
+				</crs:AccountHolder>
+				<crs:ControllingPerson>
+					<crs:Individual>
+						<crs:ResCountryCode>RECEIVINGCOUNTRY</crs:ResCountryCode>
+						<crs:TIN issuedBy="RECEIVINGCOUNTRY">123456789CP2</crs:TIN>
+						<crs:Name>
+							<crs:FirstName>Controllingfirst2</crs:FirstName>
+							<crs:LastName>ControllingLast2</crs:LastName>
+						</crs:Name>
+						<crs:Address>
+							<cfc:CountryCode>RECEIVINGCOUNTRY</cfc:CountryCode>
+							<cfc:AddressFree>AddressFreee1</cfc:AddressFree>
+						</crs:Address>
+					</crs:Individual>
+					<crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+				</crs:ControllingPerson>
+				<crs:AccountBalance currCode="USD">50000000.00</crs:AccountBalance>
+			</crs:AccountReport>
+		</crs:ReportingGroup>
+	</crs:CrsBody>
+</crs:CRS_OECD>
