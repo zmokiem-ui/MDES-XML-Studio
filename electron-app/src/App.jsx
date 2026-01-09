@@ -22,7 +22,7 @@ function App() {
   const THEMES = {
     light: {
       name: 'Light',
-      icon: '☀️',
+      emoji: '☀️',
       isDark: false,
       // Backgrounds
       bg: 'bg-gray-50',
@@ -66,7 +66,7 @@ function App() {
     },
     dark: {
       name: 'Dark',
-      icon: '🌙',
+      emoji: '🌙',
       isDark: true,
       bg: 'bg-gray-950',
       card: 'bg-gray-900 border-gray-800',
@@ -100,7 +100,7 @@ function App() {
     },
     midnight: {
       name: 'Midnight',
-      icon: '🌌',
+      emoji: '🌌',
       isDark: true,
       bg: 'bg-[#0f0f23]',
       card: 'bg-[#1a1a2e] border-[#2d2d44]',
@@ -134,7 +134,7 @@ function App() {
     },
     ocean: {
       name: 'Ocean',
-      icon: '🌊',
+      emoji: '🌊',
       isDark: true,
       bg: 'bg-[#0a192f]',
       card: 'bg-[#112240] border-[#1d3a5f]',
@@ -168,7 +168,7 @@ function App() {
     },
     sunset: {
       name: 'Sunset',
-      icon: '🌅',
+      emoji: '🌅',
       isDark: false,
       bg: 'bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50',
       card: 'bg-white/95 border-orange-200',
@@ -202,7 +202,7 @@ function App() {
     },
     forest: {
       name: 'Forest',
-      icon: '🌲',
+      emoji: '🌲',
       isDark: true,
       bg: 'bg-[#1a2f1a]',
       card: 'bg-[#243524] border-[#2f4a2f]',
@@ -236,7 +236,7 @@ function App() {
     },
     lavender: {
       name: 'Lavender',
-      icon: '💜',
+      emoji: '💜',
       isDark: false,
       bg: 'bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-50',
       card: 'bg-white/95 border-purple-200',
@@ -270,7 +270,7 @@ function App() {
     },
     spaceGalaxy: {
       name: 'Space Galaxy',
-      icon: '🚀',
+      emoji: '🚀',
       isDark: true,
       isSpaceTheme: true,
       // Deep space backgrounds
@@ -315,7 +315,7 @@ function App() {
     },
     cyberpunkNeon: {
       name: 'Cyberpunk',
-      icon: '⚡',
+      emoji: '⚡',
       isDark: true,
       isCyberpunkTheme: true,
       bg: 'bg-[#0a0a0a]',
@@ -349,8 +349,8 @@ function App() {
       preview: 'from-[#ff006e] via-[#b400ff] to-[#00f0ff]'
     },
     organicForest: {
-      name: 'Forest',
-      icon: '🌿',
+      name: 'Organic Forest',
+      emoji: '🌿',
       isDark: false,
       isForestTheme: true,
       bg: 'bg-[#faf8f3]',
@@ -384,8 +384,8 @@ function App() {
       preview: 'from-[#2d5016] via-[#7cb342] to-[#fdd835]'
     },
     oceanUnderwater: {
-      name: 'Ocean',
-      icon: '🌊',
+      name: 'Ocean Depths',
+      emoji: '🐠',
       isDark: true,
       isOceanTheme: true,
       bg: 'bg-gradient-to-b from-[#39cccc] via-[#0074d9] to-[#001f3f]',
@@ -420,7 +420,7 @@ function App() {
     },
     steampunkVictorian: {
       name: 'Steampunk',
-      icon: '⚙️',
+      emoji: '⚙️',
       isDark: true,
       isSteampunkTheme: true,
       bg: 'bg-gradient-to-br from-[#3e2723] via-[#2c2c2c] to-[#4a0e0e]',
@@ -1339,7 +1339,7 @@ function App() {
                   className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
                   title="Click to change theme"
                 >
-                  <span>{theme.icon}</span>
+                  <span>{theme.emoji}</span>
                   <span className="text-sm font-medium hidden sm:inline">{theme.name}</span>
                 </button>
               </div>
@@ -1474,7 +1474,7 @@ function App() {
               className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
               title="Click to change theme"
             >
-              <span>{theme.icon}</span>
+              <span>{theme.emoji}</span>
               <span className="text-sm font-medium hidden sm:inline">{theme.name}</span>
             </button>
           </div>
