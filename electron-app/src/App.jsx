@@ -2695,32 +2695,13 @@ function App() {
                         : `border-transparent ${themeOption.isDark ? 'hover:border-gray-600' : 'hover:border-gray-300'}`
                     }`}
                   >
-                    {/* Theme preview card */}
-                    <div className={`${themeOption.bg} p-3`}>
-                      {/* Mini header */}
-                      <div className={`${themeOption.header} rounded-t-lg border-b p-2 flex items-center gap-2`}>
-                        <div className={`w-2 h-2 rounded-full bg-gradient-to-br ${themeOption.preview}`}></div>
-                        <div className={`h-1.5 w-12 rounded ${themeOption.isDark ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                      </div>
-                      {/* Mini content */}
-                      <div className={`${themeOption.card} rounded-b-lg border-x border-b p-2 space-y-1.5`}>
-                        <div className={`h-1.5 w-full rounded ${themeOption.isDark ? 'bg-gray-600' : 'bg-gray-200'}`}></div>
-                        <div className={`h-1.5 w-3/4 rounded ${themeOption.isDark ? 'bg-gray-700' : 'bg-gray-100'}`}></div>
-                        <div className="flex gap-1 pt-1">
-                          <div className={`h-4 w-8 rounded bg-gradient-to-r ${themeOption.preview}`}></div>
-                          <div className={`h-4 w-6 rounded ${themeOption.isDark ? 'bg-gray-700' : 'bg-gray-200'}`}></div>
-                        </div>
-                      </div>
-                    </div>
+                    {/* Theme preview - simplified gradient preview */}
+                    <div className={`h-16 bg-gradient-to-br ${themeOption.preview} rounded-t-lg`}></div>
                     
                     {/* Theme name */}
-                    <div className={`py-3 px-2 ${themeOption.isDark ? 'bg-gray-800' : 'bg-white'} border-t ${themeOption.isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-xl">{themeOption.icon}</span>
-                        <span className={`font-semibold text-sm ${themeOption.isDark ? 'text-gray-100' : 'text-gray-800'}`}>
-                          {themeOption.name}
-                        </span>
-                      </div>
+                    <div className={`py-3 px-2 text-center ${themeOption.isDark ? 'bg-gray-800' : 'bg-white'} rounded-b-lg`}>
+                      <span className="text-base mr-1">{themeOption.icon}</span>
+                      <span className={`font-semibold text-sm ${themeOption.isDark ? 'text-gray-100' : 'text-gray-800'}`}>{themeOption.name}</span>
                     </div>
                     
                     {/* Selected indicator */}
