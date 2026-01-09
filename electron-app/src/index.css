@@ -841,3 +841,125 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
+
+/* ============================================
+   CYBERPUNK NEON THEME
+   ============================================ */
+
+.cyberpunk-neon { font-family: 'Rajdhani', 'Share Tech Mono', sans-serif; }
+.cyberpunk-neon h1, .cyberpunk-neon h2, .cyberpunk-neon h3, .cyberpunk-neon h4, .cyberpunk-neon h5, .cyberpunk-neon h6 {
+  font-family: 'Rajdhani', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 5px #ff006e, 0 0 10px #ff006e, 0 0 20px rgba(255, 0, 110, 0.5);
+}
+
+@keyframes glitch { 0%, 100% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 80% { transform: translate(2px, -2px); } }
+@keyframes vhs-scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
+@keyframes neon-flicker { 0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; } 20%, 24%, 55% { opacity: 0.6; } }
+@keyframes matrix-rain { 0% { transform: translateY(-100%); opacity: 1; } 100% { transform: translateY(100vh); opacity: 0; } }
+@keyframes electric-surge { 0%, 100% { box-shadow: 0 0 5px #00f0ff; } 50% { box-shadow: 0 0 20px #00f0ff, 0 0 40px #ff006e; } }
+@keyframes data-stream { 0% { background-position: 0% 0%; } 100% { background-position: 0% 100%; } }
+
+.cyberpunk-bg { position: fixed; inset: 0; background: linear-gradient(180deg, #0a0a0a 0%, #1a0033 50%, #0d1b2a 100%); z-index: -3; }
+.cyberpunk-scanlines { position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px); pointer-events: none; z-index: 9999; opacity: 0.3; }
+.cyberpunk-scanlines::before { content: ''; position: absolute; inset: 0; width: 100%; height: 10px; background: linear-gradient(180deg, rgba(255,0,110,0.1), transparent); animation: vhs-scan 8s linear infinite; }
+.cyberpunk-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px); background-size: 50px 50px; z-index: -2; pointer-events: none; }
+.cyberpunk-matrix { position: fixed; inset: 0; overflow: hidden; z-index: -2; pointer-events: none; opacity: 0.15; }
+
+.cyberpunk-neon ::-webkit-scrollbar { width: 6px; }
+.cyberpunk-neon ::-webkit-scrollbar-track { background: #0a0a0a; }
+.cyberpunk-neon ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff006e, #00f0ff); box-shadow: 0 0 10px #ff006e; }
+
+@media (prefers-reduced-motion: reduce) { .cyberpunk-neon *, .cyberpunk-scanlines::before { animation: none !important; } }
+
+/* ============================================
+   ORGANIC FOREST THEME
+   ============================================ */
+
+.organic-forest { font-family: 'Nunito', 'Lora', sans-serif; }
+.organic-forest h1, .organic-forest h2, .organic-forest h3, .organic-forest h4, .organic-forest h5, .organic-forest h6 {
+  font-family: 'Playfair Display', 'Lora', serif;
+  letter-spacing: 0.01em;
+}
+
+@keyframes leaf-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes leaf-fall { 0% { transform: translateY(-10%) rotate(0deg); opacity: 0.8; } 50% { transform: translateY(50vh) rotate(180deg) translateX(30px); } 100% { transform: translateY(105vh) rotate(360deg); opacity: 0; } }
+@keyframes sunlight-filter { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.5; } }
+@keyframes firefly-glow { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes grow-in { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes gentle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+.forest-bg { position: fixed; inset: 0; background: linear-gradient(180deg, rgba(129,212,250,0.3) 0%, rgba(250,248,243,0.9) 30%, #faf8f3 100%); z-index: -3; }
+.forest-sunlight { position: fixed; inset: 0; background: radial-gradient(ellipse 300px 600px at 20% 0%, rgba(253,216,53,0.2) 0%, transparent 70%), radial-gradient(ellipse 200px 400px at 60% 10%, rgba(253,216,53,0.15) 0%, transparent 60%), radial-gradient(ellipse 250px 500px at 80% 5%, rgba(253,216,53,0.1) 0%, transparent 50%); z-index: -2; pointer-events: none; animation: sunlight-filter 8s ease-in-out infinite; }
+.forest-leaves { position: fixed; inset: 0; overflow: hidden; z-index: -1; pointer-events: none; }
+.forest-leaf { position: absolute; top: -50px; font-size: 20px; animation: leaf-fall 20s linear infinite; opacity: 0.6; }
+
+.organic-forest ::-webkit-scrollbar { width: 10px; }
+.organic-forest ::-webkit-scrollbar-track { background: #faf8f3; border-radius: 5px; }
+.organic-forest ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #4a7c39, #2d5016); border-radius: 5px; border: 2px solid #faf8f3; }
+
+@media (prefers-reduced-motion: reduce) { .organic-forest *, .forest-leaf, .forest-sunlight { animation: none !important; } }
+
+/* ============================================
+   OCEAN UNDERWATER THEME
+   ============================================ */
+
+.ocean-underwater { font-family: 'Quicksand', 'Montserrat', sans-serif; }
+.ocean-underwater h1, .ocean-underwater h2, .ocean-underwater h3, .ocean-underwater h4, .ocean-underwater h5, .ocean-underwater h6 {
+  font-family: 'Righteous', 'Montserrat', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+@keyframes bubble-rise { 0% { transform: translateY(100%) scale(1); opacity: 0.7; } 50% { transform: translateY(50%) scale(1.1) translateX(10px); } 100% { transform: translateY(-20px) scale(0.8); opacity: 0; } }
+@keyframes caustic-light { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } }
+@keyframes wave-motion { 0%, 100% { transform: translateX(0) translateY(0); } 50% { transform: translateX(5px) translateY(-5px); } }
+@keyframes fish-swim { 0% { transform: translateX(-100px); } 100% { transform: translateX(calc(100vw + 100px)); } }
+@keyframes bioluminescence { 0%, 100% { opacity: 0; } 50% { opacity: 0.8; } }
+@keyframes float-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes ripple-expand { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
+
+.ocean-bg { position: fixed; inset: 0; background: linear-gradient(180deg, #e1f5fe 0%, #39cccc 15%, #0074d9 40%, #001f3f 70%, #000814 100%); z-index: -3; }
+.ocean-caustics { position: fixed; top: 0; left: 0; width: 100%; height: 50%; background: radial-gradient(ellipse 100px 150px at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 70%), radial-gradient(ellipse 80px 120px at 50% 20%, rgba(255,255,255,0.25) 0%, transparent 60%), radial-gradient(ellipse 120px 100px at 70% 40%, rgba(255,255,255,0.2) 0%, transparent 50%); z-index: -2; pointer-events: none; animation: caustic-light 6s ease-in-out infinite; }
+.ocean-bubbles { position: fixed; inset: 0; overflow: hidden; z-index: -1; pointer-events: none; }
+.ocean-bubble { position: absolute; bottom: -50px; width: 20px; height: 20px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0.2)); border-radius: 50%; animation: bubble-rise 8s ease-in-out infinite; }
+.ocean-fish { position: fixed; font-size: 24px; z-index: -1; pointer-events: none; animation: fish-swim 20s linear infinite; }
+.ocean-bioluminescent { position: fixed; width: 6px; height: 6px; background: #00fff7; border-radius: 50%; box-shadow: 0 0 10px #00fff7, 0 0 20px #00fff7; animation: bioluminescence 4s ease-in-out infinite; z-index: -1; pointer-events: none; }
+
+.ocean-underwater ::-webkit-scrollbar { width: 8px; }
+.ocean-underwater ::-webkit-scrollbar-track { background: rgba(0,31,63,0.3); border-radius: 4px; }
+.ocean-underwater ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #39cccc, #00fff7); border-radius: 4px; box-shadow: 0 0 10px rgba(0,255,247,0.3); }
+
+@media (prefers-reduced-motion: reduce) { .ocean-underwater *, .ocean-bubble, .ocean-fish, .ocean-bioluminescent, .ocean-caustics { animation: none !important; } }
+
+/* ============================================
+   STEAMPUNK VICTORIAN THEME
+   ============================================ */
+
+.steampunk-victorian { font-family: 'Crimson Text', 'Georgia', serif; }
+.steampunk-victorian h1, .steampunk-victorian h2, .steampunk-victorian h3, .steampunk-victorian h4, .steampunk-victorian h5, .steampunk-victorian h6 {
+  font-family: 'Cinzel', 'Georgia', serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@keyframes gear-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes gear-rotate-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+@keyframes steam-rise { 0% { transform: translateY(0) scale(1); opacity: 0.6; } 50% { transform: translateY(-30px) scale(1.5); opacity: 0.3; } 100% { transform: translateY(-60px) scale(2); opacity: 0; } }
+@keyframes lamp-flicker { 0%, 92%, 94%, 96%, 100% { opacity: 1; } 93%, 95%, 97% { opacity: 0.8; } }
+@keyframes brass-shine { 0%, 100% { background-position: -200% center; } 50% { background-position: 200% center; } }
+@keyframes pressure-gauge { 0%, 100% { transform: rotate(-45deg); } 50% { transform: rotate(45deg); } }
+
+.steampunk-bg { position: fixed; inset: 0; background: linear-gradient(135deg, #3e2723 0%, #2c2c2c 50%, #4a0e0e 100%); z-index: -3; }
+.steampunk-panels { position: fixed; inset: 0; background-image: repeating-linear-gradient(90deg, transparent, transparent 200px, rgba(90,90,90,0.3) 200px, rgba(90,90,90,0.3) 202px), repeating-linear-gradient(0deg, transparent, transparent 200px, rgba(90,90,90,0.3) 200px, rgba(90,90,90,0.3) 202px); z-index: -2; pointer-events: none; }
+.steampunk-gears { position: fixed; inset: 0; overflow: hidden; z-index: -2; pointer-events: none; opacity: 0.15; }
+.steampunk-gear { position: absolute; border: 8px solid #b87333; border-radius: 50%; animation: gear-rotate 20s linear infinite; }
+.steampunk-gear.reverse { animation: gear-rotate-reverse 15s linear infinite; }
+.steampunk-steam { position: fixed; bottom: 0; width: 100%; height: 200px; overflow: hidden; z-index: -1; pointer-events: none; }
+.steampunk-steam-particle { position: absolute; bottom: 0; width: 30px; height: 30px; background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%); border-radius: 50%; animation: steam-rise 4s ease-out infinite; }
+
+.steampunk-victorian ::-webkit-scrollbar { width: 12px; }
+.steampunk-victorian ::-webkit-scrollbar-track { background: #3e2723; border: 1px solid #b87333; }
+.steampunk-victorian ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #d4af37, #b87333, #c87533); border-radius: 2px; border: 1px solid #2c2c2c; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3); }
+
+@media (prefers-reduced-motion: reduce) { .steampunk-victorian *, .steampunk-gear, .steampunk-steam-particle { animation: none !important; } }

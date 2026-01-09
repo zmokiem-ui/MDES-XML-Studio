@@ -312,6 +312,146 @@ function App() {
       toggleOff: 'bg-[#1a1f3a] border border-[#00d9ff]/30',
       // Preview gradient
       preview: 'from-[#00d9ff] via-[#ff006e] to-[#4d7cff]'
+    },
+    cyberpunkNeon: {
+      name: 'Cyberpunk',
+      icon: '⚡',
+      isDark: true,
+      isCyberpunkTheme: true,
+      bg: 'bg-[#0a0a0a]',
+      card: 'bg-[#0a0a0a]/95 border-[#ff006e]/40 backdrop-blur-sm',
+      cardHover: 'hover:bg-[#1a0033]/80 hover:border-[#00f0ff]/60 hover:shadow-[0_0_30px_rgba(255,0,110,0.3)]',
+      header: 'bg-[#0a0a0a]/98 border-[#ff006e]/30 backdrop-blur-sm',
+      text: 'text-white',
+      textMuted: 'text-[#00f0ff]',
+      input: 'bg-[#0a0a0a]/90 border-b-2 border-[#00f0ff] text-[#00f0ff] focus:border-[#ff006e] focus:shadow-[0_2px_0_#ff006e,0_0_20px_rgba(255,0,110,0.3)]',
+      inputFocus: 'focus:border-[#ff006e] focus:ring-0',
+      buttonPrimary: 'bg-gradient-to-r from-[#ff006e] to-[#b400ff] hover:from-[#ff1a7a] hover:to-[#c41aff] text-white font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(255,0,110,0.5)] hover:shadow-[0_0_30px_rgba(255,0,110,0.7)]',
+      buttonSecondary: 'bg-transparent hover:bg-[#ff006e]/20 text-white border-2 border-[#ff006e] hover:border-[#00f0ff] uppercase tracking-wider',
+      buttonDanger: 'bg-gradient-to-r from-[#ff0266] to-[#ff006e] hover:from-[#ff1a7a] hover:to-[#ff1a8a] text-white shadow-[0_0_20px_rgba(255,2,102,0.5)]',
+      buttonSuccess: 'bg-gradient-to-r from-[#39ff14] to-[#00ff41] hover:from-[#4dff28] hover:to-[#1aff55] text-[#0a0a0a] font-bold shadow-[0_0_20px_rgba(57,255,20,0.5)]',
+      accent: 'bg-[#ff006e]',
+      accentHover: 'hover:bg-[#ff1a7a]',
+      accentText: 'text-[#ff006e]',
+      accentLight: 'bg-[#ff006e]/10 border-[#ff006e]/30 text-[#ff006e]',
+      icon: 'text-[#00f0ff]',
+      iconHover: 'hover:text-[#ff006e] hover:drop-shadow-[0_0_8px_rgba(255,0,110,0.8)]',
+      iconActive: 'text-[#ff006e] drop-shadow-[0_0_8px_rgba(255,0,110,0.8)]',
+      badge: 'bg-[#b400ff]/20 text-[#b400ff] border border-[#b400ff]/40',
+      badgeSuccess: 'bg-[#39ff14]/15 text-[#39ff14] border border-[#39ff14]/40 shadow-[0_0_10px_rgba(57,255,20,0.2)]',
+      badgeWarning: 'bg-[#ffed00]/15 text-[#ffed00] border border-[#ffed00]/40',
+      badgeError: 'bg-[#ff0266]/15 text-[#ff0266] border border-[#ff0266]/40',
+      border: 'border-[#ff006e]/30',
+      borderHover: 'hover:border-[#00f0ff]/60',
+      borderFocus: 'focus:border-[#ff006e]',
+      toggleOn: 'bg-gradient-to-r from-[#ff006e] to-[#00f0ff] shadow-[0_0_15px_rgba(255,0,110,0.5)]',
+      toggleOff: 'bg-[#1a0033] border border-[#00f0ff]/40',
+      preview: 'from-[#ff006e] via-[#b400ff] to-[#00f0ff]'
+    },
+    organicForest: {
+      name: 'Forest',
+      icon: '🌿',
+      isDark: false,
+      isForestTheme: true,
+      bg: 'bg-[#faf8f3]',
+      card: 'bg-gradient-to-br from-[#faf8f3] to-[#f5f0e8] border-[#4a7c39]/20',
+      cardHover: 'hover:shadow-lg hover:shadow-[#4a7c39]/10 hover:border-[#4a7c39]/40',
+      header: 'bg-[#faf8f3]/98 border-[#4a7c39]/20',
+      text: 'text-[#2e2e2e]',
+      textMuted: 'text-[#6b8e65]',
+      input: 'bg-[#faf8f3] border-2 border-[#4a7c39]/30 text-[#2e2e2e] focus:border-[#4a7c39] focus:ring-[#4a7c39]/20',
+      inputFocus: 'focus:border-[#4a7c39] focus:ring-2 focus:ring-[#4a7c39]/20',
+      buttonPrimary: 'bg-gradient-to-r from-[#4a7c39] to-[#2d5016] hover:from-[#5a8c49] hover:to-[#3d6026] text-white shadow-md hover:shadow-lg',
+      buttonSecondary: 'bg-[#faf8f3] hover:bg-[#4a7c39]/10 text-[#2d5016] border-2 border-[#4a7c39]/30 hover:border-[#4a7c39]/60',
+      buttonDanger: 'bg-gradient-to-r from-[#e57373] to-[#d32f2f] hover:from-[#ef8a8a] hover:to-[#e33f3f] text-white',
+      buttonSuccess: 'bg-gradient-to-r from-[#66bb6a] to-[#7cb342] hover:from-[#76cb7a] hover:to-[#8cc352] text-white',
+      accent: 'bg-[#4a7c39]',
+      accentHover: 'hover:bg-[#5a8c49]',
+      accentText: 'text-[#2d5016]',
+      accentLight: 'bg-[#4a7c39]/10 border-[#4a7c39]/30 text-[#2d5016]',
+      icon: 'text-[#6b8e65]',
+      iconHover: 'hover:text-[#4a7c39]',
+      iconActive: 'text-[#2d5016]',
+      badge: 'bg-[#4a7c39]/15 text-[#2d5016] border border-[#4a7c39]/30',
+      badgeSuccess: 'bg-[#66bb6a]/15 text-[#2d5016] border border-[#66bb6a]/40',
+      badgeWarning: 'bg-[#ffb74d]/20 text-[#8b6914] border border-[#ffb74d]/40',
+      badgeError: 'bg-[#e57373]/15 text-[#c62828] border border-[#e57373]/40',
+      border: 'border-[#4a7c39]/20',
+      borderHover: 'hover:border-[#4a7c39]/40',
+      borderFocus: 'focus:border-[#4a7c39]',
+      toggleOn: 'bg-gradient-to-r from-[#4a7c39] to-[#7cb342]',
+      toggleOff: 'bg-[#d7ccc8]',
+      preview: 'from-[#2d5016] via-[#7cb342] to-[#fdd835]'
+    },
+    oceanUnderwater: {
+      name: 'Ocean',
+      icon: '🌊',
+      isDark: true,
+      isOceanTheme: true,
+      bg: 'bg-gradient-to-b from-[#39cccc] via-[#0074d9] to-[#001f3f]',
+      card: 'bg-white/10 border-white/20 backdrop-blur-xl',
+      cardHover: 'hover:bg-white/15 hover:border-[#00fff7]/40 hover:shadow-[0_0_30px_rgba(0,255,247,0.15)]',
+      header: 'bg-[#001f3f]/80 border-white/20 backdrop-blur-xl',
+      text: 'text-white',
+      textMuted: 'text-[#b2ebf2]',
+      input: 'bg-white/10 border border-white/20 text-white backdrop-blur-sm focus:border-[#00fff7] focus:ring-[#00fff7]/20',
+      inputFocus: 'focus:border-[#00fff7] focus:ring-2 focus:ring-[#00fff7]/20',
+      buttonPrimary: 'bg-gradient-to-r from-[#0074d9] to-[#39cccc] hover:from-[#0084e9] hover:to-[#49dcdc] text-white shadow-lg hover:shadow-xl',
+      buttonSecondary: 'bg-white/15 hover:bg-[#00fff7]/20 text-white border border-white/30 hover:border-[#00fff7]/60 backdrop-blur-sm',
+      buttonDanger: 'bg-gradient-to-r from-[#ff6b6b] to-[#ee5a52] hover:from-[#ff7b7b] hover:to-[#fe6a62] text-white',
+      buttonSuccess: 'bg-gradient-to-r from-[#00ffcc] to-[#7fdbff] hover:from-[#1affdd] hover:to-[#8febff] text-[#001f3f] font-semibold',
+      accent: 'bg-[#00fff7]',
+      accentHover: 'hover:bg-[#1affff]',
+      accentText: 'text-[#00fff7]',
+      accentLight: 'bg-[#00fff7]/10 border-[#00fff7]/30 text-[#00fff7]',
+      icon: 'text-[#7fdbff]',
+      iconHover: 'hover:text-[#00fff7] hover:drop-shadow-[0_0_8px_rgba(0,255,247,0.6)]',
+      iconActive: 'text-[#00fff7] drop-shadow-[0_0_8px_rgba(0,255,247,0.6)]',
+      badge: 'bg-[#0074d9]/30 text-[#7fdbff] border border-[#7fdbff]/30',
+      badgeSuccess: 'bg-[#00ffcc]/15 text-[#00ffcc] border border-[#00ffcc]/30',
+      badgeWarning: 'bg-[#ffdc00]/15 text-[#ffdc00] border border-[#ffdc00]/30',
+      badgeError: 'bg-[#ff6b6b]/15 text-[#ff6b6b] border border-[#ff6b6b]/30',
+      border: 'border-white/20',
+      borderHover: 'hover:border-[#00fff7]/40',
+      borderFocus: 'focus:border-[#00fff7]',
+      toggleOn: 'bg-gradient-to-r from-[#39cccc] to-[#00fff7] shadow-[0_0_15px_rgba(0,255,247,0.4)]',
+      toggleOff: 'bg-[#001f3f]/60 border border-white/30',
+      preview: 'from-[#00fff7] via-[#0074d9] to-[#001f3f]'
+    },
+    steampunkVictorian: {
+      name: 'Steampunk',
+      icon: '⚙️',
+      isDark: true,
+      isSteampunkTheme: true,
+      bg: 'bg-gradient-to-br from-[#3e2723] via-[#2c2c2c] to-[#4a0e0e]',
+      card: 'bg-gradient-to-br from-[#f4e7d7] to-[#faf0e6] border-[#b87333]/60',
+      cardHover: 'hover:shadow-xl hover:shadow-[#b87333]/20 hover:border-[#d4af37]',
+      header: 'bg-[#3e2723]/95 border-[#b87333]/40',
+      text: 'text-[#1a1a1a]',
+      textMuted: 'text-[#5d4037]',
+      input: 'bg-[#f4e7d7] border-2 border-[#b87333]/50 text-[#1a1a1a] focus:border-[#d4af37] focus:ring-[#d4af37]/20',
+      inputFocus: 'focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20',
+      buttonPrimary: 'bg-gradient-to-r from-[#b87333] via-[#c87533] to-[#cd7f32] hover:from-[#d4af37] hover:via-[#b87333] hover:to-[#c87533] text-[#1a1a1a] font-semibold uppercase tracking-wider shadow-lg',
+      buttonSecondary: 'bg-[#f4e7d7] hover:bg-[#d4af37]/20 text-[#3e2723] border-2 border-[#b87333]/50 hover:border-[#d4af37]',
+      buttonDanger: 'bg-gradient-to-r from-[#b7410e] to-[#8b0000] hover:from-[#c7511e] hover:to-[#9b1010] text-white',
+      buttonSuccess: 'bg-gradient-to-r from-[#6e8b3d] to-[#2c5f2d] hover:from-[#7e9b4d] hover:to-[#3c6f3d] text-white',
+      accent: 'bg-[#d4af37]',
+      accentHover: 'hover:bg-[#e4bf47]',
+      accentText: 'text-[#b87333]',
+      accentLight: 'bg-[#d4af37]/15 border-[#b87333]/40 text-[#8b4513]',
+      icon: 'text-[#b87333]',
+      iconHover: 'hover:text-[#d4af37]',
+      iconActive: 'text-[#d4af37]',
+      badge: 'bg-[#b87333]/20 text-[#8b4513] border border-[#b87333]/40',
+      badgeSuccess: 'bg-[#6e8b3d]/20 text-[#2c5f2d] border border-[#6e8b3d]/40',
+      badgeWarning: 'bg-[#ffbf00]/20 text-[#8b6914] border border-[#ffbf00]/40',
+      badgeError: 'bg-[#b7410e]/20 text-[#8b0000] border border-[#b7410e]/40',
+      border: 'border-[#b87333]/40',
+      borderHover: 'hover:border-[#d4af37]',
+      borderFocus: 'focus:border-[#d4af37]',
+      toggleOn: 'bg-gradient-to-r from-[#b87333] to-[#d4af37]',
+      toggleOff: 'bg-[#5a5a5a] border border-[#b87333]/40',
+      preview: 'from-[#d4af37] via-[#b87333] to-[#3e2723]'
     }
   }
 
@@ -1034,70 +1174,137 @@ function App() {
     }
   }
 
-  // Space Galaxy Background Component
-  const SpaceGalaxyBackground = () => {
-    const [shootingStars, setShootingStars] = useState([])
+  // Theme Background Component - handles all immersive theme backgrounds
+  const ThemeBackground = () => {
+    const [particles, setParticles] = useState([])
     
     useEffect(() => {
-      if (!theme.isSpaceTheme || !settings.animationsEnabled) return
+      if (!settings.animationsEnabled) return
       
-      // Spawn shooting stars periodically
-      const spawnShootingStar = () => {
-        const id = Date.now()
-        const star = {
-          id,
-          top: Math.random() * 50 + '%',
-          left: Math.random() * 50 + '%',
+      // Space Galaxy - shooting stars
+      if (theme.isSpaceTheme) {
+        const spawnStar = () => {
+          const id = Date.now()
+          setParticles(prev => [...prev, { id, type: 'star', top: Math.random() * 50 + '%', left: Math.random() * 50 + '%' }])
+          setTimeout(() => setParticles(prev => prev.filter(p => p.id !== id)), 1500)
         }
-        setShootingStars(prev => [...prev, star])
-        
-        // Remove after animation
-        setTimeout(() => {
-          setShootingStars(prev => prev.filter(s => s.id !== id))
-        }, 1500)
+        const interval = setInterval(spawnStar, 4000 + Math.random() * 4000)
+        return () => clearInterval(interval)
       }
       
-      // Random interval between 3-8 seconds
-      const scheduleNext = () => {
-        const delay = 3000 + Math.random() * 5000
-        return setTimeout(() => {
-          spawnShootingStar()
-          scheduleNext()
-        }, delay)
+      // Ocean - bubbles
+      if (theme.isOceanTheme) {
+        const spawnBubble = () => {
+          const id = Date.now()
+          setParticles(prev => [...prev, { id, type: 'bubble', left: Math.random() * 100 + '%', size: 10 + Math.random() * 20, delay: Math.random() * 2 }])
+          setTimeout(() => setParticles(prev => prev.filter(p => p.id !== id)), 8000)
+        }
+        const interval = setInterval(spawnBubble, 1500)
+        return () => clearInterval(interval)
       }
       
-      const timeoutId = scheduleNext()
-      return () => clearTimeout(timeoutId)
-    }, [theme.isSpaceTheme, settings.animationsEnabled])
+      // Forest - falling leaves
+      if (theme.isForestTheme) {
+        const leaves = ['🍃', '🌿', '🍂', '🌱']
+        const spawnLeaf = () => {
+          const id = Date.now()
+          setParticles(prev => [...prev, { id, type: 'leaf', left: Math.random() * 100 + '%', emoji: leaves[Math.floor(Math.random() * leaves.length)], delay: Math.random() * 5 }])
+          setTimeout(() => setParticles(prev => prev.filter(p => p.id !== id)), 20000)
+        }
+        const interval = setInterval(spawnLeaf, 3000)
+        return () => clearInterval(interval)
+      }
+    }, [theme.isSpaceTheme, theme.isOceanTheme, theme.isForestTheme, settings.animationsEnabled])
     
-    if (!theme.isSpaceTheme) return null
+    // Space Galaxy Theme
+    if (theme.isSpaceTheme) {
+      return (
+        <>
+          <div className="space-galaxy-bg" />
+          <div className="space-galaxy-stars" />
+          <div className="space-galaxy-nebula" />
+          {particles.filter(p => p.type === 'star').map(star => (
+            <div key={star.id} className="space-galaxy-shooting-star active" style={{ top: star.top, left: star.left }} />
+          ))}
+        </>
+      )
+    }
     
-    return (
-      <>
-        {/* Deep space background */}
-        <div className="space-galaxy-bg" />
-        {/* Twinkling stars layer */}
-        <div className="space-galaxy-stars" />
-        {/* Nebula clouds */}
-        <div className="space-galaxy-nebula" />
-        {/* Shooting stars */}
-        {shootingStars.map(star => (
-          <div
-            key={star.id}
-            className="space-galaxy-shooting-star active"
-            style={{ top: star.top, left: star.left }}
-          />
-        ))}
-      </>
-    )
+    // Cyberpunk Theme
+    if (theme.isCyberpunkTheme) {
+      return (
+        <>
+          <div className="cyberpunk-bg" />
+          <div className="cyberpunk-grid" />
+          <div className="cyberpunk-scanlines" />
+        </>
+      )
+    }
+    
+    // Forest Theme
+    if (theme.isForestTheme) {
+      return (
+        <>
+          <div className="forest-bg" />
+          <div className="forest-sunlight" />
+          <div className="forest-leaves">
+            {particles.filter(p => p.type === 'leaf').map(leaf => (
+              <div key={leaf.id} className="forest-leaf" style={{ left: leaf.left, animationDelay: `${leaf.delay}s` }}>{leaf.emoji}</div>
+            ))}
+          </div>
+        </>
+      )
+    }
+    
+    // Ocean Theme
+    if (theme.isOceanTheme) {
+      return (
+        <>
+          <div className="ocean-bg" />
+          <div className="ocean-caustics" />
+          <div className="ocean-bubbles">
+            {particles.filter(p => p.type === 'bubble').map(bubble => (
+              <div key={bubble.id} className="ocean-bubble" style={{ left: bubble.left, width: bubble.size, height: bubble.size, animationDelay: `${bubble.delay}s` }} />
+            ))}
+          </div>
+        </>
+      )
+    }
+    
+    // Steampunk Theme
+    if (theme.isSteampunkTheme) {
+      return (
+        <>
+          <div className="steampunk-bg" />
+          <div className="steampunk-panels" />
+          <div className="steampunk-gears">
+            <div className="steampunk-gear" style={{ width: 120, height: 120, top: '10%', right: '5%' }} />
+            <div className="steampunk-gear reverse" style={{ width: 80, height: 80, top: '15%', right: '12%' }} />
+            <div className="steampunk-gear" style={{ width: 100, height: 100, bottom: '20%', left: '8%' }} />
+          </div>
+        </>
+      )
+    }
+    
+    return null
+  }
+
+  // Get theme class for body
+  const getThemeClass = () => {
+    if (theme.isSpaceTheme) return 'space-galaxy'
+    if (theme.isCyberpunkTheme) return 'cyberpunk-neon'
+    if (theme.isForestTheme) return 'organic-forest'
+    if (theme.isOceanTheme) return 'ocean-underwater'
+    if (theme.isSteampunkTheme) return 'steampunk-victorian'
+    return ''
   }
 
   // Module selection screen
   if (!activeModule) {
     return (
-      <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${theme.isSpaceTheme ? 'space-galaxy' : ''}`}>
-        {/* Space Galaxy Background */}
-        <SpaceGalaxyBackground />
+      <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${getThemeClass()}`}>
+        {/* Theme Background */}
+        <ThemeBackground />
         {/* Simple header for module selection */}
         <header className={`${theme.header} border-b shadow-sm`}>
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -1196,9 +1403,9 @@ function App() {
   const ModuleIcon = currentModule?.icon || Globe
 
   return (
-    <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${theme.isSpaceTheme ? 'space-galaxy' : ''}`}>
-      {/* Space Galaxy Background */}
-      <SpaceGalaxyBackground />
+    <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${getThemeClass()}`}>
+      {/* Theme Background */}
+      <ThemeBackground />
       {/* Header */}
       <header className={`${theme.header} border-b shadow-sm sticky top-0 z-40`}>
         <div className="max-w-7xl mx-auto px-6 py-3">
@@ -2473,6 +2680,10 @@ function App() {
                             key === 'forest' ? 'border-emerald-500 ring-emerald-500' :
                             key === 'midnight' ? 'border-violet-500 ring-violet-500' :
                             key === 'spaceGalaxy' ? 'border-[#00d9ff] ring-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.3)]' :
+                            key === 'cyberpunkNeon' ? 'border-[#ff006e] ring-[#ff006e] shadow-[0_0_20px_rgba(255,0,110,0.4)]' :
+                            key === 'organicForest' ? 'border-[#4a7c39] ring-[#4a7c39]' :
+                            key === 'oceanUnderwater' ? 'border-[#00fff7] ring-[#00fff7] shadow-[0_0_20px_rgba(0,255,247,0.3)]' :
+                            key === 'steampunkVictorian' ? 'border-[#d4af37] ring-[#d4af37] shadow-[0_0_15px_rgba(212,175,55,0.3)]' :
                             'border-blue-500 ring-blue-500'
                           }` 
                         : `border-transparent ${themeOption.isDark ? 'hover:border-gray-600' : 'hover:border-gray-300'}`
@@ -2516,6 +2727,10 @@ function App() {
                           key === 'forest' ? 'text-emerald-500' :
                           key === 'midnight' ? 'text-violet-500' :
                           key === 'spaceGalaxy' ? 'text-[#00d9ff] drop-shadow-[0_0_8px_rgba(0,217,255,0.8)]' :
+                          key === 'cyberpunkNeon' ? 'text-[#ff006e] drop-shadow-[0_0_8px_rgba(255,0,110,0.8)]' :
+                          key === 'organicForest' ? 'text-[#4a7c39]' :
+                          key === 'oceanUnderwater' ? 'text-[#00fff7] drop-shadow-[0_0_8px_rgba(0,255,247,0.8)]' :
+                          key === 'steampunkVictorian' ? 'text-[#d4af37] drop-shadow-[0_0_6px_rgba(212,175,55,0.6)]' :
                           'text-blue-500'
                         }`} />
                       </div>
