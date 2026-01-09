@@ -221,10 +221,70 @@ class CRSCorrectionGenerator:
             # Try without namespace prefix (default namespace)
             crs_bodies = [child for child in correction_root if child.tag.endswith('CrsBody')]
         
+        # Collect all accounts across all CrsBody elements first
+        all_individual_accounts = []  # List of (account, acct_data, parent_element, body)
+        all_organisation_accounts = []
+        
         for i, body in enumerate(crs_bodies):
             body_data = parsed_data['crs_bodies'][i] if i < len(parsed_data['crs_bodies']) else None
-            if body_data:
-                self._process_crs_body(body, body_data, options, result)
+            if not body_data:
+                continue
+                
+            # Process ReportingFI if requested
+            if options.correct_reporting_fi:
+                reporting_fi = self._find_element(body, 'ReportingFI')
+                if reporting_fi is not None:
+                    self._correct_reporting_fi(reporting_fi, body_data.get('reporting_fi', {}), options)
+                    result.fi_corrected = True
+            
+            # Find accounts in this body
+            reporting_group = self._find_element(body, 'ReportingGroup')
+            if reporting_group is not None:
+                accounts = self._find_all_elements(reporting_group, 'AccountReport')
+                parent_element = reporting_group
+            else:
+                accounts = self._find_all_elements(body, 'AccountReport')
+                parent_element = body
+            
+            account_data_list = body_data.get('accounts', [])
+            
+            for j, account in enumerate(accounts):
+                acct_data = account_data_list[j] if j < len(account_data_list) else {}
+                if acct_data.get('holder_type') == 'individual':
+                    all_individual_accounts.append((account, acct_data, parent_element))
+                else:
+                    all_organisation_accounts.append((account, acct_data, parent_element))
+        
+        # Shuffle for random selection
+        random.shuffle(all_individual_accounts)
+        random.shuffle(all_organisation_accounts)
+        
+        # Process individual accounts globally
+        accounts_to_remove = []
+        for j, (account, acct_data, parent_element) in enumerate(all_individual_accounts):
+            if j < options.delete_individual_accounts:
+                self._delete_account(account, acct_data)
+                result.deletions_made += 1
+            elif j < options.delete_individual_accounts + options.correct_individual_accounts:
+                self._correct_account(account, acct_data, options)
+                result.corrections_made += 1
+            else:
+                accounts_to_remove.append((account, parent_element))
+        
+        # Process organisation accounts globally
+        for j, (account, acct_data, parent_element) in enumerate(all_organisation_accounts):
+            if j < options.delete_organisation_accounts:
+                self._delete_account(account, acct_data)
+                result.deletions_made += 1
+            elif j < options.delete_organisation_accounts + options.correct_organisation_accounts:
+                self._correct_account(account, acct_data, options)
+                result.corrections_made += 1
+            else:
+                accounts_to_remove.append((account, parent_element))
+        
+        # Remove accounts that are not being corrected or deleted
+        for account, parent_element in accounts_to_remove:
+            parent_element.remove(account)
         
         return correction_root
     
