@@ -429,6 +429,8 @@ function App() {
       header: 'bg-[#3e2723]/95 border-[#b87333]/40',
       text: 'text-[#1a1a1a]',
       textMuted: 'text-[#5d4037]',
+      headerText: 'text-[#f4e7d7]',
+      headerTextMuted: 'text-[#d4af37]',
       input: 'bg-[#f4e7d7] border-2 border-[#b87333]/50 text-[#1a1a1a] focus:border-[#d4af37] focus:ring-[#d4af37]/20',
       inputFocus: 'focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20',
       buttonPrimary: 'bg-gradient-to-r from-[#b87333] via-[#c87533] to-[#cd7f32] hover:from-[#d4af37] hover:via-[#b87333] hover:to-[#c87533] text-[#1a1a1a] font-semibold uppercase tracking-wider shadow-lg',
@@ -1159,8 +1161,6 @@ function App() {
       fullName: 'Common Reporting Standard',
       description: 'Generate CRS XML test data for automatic exchange of financial account information',
       icon: Globe,
-      color: 'from-blue-600 to-blue-500',
-      bgColor: 'bg-blue-600',
       features: ['Individual & Organisation Accounts', 'Controlling Persons', 'Corrections & Deletions', 'CSV Import/Export']
     },
     fatca: {
@@ -1168,8 +1168,6 @@ function App() {
       fullName: 'Foreign Account Tax Compliance Act',
       description: 'Generate FATCA XML test data for US tax compliance reporting',
       icon: DollarSign,
-      color: 'from-green-600 to-green-500',
-      bgColor: 'bg-green-600',
       features: ['Individual & Organisation Accounts', 'Substantial Owners', 'Corrections & Deletions', 'Filer Categories']
     }
   }
@@ -1310,12 +1308,12 @@ function App() {
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-600 to-primary-500 flex items-center justify-center shadow-lg">
+                <div className={`w-12 h-12 rounded-xl ${theme.gradient || theme.buttonPrimary} flex items-center justify-center shadow-lg`}>
                   <Landmark className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className={`text-2xl font-bold ${theme.text}`}>Tax Reporting Generator</h1>
-                  <p className={`text-sm ${theme.textMuted}`}>Generate compliant XML test data</p>
+                  <h1 className={`text-2xl font-bold ${theme.headerText || theme.text}`}>Tax Reporting Generator</h1>
+                  <p className={`text-sm ${theme.headerTextMuted || theme.textMuted}`}>Generate compliant XML test data</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -1350,8 +1348,8 @@ function App() {
         {/* Module Selection */}
         <main className="max-w-5xl mx-auto px-6 py-12">
           <div className="text-center mb-12">
-            <h2 className={`text-3xl font-bold ${theme.text} mb-3`}>Select a Module</h2>
-            <p className="text-lg text-gray-500">Choose the reporting standard you want to work with</p>
+            <h2 className={`text-3xl font-bold ${theme.headerText || theme.text} mb-3`}>Select a Module</h2>
+            <p className={`text-lg ${theme.headerTextMuted || theme.textMuted}`}>Choose the reporting standard you want to work with</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -1368,8 +1366,8 @@ function App() {
                     settings.animationsEnabled ? 'animate-fade-in' : ''
                   }`}
                 >
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${module.color} flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform`}>
-                    <Icon className="w-8 h-8 text-white" />
+                  <div className={`w-16 h-16 rounded-2xl ${theme.card} flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform border-2 ${theme.border}`}>
+                    <Icon className={`w-8 h-8 ${theme.accentText}`} />
                   </div>
                   <h3 className={`text-2xl font-bold ${theme.text} mb-1`}>{module.name}</h3>
                   <p className={`text-sm ${theme.textMuted} mb-4`}>{module.fullName}</p>
@@ -1377,12 +1375,12 @@ function App() {
                   <div className="space-y-2">
                     {module.features.map((feature, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <CheckCircle2 className={`w-4 h-4 ${key === 'crs' ? 'text-blue-500' : 'text-green-500'}`} />
+                        <CheckCircle2 className={`w-4 h-4 ${theme.accentText}`} />
                         <span className={`text-sm ${theme.text}`}>{feature}</span>
                       </div>
                     ))}
                   </div>
-                  <div className={`mt-6 py-3 px-4 rounded-lg ${module.bgColor} text-white font-semibold text-center group-hover:opacity-90 transition-opacity`}>
+                  <div className={`mt-6 py-3 px-4 rounded-lg ${theme.buttonPrimary} font-semibold text-center group-hover:opacity-90 transition-opacity border-2 ${theme.border}`}>
                     Open {module.name} Module
                   </div>
                 </button>
@@ -1916,7 +1914,7 @@ function App() {
                           />
                         </div>
                         <div>
-                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Controlling Persons</label>
+                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Controlling Persons per Organisation</label>
                           <input
                             type="number"
                             min="0"
