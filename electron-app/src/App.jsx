@@ -495,6 +495,10 @@ function App() {
   const [jurisdictionSearch, setJurisdictionSearch] = useState('')
   const [showJurisdictionDropdown, setShowJurisdictionDropdown] = useState(false)
 
+  // Easter egg state 🦖
+  const [settingsClickCount, setSettingsClickCount] = useState(0)
+  const [showDinoGame, setShowDinoGame] = useState(false)
+
   // Form state (CRS)
   const [formData, setFormData] = useState({
     sendingCompanyIN: '',
@@ -1172,6 +1176,196 @@ function App() {
     }
   }
 
+  // 🦖 Dino Game Easter Egg Component
+  const DinoGame = ({ onClose }) => {
+    const [gameStarted, setGameStarted] = useState(false)
+    const [gameOver, setGameOver] = useState(false)
+    const [score, setScore] = useState(0)
+    const [highScore, setHighScore] = useState(() => {
+      const saved = localStorage.getItem('dino-high-score')
+      return saved ? parseInt(saved) : 0
+    })
+    const [dinoY, setDinoY] = useState(0)
+    const [isJumping, setIsJumping] = useState(false)
+    const [obstacles, setObstacles] = useState([])
+    const [gameSpeed, setGameSpeed] = useState(5)
+
+    // Jump handler
+    const jump = () => {
+      if (!isJumping && gameStarted && !gameOver) {
+        setIsJumping(true)
+        setDinoY(100)
+        setTimeout(() => setDinoY(50), 150)
+        setTimeout(() => setDinoY(0), 300)
+        setTimeout(() => setIsJumping(false), 300)
+      }
+      if (!gameStarted) {
+        setGameStarted(true)
+        setGameOver(false)
+        setScore(0)
+        setObstacles([])
+        setGameSpeed(5)
+      }
+      if (gameOver) {
+        setGameStarted(true)
+        setGameOver(false)
+        setScore(0)
+        setObstacles([])
+        setGameSpeed(5)
+      }
+    }
+
+    // Keyboard controls
+    useEffect(() => {
+      const handleKeyDown = (e) => {
+        if (e.code === 'Space' || e.code === 'ArrowUp') {
+          e.preventDefault()
+          jump()
+        }
+        if (e.code === 'Escape') {
+          onClose()
+        }
+      }
+      window.addEventListener('keydown', handleKeyDown)
+      return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [isJumping, gameStarted, gameOver])
+
+    // Game loop
+    useEffect(() => {
+      if (!gameStarted || gameOver) return
+
+      const gameLoop = setInterval(() => {
+        // Move obstacles
+        setObstacles(prev => {
+          const moved = prev.map(o => ({ ...o, x: o.x - gameSpeed })).filter(o => o.x > -50)
+          
+          // Check collision
+          moved.forEach(o => {
+            if (o.x < 80 && o.x > 20 && dinoY < 40) {
+              setGameOver(true)
+              if (score > highScore) {
+                setHighScore(score)
+                localStorage.setItem('dino-high-score', score.toString())
+              }
+            }
+          })
+          
+          return moved
+        })
+
+        // Increment score
+        setScore(prev => prev + 1)
+
+        // Speed up over time
+        if (score > 0 && score % 500 === 0) {
+          setGameSpeed(prev => Math.min(prev + 1, 15))
+        }
+      }, 50)
+
+      return () => clearInterval(gameLoop)
+    }, [gameStarted, gameOver, dinoY, score, gameSpeed, highScore])
+
+    // Spawn obstacles
+    useEffect(() => {
+      if (!gameStarted || gameOver) return
+
+      const spawnObstacle = () => {
+        const types = ['🌵', '🪨', '🦴', '💀']
+        setObstacles(prev => [...prev, { 
+          id: Date.now(), 
+          x: 600, 
+          type: types[Math.floor(Math.random() * types.length)] 
+        }])
+      }
+
+      const interval = setInterval(spawnObstacle, 1500 + Math.random() * 1000)
+      return () => clearInterval(interval)
+    }, [gameStarted, gameOver])
+
+    return (
+      <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100]" onClick={jump}>
+        <div className="relative">
+          {/* Close button */}
+          <button 
+            onClick={(e) => { e.stopPropagation(); onClose() }}
+            className="absolute -top-12 right-0 text-white hover:text-red-400 transition-colors"
+          >
+            <X className="w-8 h-8" />
+          </button>
+
+          {/* Game container */}
+          <div className="bg-white rounded-xl p-4 shadow-2xl">
+            <div className="text-center mb-2">
+              <span className="text-gray-600 font-mono">Score: {score}</span>
+              <span className="text-gray-400 font-mono ml-4">HI: {highScore}</span>
+            </div>
+            
+            {/* Game area */}
+            <div className="relative w-[600px] h-[200px] bg-gradient-to-b from-sky-200 to-sky-100 rounded-lg overflow-hidden border-4 border-gray-300">
+              {/* Ground */}
+              <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-amber-600 to-amber-500" />
+              <div className="absolute bottom-10 left-0 right-0 h-2 bg-amber-700" />
+              
+              {/* Clouds */}
+              <div className="absolute top-4 left-10 text-4xl opacity-60">☁️</div>
+              <div className="absolute top-8 left-[200px] text-2xl opacity-40">☁️</div>
+              <div className="absolute top-2 right-20 text-3xl opacity-50">☁️</div>
+              
+              {/* Dino */}
+              <div 
+                className="absolute left-12 text-5xl transition-transform duration-75"
+                style={{ bottom: `${48 + dinoY}px` }}
+              >
+                🦖
+              </div>
+
+              {/* Obstacles */}
+              {obstacles.map(o => (
+                <div 
+                  key={o.id}
+                  className="absolute bottom-12 text-4xl"
+                  style={{ left: `${o.x}px` }}
+                >
+                  {o.type}
+                </div>
+              ))}
+
+              {/* Start/Game Over overlay */}
+              {!gameStarted && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <p className="text-4xl mb-2">🦖</p>
+                    <p className="text-xl font-bold">Tax Dino Run!</p>
+                    <p className="text-sm mt-2 opacity-80">Press SPACE or Click to Start</p>
+                    <p className="text-xs mt-1 opacity-60">ESC to close</p>
+                  </div>
+                </div>
+              )}
+
+              {gameOver && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <p className="text-4xl mb-2">💀</p>
+                    <p className="text-xl font-bold">Game Over!</p>
+                    <p className="text-lg mt-1">Score: {score}</p>
+                    {score >= highScore && score > 0 && (
+                      <p className="text-yellow-400 text-sm mt-1">🏆 New High Score!</p>
+                    )}
+                    <p className="text-sm mt-2 opacity-80">Press SPACE to Retry</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <p className="text-center text-gray-400 text-xs mt-2">
+              🎮 You found the secret! Jump over obstacles to survive.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Theme Background Component - handles all immersive theme backgrounds
   const ThemeBackground = () => {
     const [particles, setParticles] = useState([])
@@ -1319,8 +1513,15 @@ function App() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
-                    setActiveModule('crs')
-                    setCurrentPage('settings')
+                    const newCount = settingsClickCount + 1
+                    setSettingsClickCount(newCount)
+                    if (newCount >= 10) {
+                      setShowDinoGame(true)
+                      setSettingsClickCount(0)
+                    } else {
+                      setActiveModule('crs')
+                      setCurrentPage('settings')
+                    }
                   }}
                   className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
                   title="Settings"
@@ -3184,6 +3385,11 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 🦖 Easter Egg - Dino Game */}
+      {showDinoGame && (
+        <DinoGame onClose={() => setShowDinoGame(false)} />
       )}
     </div>
   )
