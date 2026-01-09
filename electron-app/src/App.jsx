@@ -1318,19 +1318,31 @@ function App() {
                   <p className={`text-sm ${theme.textMuted}`}>Generate compliant XML test data</p>
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  const themeKeys = Object.keys(THEMES)
-                  const currentIndex = themeKeys.indexOf(selectedTheme)
-                  const nextIndex = (currentIndex + 1) % themeKeys.length
-                  setSelectedTheme(themeKeys[nextIndex])
-                }}
-                className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
-                title={`Current: ${THEMES[selectedTheme]?.name} - Click to change`}
-              >
-                <span className="text-lg">{THEMES[selectedTheme]?.icon}</span>
-                <span className={`text-sm font-medium hidden sm:inline`}>{THEMES[selectedTheme]?.name}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setActiveModule('crs')
+                    setCurrentPage('settings')
+                  }}
+                  className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
+                  title="Settings"
+                >
+                  <Settings className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => {
+                    const themeKeys = Object.keys(THEMES)
+                    const currentIndex = themeKeys.indexOf(selectedTheme)
+                    const nextIndex = (currentIndex + 1) % themeKeys.length
+                    setSelectedTheme(themeKeys[nextIndex])
+                  }}
+                  className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
+                  title={`Current: ${THEMES[selectedTheme]?.name} - Click to change`}
+                >
+                  <span className="text-lg">{THEMES[selectedTheme]?.icon}</span>
+                  <span className={`text-sm font-medium hidden sm:inline`}>{THEMES[selectedTheme]?.name}</span>
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -1414,9 +1426,7 @@ function App() {
               {/* Back to module selection */}
               <button
                 onClick={() => setActiveModule(null)}
-                className={`p-2 rounded-lg transition-colors ${
-                  darkMode ? 'hover:bg-gray-700 text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
-                }`}
+                className={`p-2 rounded-lg transition-colors ${theme.buttonSecondary}`}
                 title="Back to module selection"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -1444,9 +1454,7 @@ function App() {
                   className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
                     currentPage === id
                       ? `${currentModule.bgColor} text-white shadow-md`
-                      : darkMode 
-                        ? 'text-gray-400 hover:text-white hover:bg-gray-700' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      : `${theme.icon} ${theme.iconHover} ${theme.cardHover}`
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -1510,7 +1518,7 @@ function App() {
                   <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Receiving Country</label>
                   <input
                     type="text"
-                    className={`w-full px-4 py-2 rounded-lg border ${theme.input} bg-gray-100 dark:bg-gray-600`}
+                    className={`w-full px-4 py-2 rounded-lg border ${theme.input} opacity-60`}
                     value={fatcaFormData.receivingCountry}
                     readOnly
                   />
@@ -1633,7 +1641,7 @@ function App() {
                     const result = await window.electronAPI.selectOutputFile()
                     if (result) setFatcaFormData({...fatcaFormData, outputPath: result})
                   }}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                  className={`px-4 py-2 ${theme.buttonSuccess} font-medium rounded-lg transition-colors flex items-center gap-2`}
                 >
                   <FolderOpen className="w-4 h-4" />
                   Browse
@@ -1720,7 +1728,7 @@ function App() {
                       {csvFilePath && (
                         <button
                           onClick={handleClearCsvFile}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 ${theme.icon} hover:text-red-500 transition-colors`}
                         >
                           <XCircle className="w-5 h-5" />
                         </button>
@@ -1729,7 +1737,7 @@ function App() {
                     <button
                       onClick={handleSelectCsvFile}
                       disabled={isValidatingCsv}
-                      className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                      className={`px-6 py-3 ${theme.buttonSuccess} disabled:opacity-50 font-medium rounded-lg transition-colors flex items-center gap-2`}
                     >
                       {isValidatingCsv ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderOpen className="w-4 h-4" />}
                       {isValidatingCsv ? 'Validating...' : 'Browse'}
@@ -1756,7 +1764,7 @@ function App() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowCrs701CsvPreview(true)}
-                      className="text-sm px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-1"
+                      className={`text-sm px-3 py-1.5 ${theme.buttonSuccess} rounded-lg flex items-center gap-1`}
                     >
                       <Eye className="w-4 h-4" />
                       Preview & Download Template
@@ -1776,7 +1784,7 @@ function App() {
                 <div className={`${theme.card} rounded-xl border shadow-sm overflow-hidden`}>
                   <button
                     onClick={() => toggleSection('messageHeader')}
-                    className={`w-full px-6 py-4 flex items-center justify-between ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition-colors`}
+                    className={`w-full px-6 py-4 flex items-center justify-between ${theme.cardHover} transition-colors`}
                   >
                     <div className="flex items-center gap-3">
                       <Globe className="w-5 h-5 text-primary-600" />
@@ -1840,7 +1848,7 @@ function App() {
                 <div className={`${theme.card} rounded-xl border shadow-sm overflow-hidden`}>
                   <button
                     onClick={() => toggleSection('fileSize')}
-                    className={`w-full px-6 py-4 flex items-center justify-between ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition-colors`}
+                    className={`w-full px-6 py-4 flex items-center justify-between ${theme.cardHover} transition-colors`}
                   >
                     <div className="flex items-center gap-3">
                       <Database className="w-5 h-5 text-primary-600" />
@@ -1934,16 +1942,14 @@ function App() {
                       <button
                         onClick={handleGeneratePreview}
                         disabled={isLoadingPreview}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2 text-sm"
+                        className={`px-4 py-2 ${theme.buttonSuccess} font-medium rounded-lg transition-colors flex items-center gap-2 text-sm`}
                       >
                         {isLoadingPreview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
                         Preview
                       </button>
                       <button
                         onClick={handleDownloadCsv}
-                        className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 ${
-                          darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
+                        className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 ${theme.buttonSecondary}`}
                       >
                         <Download className="w-4 h-4" />
                         Download CSV
@@ -2191,7 +2197,7 @@ function App() {
                           console.error('Download error:', err)
                         }
                       }}
-                      className="text-sm px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-1"
+                      className={`text-sm px-3 py-1.5 ${theme.buttonSuccess} rounded-lg flex items-center gap-1`}
                     >
                       <Download className="w-4 h-4" />
                       Download Template
@@ -2847,20 +2853,20 @@ function App() {
                     Reset to Default
                   </button>
                 </div>
-                <div className={`flex flex-wrap gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg ${theme.card}`}>
+                <div className={`flex flex-wrap gap-2 max-h-48 overflow-y-auto p-3 border rounded-lg ${theme.card}`}>
                   {(settings.partnerJurisdictions || []).sort().map(code => (
                     <span
                       key={code}
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm ${theme.badge}`}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${theme.badge}`}
                     >
-                      <span className="font-mono font-medium">{code}</span>
-                      <span className="text-xs opacity-75">({getCountryName(code)})</span>
+                      <span className="font-medium">{getCountryName(code)}</span>
+                      <span className="text-xs font-mono opacity-60">{code}</span>
                       <button
                         onClick={() => setSettings(prev => ({
                           ...prev,
                           partnerJurisdictions: prev.partnerJurisdictions.filter(c => c !== code)
                         }))}
-                        className="ml-1 hover:text-red-500"
+                        className="ml-1 hover:text-red-500 transition-colors"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -2902,7 +2908,7 @@ function App() {
               <button
                 onClick={() => setShowModal(false)}
                 className={`w-full py-3 rounded-lg font-semibold transition-colors ${
-                  modalType === 'success' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'
+                  modalType === 'success' ? theme.buttonSuccess : theme.buttonDanger
                 }`}
               >
                 Close
@@ -3037,14 +3043,14 @@ function App() {
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
               <button
                 onClick={handleDownloadCsv}
-                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg flex items-center gap-2"
+                className={`px-6 py-3 ${theme.buttonSuccess} font-semibold rounded-lg flex items-center gap-2`}
               >
                 <Download className="w-5 h-5" />
                 Download Full CSV
               </button>
               <button
                 onClick={() => setShowPreviewModal(false)}
-                className={`flex-1 py-3 rounded-lg font-semibold ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                className={`flex-1 py-3 rounded-lg font-semibold ${theme.buttonSecondary}`}
               >
                 Close
               </button>
@@ -3057,13 +3063,13 @@ function App() {
       {showCrs701CsvPreview && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className={`${theme.card} rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col ${settings.animationsEnabled ? 'animate-slide-up' : ''}`}>
-            <div className="p-6 bg-green-600 text-white">
+            <div className={`p-6 ${theme.buttonSuccess} rounded-t-2xl`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Table className="w-8 h-8" />
                   <h3 className="text-xl font-bold">CRS 701 CSV Template</h3>
                 </div>
-                <button onClick={() => setShowCrs701CsvPreview(false)} className="hover:bg-green-700 p-2 rounded-lg">
+                <button onClick={() => setShowCrs701CsvPreview(false)} className="hover:opacity-80 p-2 rounded-lg">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -3125,14 +3131,14 @@ function App() {
                   await handleDownloadTemplate()
                   setShowCrs701CsvPreview(false)
                 }}
-                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg flex items-center gap-2"
+                className={`px-6 py-3 ${theme.buttonSuccess} font-semibold rounded-lg flex items-center gap-2`}
               >
                 <Download className="w-5 h-5" />
                 Download Template
               </button>
               <button
                 onClick={() => setShowCrs701CsvPreview(false)}
-                className={`flex-1 py-3 rounded-lg font-semibold ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                className={`flex-1 py-3 rounded-lg font-semibold ${theme.buttonSecondary}`}
               >
                 Close
               </button>
@@ -3201,14 +3207,14 @@ function App() {
                   await window.electronAPI.downloadCorrectionCsvTemplate()
                   setShowCorrectionCsvPreview(false)
                 }}
-                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg flex items-center gap-2"
+                className={`px-6 py-3 ${theme.buttonSuccess} font-semibold rounded-lg flex items-center gap-2`}
               >
                 <Download className="w-5 h-5" />
                 Download Template
               </button>
               <button
                 onClick={() => setShowCorrectionCsvPreview(false)}
-                className={`flex-1 py-3 rounded-lg font-semibold ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                className={`flex-1 py-3 rounded-lg font-semibold ${theme.buttonSecondary}`}
               >
                 Close
               </button>
