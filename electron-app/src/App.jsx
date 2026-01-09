@@ -1339,8 +1339,8 @@ function App() {
                   className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
                   title="Click to change theme"
                 >
-                  <span>{THEMES[selectedTheme]?.icon}</span>
-                  <span className="text-sm font-medium hidden sm:inline">{THEMES[selectedTheme]?.name}</span>
+                  <span>{theme.icon}</span>
+                  <span className="text-sm font-medium hidden sm:inline">{theme.name}</span>
                 </button>
               </div>
             </div>
@@ -1474,8 +1474,8 @@ function App() {
               className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
               title="Click to change theme"
             >
-              <span>{THEMES[selectedTheme]?.icon}</span>
-              <span className="text-sm font-medium hidden sm:inline">{THEMES[selectedTheme]?.name}</span>
+              <span>{theme.icon}</span>
+              <span className="text-sm font-medium hidden sm:inline">{theme.name}</span>
             </button>
           </div>
         </div>
@@ -2673,31 +2673,41 @@ function App() {
               <p className="text-sm text-gray-500 mb-6">Choose your preferred color scheme</p>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {Object.entries(THEMES).map(([themeKey, t]) => {
-                  const isSelected = selectedTheme === themeKey
-                  return (
-                    <button
-                      key={themeKey}
-                      onClick={() => setSelectedTheme(themeKey)}
-                      className={`relative rounded-xl overflow-hidden transition-all duration-200 ${
-                        isSelected 
-                          ? 'ring-2 ring-offset-2 ring-blue-500 border-2 border-blue-500' 
-                          : 'border-2 border-gray-200 hover:border-gray-400'
-                      }`}
-                    >
-                      <div className={`h-14 bg-gradient-to-br ${t.preview}`} />
-                      <div className={`py-2.5 px-2 text-center ${t.isDark ? 'bg-gray-800' : 'bg-white'}`}>
-                        <span className="mr-1">{t.icon}</span>
-                        <span className={`font-medium text-sm ${t.isDark ? 'text-white' : 'text-gray-900'}`}>{t.name}</span>
+                {[
+                  { key: 'light', name: 'Light', icon: '☀️', preview: 'from-blue-500 to-indigo-600', dark: false },
+                  { key: 'dark', name: 'Dark', icon: '🌙', preview: 'from-blue-600 to-indigo-800', dark: true },
+                  { key: 'midnight', name: 'Midnight', icon: '🌌', preview: 'from-violet-600 to-purple-900', dark: true },
+                  { key: 'ocean', name: 'Ocean', icon: '🌊', preview: 'from-cyan-500 to-blue-700', dark: true },
+                  { key: 'sunset', name: 'Sunset', icon: '🌅', preview: 'from-orange-400 to-rose-500', dark: false },
+                  { key: 'forest', name: 'Forest', icon: '🌲', preview: 'from-emerald-500 to-green-700', dark: true },
+                  { key: 'lavender', name: 'Lavender', icon: '💜', preview: 'from-purple-400 to-fuchsia-500', dark: false },
+                  { key: 'spaceGalaxy', name: 'Space Galaxy', icon: '🚀', preview: 'from-[#00d9ff] via-[#7b2cbf] to-[#ff006e]', dark: true },
+                  { key: 'cyberpunkNeon', name: 'Cyberpunk', icon: '⚡', preview: 'from-[#ff006e] via-[#00f0ff] to-[#b400ff]', dark: true },
+                  { key: 'organicForest', name: 'Organic Forest', icon: '🌿', preview: 'from-[#4a7c39] to-[#2d5016]', dark: false },
+                  { key: 'oceanUnderwater', name: 'Ocean Depths', icon: '🐠', preview: 'from-[#39cccc] to-[#001f3f]', dark: true },
+                  { key: 'steampunkVictorian', name: 'Steampunk', icon: '⚙️', preview: 'from-[#d4af37] via-[#b87333] to-[#8b4513]', dark: false },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() => setSelectedTheme(item.key)}
+                    className={`relative rounded-xl overflow-hidden transition-all duration-200 ${
+                      selectedTheme === item.key 
+                        ? 'ring-2 ring-offset-2 ring-blue-500 border-2 border-blue-500' 
+                        : 'border-2 border-gray-200 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className={`h-14 bg-gradient-to-br ${item.preview}`} />
+                    <div className={`py-2.5 px-2 text-center ${item.dark ? 'bg-gray-800' : 'bg-white'}`}>
+                      <span className="mr-1">{item.icon}</span>
+                      <span className={`font-medium text-sm ${item.dark ? 'text-white' : 'text-gray-900'}`}>{item.name}</span>
+                    </div>
+                    {selectedTheme === item.key && (
+                      <div className="absolute top-1.5 right-1.5 bg-blue-500 rounded-full p-0.5">
+                        <CheckCircle2 className="w-4 h-4 text-white" />
                       </div>
-                      {isSelected && (
-                        <div className="absolute top-1.5 right-1.5 bg-blue-500 rounded-full p-0.5">
-                          <CheckCircle2 className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                    </button>
-                  )
-                })}
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
 
