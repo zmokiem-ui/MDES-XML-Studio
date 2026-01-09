@@ -1337,10 +1337,10 @@ function App() {
                     setSelectedTheme(themeKeys[nextIndex])
                   }}
                   className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
-                  title={`Current: ${THEMES[selectedTheme]?.name} - Click to change`}
+                  title="Click to change theme"
                 >
-                  <span className="text-lg">{THEMES[selectedTheme]?.icon}</span>
-                  <span className={`text-sm font-medium hidden sm:inline`}>{THEMES[selectedTheme]?.name}</span>
+                  <span>{THEMES[selectedTheme]?.icon}</span>
+                  <span className="text-sm font-medium hidden sm:inline">{THEMES[selectedTheme]?.name}</span>
                 </button>
               </div>
             </div>
@@ -1351,7 +1351,7 @@ function App() {
         <main className="max-w-5xl mx-auto px-6 py-12">
           <div className="text-center mb-12">
             <h2 className={`text-3xl font-bold ${theme.text} mb-3`}>Select a Module</h2>
-            <p className={`${theme.textMuted} text-lg`}>Choose the reporting standard you want to work with</p>
+            <p className="text-lg text-gray-500">Choose the reporting standard you want to work with</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -1472,9 +1472,9 @@ function App() {
                 setSelectedTheme(themeKeys[nextIndex])
               }}
               className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
-              title={`Current: ${THEMES[selectedTheme]?.name} - Click to change`}
+              title="Click to change theme"
             >
-              <span className="text-lg">{THEMES[selectedTheme]?.icon}</span>
+              <span>{THEMES[selectedTheme]?.icon}</span>
               <span className="text-sm font-medium hidden sm:inline">{THEMES[selectedTheme]?.name}</span>
             </button>
           </div>
@@ -1747,8 +1747,8 @@ function App() {
                   {errors.csvFilePath && <p className="text-sm text-red-500">{errors.csvFilePath}</p>}
                   
                   {csvFilePath && csvStatistics && (
-                    <div className={`${darkMode ? 'bg-green-900/30 border-green-700' : 'bg-green-50 border-green-200'} border rounded-lg p-4`}>
-                      <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium mb-2">
+                    <div className={`${theme.badgeSuccess} border rounded-lg p-4`}>
+                      <div className={`flex items-center gap-2 font-medium mb-2 ${theme.accentText}`}>
                         <CheckCircle2 className="w-4 h-4" />
                         <span>CSV Validated</span>
                       </div>
@@ -2102,8 +2102,8 @@ function App() {
                 {xmlValidation && (
                   <div className={`rounded-lg p-4 ${
                     xmlValidation.is_valid && xmlValidation.can_generate_correction
-                      ? darkMode ? 'bg-green-900/30 border-green-700' : 'bg-green-50 border-green-200'
-                      : darkMode ? 'bg-red-900/30 border-red-700' : 'bg-red-50 border-red-200'
+                      ? theme.badgeSuccess
+                      : theme.badgeError
                   } border`}>
                     <div className="flex items-center gap-2 mb-3">
                       {xmlValidation.can_generate_correction ? (
@@ -2176,9 +2176,9 @@ function App() {
               
               <div className="space-y-4">
                 {/* CSV Format Info */}
-                <div className={`${darkMode ? 'bg-blue-900/20 border-blue-700' : 'bg-blue-50 border-blue-200'} border rounded-lg p-4`}>
-                  <p className={`font-medium ${darkMode ? 'text-blue-300' : 'text-blue-800'} mb-2`}>Required CSV Format</p>
-                  <p className={`text-sm ${darkMode ? 'text-blue-400' : 'text-blue-700'} mb-3`}>
+                <div className={`${theme.accentLight} border rounded-lg p-4`}>
+                  <p className={`font-medium ${theme.accentText} mb-2`}>Required CSV Format</p>
+                  <p className={`text-sm ${theme.textMuted} mb-3`}>
                     Your CSV must include a <strong>DocRefId</strong> column with valid document reference IDs from your original CRS701 file.
                   </p>
                   <div className="flex gap-2">
@@ -2670,60 +2670,34 @@ function App() {
           <div className={`space-y-6 ${settings.animationsEnabled ? 'animate-fade-in' : ''}`}>
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
               <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>Theme</h3>
-              <p className={`text-sm ${theme.textMuted} mb-6`}>Choose your preferred color scheme</p>
+              <p className="text-sm text-gray-500 mb-6">Choose your preferred color scheme</p>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {Object.entries(THEMES).map(([key, themeOption]) => (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedTheme(key)}
-                    className={`relative rounded-xl border-2 transition-all overflow-hidden ${
-                      selectedTheme === key 
-                        ? `ring-2 ring-offset-2 ${themeOption.isDark ? 'ring-offset-gray-900' : 'ring-offset-white'} ${
-                            key === 'sunset' ? 'border-orange-500 ring-orange-500' :
-                            key === 'lavender' ? 'border-purple-500 ring-purple-500' :
-                            key === 'ocean' ? 'border-cyan-500 ring-cyan-500' :
-                            key === 'forest' ? 'border-emerald-500 ring-emerald-500' :
-                            key === 'midnight' ? 'border-violet-500 ring-violet-500' :
-                            key === 'spaceGalaxy' ? 'border-[#00d9ff] ring-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.3)]' :
-                            key === 'cyberpunkNeon' ? 'border-[#ff006e] ring-[#ff006e] shadow-[0_0_20px_rgba(255,0,110,0.4)]' :
-                            key === 'organicForest' ? 'border-[#4a7c39] ring-[#4a7c39]' :
-                            key === 'oceanUnderwater' ? 'border-[#00fff7] ring-[#00fff7] shadow-[0_0_20px_rgba(0,255,247,0.3)]' :
-                            key === 'steampunkVictorian' ? 'border-[#d4af37] ring-[#d4af37] shadow-[0_0_15px_rgba(212,175,55,0.3)]' :
-                            'border-blue-500 ring-blue-500'
-                          }` 
-                        : `border-transparent ${themeOption.isDark ? 'hover:border-gray-600' : 'hover:border-gray-300'}`
-                    }`}
-                  >
-                    {/* Theme preview - simplified gradient preview */}
-                    <div className={`h-16 bg-gradient-to-br ${themeOption.preview} rounded-t-lg`}></div>
-                    
-                    {/* Theme name */}
-                    <div className={`py-3 px-2 text-center ${themeOption.isDark ? 'bg-gray-800' : 'bg-white'} rounded-b-lg`}>
-                      <span className="text-base mr-1">{themeOption.icon}</span>
-                      <span className={`font-semibold text-sm ${themeOption.isDark ? 'text-gray-100' : 'text-gray-800'}`}>{themeOption.name}</span>
-                    </div>
-                    
-                    {/* Selected indicator */}
-                    {selectedTheme === key && (
-                      <div className={`absolute top-2 right-2 p-1 rounded-full ${themeOption.isDark ? 'bg-gray-800' : 'bg-white'}`}>
-                        <CheckCircle2 className={`w-5 h-5 ${
-                          key === 'sunset' ? 'text-orange-500' :
-                          key === 'lavender' ? 'text-purple-500' :
-                          key === 'ocean' ? 'text-cyan-500' :
-                          key === 'forest' ? 'text-emerald-500' :
-                          key === 'midnight' ? 'text-violet-500' :
-                          key === 'spaceGalaxy' ? 'text-[#00d9ff] drop-shadow-[0_0_8px_rgba(0,217,255,0.8)]' :
-                          key === 'cyberpunkNeon' ? 'text-[#ff006e] drop-shadow-[0_0_8px_rgba(255,0,110,0.8)]' :
-                          key === 'organicForest' ? 'text-[#4a7c39]' :
-                          key === 'oceanUnderwater' ? 'text-[#00fff7] drop-shadow-[0_0_8px_rgba(0,255,247,0.8)]' :
-                          key === 'steampunkVictorian' ? 'text-[#d4af37] drop-shadow-[0_0_6px_rgba(212,175,55,0.6)]' :
-                          'text-blue-500'
-                        }`} />
+                {Object.entries(THEMES).map(([themeKey, t]) => {
+                  const isSelected = selectedTheme === themeKey
+                  return (
+                    <button
+                      key={themeKey}
+                      onClick={() => setSelectedTheme(themeKey)}
+                      className={`relative rounded-xl overflow-hidden transition-all duration-200 ${
+                        isSelected 
+                          ? 'ring-2 ring-offset-2 ring-blue-500 border-2 border-blue-500' 
+                          : 'border-2 border-gray-200 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className={`h-14 bg-gradient-to-br ${t.preview}`} />
+                      <div className={`py-2.5 px-2 text-center ${t.isDark ? 'bg-gray-800' : 'bg-white'}`}>
+                        <span className="mr-1">{t.icon}</span>
+                        <span className={`font-medium text-sm ${t.isDark ? 'text-white' : 'text-gray-900'}`}>{t.name}</span>
                       </div>
-                    )}
-                  </button>
-                ))}
+                      {isSelected && (
+                        <div className="absolute top-1.5 right-1.5 bg-blue-500 rounded-full p-0.5">
+                          <CheckCircle2 className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -2876,7 +2850,7 @@ function App() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className={`${theme.card} rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden ${settings.animationsEnabled ? 'animate-slide-up' : ''}`}>
-            <div className={`p-6 ${modalType === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`}>
+            <div className={`p-6 ${modalType === 'success' ? theme.buttonSuccess : theme.buttonDanger}`}>
               <div className="flex items-center gap-3">
                 {modalType === 'success' ? <CheckCircle2 className="w-8 h-8" /> : <AlertCircle className="w-8 h-8" />}
                 <h3 className="text-xl font-bold">{modalType === 'success' ? 'Success' : 'Error'}</h3>
@@ -2903,7 +2877,7 @@ function App() {
       {showXmlErrorsModal && xmlValidation?.errors?.length > 0 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className={`${theme.card} rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col ${settings.animationsEnabled ? 'animate-slide-up' : ''}`}>
-            <div className="p-6 bg-red-500 text-white flex items-center justify-between">
+            <div className={`p-6 ${theme.buttonDanger} flex items-center justify-between`}>
               <div className="flex items-center gap-3">
                 <AlertCircle className="w-8 h-8" />
                 <div>
