@@ -1,0 +1,15 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Uw accountgegevens zijn gewijzigd ${event.data.value[FormeleNaamNL]}.
+
+Het nieuwe e-mailadres is ${event.data.value[E_mailAdres]}.
+
+Heeft u de gegevens niet zelf gewijzigd? Open het portaal voor de financiële gegevensuitwisseling (${event.data.value[ApplicationName]}), wijzig uw wachtwoord en neem contact op met de bevoegde autoriteit.
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

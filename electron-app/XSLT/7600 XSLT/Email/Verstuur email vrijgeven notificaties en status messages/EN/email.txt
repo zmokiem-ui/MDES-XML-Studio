@@ -1,0 +1,22 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+One or more notifications / status messages have been received from ${event.data.value[DoorgeeflandNaam]} concerning your report mentioned below.
+
+Treaty(s): ${event.data.value[Verdrag]}
+
+Case name: ${event.data.value[Dossiernaam]}
+
+
+The notifications are saved in the "Notifications" panel of the corresponding report.
+Click on the button below to review the notification(s).
+
+
+Open portal: ${event.data.value[PortaalNotificatiesLink]}
+
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}

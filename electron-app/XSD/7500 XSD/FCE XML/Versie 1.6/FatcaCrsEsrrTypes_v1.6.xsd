@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2013 sp1 (x64) (http://www.altova.com) by Belastingdienst (Belastingdienst) -->
+<xsd:schema xmlns:sfa_ftc="urn:oecd:ties:fatcacrsesrrtypes:v1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:stf="urn:oecd:ties:stf:v4" xmlns:sfa="urn:oecd:ties:stffatcatypes:v1" xmlns:iso="urn:oecd:ties:isofatcatypes:v1" targetNamespace="urn:oecd:ties:fatcacrsesrrtypes:v1" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.1">
+	<xsd:import namespace="urn:oecd:ties:isofatcatypes:v1" schemaLocation="isofatcatypes_v1.0.xsd"/>
+	<xsd:import namespace="urn:oecd:ties:stffatcatypes:v1" schemaLocation="stffatcatypes_v1.1.xsd"/>
+	<xsd:import namespace="urn:oecd:ties:stf:v4" schemaLocation="oecdtypes_v4.1.xsd"/>
+	<!-- Financial Institution Account Number  -->
+	<xsd:simpleType name="AccountNumberType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Account number type </xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="OECD601"/>
+			<xsd:enumeration value="OECD602"/>
+			<xsd:enumeration value="OECD603"/>
+			<xsd:enumeration value="OECD604"/>
+			<xsd:enumeration value="OECD605"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="AccountNumber_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Account number definition</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="AccNumberType" type="sfa_ftc:AccountNumberType" use="optional"/>
+				<xsd:attribute name="UndocumentedAccount" type="xsd:boolean" use="optional"/>
+				<xsd:attribute name="ClosedAccount" type="xsd:boolean" use="optional"/>
+				<xsd:attribute name="DormantAccount" type="xsd:boolean" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<!-- -->
+	<!-- Benulux Reference Id -->
+	<xsd:simpleType name="DutchKingdomRefId_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">ReferenceID used in the Kingdom of the Netherlands</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="200"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- Countrycodes of the countries within the Kingdom of the Netherlands  -->
+	<xsd:simpleType name="CountryCodeKingdomNetherlands">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Countrycodes of the countries within the Kingdom of the Netherlands</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="AW">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Aruba</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BQ">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Bonaire, Sint Eustasius and Saba</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CW">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Curacao</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="NL">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">The Netherlands</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SX">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Sint Maarten (Dutch part)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- -->
+	<!-- Countrycode of the US  -->
+	<xsd:simpleType name="CountryCodeUS_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Countrycodes of the US</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="US">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">United States</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- -->
+	<!-- Controlling Person Definition  -->
+	<xsd:simpleType name="CrsCtrlgPersonType_EnumType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Controlling Person Definition</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="CRS801"/>
+			<xsd:enumeration value="CRS802"/>
+			<xsd:enumeration value="CRS803"/>
+			<xsd:enumeration value="CRS804"/>
+			<xsd:enumeration value="CRS805"/>
+			<xsd:enumeration value="CRS806"/>
+			<xsd:enumeration value="CRS807"/>
+			<xsd:enumeration value="CRS808"/>
+			<xsd:enumeration value="CRS809"/>
+			<xsd:enumeration value="CRS810"/>
+			<xsd:enumeration value="CRS811"/>
+			<xsd:enumeration value="CRS812"/>
+			<xsd:enumeration value="CRS813"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- -->
+	<!-- Account Holder CRS Type - 1 -->
+	<xsd:simpleType name="AcctHolderTypeCrs_EnumType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">CRS Account Holder Type</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="CRS101">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Passive Non-Financial Entity with one or more controlling person that is a Reportable Person</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS102">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">CRS Reportable Person</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS103">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Passive Non-Financial Entiy that is a CRS Reportable Person</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- -->
+	<!-- Account Holder FATCA Type - 1-->
+	<xsd:simpleType name="AcctHolderTypeFatca_EnumType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">FATCA Account Holder Type</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="FATCA101">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Owner-Documented FI with specified US owner(s)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="FATCA102">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Passive Non-Financial Entity with substantial US owner(s)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="FATCA103">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Non-Participating FI</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="FATCA104">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Specified US Person</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="FATCA105">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Direct Reporting NFFE</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- -->
+	<!-- Pool Reporting for Recalcitrant and Dormant Accounts Type - 2 -->
+	<xsd:simpleType name="FatcaAcctPoolReportType_EnumType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Account Pool Reporting Type</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="FATCA201">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Recalcitrant account holders with US Indicia</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="FATCA202">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Recalcitrant account holders without US Indicia</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="FATCA203">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Dormant accounts</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="FATCA204">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Non-participating foreign financial institutions</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="FATCA205">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Recalcitrant account holders that are US persons</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="FATCA206">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Recalcitrant account holders that are passive NFFEs</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- -->
+	<!-- Document type indicators types -->
+	<xsd:simpleType name="DocTypeIndic_EnumType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">The element applies only to the document part in which it is included. In the case of repeated or corrected data elements CorrMessageRefId and CorrDocRefId must contain the identifiers MessageRefId and DocRefId respectively for the data referred to. In the case of a correction the unchanged elements shall be transmitted again - except for the element DocRefId.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="OECD1">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">New Data</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="OECD2">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Corrected Data</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="OECD3">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Void Data</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="OECD11">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">New Test Data</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="OECD12">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Corrected Test Data</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="OECD13">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Void Test Data</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- -->
+	<!--Payment Type - 5 -->
+	<xsd:simpleType name="PaymentType_EnumType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">The code describing the nature of the payments used in FATCA CRS ESRR
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="CRS501a">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Dividend with FISC153-type payment CX</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS501b">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Dividend with FISC153-type payment C1</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS501c">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Dividend with FISC153-type payment C2</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS502a">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Interest with FISC153-type payment 1</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS502b">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Interest with FISC153-type payment A</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS502c">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Interest with FISC153-type payment E</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS503a">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Gross Proceeds/Redemptions with FISC153-type payment BX</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS503b">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Gross Proceeds/Redemptions with FISC153-type payment B2</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS503c">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Gross Proceeds/Redemptions with FISC153-type payment B1</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS503d">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Gross Proceeds/Redemptions with FISC153-type payment 2</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS503e">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Gross Proceeds/Redemptions with FISC153-type payment D1</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS504a">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Other Income or Reportable Amount with FISC153-type payment DX</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CRS504b">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Other Income or Reportable Amount with FISC153-type payment D2</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- -->
+	<!-- Identifier for a Party -->
+	<xsd:complexType name="TIN_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">This is the identification number/identification code for the party in question. As the identifier may be not strictly numeric, it is just defined as a string of characters. Attribute 'issuedBy' is required to designate the issuer of the identifier. </xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="sfa:String1MinLength_Type">
+				<xsd:attribute name="issuedBy" type="iso:CountryCode_Type" use="required">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en">Country code of issuing country, indicating country of Residence (to taxes and other)</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<!-- -->
+	<!-- Account Holder Type -->
+	<xsd:complexType name="AccountHolder_Type">
+		<xsd:sequence>
+			<xsd:choice>
+				<xsd:element name="Individual" type="sfa_ftc:AccountPersonParty_Type"/>
+				<xsd:sequence>
+					<xsd:element name="Organisation" type="sfa_ftc:AccountholderOrganisationParty_Type"/>
+					<xsd:element name="AcctHolderTypeCRS" type="sfa_ftc:AcctHolderTypeCrs_EnumType" minOccurs="0"/>
+					<xsd:element name="AcctHolderTypeFATCA" type="sfa_ftc:AcctHolderTypeFatca_EnumType" minOccurs="0"/>
+				</xsd:sequence>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- -->
+	<!-- Collection of all Data describing an organisationy for an accountholder as party-->
+	<xsd:complexType name="AccountholderOrganisationParty_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+This container brings together all data about an organisation for an accountholder as a party. Name and address are required components and each can
+be present more than once to enable as complete a description as possible. Whenever possible one or more identifiers (TIN
+etc) should be added and at least one residence country code is mandatory. Additional data that describes and identifies the party can be
+given . The code for the legal type according to the OECD codelist must be added. The structures of
+all of the subelements are defined elsewhere in this schema.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ResCountryCode" type="iso:CountryCode_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Recalcitrant" type="xsd:boolean"/>
+			<xsd:element name="IngehoudenBronbelasting" type="xsd:boolean"/>
+			<xsd:element name="TIN" type="sfa_ftc:TIN_Type" minOccurs="0" maxOccurs="unbounded">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Tax Identification number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Name" type="sfa:NameOrganisation_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Address" type="sfa:Address_Type" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- Correctable Account Report -->
+	<xsd:complexType name="CorrectableAccountReport_Type">
+		<xsd:sequence>
+			<xsd:element name="DocSpec" type="sfa_ftc:DocSpec_Type"/>
+			<xsd:element name="AccountNumber" type="sfa_ftc:AccountNumber_Type"/>
+			<xsd:element name="AccountHolder" type="sfa_ftc:AccountHolder_Type"/>
+			<xsd:element name="SubstantialOwner" type="sfa_ftc:SubstantionalOwnerParty_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="ControllingPerson" type="sfa_ftc:ControllingPerson_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="AccountBalance" type="sfa:MonAmnt_Type"/>
+			<xsd:element name="Payment" type="sfa_ftc:Payment_Type" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- -->
+	<!-- Correctable Organisation-->
+	<xsd:complexType name="CorrectableOrganisationParty_Type">
+		<xsd:complexContent>
+			<xsd:extension base="sfa_ftc:OrganisationParty_Type">
+				<xsd:sequence>
+					<xsd:element name="DocSpec" type="sfa_ftc:DocSpec_Type"/>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<!-- -->
+	<!-- Correctable Pool Report -->
+	<xsd:complexType name="CorrectablePoolReport_Type">
+		<xsd:sequence>
+			<xsd:element name="DocSpec" type="sfa_ftc:DocSpec_Type"/>
+			<xsd:element name="AccountCount" type="xsd:integer"/>
+			<xsd:element name="AccountPoolReportType" type="sfa_ftc:FatcaAcctPoolReportType_EnumType"/>
+			<xsd:element name="PoolBalance" type="sfa:MonAmnt_Type" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- -->
+	<!--  Controlling Person data concerning CRS data exchange -->
+	<xsd:complexType name="ControllingPerson_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Provide the name of any Controlling Person of a Passive NFE that is a Reportable Person. Mandatory only if the entity Account Holder is a Passive NFE with one or more Controlling Persons who are Reportable Persons. If the Passive NFE has more than one Controlling Person that is a Reportable Person, then the name of all such Reportable Persons must be reported.	</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="Individual" type="sfa_ftc:PersonParty_Type"/>
+			<xsd:element name="CtrlgPersonType" type="sfa_ftc:CrsCtrlgPersonType_EnumType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- -->
+	<!-- Document specification: Data identifying and describing the document -->
+	<xsd:complexType name="DocSpec_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Document specification: Data identifying and describing the document, where
+'document' here means the part of a message that is to transmit the data about a single block of FATCA information. </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="DocTypeIndic" type="sfa_ftc:DocTypeIndic_EnumType"/>
+			<xsd:element name="DocRefId" type="sfa_ftc:DutchKingdomRefId_Type">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Sender's unique identifier of this document </xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="CorrDocRefId" type="sfa_ftc:DutchKingdomRefId_Type" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Reference id of the document referred to if this is correction</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- -->
+	<!-- FATCA Type - FATCA Report  -->
+	<xsd:complexType name="Fatca_Crs_Esrr_Type">
+		<xsd:sequence>
+			<xsd:element name="ReportingFI" type="sfa_ftc:CorrectableOrganisationParty_Type">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Reporting financial institution</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ReportingGroup" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Group that wraps the details for a financial institution FATCA, CRS and ESRR report</xsd:documentation>
+				</xsd:annotation>
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Sponsor" type="sfa_ftc:CorrectableOrganisationParty_Type" minOccurs="0"/>
+						<xsd:element name="AccountReport" type="sfa_ftc:CorrectableAccountReport_Type" maxOccurs="unbounded"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- -->
+	<!-- Message specification: Data identifying and describing the message as a whole -->
+	<xsd:complexType name="MessageSpec_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Information in the message header identifies the Financial Institution (FI) or Tax Administration that is sending the message.  It specifies when the message was created, what calendar year the report is for, and the nature of the report (original, corrected, supplemental, etc).</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="SendingCompanyIN" type="xsd:string"/>
+			<xsd:element name="TransmittingCountry" type="sfa_ftc:CountryCodeKingdomNetherlands"/>
+			<xsd:element name="ReceivingCountry" type="sfa_ftc:CountryCodeKingdomNetherlands"/>
+			<xsd:element name="MessageType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="FATCA-CRS-ESRR"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="Warning" type="xsd:string" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Free text expressing the restrictions for use of the information this
+message contains and the legal framework under which it is given</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Contact" type="xsd:string" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">All necessary contact information about persons responsible for and
+involved in the processing of the data transmitted in this message, both legally and technically. Free text as this is not
+intended for automatic processing. </xsd:documentation>
+				</xsd:annotation>
+				<!-- changed to optional -->
+			</xsd:element>
+			<xsd:element name="MessageRefId" type="sfa_ftc:DutchKingdomRefId_Type">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Sender's unique identifier for this message</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="MessageTypeIndic">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">MessageType (New, Correction or Empty)</xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="CRS701"/>
+						<xsd:enumeration value="CRS702"/>
+						<xsd:enumeration value="CRS703"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:element name="CorrMessageRefId" type="sfa_ftc:DutchKingdomRefId_Type" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Sender's unique identifier that has to be corrected.  Can point to 1 previous message</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ReportingPeriod" type="xsd:date">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">The reporting year for which information is transmitted in documents of the current message.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Timestamp" type="xsd:dateTime"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- -->
+	<!-- Collection of all Data describing an organisationy  as party-->
+	<xsd:complexType name="OrganisationParty_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+This container brings together all data about an organisation as a party. Name and address are required components and each can
+be present more than once to enable as complete a description as possible. Whenever possible one or more identifiers (TIN
+etc) should be added as well as a residence country code. Additional data that describes and identifies the party can be
+given . The code for the legal type according to the OECD codelist must be added. The structures of
+all of the subelements are defined elsewhere in this schema.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ResCountryCode" type="iso:CountryCode_Type"/>
+			<xsd:element name="TIN" type="sfa_ftc:TIN_Type" minOccurs="0" maxOccurs="unbounded">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Tax Identification number</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Name" type="sfa:NameOrganisation_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Address" type="sfa:Address_Type" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- Payment   -->
+	<xsd:complexType name="Payment_Type">
+		<xsd:sequence>
+			<xsd:element name="Type" type="sfa_ftc:PaymentType_EnumType">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Type of payment (interest, dividend,...)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="PaymentAmnt" type="sfa:MonAmnt_Type">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">The amount of payment</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- -->
+	<!-- Collection of all Data describing a person as a  Party -->
+	<xsd:complexType name="PersonParty_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+This container brings together all data about a person as a party. Name and address are required components and each can
+be present more than once to enable as complete a description as possible. Whenever possible one or more identifiers (TIN
+etc) should be added and at least one residence country code is mandatory. Additional data that describes and identifies the party can be
+given. The code for the legal type according to the OECD codelist must be added. The structures of
+all of the subelements are defined elsewhere in this schema.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ResCountryCode" type="iso:CountryCode_Type" maxOccurs="unbounded"/>
+			<xsd:element name="TIN" type="sfa_ftc:TIN_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="Name" type="sfa:NamePerson_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Address" type="sfa:Address_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Nationality" type="iso:CountryCode_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="BirthInfo" minOccurs="0">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="BirthDate" type="xsd:date" minOccurs="0"/>
+						<xsd:element name="City" type="xsd:string" minOccurs="0"/>
+						<xsd:element name="CitySubentity" type="xsd:string" minOccurs="0"/>
+						<xsd:element name="CountryInfo" minOccurs="0">
+							<xsd:complexType>
+								<xsd:choice>
+									<xsd:element name="CountryCode" type="iso:CountryCode_Type"/>
+									<xsd:element name="FormerCountryName" type="xsd:string"/>
+								</xsd:choice>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- Collection of all Data describing a person as a  Party of Accountholder -->
+	<xsd:complexType name="AccountPersonParty_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+This container brings together all data about a person as a party. Name and address are required components and each can
+be present more than once to enable as complete a description as possible. Whenever possible one or more identifiers (TIN
+etc) should be added and at least one residence country code is mandatory. Additional data that describes and identifies the party can be
+given. The code for the legal type according to the OECD codelist must be added. The structures of
+all of the subelements are defined elsewhere in this schema.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ResCountryCode" type="iso:CountryCode_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Recalcitrant" type="xsd:boolean"/>
+			<xsd:element name="IngehoudenBronbelasting" type="xsd:boolean"/>
+			<xsd:element name="TIN" type="sfa_ftc:TIN_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="Name" type="sfa:NamePerson_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Address" type="sfa:Address_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Nationality" type="iso:CountryCode_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="BirthInfo" minOccurs="0">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="BirthDate" type="xsd:date" minOccurs="0"/>
+						<xsd:element name="City" type="xsd:string" minOccurs="0"/>
+						<xsd:element name="CitySubentity" type="xsd:string" minOccurs="0"/>
+						<xsd:element name="CountryInfo" minOccurs="0">
+							<xsd:complexType>
+								<xsd:choice>
+									<xsd:element name="CountryCode" type="iso:CountryCode_Type"/>
+									<xsd:element name="FormerCountryName" type="xsd:string"/>
+								</xsd:choice>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- Collection of all Data describing the substantional owner as a  Party -->
+	<xsd:complexType name="SubstantionalOwnerParty_Type">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+This container brings together all data about a person as a party. Name and address are required components and each can
+be present more than once to enable as complete a description as possible. Whenever possible one or more identifiers (TIN
+etc) should be added and the residence country code is always US. Additional data that describes and identifies the party can be
+given. The code for the legal type according to the OECD codelist must be added. The structures of
+all of the subelements are defined elsewhere in this schema.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ResCountryCode" type="sfa_ftc:CountryCodeUS_Type"/>
+			<xsd:element name="TIN" type="sfa_ftc:TIN_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="Name" type="sfa:NamePerson_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Address" type="sfa:Address_Type" maxOccurs="unbounded"/>
+			<xsd:element name="Nationality" type="iso:CountryCode_Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="BirthInfo" minOccurs="0">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="BirthDate" type="xsd:date" minOccurs="0"/>
+						<xsd:element name="City" type="xsd:string" minOccurs="0"/>
+						<xsd:element name="CitySubentity" type="xsd:string" minOccurs="0"/>
+						<xsd:element name="CountryInfo" minOccurs="0">
+							<xsd:complexType>
+								<xsd:choice>
+									<xsd:element name="CountryCode" type="iso:CountryCode_Type"/>
+									<xsd:element name="FormerCountryName" type="xsd:string"/>
+								</xsd:choice>
+							</xsd:complexType>
+						</xsd:element>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- -->
+</xsd:schema>

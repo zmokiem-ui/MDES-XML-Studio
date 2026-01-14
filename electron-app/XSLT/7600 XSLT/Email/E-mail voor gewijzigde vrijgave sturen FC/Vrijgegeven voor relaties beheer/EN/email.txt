@@ -1,0 +1,13 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+The online portal for the ${event.data.value[ApplicationNameExtended]} is now available to manage EOI relations. You can now change your EOI relations yourself.
+
+You can also test your report (check XML files).
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

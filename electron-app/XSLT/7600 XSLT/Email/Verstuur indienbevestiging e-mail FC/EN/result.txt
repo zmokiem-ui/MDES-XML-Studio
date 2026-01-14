@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>Preparation of files is complete</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><style type="text/css">body {font-family: Verdana, Arial, sans-serif;font-size: 10pt;padding: 0;margin: 0;}.main-content {width: 100%;border: none;font-size: 10pt;}.main-content td {margin: 0;}.col1 {min-width: 55px;padding: 0;}.col2 {padding: 15px;}.col3 {padding: 0;}.header td {height: 70px;}.spacing td {height: 20px}.spacing .col2 {padding: 0;}.title {color: #002c59;font-size: 14pt;font-weight: 500;padding:15px;}.text-highlight {background-color: #f8f8f8;padding:15px;}.buttonlink {text-align: center;margin: 20px 0;}.buttonlink a {text-decoration: none;background-color: #ffdd00;color: #FFFFFF;font-weight: 500;font-size: 14px;border-left: 40px solid #ffdd00;border-right: 40px solid #ffdd00;border-top: 10px solid #ffdd00;border-bottom: 10px solid #ffdd00;}.highlight {font-weight: bold;}.footer {background-color: #0022c59;color: #FFFFFF!important;}.footertext {color: #FFFFFF!important;}.footer .col1,.footer .col3 {padding: 15px;}</style></head><body><table class="main-content" cellspacing="0"><tr class="header" xmlns:exsl="http://exslt.org/common"><td width="55" class="logo"><img>        </img></td><td class="title">Preparation of files is complete</td><td width="55" class="col3"/></tr><tr class="spacing" xmlns:exsl="http://exslt.org/common"><td width="55" class="col1"/><td class="col2"/><td width="55" class="col3"/></tr><tr xmlns:exsl="http://exslt.org/common"><td width="55" class="col1"/><td class="text-highlight"><p>Dear  a,</p><p>The process of preparing the delivery files is completed.</p><p>Treaty:<span class="highlight">a</span></p><br/><p>Jurisdiction:<span class="highlight">a (
+        			)</span><br/>Report(s) type:<span class="highlight">areport(s)</span></p><br/><p>Open the portal and review the result of this process.</p><p class="buttonlink"><a href="a">Open portal  
+					       
+        		</a></p><p>When this process is completed successfully, the encrypted files are saved in the 'Documents' panel.</p></td><td width="55" class="col3"/></tr><tr valign="top"><td width="55" class="col1"/><td class="col2"><p><br/>This message was created automatically and is therefore not signed.</p><p><br/></p></td><td width="55" class="col3"/></tr><tr valign="top" class="footer"><td width="55" class="col1"/><td class="col2"><div align="center"><p><strong>    Ghana Revenue Authority</strong><br/><span>    Off Starletsâ&#128;&#153; 91 Road, near Accra Sports Stadium</span></p><p><strong>    &lt;a href="mailto:info@gra.gov.gh "&gt;info@gra.gov.gh&lt;/a&gt;</strong></p><p>    &lt;a href="http://www.gra.gov.gh"&gt;www.gra.gov.gh&lt;/a&gt;<br/><a href="$">    http://localhost:18080/BeInformed/</a></p></div></td><td width="55" class="col3"/></tr></table></body></html>
+                                                                      
+
+-----------------------
+
+Preparation of files is complete
+      Dear  
+      a
+      The process of preparing the delivery files is completed.
+      Treaty:
+      a
+      Jurisdiction:
+      a
+      
+      Report(s) type:
+      a
+      report(s)
+      Open the portal and review the result of this process.
+      
+      Open portal
+      When this process is completed successfully, the encrypted files are saved in the 'Documents' panel.

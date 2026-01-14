@@ -1,0 +1,26 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Uw levering van financiële gegevens is ingediend bij de bevoegde autoriteit en klaargezet voor doorgeven.
+
+Datum ingediend: ${event.data.value[DatumIngediendFormaat]}
+
+Type levering: ${event.data.value[TypeLeveringLabelNL]}
+Belastingjaar: ${event.data.value[Belastingjaar]}
+
+
+De ingediende gegevens zullen door de bevoegde autoriteit doorgegeven worden naar de desbetreffende jurisdictie(s). U ontvangt per e-mail bericht wanneer uw gegevens door de bevoegde autoriteit zijn doorgegeven.
+
+Ingesloten vindt u een PDF kopie van dit bericht. Log in om deze levering en de daarin opgenomen EOI relaties en doorgeeflanden (jurisdicties) te bekijken.
+
+Open portaal: ${event.data.value[PortaalBaseURL]}
+
+Belangrijk: Indien u deze levering niet hebt ingediend, neem dan zo snel als mogelijk contact op met de belastingdienst.
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

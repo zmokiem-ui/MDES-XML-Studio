@@ -1,0 +1,22 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+Se ha recibido una notificación destinada a su administrador de intercambio de los datos dentro de siguiente tratado/jurisdicción:
+
+Jurisdicción: ${event.data.value[Verdrag]}
+
+Recibido de: ${event.data.value[DoorgeeflandNaam]} (${event.data.value[DoorgeeflandCode]})
+Resultado de validación estatus: ${event.data.value[ValidationResultStatus]}
+
+
+El descifrado notificaciones documento es guardado en el tablero de los documentos.
+Abra el portal para ver el (los) notificación informe(s). 
+
+Abra portal: ${event.data.value[PortaalBaseURL]}
+
+Este mensaje es fabricado en un proceso automatizado y por eso no firmado.
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

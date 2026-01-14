@@ -1,0 +1,20 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+You have submitted a request to use the online portal for the exchange of financial information (${event.data.value[ApplicationName]})
+
+Click on the button below to confirm this request.
+
+Click here to confirm your request: ${event.data.value[Activatielink]}
+
+If the link does not work, you can confirm the request on the login screen/box of this portal, your activation code is: ${event.data.value[Activeringscode]}
+
+Important: In case you did not submit this request yourself, please contact the competent authority as soon as possible. This activation code is valid for 24 hours.
+
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailFooterText3]}
+${event.data.value[mailFooterText4]}
+${event.data.value[PortaalBaseURL]}

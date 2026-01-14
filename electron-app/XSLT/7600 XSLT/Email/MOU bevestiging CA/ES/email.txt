@@ -1,0 +1,20 @@
+Sujeto : Confirma su solicitud
+
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+Usted ha presentado una solicitud para el uso del portal en línea por el intercambio de datos financieros ( ${event.data.value[ApplicationName]}).
+
+Haga clic aquí para confirmar su solicitud: ${event.data.value[Activatielink]}
+
+Si el enlace arriba no funciona, puede confirmar su solicitud a través de la pantalla de inicio de sesión, su código de activación es: ${event.data.value[Activeringscode]}
+
+Importante: Si Usted no presentó esta solicitud, póngase en contacto con las autoridades fiscales. Este enlace de activación es válido 24 horas. 
+
+
+Este mensaje es fabricado en un proceso automatizado y por eso no firmado.
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailFooterText3]}
+${event.data.value[mailFooterText4]}
+${event.data.value[PortaalBaseURL]}

@@ -1,0 +1,15 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+Your account details have been changed ${event.data.value[FormeleNaamENG]}.
+
+The new e-mail address is ${event.data.value[E_mailAdres]}.
+
+In case you did not make these changes, open the online portal for the exchange of financial information (${event.data.value[ApplicationName]}), change your password and contact the competent authority.
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

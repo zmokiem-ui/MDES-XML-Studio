@@ -1,0 +1,178 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>${event.data.value[Onderwerp]}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style type="text/css">
+      body {
+      	font-family: Verdana,Arial,sans-serif;
+      	font-size: 10pt;
+      	padding: 0;
+      	margin:0;
+      }
+
+      .main-content {
+      	width: 100%;
+      	border: none;
+      	font-size: 10pt;
+      }
+
+      .main-content td {
+      	margin:0;
+      }
+
+      .col1 {
+      	min-width: 55px;
+      	padding: 0;
+      }
+
+      .col2 {
+      	padding: 15px;
+      }
+
+      .col3 {
+      	padding: 0;
+      }
+
+      .header td {
+      	height: 70px;
+      }
+
+      .spacing td {
+      	height: 20px
+      }
+
+      .spacing .col2 {
+      	padding: 0;
+      }
+
+      .title {
+      	color: #${event.data.value[mailTitleColor]};
+      	font-size: 14pt;
+      	font-weight: 500;
+      	padding:15px;
+      }
+
+      .text-highlight {
+      	background-color: #${event.data.value[mailBodyBG]};
+      	padding:15px;
+      }
+
+      .buttonlink {
+      	text-align:center;
+      	margin: 20px 0;
+      }
+
+      .buttonlink a {
+      	text-decoration: none;
+      	background-color: #${event.data.value[mailButtonColor]};
+      	color: #FFFFFF;
+      	font-weight: 500;
+      	font-size: 14px;
+      	border-left: 40px solid #${event.data.value[mailButtonColor]};
+      	border-right: 40px solid #${event.data.value[mailButtonColor]};
+      	border-top: 10px solid #${event.data.value[mailButtonColor]};
+      	border-bottom: 10px solid #${event.data.value[mailButtonColor]};
+      }
+
+      .highlight {
+      	font-weight: bold;
+      }
+
+      .footer {
+      	background-color: #${event.data.value[mailFooterBG]};
+      	color: #${event.data.value[mailFooterFontColor]} !important;
+      }
+
+      .footertext{
+      	color: #${event.data.value[mailFooterFontColor]} !important;
+      }
+
+      .footer .col1,.footer .col3 {
+      	padding: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <table class="main-content" cellspacing="0">
+      <tr class="header">
+        <td width="55" class="logo">
+          <img
+            src="${event.data.value[LogoURL]}"
+            alt="${event.data.value[mailTextLogo]}"
+          />
+        </td>
+        <td class="title">
+          Portaal vrijgegeven voor relaties beheer
+        </td>
+        <td width="55" class="col3">&#32;</td>
+      </tr>
+      <tr class="spacing">
+        <td width="55" class="col1">&#32;</td>
+        <td class="col2">&#32;</td>
+        <td width="55" class="col3">&#32;</td>
+      </tr>
+      <tr>
+        <td width="55" class="col1">&#32;</td>
+        <td class="text-highlight">
+          <p>Beste ${event.data.value[NaamContactpersoon]},</p>
+          <p>
+            Het online portaal voor de
+            ${event.data.value[ApplicationNameExtended]} is vanaf nu vrijgegeven
+            voor het beheren van relaties. U kunt nu zelf uw EOI relaties
+            instellen.
+          </p>
+          <p>U kunt tevens leveringen testen (XML-bestanden controleren).</p>
+          <p class="buttonlink">
+            <a href="${event.data.value[PortaalLoginLink]}"
+              >&#32;&#32;&#32;&#32;&#32;&#32;Open
+              portaal&#32;&#32;&#32;&#32;&#32;&#32;&#160;</a
+            >
+          </p>
+        </td>
+        <td width="55" class="col3">&#32;</td>
+      </tr>
+      <tr valign="top">
+        <td width="55" class="col1">&#32;</td>
+        <td class="col2">
+          <p>
+            <br />
+
+            ${event.data.value[mailSignatureNL]}
+          </p>
+          <p><br /></p>
+        </td>
+        <td width="55" class="col3">&#32;</td>
+      </tr>
+      <tr valign="top" class="footer">
+        <td width="55" class="col1">&#32;</td>
+        <td class="col2">
+          <div align="center">
+            <p>
+              <strong style="color:#${event.data.value[mailFooterFontColor]}"
+                >${event.data.value[mailFooterText1]}</strong
+              ><br />
+              <span style="color:#${event.data.value[mailFooterFontColor]}"
+                >${event.data.value[mailFooterText2]}</span
+              >
+            </p>
+            <p>
+              <strong style="color:#${event.data.value[mailFooterFontColor]}"
+                >${event.data.value[mailFooterText3]}</strong
+              >
+            </p>
+            <p style="color:#${event.data.value[mailFooterFontColor]}">
+              ${event.data.value[mailFooterText4]}<br />
+              <a
+                style="color:#${event.data.value[mailFooterFontColor]}"
+                href="${event.data.value[PortaalBaseURL]}"
+                >${event.data.value[PortaalBaseURL]}</a
+              >
+            </p>
+          </div>
+        </td>
+        <td width="55" class="col3">&#32;</td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+Se ha recibido una notificacion destinado a su administrador de intercambio de los datos dentro de siguiente tratado/jurisdiccion:
+
+Jurisdiccion: ${event.data.value[Verdrag]}
+
+Recibido de: ${event.data.value[DoorgeeflandNaam]} (${event.data.value[DoorgeeflandCode]})
+Tipo de notificacion: ${event.data.value[TypeNotificatie]}
+
+Accion antes de fecha limite: ${event.data.value[Deadline]}
+
+El descifrado notificaciones documento es guardado en el tablero de documentos.
+Abra el portal para ver el (los) notificacion informe(s). 
+
+Abre portal: ${event.data.value[PortaalBaseURL]}
+
+Este mensaje es fabricado en un proceso automatizado y por eso no firmado.
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

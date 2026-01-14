@@ -1,0 +1,27 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Uw levering van financiële gegevens is door de bevoegde autoriteit bezorgd.
+
+Verdrag: ${event.data.value[VerdragenLabels]}
+
+Jurisdictie: ${event.data.value[DoorgeeflandNaam]} (${event.data.value[DoorgeeflandCode]})
+Datum bezorging: ${event.data.value[DatumBezorgdFormaat]}
+
+Type levering: ${event.data.value[TypeLeveringLabelNL]}
+Belastingjaar: ${event.data.value[Belastingjaar]}
+
+
+Ingesloten vindt u een PDF kopie van dit bericht. Log in om deze levering en de daarin opgenomen EOI relaties en doorgeeflanden (jurisdicties) te bekijken.
+
+Open portaal: ${event.data.value[PortaalBaseURL]}
+
+Belangrijk: Indien u deze levering niet hebt ingediend, neem dan zo snel als mogelijk contact op met de belastingdienst.
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

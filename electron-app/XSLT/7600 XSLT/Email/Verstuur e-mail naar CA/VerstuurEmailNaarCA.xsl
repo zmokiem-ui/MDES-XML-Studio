@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- XML-base template -->
+
+<xsl:stylesheet version="1.0" 
+				xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+				xmlns:html="http://www.w3.org/1999/xhtml"  
+				xmlns:bi="http://www.be-informed.nl/BeInformed" 
+				xmlns:knowledge="http://www.be-informed.nl/BeInformed/Knowledge" 
+				xmlns:cmf="http://www.be-informed.nl/BeInformed/CMF" 
+				xmlns:case="http://www.be-informed.nl/BeInformed/Case" 
+				xmlns:form="http://www.be-informed.nl/BeInformed/Form" 
+				xmlns:report="http://www.be-informed.nl/BeInformed/Report" 
+				xmlns:search="http://www.be-informed.nl/BeInformed/Search" 
+				xmlns:assistant="http://www.be-informed.nl/BeInformed/Assistant" 
+				xmlns:today="http://www.be-informed.nl/BeInformed/Today" 
+				xmlns:dataeditor="http://www.be-informed.nl/BeInformed/DataEditor" 
+				xmlns:attributes="http://www.be-informed.nl/BeInformed/Attributes" 
+				xmlns:usermanagement="http://www.be-informed.nl/BeInformed/UserManagement" 
+				xmlns:subscriptionmanagement="http://www.be-informed.nl/BeInformed/SubscriptionManagement" 
+				xmlns:organisationmanagement="http://www.be-informed.nl/BeInformed/OrganisationManagement" 
+				xmlns:serviceapplication="http://www.be-informed.nl/BeInformed/ServiceApplication"
+				xmlns:cas="http://schemas.beinformed.nl/beinformed/v3/services/caseservice"
+			    xmlns:attachment="http://schemas.beinformed.nl/beinformed/v3/services/caseservice/attachments"
+			    xmlns:xop="http://www.w3.org/2004/08/xop/include" 
+			    xmlns:exsl="http://exslt.org/common"
+				exclude-result-prefixes="attachment html xop cas bi knowledge cmf case form report search assistant today dataeditor attributes usermanagement subscriptionmanagement organisationmanagement serviceapplication">
+	<xsl:output method="xml"/> 
+    
+    <xsl:template match="*[//cas:property[cas:key='MailIdentifier']/cas:value='VerstuurEmailNaarCA']" mode="content">
+        <tr class="header">
+        <td width="55" class="logo">
+          <img>
+            <xsl:apply-templates mode="LogoURL" />
+            <xsl:apply-templates mode="mailTextLogo" />
+</img>
+        </td>
+         <td class="title">
+          <xsl:apply-templates select="//cas:property[cas:key='Verdrag']/cas:value" /> - Administrative user of reporting entity <xsl:apply-templates select="//cas:property[cas:key='TIN']/cas:value" /> has been updated
+        </td>
+        <td width="55" class="col3">&#32;</td>
+      </tr>
+      <tr class="spacing">
+        <td width="55" class="col1">&#32;</td>
+        <td class="col2">&#32;</td>
+        <td width="55" class="col3">&#32;</td>
+      </tr>
+      <tr>
+        <td width="55" class="col1">&#32;</td>
+        <td class="text-highlight">
+          <p>
+          <xsl:apply-templates select="//VerstuurEmailNaarCA.Aanhef"/>
+          </p>
+          <p>
+          <xsl:apply-templates select="//VerstuurEmailNaarCA.AdministratiefGebruik"/>
+            
+            <xsl:apply-templates  select="//cas:property[cas:key='TIN']/cas:value" />
+             <xsl:apply-templates select="//VerstuurEmailNaarCA.HasBeenUpdated"/>
+          </p>
+          <p>
+            <xsl:apply-templates select="//VerstuurEmailNaarCA.DetailsOfAdministrator"/> <xsl:apply-templates  select="//cas:property[cas:key='Voornaam']/cas:value" />
+            <xsl:apply-templates  select="//cas:property[cas:key='Achternaam']/cas:value" />, <xsl:apply-templates  select="//cas:property[cas:key='Telefoon']/cas:value" />,
+            <xsl:apply-templates  select="//cas:property[cas:key='E_mailAdres']/cas:value" />.
+          </p>
+          <p>
+            <xsl:apply-templates select="//VerstuurEmailNaarCA.DetailsOfNewAdministrator"/>
+            <xsl:apply-templates  select="//cas:property[cas:key='VoornaamRegisteredUser']/cas:value" />
+            <xsl:apply-templates  select="//cas:property[cas:key='AchternaamRegisteredUser']/cas:value" />,
+            <xsl:apply-templates  select="//cas:property[cas:key='TelefoonRegisteredUser']/cas:value" />,
+            <xsl:apply-templates  select="//cas:property[cas:key='E_mailAdresRegisteredUser']/cas:value" />
+          </p>
+          <p>
+          <xsl:apply-templates select="//VerstuurEmailNaarCA.ConfirmIdentity"/>
+            <br />
+            <xsl:apply-templates select="//VerstuurEmailNaarCA.KlikOpKnop"/>
+            
+          </p>
+          <p class="buttonlink">
+            <a>
+              <xsl:attribute name="href"><xsl:apply-templates select="//cas:property[cas:key='PortaalNotificatiesLink']/cas:value"/></xsl:attribute>
+              &#32;&#32;&#32;&#32;&#32;&#32;
+              <xsl:apply-templates select="//VerstuurEmailNaarCA.OpenPortaal"/>
+              &#32;&#32;&#32;&#32;&#32;&#32;&#160;</a
+            >
+          </p>
+        </td>
+        <td width="55" class="col3">&#32;</td>
+      </tr>
+    </xsl:template>
+
+    <xsl:template match="*[//cas:property[cas:key='MailIdentifier']/cas:value='VerstuurEmailNaarCA']" mode="plaintext">
+
+
+<xsl:apply-templates select="//cas:property[cas:key='Verdrag']/cas:value" />
+<xsl:text xml:space="preserve"> - Administrative user of reporting entity </xsl:text>
+<xsl:apply-templates select="//cas:property[cas:key='TIN']/cas:value" />
+<xsl:text xml:space="preserve"> has been updated
+      </xsl:text>
+<xsl:apply-templates select="//VerstuurEmailNaarCA.Aanhef"/>
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates select="//VerstuurEmailNaarCA.AdministratiefGebruik"/>
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates  select="//cas:property[cas:key='TIN']/cas:value" />
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates select="//VerstuurEmailNaarCA.HasBeenUpdated"/>
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates select="//VerstuurEmailNaarCA.DetailsOfAdministrator"/> 
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates  select="//cas:property[cas:key='Voornaam']/cas:value" />
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates  select="//cas:property[cas:key='Achternaam']/cas:value" /> 
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates  select="//cas:property[cas:key='Telefoon']/cas:value" />
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates  select="//cas:property[cas:key='E_mailAdres']/cas:value" />
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates select="//VerstuurEmailNaarCA.DetailsOfNewAdministrator"/>
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates  select="//cas:property[cas:key='VoornaamRegisteredUser']/cas:value" />
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates  select="//cas:property[cas:key='AchternaamRegisteredUser']/cas:value" />
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates  select="//cas:property[cas:key='TelefoonRegisteredUser']/cas:value" />
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates  select="//cas:property[cas:key='E_mailAdresRegisteredUser']/cas:value" />
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates select="//VerstuurEmailNaarCA.ConfirmIdentity"/>
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates select="//VerstuurEmailNaarCA.KlikOpKnop"/>
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:attribute name="href"><xsl:apply-templates select="//cas:property[cas:key='PortaalNotificatiesLink']/cas:value"/></xsl:attribute>
+<xsl:text xml:space="preserve">
+      </xsl:text>
+<xsl:apply-templates select="//VerstuurEmailNaarCA.OpenPortaal"/>
+
+</xsl:template>
+    </xsl:stylesheet>

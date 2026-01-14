@@ -1,0 +1,13 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Het online portaal voor de ${event.data.value[ApplicationNameExtended]} is vanaf nu vrijgegeven voor het beheren van relaties. U kunt nu zelf uw EOI relaties instellen.
+
+U kunt tevens leveringen testen (XML-bestanden controleren). 
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

@@ -1,0 +1,16 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+Se ha modificado el correo electrónico de su cuenta: ${event.data.value[FormeleNaamES]}.
+
+El nuevo correo electrónico es: ${event.data.value[E_mailAdres]}.
+
+¿Usted no cambió los datos de su correo electrónico? 
+Abra el portal para el intercambio de datos financieros (${event.data.value[ApplicationName]}), cambie su contraseña y póngase en contacto con nuestra central de servicios(indicar número de contacto).
+
+${event.data.value[mailSignatureES]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

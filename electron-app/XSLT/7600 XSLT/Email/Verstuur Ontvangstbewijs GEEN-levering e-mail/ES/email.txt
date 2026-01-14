@@ -1,0 +1,21 @@
+Estimado/a  ${event.data.value[NaamContactpersoon]},
+
+Ha informado que no tiene datos que reportar para el año tributario ${event.data.value[Belastingjaar]}.
+
+Fecha de entrega: ${event.data.value[DatumIngediendFormaat]}
+Año tributario:  ${event.data.value[Belastingjaar]}
+
+Adjunta encontrará una constancia en formato PDF. Inicie sesión para ver esta entrega y las Relaciones EOI incluidas.
+
+Abrir portal: ${event.data.value[PortaalBaseURL]}
+
+Importante: Si no ha entregado esta entrega, póngase directamente en contacto con la autoridad competente.
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

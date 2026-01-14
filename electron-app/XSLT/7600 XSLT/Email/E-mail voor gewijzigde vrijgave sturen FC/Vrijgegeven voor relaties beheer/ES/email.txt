@@ -1,0 +1,12 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+El portal ${event.data.value[ApplicationNameExtended]} está disponible desde ahora validar la entrega de reportes de tipo CbC (archivos XML) 
+
+
+${event.data.value[mailSignatureES]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

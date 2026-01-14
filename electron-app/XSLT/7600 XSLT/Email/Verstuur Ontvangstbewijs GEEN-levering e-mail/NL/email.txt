@@ -1,0 +1,21 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+U hebt aangegeven geen gegevens te hebben om te leveren over het belastingjaar ${event.data.value[Belastingjaar]}.
+
+Datum ingediend: ${event.data.value[DatumIngediendFormaat]}
+Belastingjaar: ${event.data.value[Belastingjaar]}
+
+Ingesloten vindt u een PDF kopie van dit bericht. Log in om deze levering en de daarin opgenomen EOI relaties te bekijken.
+
+Open portaal: ${event.data.value[PortaalBaseURL]}
+
+Belangrijk: Indien u deze levering niet hebt ingediend, neem dan zo snel als mogelijk contact op met de belastingdienst.
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

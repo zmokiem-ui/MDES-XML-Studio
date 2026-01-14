@@ -1,0 +1,20 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+U hebt een aanvraag voor het gebruik van het online portaal voor de financiële gegevens uitwisseling ( ${event.data.value[ApplicationName]}) ingediend.
+
+Klik op de onderstaande knop om deze te bevestigen.
+
+Klik hier om uw aanvraag te bevestigen: ${event.data.value[Activatielink]}
+
+Indien de bovenstaande link niet werkt, kunt u de aanvraag bevestigen via het inloggen scherm van dit portaal, uw activeringscode is: ${event.data.value[Activeringscode]}
+
+Belangrijk: Indien u deze aanvraag niet hebt ingediend,neem dan zo snel als mogelijk contact op met de belastingdienst. Deze activeringslink is 24 uur geldig.
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailFooterText3]}
+${event.data.value[mailFooterText4]}
+${event.data.value[PortaalBaseURL]}

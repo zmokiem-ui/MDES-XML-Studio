@@ -1,0 +1,22 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+A delivery has been received from ${event.data.value[DoorgeeflandNaam]} which contains one or more errors. A status message dossier had been created. In this dossier you can view the errors and download the status message report.
+
+Treaty(s): ${event.data.value[Verdrag]}
+
+Case name: ${event.data.value[Dossiernaam]}
+
+
+The files are saved in the "Document" panel.
+Click on the button below to review the dossier.
+
+
+Open portal: ${event.data.value[PortaalNotificatiesLink]}
+
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}

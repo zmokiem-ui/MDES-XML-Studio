@@ -1,0 +1,16 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+The online portal for the ${event.data.value[ApplicationNameExtended]} is now available for reporting over ${event.data.value[Belastingjaar]}.
+
+You can upload files in the portal now or manually enter account information.
+
+It is now no longer possible to change your EOI relations yourself. If you have not yet correctly entered all your EOI relations, please send a message to ${event.data.value[mailPlainEmail]} and specify (i) the name and (ii) ${event.data.value[mailTaxIdentificationEN]} of the ReportingFI and (iii) the name of the sending company.
+
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

@@ -1,0 +1,26 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+Your report with financial information has been submitted with the competent authority and has been saved for delivery.
+
+Date submitted: ${event.data.value[DatumIngediendFormaat]}
+
+Report type: ${event.data.value[TypeLeveringLabelEN]}
+Reported year: ${event.data.value[Belastingjaar]}
+
+
+The submitted information will be delivered to the corresponding jurisdictions by the competent authority. Upon delivery you will receive an email confirmation thereof.
+
+See attached for the PDF copy of this message. Log in to review this report and contained EOI relations and delivery jurisdictions.
+
+Open portal: ${event.data.value[PortaalBaseURL]}
+
+
+Important: In case you did not submit this report yourself, please contact the tax administration as soon as possible.
+
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}

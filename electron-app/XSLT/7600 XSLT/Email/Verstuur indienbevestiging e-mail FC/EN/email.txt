@@ -1,0 +1,26 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+The process of preparing the delivery files is completed.
+
+Treaty: ${event.data.value[VerdragenLabels]}
+
+Jurisdiction: ${event.data.value[DoorgeeflandNaamEN]} (${event.data.value[DoorgeeflandCode]})
+Report type: ${event.data.value[TypeLeveringLabelEN]}
+
+Reported year: ${event.data.value[Belastingjaar]}
+
+
+Open the portal and review the result of this process.
+
+Open portal: ${event.data.value[PortaalBaseURL]}
+
+
+When this process is completed successfully, the encrypted files are saved in the 'Documents' panel.
+
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}

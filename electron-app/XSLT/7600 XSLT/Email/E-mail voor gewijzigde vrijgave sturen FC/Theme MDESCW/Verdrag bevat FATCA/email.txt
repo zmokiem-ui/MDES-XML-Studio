@@ -1,0 +1,16 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Het online portaal voor de ${event.data.value[ApplicationNameExtended]} is vanaf nu vrijgegeven voor het leveren van gegevens over ${event.data.value[Belastingjaar]}.
+
+U kunt vanaf nu in het portaal bestanden uploaden of gegevens handmatig invoeren.
+
+U kunt uw EOI-relaties nu niet meer zelf beheren. Indien u nog niet al uw relaties correct hebt ingesteld, dient u een e-mail te sturen naar ${event.data.value[mailPlainEmail]} met vermelding van (i) de naam, (ii) het ${event.data.value[mailTaxIdentificationNL]} en (iii) het GIIN nummer van de ReportingFI(s) en (iv) de naam van de leverende instelling.
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

@@ -1,0 +1,16 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Uw aanvraag voor het wijzigen van verdragen waaraan uw organisatie wil voldoen is goedgekeurd. 
+
+
+Om in te loggen ga naar ${event.data.value[PortaalBaseURL]}.
+
+${event.data.value[mailReferentieOnlinePortaal1]}
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

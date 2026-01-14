@@ -1,0 +1,13 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+Su solicitud para el uso del portal en línea para el intercambio de datos financieros (${event.data.value[ApplicationName]}) se aprobó para:
+${event.data.value[FormalNameES]}: ${event.data.value[FormeleNaam]}
+${event.data.value[mailTaxIdentificationES]}: ${event.data.value[CRIB_nummer]}
+
+
+
+Para iniciar una sesión, vaya a ${event.data.value[PortaalBaseURL]}.
+
+${event.data.value[mailReferentieOnlinePortaal1]}
+
+${event.data.value[mailSignatureES]}

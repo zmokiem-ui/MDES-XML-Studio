@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns="urn:fatca:fatcainterimvalidfilenotification" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:fnb="urn:fatca:fatcanotificationbase" targetNamespace="urn:fatca:fatcainterimvalidfilenotification" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.4">
+	<xsd:annotation>
+		<xsd:appinfo>
+			<release>1.4</release>
+		</xsd:appinfo>
+		<xsd:documentation>
+			<Component>
+				<DictionaryEntryNm>Schema Components for FATCA Interim Valid File Notifications</DictionaryEntryNm>
+				<MajorVersionNum>1</MajorVersionNum>
+				<MinorVersionNum>4</MinorVersionNum>
+				<VersionEffectiveBeginDt>2014-12-02</VersionEffectiveBeginDt>
+				<VersionDescriptionTxt>Version 1.4</VersionDescriptionTxt>
+				<DescriptionTxt>Schema Components created for FATCA Interim Valid File Notifications</DescriptionTxt>
+			</Component>
+		</xsd:documentation>
+	</xsd:annotation>
+	<!-- ================ -->
+	<!-- ===== Imports ===== -->
+	<!-- ================ -->
+	<xsd:import namespace="urn:fatca:fatcanotificationbase" schemaLocation="BASE-FATCA-NOTIFICATION-1.4.xsd"/>
+	<!-- ============================================================== -->
+	<!-- ===== Local Common Aggregate Component (CAC) Elements  ================ -->
+	<!-- ============================================================== -->
+	<xsd:element name="FATCAValidFileNotification" type="FATCAValidFileNotificationType">
+		<xsd:annotation>
+			<xsd:documentation>
+				<Component>
+					<DictionaryEntryNm>FATCA Notification for Interim Valid Files</DictionaryEntryNm>
+					<MajorVersionNum>1</MajorVersionNum>
+					<MinorVersionNum>4</MinorVersionNum>
+					<VersionEffectiveBeginDt>2014-12-02</VersionEffectiveBeginDt>
+					<VersionDescriptionTxt>Version 1.4</VersionDescriptionTxt>
+					<DescriptionTxt>Contains the details of FATCA Notification for Interim Valid Files </DescriptionTxt>
+				</Component>
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<!-- ========================================================================= -->
+	<!-- ===== Local Common Aggregate Component (CAC) Complex Type Definitions ================ -->
+	<!-- =========================================================================  -->
+	<xsd:complexType name="FATCAValidFileNotificationType">
+		<xsd:annotation>
+			<xsd:documentation>
+				<Component>
+					<DictionaryEntryNm>Type for FATCA Notification for Interim Valid Files</DictionaryEntryNm>
+					<MajorVersionNum>1</MajorVersionNum>
+					<MinorVersionNum>4</MinorVersionNum>
+					<VersionEffectiveBeginDt>2014-12-02</VersionEffectiveBeginDt>
+					<VersionDescriptionTxt>Version 1.4</VersionDescriptionTxt>
+					<Description>Contains the type details of FATCA Notification for Interim Valid Files (i.e. schema validated files)</Description>
+				</Component>
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element ref="fnb:FATCANotificationHeaderGrp"/>
+			<xsd:element ref="fnb:OriginalFileMetadataGrp"/>
+			<xsd:element ref="fnb:OriginalFileMessageSpecGrp"/>
+			<xsd:element ref="fnb:NotificationContentTxt"/>
+			<xsd:element ref="fnb:OriginalFileProcessingDataGrp"/>
+			<xsd:element ref="fnb:HCTATreatyStampTxt" minOccurs="0"/>
+		</xsd:sequence>
+		<xsd:attribute name="version" type="xsd:string" fixed="1.4">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">Notification Schema Version</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+</xsd:schema>

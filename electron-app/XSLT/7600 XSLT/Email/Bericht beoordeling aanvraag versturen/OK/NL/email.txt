@@ -1,0 +1,19 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Uw aanvraag voor het gebruik van het online portaal voor de financiële gegevens uitwisseling (${event.data.value[ApplicationName]}) is toegekend voor:
+${event.data.value[EIG_Formelenaam]}: ${event.data.value[FormeleNaam]}
+${event.data.value[mailTaxIdentificationNL]}: ${event.data.value[CRIB_nummer]}
+GIIN-nummer: ${event.data.value[GIIN]}
+
+
+Om in te loggen ga naar ${event.data.value[PortaalBaseURL]}.
+
+${event.data.value[mailReferentieOnlinePortaal1]}
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

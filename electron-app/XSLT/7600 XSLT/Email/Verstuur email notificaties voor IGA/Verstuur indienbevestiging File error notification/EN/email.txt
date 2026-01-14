@@ -1,0 +1,26 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+A notification has been received for the administrator of the exchange of information under below mentioned treaty/agreement.
+
+Treaty: ${event.data.value[Verdrag]}
+
+Sender: ${event.data.value[DoorgeeflandNaam]} (${event.data.value[DoorgeeflandCode]})
+Notification type: ${event.data.value[TypeNotificatie]}
+
+Action deadline: ${event.data.value[Deadline]}
+
+
+The decrypted notifications file is saved in the 'Documents' panel.
+Open the portal and review the notifications.
+
+Open portal: ${event.data.value[PortaalBaseURL]}
+
+
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

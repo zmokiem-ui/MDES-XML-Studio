@@ -1,0 +1,16 @@
+Dear ${event.data.value[NaamGebruiker]},
+
+MDES has received ${event.data.value[AantalBestanden]} files via automatic exchange.
+Log in to MDES to view the received files.
+
+Open portal: ${event.data.value[PortaalBaseURL]}
+
+
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

@@ -1,0 +1,24 @@
+Estimado ${event.data.value[NaamContactpersoon]},
+
+
+El proceso de preparación es completado.
+
+Jurisdicción: ${event.data.value[DoorgeeflandNaamES]} (${event.data.value[DoorgeeflandCode]})
+Tipo Declaración: ${event.data.value[TypeLeveringLabelES]} entrega(s)
+
+Año Tributario: ${event.data.value[Belastingjaar]}
+
+Abra el portal "${event.data.value[ApplicationNameExtended]}" para ver el resultado de este proceso. 
+
+Abre portal: ${event.data.value[PortaalBaseURL]}
+
+Cuando se terminó el processo con éxito, los documentos asegurados son guardados en el tablero de los documentos. 
+
+
+${event.data.value[mailSignatureES]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

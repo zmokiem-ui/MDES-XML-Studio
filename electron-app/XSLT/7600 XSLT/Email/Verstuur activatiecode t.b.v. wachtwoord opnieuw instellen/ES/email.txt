@@ -1,0 +1,17 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+Haga clic en el siguiente enlace para reestablecer su contraseña del portal en línea por el intercambio de los datos financieros (${event.data.value[ApplicationName]}):
+
+Si el enlace arriba no funciona, puede estabelecer una nueva contraseña a través de la pantalla de inicio de sesión, su código de activación es: ${event.data.value[Activeringscode]}
+
+Importante: Si Usted no presentó esta solicitud, póngase en contacto con las autoridades fiscales.
+
+
+
+Este mensaje es fabricado en un proceso automatizado y por eso no firmado.
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

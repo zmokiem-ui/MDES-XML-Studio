@@ -1,0 +1,22 @@
+Estimado/a  ${event.data.value[NaamContactpersoon]},
+
+Se recibió una entrega de ${event.data.value[DoorgeeflandNaam]} que contiene uno o más errores. Un mensaje de estado caso ha creado. En este caso puede ver los errores y puede descargar el mensaje de estado reporte.
+
+Tipo de reporte: ${event.data.value[Verdrag]}
+
+Nombre del caso:  ${event.data.value[Dossiernaam]}
+
+
+Los archivos están guardados en el tablero “Documento”.
+Haga clic en el botón de abajo para revisar el caso.
+
+
+Abre portal: ${event.data.value[PortaalNotificatiesLink]}
+
+
+${event.data.value[mailSignatureES]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}

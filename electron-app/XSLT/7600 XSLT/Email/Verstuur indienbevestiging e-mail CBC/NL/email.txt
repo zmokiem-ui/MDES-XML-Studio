@@ -1,0 +1,24 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Het proces van voorbereiden van de oplevering is afgerond.
+
+Verdrag: ${event.case.properties.value[Verdrag]}
+
+Jurisdictie: ${event.data.value[DoorgeeflandNaam]} (${event.case.properties.value[Landcode]})
+Type levering: ${event.data.value[TypeLeveringLabelNL]} levering(en)
+
+
+Open het portaal om het resultaat van dit proces te zien.
+
+Open portaal: ${event.data.value[PortaalBaseURL]}
+
+Wanneer het proces succesvol afgerond is afgerond zijn de beveiligde bestanden in het documenten paneel opgeslagen.
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

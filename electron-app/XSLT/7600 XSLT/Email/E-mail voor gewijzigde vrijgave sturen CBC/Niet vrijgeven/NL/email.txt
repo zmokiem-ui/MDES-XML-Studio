@@ -1,0 +1,15 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Het online portaal voor de ${event.data.value[ApplicationNameExtended]} is in de status 'Niet vrijgegeven' geplaatst.
+
+U kunt vanaf nu geen bestanden testen of uploaden voor levering of gegevens handmatig invoeren. Ook kunt u geen EOI-relaties opvoeren.
+
+U wordt per email geïnformeerd wanneer het portaal is vrijgegeven voor EOI-relaties beheer en voor testen.
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

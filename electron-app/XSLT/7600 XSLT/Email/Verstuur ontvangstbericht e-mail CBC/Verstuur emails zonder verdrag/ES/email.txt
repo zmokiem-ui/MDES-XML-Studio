@@ -1,0 +1,26 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+Su reporte financiero ha sido entregado correctamente a la autoridad competente y está listo para ser transmitido. Adjunto encontrará la constancia en formato PDF.
+
+Fecha de entrega: ${event.data.value[DatumIngediendFormaat]}
+Reporte: ${event.data.value[TypeLeveringLabelES]}
+Año tributario: ${event.data.value[Belastingjaar]}
+
+La autoridad competente enviará los datos presentados a la jurisdicción relevante. Recibirá un correo electrónico cuando se realice la entrega. 
+
+Inicie sesión para ver su entrega, las Relaciones EOI incluidas y los países de transmissión: 
+Abrir portal: <hipervínculo>[dirección web del Portal]</hipervínculo>
+
+
+Abre portal: ${event.data.value[PortaalBaseURL]}
+
+Importante: Si no ha realizado esta entrega, póngase en contacto inmediatamente con la autoridad competente.
+
+
+${event.data.value[mailSignatureES]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

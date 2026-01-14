@@ -1,0 +1,14 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+El portal ${event.data.value[ApplicationNameExtended]} está disponible desde ahora para entregar nuevos reportes de tipo CbC pare el año tributario  ${event.data.value[Belastingjaar]}.
+
+A partir de ahora se pueden cargar archivos XML o ingresar registros manualmente.
+
+
+${event.data.value[mailSignatureES]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

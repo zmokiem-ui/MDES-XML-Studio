@@ -1,0 +1,14 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+El portal ${event.data.value[ApplicationNameExtended]} está cerrado para entregar o validar reportes de tipo CbC.
+
+A partir de ahora no se puede validar o cargar archivos XML, ni se puede ingresar registros de manera manual. Le informaremos por correo electrónico, cuando el portal esté disponible. 
+
+${event.data.value[mailSignatureES]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}
+

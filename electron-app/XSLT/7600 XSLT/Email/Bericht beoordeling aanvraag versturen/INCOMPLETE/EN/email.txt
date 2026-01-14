@@ -1,0 +1,17 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+Your request to use the online portal for the exchange of financial information (${event.data.value[ApplicationName]}) has been denied.
+
+Click on the following link to log in and submit a new request incl. attachments: ${event.data.value[PortaalLoginLink]}
+
+Explanation of your request assessment:
+${event.data.value[RedenAfwijzenAanvraag]}
+
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

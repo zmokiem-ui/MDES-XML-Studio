@@ -1,0 +1,22 @@
+Estimado/a  ${event.data.value[NaamContactpersoon]},
+
+Desde ${event.data.value[DoorgeeflandNaam]} se recibió una(s) notificacion(es) o mensaje(s) de estado en relación con su entrega abajo.
+
+Tipo de reporte: ${event.data.value[Verdrag]}
+
+Nombre del caso:  ${event.data.value[Dossiernaam]}
+
+
+Las notificaciones son guardados en la pantalla "Notificaciones" de la entrega concerniente.
+Haga clic en el botón abajo para ver la(s) notificacion(es).
+
+
+Abre el portal: ${event.data.value[PortaalNotificatiesLink]}
+
+
+${event.data.value[mailSignatureES]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}

@@ -1,0 +1,23 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Er is vanuit ${event.data.value[DoorgeeflandNaam]} een levering ontvangen en deze bevat een of meerdere fouten. Er is een status message dossier gemaakt waarin u deze fouten kunt bekijken en het status message retour bestand kunt downloaden.
+
+Verdrag(en): ${event.data.value[Verdrag]}
+
+Dossiernaam: ${event.data.value[Dossiernaam]}
+
+
+De bestanden zijn in het "Documenten" paneel opgeslagen.
+Klik op de onderstaande knop om het dossier in te zien.
+
+
+Open portaal: ${event.data.value[PortaalNotificatiesLink]}
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

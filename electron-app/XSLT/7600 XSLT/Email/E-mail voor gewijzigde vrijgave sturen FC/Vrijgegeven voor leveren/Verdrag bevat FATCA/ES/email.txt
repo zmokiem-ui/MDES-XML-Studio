@@ -1,0 +1,16 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+El portal en línea para el ${event.data.value[ApplicationNameExtended]} es liberado desde ahora para entregar nuevos datos de ${event.data.value[Belastingjaar]}.
+
+A partir de ahora puede subir documentos o entrar datos manualmente.
+
+Todavía no puede gestionar sus EOI-relaciones. Si no establecía todas sus relaciones, tenga que enviar un correo electrónico a ${event.data.value[mailPlainEmail]} indicando de (i) el nombre, (ii) el ${event.data.value[mailTaxIdentificationES]} y (iii) el GIIN número de ReportandoFI(s) y (iv) el nombre del instituto ReportingFI(s) que entrega. 
+
+
+${event.data.value[mailSignatureES]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

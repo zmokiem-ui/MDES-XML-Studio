@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>notificacion recibido</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><style type="text/css">body {font-family: Verdana, Arial, sans-serif;font-size: 10pt;padding: 0;margin: 0;}.main-content {width: 100%;border: none;font-size: 10pt;}.main-content td {margin: 0;}.col1 {min-width: 55px;padding: 0;}.col2 {padding: 15px;}.col3 {padding: 0;}.header td {height: 70px;}.spacing td {height: 20px}.spacing .col2 {padding: 0;}.title {color: #002c59;font-size: 14pt;font-weight: 500;padding:15px;}.text-highlight {background-color: #f8f8f8;padding:15px;}.buttonlink {text-align: center;margin: 20px 0;}.buttonlink a {text-decoration: none;background-color: #ffdd00;color: #FFFFFF;font-weight: 500;font-size: 14px;border-left: 40px solid #ffdd00;border-right: 40px solid #ffdd00;border-top: 10px solid #ffdd00;border-bottom: 10px solid #ffdd00;}.highlight {font-weight: bold;}.footer {background-color: #0022c59;color: #FFFFFF!important;}.footertext {color: #FFFFFF!important;}.footer .col1,.footer .col3 {padding: 15px;}</style></head><body><table class="main-content" cellspacing="0"><tr class="header" xmlns:exsl="http://exslt.org/common"><td width="55" class="logo"><img>        </img></td><td class="title">anotificacion recibido</td><td width="55" class="col3"/></tr><tr class="spacing" xmlns:exsl="http://exslt.org/common"><td width="55" class="col1"/><td class="col2"/><td width="55" class="col3"/></tr><tr xmlns:exsl="http://exslt.org/common"><td width="55" class="col1"/><td class="text-highlight"><p>Estimado/a  a,</p><p>Desde a se recibió una(s) notificacion(es) o mensaje(s) de estado en relación con su entrega abajo.</p><p>Tipo de reporte: <span class="highlight">a</span></p><p>Nombre del caso: <span class="highlight">a</span></p><p>Las notificaciones son guardados en la pantalla 'Notificaciones' de la entrega concerniente.<br/> Haga clic en el botón de abajo para ver la(s) notificacion(es).</p><p class="buttonlink"><a href="a">Abre el portal  
+                     
+              </a></p></td><td width="55" class="col3"/></tr><tr valign="top"><td width="55" class="col1"/><td class="col2"><p><br/>Este mensaje fue creado en un proceso automatizado y por eso no firmado.</p><p><br/></p></td><td width="55" class="col3"/></tr><tr valign="top" class="footer"><td width="55" class="col1"/><td class="col2"><div align="center"><p><strong>    Ghana Revenue Authority</strong><br/><span>    Off Starletsâ&#128;&#153; 91 Road, near Accra Sports Stadium</span></p><p><strong>    &lt;a href="mailto:info@gra.gov.gh "&gt;info@gra.gov.gh&lt;/a&gt;</strong></p><p>    &lt;a href="http://www.gra.gov.gh"&gt;www.gra.gov.gh&lt;/a&gt;<br/><a href="$">    http://localhost:18080/BeInformed/</a></p></div></td><td width="55" class="col3"/></tr></table></body></html>
+                         
+                    
+-----------------------
+
+a
+      notificacion recibido
+      Estimado/a  
+      a
+      Desde 
+      a
+       se recibi? una(s) notificacion(es) o mensaje(s) de estado en relaci?n con su entrega abajo.
+      Tipo de reporte: 
+      a
+      Nombre del caso: 
+      a
+      Las notificaciones son guardados en la pantalla 'Notificaciones' de la entrega concerniente.
+       Haga clic en el bot?n de abajo para ver la(s) notificacion(es).
+      
+      Abre el portal

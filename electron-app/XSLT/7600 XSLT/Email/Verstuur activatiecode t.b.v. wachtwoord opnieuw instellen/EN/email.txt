@@ -1,0 +1,17 @@
+Dear ${event.data.value[NaamContactpersoon]},
+
+Click on the following link to choose a new password for the online portal for the exchange of financial information (${event.data.value[ApplicationName]}):
+${event.data.value[Activatielink]}
+
+If the link does not work, you can choose a new password on the login screen/box of this portal, your activation code is:  ${event.data.value[Activeringscode]}
+
+Important: In case you did not submit this request yourself, please contact the tax administration as soon as possible.
+
+
+${event.data.value[mailSignatureEN]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

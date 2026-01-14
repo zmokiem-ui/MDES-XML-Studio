@@ -1,0 +1,23 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Er is een notificatie ontvangen die bestemd is voor de beheerder van de gegevens uitwisseling in het kader van onderstaand verdrag/overeenkomst.
+
+Verdrag: ${event.data.value[Verdrag]}
+
+Ontvangen van: ${event.data.value[DoorgeeflandNaam]} (${event.data.value[DoorgeeflandCode]})
+Validatieresultaat status: ${event.data.value[ValidationResultStatus]}
+
+Het decrypted notificaties bestand is in het documenten paneel opgeslagen.
+Open het portaal om de notificatie dossier(s) in te zien.
+
+Open portaal: ${event.data.value[PortaalBaseURL]}
+
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

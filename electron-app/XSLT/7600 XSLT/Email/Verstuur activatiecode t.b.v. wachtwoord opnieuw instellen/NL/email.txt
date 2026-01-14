@@ -1,0 +1,17 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Klik op de volgende link om een nieuw wachtwoord van het online portaal voor de financiële gegevens uitwisseling (${event.data.value[ApplicationName]}) in te stellen:
+${event.data.value[Activatielink]}
+
+Indien de bovenstaande link niet werkt,  kunt u een nieuw wachtwoord instellen via het inloggen scherm van dit portaal, uw activatiecode is: ${event.data.value[Activeringscode]}
+
+Belangrijk: Indien u deze aanvraag niet hebt ingediend, neem dan zo snel als mogelijk contact op met de belastingdienst.
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

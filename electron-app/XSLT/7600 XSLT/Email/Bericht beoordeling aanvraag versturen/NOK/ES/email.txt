@@ -1,0 +1,16 @@
+Estimado/a ${event.data.value[NaamContactpersoon]},
+
+Su solicitud para el uso del portal en línea para el intercambio de datos financieros (${event.data.value[ApplicationName]}) se rechazó y la cuenta del usuario está bloqueado.
+
+Tiene que crear una nueva cuenta y una solicitud incluyendo anexos. Para hacerlo, vaya a ${event.data.value[PortaalLoginLink]}.
+
+Explicación de la evaluación de su solicitud:
+${event.data.value[RedenAfwijzenAanvraag]}
+
+${event.data.value[mailSignatureES]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

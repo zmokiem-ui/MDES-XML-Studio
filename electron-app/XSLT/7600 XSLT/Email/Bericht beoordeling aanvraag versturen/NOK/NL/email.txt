@@ -1,0 +1,17 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Uw aanvraag voor het gebruik van het online portaal voor de financiële gegevens uitwisseling (${event.data.value[ApplicationName]}) is afgewezen en de user account is geblokkeerd.
+
+U dient een nieuwe account en verzoek incl. bijlagen aan te maken. Ga daarvoor naar ${event.data.value[PortaalLoginLink]}.
+
+Toelichting bij de beoordeling van uw verzoek:
+${event.data.value[RedenAfwijzenAanvraag]}
+
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}

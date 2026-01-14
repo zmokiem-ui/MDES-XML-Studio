@@ -1,0 +1,14 @@
+Beste ${event.data.value[NaamContactpersoon]},
+
+Uw aanvraag voor het wijzigen van de verdragen waar uw organisatie moet voldoen is afgewezen.
+
+Toelichting bij de beoordeling van uw verzoek:
+${event.data.value[RedenAfwijzenAanvraag]}
+
+${event.data.value[mailSignatureNL]}
+
+${event.data.value[mailFooterText1]}
+${event.data.value[mailFooterText2]}
+${event.data.value[mailPlainEmail]}
+${event.data.value[mailSite1]}
+${event.data.value[PortaalBaseURL]}
