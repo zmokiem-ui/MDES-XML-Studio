@@ -1,0 +1,76 @@
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" /><Reference URI="#FATCA"><Transforms><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" /><DigestValue>NGswI+e7j5jmhFMZBhuP9He0DXjKMMJHDAlDTMX0q18=</DigestValue></Reference></SignedInfo><SignatureValue>rW4NkmXjqPMqlSHHoDHyPuRnZOKxicz57DbvNWmY0C2ZrTyWU/RjtrzXe6sTrxKoSn/XkVha9rj/pmWTmKfTk77oh3Hn9kcsvfx1AcrOw87vRZZi/hBYgzW3eHCgq/cI2MlNSxaixZTEeIE4Dp3D0x/Pe5iGDw3VBhDEqmXyr/S4gs45ou/93zDU4DoIh4HfCrlzebIIYlAEYcdOJ+CGkhcxUn0pOtddxC+wx6kvf+ZrtjPxoL4XQ4uZMxkTwjw1WNy86SuuPAcQhFBM7tkkTEJr6aAsjaW0KAr/F1pKBGKnXuFXIX4LJXoSWmz5GVNCrCIq2/oT2n4Mf0fZDtyNOBlQbCYXhEYJxk5YnuLzZh4R9IsI3DfIu2Y/pIeIQsox3UoNNglFXDq9M4f/pX7lEqk/YvaWSnsRf81qsdn8rmhaHQGSHZERauhOdnNkcbIqghCBfuMSDfYAW8tkm1IXDrhoQ/2BB9fpdmissYKy4cWfRDHf5Ntes1ct3YeIpEZFU8guUtaaSYWNJhbsaXHhVeglWcs09BgsV5MQKx60D+tMFvIspNPLwHiOOLjm7Icx++mSgrh8EMVBwdpiBZz8JidrAvWS0AGKDwg0Anitv4wWIkB1Q52l+Gdeb9OuSt2I/DiabVS1LnVM2+pzigvVyOiDPxOcIBEd0MEPJdVwBeQ=</SignatureValue><KeyInfo><X509Data><X509SubjectName>E=info@bearingpointcaribbean.com, CN=Bearingpointcaribbean, OU=section, O=Bearingpointcaribbean, L=Netherlands, S=Netherlands, C=nl</X509SubjectName><X509Certificate>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</X509Certificate></X509Data></KeyInfo><Object Id="FATCA"><cbc:CBC_OECD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cbc="urn:oecd:ties:cbc:v1" xmlns:stf="urn:oecd:ties:stf:v4" xmlns:iso="urn:oecd:ties:isocbctypes:v1" xsi:schemaLocation="urn:oecd:ties:cbc:v1 CbcXML_v1.0.1.xsd" version="1.0.1">
+    <cbc:MessageSpec>
+        <cbc:SendingEntityIN>123456678</cbc:SendingEntityIN>
+        <cbc:TransmittingCountry>PE</cbc:TransmittingCountry>
+        <cbc:ReceivingCountry>PE</cbc:ReceivingCountry>
+        <cbc:MessageType>CBC</cbc:MessageType>
+        <cbc:Language>ES</cbc:Language>
+        <cbc:Warning>MyWarning</cbc:Warning>
+        <cbc:Contact>MyContact</cbc:Contact>
+        <cbc:MessageRefId>PE201812345667898fd6a4d-3184-45ab-8633-95b8930cd732</cbc:MessageRefId>
+        <cbc:MessageTypeIndic>CBC401</cbc:MessageTypeIndic>
+        <cbc:ReportingPeriod>2018-12-31</cbc:ReportingPeriod>
+        <cbc:Timestamp>2019-04-20T00:51:32.903481Z</cbc:Timestamp>
+    </cbc:MessageSpec>
+    <cbc:CbcBody>
+        <cbc:ReportingEntity>
+            <cbc:Entity>
+                <cbc:ResCountryCode>PE</cbc:ResCountryCode>
+                <cbc:TIN issuedBy="PE">123456678</cbc:TIN>
+                <cbc:Name>My Entity Name</cbc:Name>
+                <cbc:Address>
+                    <cbc:CountryCode>PE</cbc:CountryCode>
+                    <cbc:AddressFix>
+                        <cbc:Street>My Street</cbc:Street>
+                        <cbc:City>My City</cbc:City>
+                    </cbc:AddressFix>
+                    <cbc:AddressFree>My Free Address</cbc:AddressFree>
+                </cbc:Address>
+            </cbc:Entity>
+            <cbc:ReportingRole>CBC701</cbc:ReportingRole>
+            <cbc:DocSpec>
+                <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+                <stf:DocRefId>PE20181234566788c161a66-e144-479c-bc7f-dc11a3b72dfe</stf:DocRefId>
+            </cbc:DocSpec>
+        </cbc:ReportingEntity>
+        <cbc:CbcReports>
+            <cbc:DocSpec>
+                <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+                <stf:DocRefId>PE2018123456678a84e3845-fd12-4304-8d91-052e746237bc</stf:DocRefId>
+            </cbc:DocSpec>
+            <cbc:ResCountryCode>PE</cbc:ResCountryCode>
+            <cbc:Summary>
+                <cbc:Revenues>
+                    <cbc:Unrelated currCode="USD">22000000</cbc:Unrelated>
+                    <cbc:Related currCode="USD">33000000</cbc:Related>
+                    <cbc:Total currCode="USD">55000000</cbc:Total>
+                </cbc:Revenues>
+                <cbc:ProfitOrLoss currCode="USD">11000000</cbc:ProfitOrLoss>
+                <cbc:TaxPaid currCode="USD">12000000</cbc:TaxPaid>
+                <cbc:TaxAccrued currCode="USD">13000000</cbc:TaxAccrued>
+                <cbc:Capital currCode="USD">14000000</cbc:Capital>
+                <cbc:Earnings currCode="USD">15000000</cbc:Earnings>
+                <cbc:NbEmployees>100</cbc:NbEmployees>
+                <cbc:Assets currCode="USD">17000000</cbc:Assets>
+            </cbc:Summary>
+            <cbc:ConstEntities>
+                <cbc:ConstEntity>
+                    <cbc:ResCountryCode>NL</cbc:ResCountryCode>
+                    <cbc:TIN issuedBy="NL">987654321</cbc:TIN>
+                    <cbc:Name>My ConstEntity Name.</cbc:Name>
+                    <cbc:Address>
+                        <cbc:CountryCode>NL</cbc:CountryCode>
+                        <cbc:AddressFix>
+                            <cbc:Street>My Street</cbc:Street>
+                            <cbc:City>My City</cbc:City>
+                        </cbc:AddressFix>
+                        <cbc:AddressFree>My Free Address</cbc:AddressFree>
+                    </cbc:Address>
+                </cbc:ConstEntity>
+                <cbc:IncorpCountryCode>NL</cbc:IncorpCountryCode>
+                <cbc:BizActivities>CBC501</cbc:BizActivities>
+                <cbc:OtherEntityInfo>MyInfo</cbc:OtherEntityInfo>
+            </cbc:ConstEntities>
+        </cbc:CbcReports>
+    </cbc:CbcBody>
+</cbc:CBC_OECD></Object></Signature>

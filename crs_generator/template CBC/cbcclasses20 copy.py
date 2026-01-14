@@ -1,0 +1,5455 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# Generated Wed Dec  2 15:00:05 2020 by generateDS.py version 2.35.17.
+# Python 3.8.2 (tags/v3.8.2:7b3ab59, Feb 25 2020, 22:45:29) [MSC v.1916 32 bit (Intel)]
+#
+# Command line options:
+#   ('-o', 'cbcclasses.py')
+#   ('-s', 'cbcsubclasses.py')
+#
+# Command line arguments:
+#   MDES\TestSuite\Lib\cbcgenerator20\xsd\CbcXML_v2.0.xsd
+#
+# Command line:
+#   C:\Users\giovanni.kromosemito\Downloads\generateDS-2.35.17\generateDS-2.35.17\generateDS.py -o "cbcclasses.py" -s "cbcsubclasses.py" C:\Users\giovanni.kromosemito\Downloads\cbcgenerator20\xsd\CbcXML_v2.0.xsd
+#
+# Current working directory (os.getcwd()):
+#   classes
+#
+
+from six.moves import zip_longest
+import os
+import sys
+import re as re_
+import base64
+import datetime as datetime_
+import decimal as decimal_
+try:
+    from lxml import etree as etree_
+except ImportError:
+    from xml.etree import ElementTree as etree_
+
+
+Validate_simpletypes_ = True
+SaveElementTreeNode = True
+if sys.version_info.major == 2:
+    BaseStrType_ = basestring
+else:
+    BaseStrType_ = str
+
+
+def parsexml_(infile, parser=None, **kwargs):
+    if parser is None:
+        # Use the lxml ElementTree compatible parser so that, e.g.,
+        #   we ignore comments.
+        try:
+            parser = etree_.ETCompatXMLParser()
+        except AttributeError:
+            # fallback to xml.etree
+            parser = etree_.XMLParser()
+    try:
+        if isinstance(infile, os.PathLike):
+            infile = os.path.join(infile)
+    except AttributeError:
+        pass
+    doc = etree_.parse(infile, parser=parser, **kwargs)
+    return doc
+
+def parsexmlstring_(instring, parser=None, **kwargs):
+    if parser is None:
+        # Use the lxml ElementTree compatible parser so that, e.g.,
+        #   we ignore comments.
+        try:
+            parser = etree_.ETCompatXMLParser()
+        except AttributeError:
+            # fallback to xml.etree
+            parser = etree_.XMLParser()
+    element = etree_.fromstring(instring, parser=parser, **kwargs)
+    return element
+
+#
+# Namespace prefix definition table (and other attributes, too)
+#
+# The module generatedsnamespaces, if it is importable, must contain
+# a dictionary named GeneratedsNamespaceDefs.  This Python dictionary
+# should map element type names (strings) to XML schema namespace prefix
+# definitions.  The export method for any class for which there is
+# a namespace prefix definition, will export that definition in the
+# XML representation of that element.  See the export method of
+# any generated element type class for an example of the use of this
+# table.
+# A sample table is:
+#
+#     # File: generatedsnamespaces.py
+#
+#     GenerateDSNamespaceDefs = {
+#         "ElementtypeA": "http://www.xxx.com/namespaceA",
+#         "ElementtypeB": "http://www.xxx.com/namespaceB",
+#     }
+#
+# Additionally, the generatedsnamespaces module can contain a python
+# dictionary named GenerateDSNamespaceTypePrefixes that associates element
+# types with the namespace prefixes that are to be added to the
+# "xsi:type" attribute value.  See the exportAttributes method of
+# any generated element type and the generation of "xsi:type" for an
+# example of the use of this table.
+# An example table:
+#
+#     # File: generatedsnamespaces.py
+#
+#     GenerateDSNamespaceTypePrefixes = {
+#         "ElementtypeC": "aaa:",
+#         "ElementtypeD": "bbb:",
+#     }
+#
+
+try:
+    from generatedsnamespaces import GenerateDSNamespaceDefs as GenerateDSNamespaceDefs_
+except ImportError:
+    GenerateDSNamespaceDefs_ = {}
+try:
+    from generatedsnamespaces import GenerateDSNamespaceTypePrefixes as GenerateDSNamespaceTypePrefixes_
+except ImportError:
+    GenerateDSNamespaceTypePrefixes_ = {}
+
+#
+# You can replace the following class definition by defining an
+# importable module named "generatedscollector" containing a class
+# named "GdsCollector".  See the default class definition below for
+# clues about the possible content of that class.
+#
+try:
+    from generatedscollector import GdsCollector as GdsCollector_
+except ImportError:
+
+    class GdsCollector_(object):
+
+        def __init__(self, messages=None):
+            if messages is None:
+                self.messages = []
+            else:
+                self.messages = messages
+
+        def add_message(self, msg):
+            self.messages.append(msg)
+
+        def get_messages(self):
+            return self.messages
+
+        def clear_messages(self):
+            self.messages = []
+
+        def print_messages(self):
+            for msg in self.messages:
+                print("Warning: {}".format(msg))
+
+        def write_messages(self, outstream):
+            for msg in self.messages:
+                outstream.write("Warning: {}\n".format(msg))
+
+
+#
+# The super-class for enum types
+#
+
+try:
+    from enum import Enum
+except ImportError:
+    Enum = object
+
+#
+# The root super-class for element type classes
+#
+# Calls to the methods in these classes are generated by generateDS.py.
+# You can replace these methods by re-implementing the following class
+#   in a module named generatedssuper.py.
+
+try:
+    from generatedssuper import GeneratedsSuper
+except ImportError as exp:
+    
+    class GeneratedsSuper(object):
+        __hash__ = object.__hash__
+        tzoff_pattern = re_.compile(r'(\+|-)((0\d|1[0-3]):[0-5]\d|14:00)$')
+        class _FixedOffsetTZ(datetime_.tzinfo):
+            def __init__(self, offset, name):
+                self.__offset = datetime_.timedelta(minutes=offset)
+                self.__name = name
+            def utcoffset(self, dt):
+                return self.__offset
+            def tzname(self, dt):
+                return self.__name
+            def dst(self, dt):
+                return None
+        def gds_format_string(self, input_data, input_name=''):
+            return input_data
+        def gds_parse_string(self, input_data, node=None, input_name=''):
+            return input_data
+        def gds_validate_string(self, input_data, node=None, input_name=''):
+            if not input_data:
+                return ''
+            else:
+                return input_data
+        def gds_format_base64(self, input_data, input_name=''):
+            return base64.b64encode(input_data)
+        def gds_validate_base64(self, input_data, node=None, input_name=''):
+            return input_data
+        def gds_format_integer(self, input_data, input_name=''):
+            return '%d' % input_data
+        def gds_parse_integer(self, input_data, node=None, input_name=''):
+            try:
+                ival = int(input_data)
+            except (TypeError, ValueError) as exp:
+                raise_parse_error(node, 'Requires integer value: %s' % exp)
+            return ival
+        def gds_validate_integer(self, input_data, node=None, input_name=''):
+            try:
+                value = int(input_data)
+            except (TypeError, ValueError):
+                raise_parse_error(node, 'Requires integer value')
+            return value
+        def gds_format_integer_list(self, input_data, input_name=''):
+            return '%s' % ' '.join(input_data)
+        def gds_validate_integer_list(
+                self, input_data, node=None, input_name=''):
+            values = input_data.split()
+            for value in values:
+                try:
+                    int(value)
+                except (TypeError, ValueError):
+                    raise_parse_error(node, 'Requires sequence of integer valuess')
+            return values
+        def gds_format_float(self, input_data, input_name=''):
+            return ('%.15f' % input_data).rstrip('0')
+        def gds_parse_float(self, input_data, node=None, input_name=''):
+            try:
+                fval_ = float(input_data)
+            except (TypeError, ValueError) as exp:
+                raise_parse_error(node, 'Requires float or double value: %s' % exp)
+            return fval_
+        def gds_validate_float(self, input_data, node=None, input_name=''):
+            try:
+                value = float(input_data)
+            except (TypeError, ValueError):
+                raise_parse_error(node, 'Requires float value')
+            return value
+        def gds_format_float_list(self, input_data, input_name=''):
+            return '%s' % ' '.join(input_data)
+        def gds_validate_float_list(
+                self, input_data, node=None, input_name=''):
+            values = input_data.split()
+            for value in values:
+                try:
+                    float(value)
+                except (TypeError, ValueError):
+                    raise_parse_error(node, 'Requires sequence of float values')
+            return values
+        def gds_format_decimal(self, input_data, input_name=''):
+            return ('%s' % input_data).rstrip('0')
+        def gds_parse_decimal(self, input_data, node=None, input_name=''):
+            try:
+                decimal_value = decimal_.Decimal(input_data)
+            except (TypeError, ValueError):
+                raise_parse_error(node, 'Requires decimal value')
+            return decimal_value
+        def gds_validate_decimal(self, input_data, node=None, input_name=''):
+            try:
+                value = decimal_.Decimal(input_data)
+            except (TypeError, ValueError):
+                raise_parse_error(node, 'Requires decimal value')
+            return value
+        def gds_format_decimal_list(self, input_data, input_name=''):
+            return '%s' % ' '.join(input_data)
+        def gds_validate_decimal_list(
+                self, input_data, node=None, input_name=''):
+            values = input_data.split()
+            for value in values:
+                try:
+                    decimal_.Decimal(value)
+                except (TypeError, ValueError):
+                    raise_parse_error(node, 'Requires sequence of decimal values')
+            return values
+        def gds_format_double(self, input_data, input_name=''):
+            return '%e' % input_data
+        def gds_parse_double(self, input_data, node=None, input_name=''):
+            try:
+                fval_ = float(input_data)
+            except (TypeError, ValueError) as exp:
+                raise_parse_error(node, 'Requires double or float value: %s' % exp)
+            return fval_
+        def gds_validate_double(self, input_data, node=None, input_name=''):
+            try:
+                value = float(input_data)
+            except (TypeError, ValueError):
+                raise_parse_error(node, 'Requires double or float value')
+            return value
+        def gds_format_double_list(self, input_data, input_name=''):
+            return '%s' % ' '.join(input_data)
+        def gds_validate_double_list(
+                self, input_data, node=None, input_name=''):
+            values = input_data.split()
+            for value in values:
+                try:
+                    float(value)
+                except (TypeError, ValueError):
+                    raise_parse_error(
+                        node, 'Requires sequence of double or float values')
+            return values
+        def gds_format_boolean(self, input_data, input_name=''):
+            return ('%s' % input_data).lower()
+        def gds_parse_boolean(self, input_data, node=None, input_name=''):
+            if input_data in ('true', '1'):
+                bval = True
+            elif input_data in ('false', '0'):
+                bval = False
+            else:
+                raise_parse_error(node, 'Requires boolean value')
+            return bval
+        def gds_validate_boolean(self, input_data, node=None, input_name=''):
+            if input_data not in (True, 1, False, 0, ):
+                raise_parse_error(
+                    node,
+                    'Requires boolean value '
+                    '(one of True, 1, False, 0)')
+            return input_data
+        def gds_format_boolean_list(self, input_data, input_name=''):
+            return '%s' % ' '.join(input_data)
+        def gds_validate_boolean_list(
+                self, input_data, node=None, input_name=''):
+            values = input_data.split()
+            for value in values:
+                if value not in (True, 1, False, 0, ):
+                    raise_parse_error(
+                        node,
+                        'Requires sequence of boolean values '
+                        '(one of True, 1, False, 0)')
+            return values
+        def gds_validate_datetime(self, input_data, node=None, input_name=''):
+            return input_data
+        def gds_format_datetime(self, input_data, input_name=''):
+            if input_data.microsecond == 0:
+                _svalue = '%04d-%02d-%02dT%02d:%02d:%02d' % (
+                    input_data.year,
+                    input_data.month,
+                    input_data.day,
+                    input_data.hour,
+                    input_data.minute,
+                    input_data.second,
+                )
+            else:
+                _svalue = '%04d-%02d-%02dT%02d:%02d:%02d.%s' % (
+                    input_data.year,
+                    input_data.month,
+                    input_data.day,
+                    input_data.hour,
+                    input_data.minute,
+                    input_data.second,
+                    ('%f' % (float(input_data.microsecond) / 1000000))[2:],
+                )
+            if input_data.tzinfo is not None:
+                tzoff = input_data.tzinfo.utcoffset(input_data)
+                if tzoff is not None:
+                    total_seconds = tzoff.seconds + (86400 * tzoff.days)
+                    if total_seconds == 0:
+                        _svalue += 'Z'
+                    else:
+                        if total_seconds < 0:
+                            _svalue += '-'
+                            total_seconds *= -1
+                        else:
+                            _svalue += '+'
+                        hours = total_seconds // 3600
+                        minutes = (total_seconds - (hours * 3600)) // 60
+                        _svalue += '{0:02d}:{1:02d}'.format(hours, minutes)
+            return _svalue
+        @classmethod
+        def gds_parse_datetime(cls, input_data):
+            tz = None
+            if input_data[-1] == 'Z':
+                tz = GeneratedsSuper._FixedOffsetTZ(0, 'UTC')
+                input_data = input_data[:-1]
+            else:
+                results = GeneratedsSuper.tzoff_pattern.search(input_data)
+                if results is not None:
+                    tzoff_parts = results.group(2).split(':')
+                    tzoff = int(tzoff_parts[0]) * 60 + int(tzoff_parts[1])
+                    if results.group(1) == '-':
+                        tzoff *= -1
+                    tz = GeneratedsSuper._FixedOffsetTZ(
+                        tzoff, results.group(0))
+                    input_data = input_data[:-6]
+            time_parts = input_data.split('.')
+            if len(time_parts) > 1:
+                micro_seconds = int(float('0.' + time_parts[1]) * 1000000)
+                input_data = '%s.%s' % (
+                    time_parts[0], "{}".format(micro_seconds).rjust(6, "0"), )
+                dt = datetime_.datetime.strptime(
+                    input_data, '%Y-%m-%dT%H:%M:%S.%f')
+            else:
+                dt = datetime_.datetime.strptime(
+                    input_data, '%Y-%m-%dT%H:%M:%S')
+            dt = dt.replace(tzinfo=tz)
+            return dt
+        def gds_validate_date(self, input_data, node=None, input_name=''):
+            return input_data
+        def gds_format_date(self, input_data, input_name=''):
+            _svalue = '%04d-%02d-%02d' % (
+                input_data.year,
+                input_data.month,
+                input_data.day,
+            )
+            try:
+                if input_data.tzinfo is not None:
+                    tzoff = input_data.tzinfo.utcoffset(input_data)
+                    if tzoff is not None:
+                        total_seconds = tzoff.seconds + (86400 * tzoff.days)
+                        if total_seconds == 0:
+                            _svalue += 'Z'
+                        else:
+                            if total_seconds < 0:
+                                _svalue += '-'
+                                total_seconds *= -1
+                            else:
+                                _svalue += '+'
+                            hours = total_seconds // 3600
+                            minutes = (total_seconds - (hours * 3600)) // 60
+                            _svalue += '{0:02d}:{1:02d}'.format(
+                                hours, minutes)
+            except AttributeError:
+                pass
+            return _svalue
+        @classmethod
+        def gds_parse_date(cls, input_data):
+            tz = None
+            if input_data[-1] == 'Z':
+                tz = GeneratedsSuper._FixedOffsetTZ(0, 'UTC')
+                input_data = input_data[:-1]
+            else:
+                results = GeneratedsSuper.tzoff_pattern.search(input_data)
+                if results is not None:
+                    tzoff_parts = results.group(2).split(':')
+                    tzoff = int(tzoff_parts[0]) * 60 + int(tzoff_parts[1])
+                    if results.group(1) == '-':
+                        tzoff *= -1
+                    tz = GeneratedsSuper._FixedOffsetTZ(
+                        tzoff, results.group(0))
+                    input_data = input_data[:-6]
+            dt = datetime_.datetime.strptime(input_data, '%Y-%m-%d')
+            dt = dt.replace(tzinfo=tz)
+            return dt.date()
+        def gds_validate_time(self, input_data, node=None, input_name=''):
+            return input_data
+        def gds_format_time(self, input_data, input_name=''):
+            if input_data.microsecond == 0:
+                _svalue = '%02d:%02d:%02d' % (
+                    input_data.hour,
+                    input_data.minute,
+                    input_data.second,
+                )
+            else:
+                _svalue = '%02d:%02d:%02d.%s' % (
+                    input_data.hour,
+                    input_data.minute,
+                    input_data.second,
+                    ('%f' % (float(input_data.microsecond) / 1000000))[2:],
+                )
+            if input_data.tzinfo is not None:
+                tzoff = input_data.tzinfo.utcoffset(input_data)
+                if tzoff is not None:
+                    total_seconds = tzoff.seconds + (86400 * tzoff.days)
+                    if total_seconds == 0:
+                        _svalue += 'Z'
+                    else:
+                        if total_seconds < 0:
+                            _svalue += '-'
+                            total_seconds *= -1
+                        else:
+                            _svalue += '+'
+                        hours = total_seconds // 3600
+                        minutes = (total_seconds - (hours * 3600)) // 60
+                        _svalue += '{0:02d}:{1:02d}'.format(hours, minutes)
+            return _svalue
+        def gds_validate_simple_patterns(self, patterns, target):
+            # pat is a list of lists of strings/patterns.
+            # The target value must match at least one of the patterns
+            # in order for the test to succeed.
+            found1 = True
+            for patterns1 in patterns:
+                found2 = False
+                for patterns2 in patterns1:
+                    mo = re_.search(patterns2, target)
+                    if mo is not None and len(mo.group(0)) == len(target):
+                        found2 = True
+                        break
+                if not found2:
+                    found1 = False
+                    break
+            return found1
+        @classmethod
+        def gds_parse_time(cls, input_data):
+            tz = None
+            if input_data[-1] == 'Z':
+                tz = GeneratedsSuper._FixedOffsetTZ(0, 'UTC')
+                input_data = input_data[:-1]
+            else:
+                results = GeneratedsSuper.tzoff_pattern.search(input_data)
+                if results is not None:
+                    tzoff_parts = results.group(2).split(':')
+                    tzoff = int(tzoff_parts[0]) * 60 + int(tzoff_parts[1])
+                    if results.group(1) == '-':
+                        tzoff *= -1
+                    tz = GeneratedsSuper._FixedOffsetTZ(
+                        tzoff, results.group(0))
+                    input_data = input_data[:-6]
+            if len(input_data.split('.')) > 1:
+                dt = datetime_.datetime.strptime(input_data, '%H:%M:%S.%f')
+            else:
+                dt = datetime_.datetime.strptime(input_data, '%H:%M:%S')
+            dt = dt.replace(tzinfo=tz)
+            return dt.time()
+        def gds_check_cardinality_(
+                self, value, input_name,
+                min_occurs=0, max_occurs=1, required=None):
+            if value is None:
+                length = 0
+            elif isinstance(value, list):
+                length = len(value)
+            else:
+                length = 1
+            if required is not None :
+                if required and length < 1:
+                    self.gds_collector_.add_message(
+                        "Required value {}{} is missing".format(
+                            input_name, self.gds_get_node_lineno_()))
+            if length < min_occurs:
+                self.gds_collector_.add_message(
+                    "Number of values for {}{} is below "
+                    "the minimum allowed, "
+                    "expected at least {}, found {}".format(
+                        input_name, self.gds_get_node_lineno_(),
+                        min_occurs, length))
+            elif length > max_occurs:
+                self.gds_collector_.add_message(
+                    "Number of values for {}{} is above "
+                    "the maximum allowed, "
+                    "expected at most {}, found {}".format(
+                        input_name, self.gds_get_node_lineno_(),
+                        max_occurs, length))
+        def gds_validate_builtin_ST_(
+                self, validator, value, input_name,
+                min_occurs=None, max_occurs=None, required=None):
+            if value is not None:
+                try:
+                    validator(value, input_name=input_name)
+                except GDSParseError as parse_error:
+                    self.gds_collector_.add_message(str(parse_error))
+        def gds_validate_defined_ST_(
+                self, validator, value, input_name,
+                min_occurs=None, max_occurs=None, required=None):
+            if value is not None:
+                try:
+                    validator(value)
+                except GDSParseError as parse_error:
+                    self.gds_collector_.add_message(str(parse_error))
+        def gds_str_lower(self, instring):
+            return instring.lower()
+        def get_path_(self, node):
+            path_list = []
+            self.get_path_list_(node, path_list)
+            path_list.reverse()
+            path = '/'.join(path_list)
+            return path
+        Tag_strip_pattern_ = re_.compile(r'\{.*\}')
+        def get_path_list_(self, node, path_list):
+            if node is None:
+                return
+            tag = GeneratedsSuper.Tag_strip_pattern_.sub('', node.tag)
+            if tag:
+                path_list.append(tag)
+            self.get_path_list_(node.getparent(), path_list)
+        def get_class_obj_(self, node, default_class=None):
+            class_obj1 = default_class
+            if 'xsi' in node.nsmap:
+                classname = node.get('{%s}type' % node.nsmap['xsi'])
+                if classname is not None:
+                    names = classname.split(':')
+                    if len(names) == 2:
+                        classname = names[1]
+                    class_obj2 = globals().get(classname)
+                    if class_obj2 is not None:
+                        class_obj1 = class_obj2
+            return class_obj1
+        def gds_build_any(self, node, type_name=None):
+            # provide default value in case option --disable-xml is used.
+            content = ""
+            content = etree_.tostring(node, encoding="unicode")
+            return content
+        @classmethod
+        def gds_reverse_node_mapping(cls, mapping):
+            return dict(((v, k) for k, v in mapping.items()))
+        @staticmethod
+        def gds_encode(instring):
+            if sys.version_info.major == 2:
+                if ExternalEncoding:
+                    encoding = ExternalEncoding
+                else:
+                    encoding = 'utf-8'
+                return instring.encode(encoding)
+            else:
+                return instring
+        @staticmethod
+        def convert_unicode(instring):
+            if isinstance(instring, str):
+                result = quote_xml(instring)
+            elif sys.version_info.major == 2 and isinstance(instring, unicode):
+                result = quote_xml(instring).encode('utf8')
+            else:
+                result = GeneratedsSuper.gds_encode(str(instring))
+            return result
+        def __eq__(self, other):
+            def excl_select_objs_(obj):
+                return (obj[0] != 'parent_object_' and
+                        obj[0] != 'gds_collector_')
+            if type(self) != type(other):
+                return False
+            return all(x == y for x, y in zip_longest(
+                filter(excl_select_objs_, self.__dict__.items()),
+                filter(excl_select_objs_, other.__dict__.items())))
+        def __ne__(self, other):
+            return not self.__eq__(other)
+        # Django ETL transform hooks.
+        def gds_djo_etl_transform(self):
+            pass
+        def gds_djo_etl_transform_db_obj(self, dbobj):
+            pass
+        # SQLAlchemy ETL transform hooks.
+        def gds_sqa_etl_transform(self):
+            return 0, None
+        def gds_sqa_etl_transform_db_obj(self, dbobj):
+            pass
+        def gds_get_node_lineno_(self):
+            if (hasattr(self, "gds_elementtree_node_") and
+                    self.gds_elementtree_node_ is not None):
+                return ' near line {}'.format(
+                    self.gds_elementtree_node_.sourceline)
+            else:
+                return ""
+    
+    
+    def getSubclassFromModule_(module, class_):
+        '''Get the subclass of a class from a specific module.'''
+        name = class_.__name__ + 'Sub'
+        if hasattr(module, name):
+            return getattr(module, name)
+        else:
+            return None
+
+
+#
+# If you have installed IPython you can uncomment and use the following.
+# IPython is available from http://ipython.scipy.org/.
+#
+
+## from IPython.Shell import IPShellEmbed
+## args = ''
+## ipshell = IPShellEmbed(args,
+##     banner = 'Dropping into IPython',
+##     exit_msg = 'Leaving Interpreter, back to program.')
+
+# Then use the following line where and when you want to drop into the
+# IPython shell:
+#    ipshell('<some message> -- Entering ipshell.\nHit Ctrl-D to exit')
+
+#
+# Globals
+#
+
+ExternalEncoding = ''
+# Set this to false in order to deactivate during export, the use of
+# name space prefixes captured from the input document.
+UseCapturedNS_ = True
+CapturedNsmap_ = {}
+Tag_pattern_ = re_.compile(r'({.*})?(.*)')
+String_cleanup_pat_ = re_.compile(r"[\n\r\s]+")
+Namespace_extract_pat_ = re_.compile(r'{(.*)}(.*)')
+CDATA_pattern_ = re_.compile(r"<!\[CDATA\[.*?\]\]>", re_.DOTALL)
+
+# Change this to redirect the generated superclass module to use a
+# specific subclass module.
+CurrentSubclassModule_ = None
+
+#
+# Support/utility functions.
+#
+
+
+def showIndent(outfile, level, pretty_print=True):
+    if pretty_print:
+        for idx in range(level):
+            outfile.write('    ')
+
+
+def quote_xml(inStr):
+    "Escape markup chars, but do not modify CDATA sections."
+    if not inStr:
+        return ''
+    s1 = (isinstance(inStr, BaseStrType_) and inStr or '%s' % inStr)
+    s2 = ''
+    pos = 0
+    matchobjects = CDATA_pattern_.finditer(s1)
+    for mo in matchobjects:
+        s3 = s1[pos:mo.start()]
+        s2 += quote_xml_aux(s3)
+        s2 += s1[mo.start():mo.end()]
+        pos = mo.end()
+    s3 = s1[pos:]
+    s2 += quote_xml_aux(s3)
+    return s2
+
+
+def quote_xml_aux(inStr):
+    s1 = inStr.replace('&', '&amp;')
+    s1 = s1.replace('<', '&lt;')
+    s1 = s1.replace('>', '&gt;')
+    return s1
+
+
+def quote_attrib(inStr):
+    s1 = (isinstance(inStr, BaseStrType_) and inStr or '%s' % inStr)
+    s1 = s1.replace('&', '&amp;')
+    s1 = s1.replace('<', '&lt;')
+    s1 = s1.replace('>', '&gt;')
+    if '"' in s1:
+        if "'" in s1:
+            s1 = '"%s"' % s1.replace('"', "&quot;")
+        else:
+            s1 = "'%s'" % s1
+    else:
+        s1 = '"%s"' % s1
+    return s1
+
+
+def quote_python(inStr):
+    s1 = inStr
+    if s1.find("'") == -1:
+        if s1.find('\n') == -1:
+            return "'%s'" % s1
+        else:
+            return "'''%s'''" % s1
+    else:
+        if s1.find('"') != -1:
+            s1 = s1.replace('"', '\\"')
+        if s1.find('\n') == -1:
+            return '"%s"' % s1
+        else:
+            return '"""%s"""' % s1
+
+
+def get_all_text_(node):
+    if node.text is not None:
+        text = node.text
+    else:
+        text = ''
+    for child in node:
+        if child.tail is not None:
+            text += child.tail
+    return text
+
+
+def find_attr_value_(attr_name, node):
+    attrs = node.attrib
+    attr_parts = attr_name.split(':')
+    value = None
+    if len(attr_parts) == 1:
+        value = attrs.get(attr_name)
+    elif len(attr_parts) == 2:
+        prefix, name = attr_parts
+        namespace = node.nsmap.get(prefix)
+        if namespace is not None:
+            value = attrs.get('{%s}%s' % (namespace, name, ))
+    return value
+
+
+def encode_str_2_3(instr):
+    return instr
+
+
+class GDSParseError(Exception):
+    pass
+
+
+def raise_parse_error(node, msg):
+    if node is not None:
+        msg = '%s (element %s/line %d)' % (msg, node.tag, node.sourceline, )
+    raise GDSParseError(msg)
+
+
+class MixedContainer:
+    # Constants for category:
+    CategoryNone = 0
+    CategoryText = 1
+    CategorySimple = 2
+    CategoryComplex = 3
+    # Constants for content_type:
+    TypeNone = 0
+    TypeText = 1
+    TypeString = 2
+    TypeInteger = 3
+    TypeFloat = 4
+    TypeDecimal = 5
+    TypeDouble = 6
+    TypeBoolean = 7
+    TypeBase64 = 8
+    def __init__(self, category, content_type, name, value):
+        self.category = category
+        self.content_type = content_type
+        self.name = name
+        self.value = value
+    def getCategory(self):
+        return self.category
+    def getContenttype(self, content_type):
+        return self.content_type
+    def getValue(self):
+        return self.value
+    def getName(self):
+        return self.name
+    def export(self, outfile, level, name, namespace,
+               pretty_print=True):
+        if self.category == MixedContainer.CategoryText:
+            # Prevent exporting empty content as empty lines.
+            if self.value.strip():
+                outfile.write(self.value)
+        elif self.category == MixedContainer.CategorySimple:
+            self.exportSimple(outfile, level, name)
+        else:    # category == MixedContainer.CategoryComplex
+            self.value.export(
+                outfile, level, namespace, name_=name,
+                pretty_print=pretty_print)
+    def exportSimple(self, outfile, level, name):
+        if self.content_type == MixedContainer.TypeString:
+            outfile.write('<%s>%s</%s>' % (
+                self.name, self.value, self.name))
+        elif self.content_type == MixedContainer.TypeInteger or \
+                self.content_type == MixedContainer.TypeBoolean:
+            outfile.write('<%s>%d</%s>' % (
+                self.name, self.value, self.name))
+        elif self.content_type == MixedContainer.TypeFloat or \
+                self.content_type == MixedContainer.TypeDecimal:
+            outfile.write('<%s>%f</%s>' % (
+                self.name, self.value, self.name))
+        elif self.content_type == MixedContainer.TypeDouble:
+            outfile.write('<%s>%g</%s>' % (
+                self.name, self.value, self.name))
+        elif self.content_type == MixedContainer.TypeBase64:
+            outfile.write('<%s>%s</%s>' % (
+                self.name,
+                base64.b64encode(self.value),
+                self.name))
+    def to_etree(self, element, mapping_=None, nsmap_=None):
+        if self.category == MixedContainer.CategoryText:
+            # Prevent exporting empty content as empty lines.
+            if self.value.strip():
+                if len(element) > 0:
+                    if element[-1].tail is None:
+                        element[-1].tail = self.value
+                    else:
+                        element[-1].tail += self.value
+                else:
+                    if element.text is None:
+                        element.text = self.value
+                    else:
+                        element.text += self.value
+        elif self.category == MixedContainer.CategorySimple:
+            subelement = etree_.SubElement(
+                element, '%s' % self.name)
+            subelement.text = self.to_etree_simple()
+        else:    # category == MixedContainer.CategoryComplex
+            self.value.to_etree(element)
+    def to_etree_simple(self, mapping_=None, nsmap_=None):
+        if self.content_type == MixedContainer.TypeString:
+            text = self.value
+        elif (self.content_type == MixedContainer.TypeInteger or
+                self.content_type == MixedContainer.TypeBoolean):
+            text = '%d' % self.value
+        elif (self.content_type == MixedContainer.TypeFloat or
+                self.content_type == MixedContainer.TypeDecimal):
+            text = '%f' % self.value
+        elif self.content_type == MixedContainer.TypeDouble:
+            text = '%g' % self.value
+        elif self.content_type == MixedContainer.TypeBase64:
+            text = '%s' % base64.b64encode(self.value)
+        return text
+    def exportLiteral(self, outfile, level, name):
+        if self.category == MixedContainer.CategoryText:
+            showIndent(outfile, level)
+            outfile.write(
+                'model_.MixedContainer(%d, %d, "%s", "%s"),\n' % (
+                    self.category, self.content_type,
+                    self.name, self.value))
+        elif self.category == MixedContainer.CategorySimple:
+            showIndent(outfile, level)
+            outfile.write(
+                'model_.MixedContainer(%d, %d, "%s", "%s"),\n' % (
+                    self.category, self.content_type,
+                    self.name, self.value))
+        else:    # category == MixedContainer.CategoryComplex
+            showIndent(outfile, level)
+            outfile.write(
+                'model_.MixedContainer(%d, %d, "%s",\n' % (
+                    self.category, self.content_type, self.name,))
+            self.value.exportLiteral(outfile, level + 1)
+            showIndent(outfile, level)
+            outfile.write(')\n')
+
+
+class MemberSpec_(object):
+    def __init__(self, name='', data_type='', container=0,
+            optional=0, child_attrs=None, choice=None):
+        self.name = name
+        self.data_type = data_type
+        self.container = container
+        self.child_attrs = child_attrs
+        self.choice = choice
+        self.optional = optional
+    def set_name(self, name): self.name = name
+    def get_name(self): return self.name
+    def set_data_type(self, data_type): self.data_type = data_type
+    def get_data_type_chain(self): return self.data_type
+    def get_data_type(self):
+        if isinstance(self.data_type, list):
+            if len(self.data_type) > 0:
+                return self.data_type[-1]
+            else:
+                return 'xs:string'
+        else:
+            return self.data_type
+    def set_container(self, container): self.container = container
+    def get_container(self): return self.container
+    def set_child_attrs(self, child_attrs): self.child_attrs = child_attrs
+    def get_child_attrs(self): return self.child_attrs
+    def set_choice(self, choice): self.choice = choice
+    def get_choice(self): return self.choice
+    def set_optional(self, optional): self.optional = optional
+    def get_optional(self): return self.optional
+
+
+def _cast(typ, value):
+    if typ is None or value is None:
+        return value
+    return typ(value)
+
+#
+# Data representation classes.
+#
+
+
+class CbcBizActivityType_EnumType(Enum):
+    """Main business activities"""
+    CBC_501='CBC501' # Research and Development
+    CBC_502='CBC502' # Holding or Managing intellectual property
+    CBC_503='CBC503' # Purchasing or Procurement
+    CBC_504='CBC504' # Manufacturing or Production
+    CBC_505='CBC505' # Sales, Marketing or Distribution
+    CBC_506='CBC506' # Administrative, Management or Support Services
+    CBC_507='CBC507' # Provision of Services to unrelated parties
+    CBC_508='CBC508' # Internal Group Finance
+    CBC_509='CBC509' # Regulated Financial Services
+    CBC_510='CBC510' # Insurance
+    CBC_511='CBC511' # Holding shares or other equity instruments
+    CBC_512='CBC512' # Dormant
+    CBC_513='CBC513' # Other
+
+
+class CbcMessageTypeIndic_EnumType(Enum):
+    """The MessageTypeIndic defines the type of message sent"""
+    CBC_401='CBC401' # The message contains new information
+    CBC_402='CBC402' # The message contains corrections for previously sent information
+
+
+class CbcReportingRole_EnumType(Enum):
+    """Reporting role"""
+    CBC_701='CBC701' # Ultimate Parent Entity
+    CBC_702='CBC702' # Surrogate Parent Entity
+    CBC_703='CBC703' # Local Filing in the framework of an international exchange
+    CBC_704='CBC704' # Local Filing with Incomplete Information
+
+
+class CbcSummaryListElementsType_EnumType(Enum):
+    """List of Summary elements"""
+    CBC_601='CBC601' # Revenues - Unrelated
+    CBC_602='CBC602' # Revenues - Related
+    CBC_603='CBC603' # Revenues - Total
+    CBC_604='CBC604' # Profit or Loss
+    CBC_605='CBC605' # Tax Paid
+    CBC_606='CBC606' # Tax Accrued
+    CBC_607='CBC607' # Capital
+    CBC_608='CBC608' # Earnings
+    CBC_609='CBC609' # Number of Employees
+    CBC_610='CBC610' # Assets
+    CBC_611='CBC611' # Name of MNE Group
+
+
+class CountryCode_Type(Enum):
+    """ISO-3166 Alpha 2 country codes"""
+    AF='AF' # AFGHANISTAN
+    AX='AX' # ALAND ISLANDS
+    AL='AL' # ALBANIA
+    DZ='DZ' # ALGERIA
+    AS='AS' # AMERICAN SAMOA
+    AD='AD' # ANDORRA
+    AO='AO' # ANGOLA
+    AI='AI' # ANGUILLA
+    AQ='AQ' # ANTARCTICA
+    AG='AG' # ANTIGUA AND BARBUDA
+    AR='AR' # ARGENTINA
+    AM='AM' # ARMENIA
+    AW='AW' # ARUBA
+    AU='AU' # AUSTRALIA
+    AT='AT' # AUSTRIA
+    AZ='AZ' # AZERBAIJAN
+    BS='BS' # BAHAMAS
+    BH='BH' # BAHRAIN
+    BD='BD' # BANGLADESH
+    BB='BB' # BARBADOS
+    BY='BY' # BELARUS
+    BE='BE' # BELGIUM
+    BZ='BZ' # BELIZE
+    BJ='BJ' # BENIN
+    BM='BM' # BERMUDA
+    BT='BT' # BHUTAN
+    BO='BO' # BOLIVIA, PLURINATIONAL STATE OF
+    BQ='BQ' # BONAIRE, SINT EUSTATIUS AND SABA
+    BA='BA' # BOSNIA AND HERZEGOVINA
+    BW='BW' # BOTSWANA
+    BV='BV' # BOUVET ISLAND
+    BR='BR' # BRAZIL
+    IO='IO' # BRITISH INDIAN OCEAN TERRITORY
+    BN='BN' # BRUNEI DARUSSALAM
+    BG='BG' # BULGARIA
+    BF='BF' # BURKINA FASO
+    BI='BI' # BURUNDI
+    KH='KH' # CAMBODIA
+    CM='CM' # CAMEROON
+    CA='CA' # CANADA
+    CV='CV' # CABO VERDE
+    KY='KY' # CAYMAN ISLANDS
+    CF='CF' # CENTRAL AFRICAN REPUBLIC
+    TD='TD' # CHAD
+    CL='CL' # CHILE
+    CN='CN' # CHINA
+    CX='CX' # CHRISTMAS ISLAND
+    CC='CC' # COCOS (KEELING) ISLANDS
+    CO='CO' # COLOMBIA
+    KM='KM' # COMOROS
+    CG='CG' # CONGO
+    CD='CD' # CONGO, THE DEMOCRATIC REPUBLIC OF THE
+    CK='CK' # COOK ISLANDS
+    CR='CR' # COSTA RICA
+    CI='CI' # COTE D'IVOIRE
+    HR='HR' # CROATIA
+    CU='CU' # CUBA
+    CW='CW' # CURACAO
+    CY='CY' # CYPRUS
+    CZ='CZ' # CZECHIA
+    DK='DK' # DENMARK
+    DJ='DJ' # DJIBOUTI
+    DM='DM' # DOMINICA
+    DO='DO' # DOMINICAN REPUBLIC
+    EC='EC' # ECUADOR
+    EG='EG' # EGYPT
+    SV='SV' # EL SALVADOR
+    GQ='GQ' # EQUATORIAL GUINEA
+    ER='ER' # ERITREA
+    EE='EE' # ESTONIA
+    ET='ET' # ETHIOPIA
+    FK='FK' # FALKLAND ISLANDS (MALVINAS)
+    FO='FO' # FAROE ISLANDS
+    FJ='FJ' # FIJI
+    FI='FI' # FINLAND
+    FR='FR' # FRANCE
+    GF='GF' # FRENCH GUIANA
+    PF='PF' # FRENCH POLYNESIA
+    TF='TF' # FRENCH SOUTHERN TERRITORIES
+    GA='GA' # GABON
+    GM='GM' # GAMBIA
+    GE='GE' # GEORGIA
+    DE='DE' # GERMANY
+    GH='GH' # GHANA
+    GI='GI' # GIBRALTAR
+    GR='GR' # GREECE
+    GL='GL' # GREENLAND
+    GD='GD' # GRENADA
+    GP='GP' # GUADELOUPE
+    GU='GU' # GUAM
+    GT='GT' # GUATEMALA
+    GG='GG' # GUERNSEY
+    GN='GN' # GUINEA
+    GW='GW' # GUINEA-BISSAU
+    GY='GY' # GUYANA
+    HT='HT' # HAITI
+    HM='HM' # HEARD ISLAND AND MCDONALD ISLANDS
+    VA='VA' # HOLY SEE (VATICAN CITY STATE)
+    HN='HN' # HONDURAS
+    HK='HK' # HONG KONG
+    HU='HU' # HUNGARY
+    IS='IS' # ICELAND
+    IN='IN' # INDIA
+    ID='ID' # INDONESIA
+    IR='IR' # IRAN, ISLAMIC REPUBLIC OF
+    IQ='IQ' # IRAQ
+    IE='IE' # IRELAND
+    IM='IM' # ISLE OF MAN
+    IL='IL' # ISRAEL
+    IT='IT' # ITALY
+    JM='JM' # JAMAICA
+    JP='JP' # JAPAN
+    JE='JE' # JERSEY
+    JO='JO' # JORDAN
+    KZ='KZ' # KAZAKHSTAN
+    KE='KE' # KENYA
+    KI='KI' # KIRIBATI
+    KP='KP' # KOREA, DEMOCRATIC PEOPLE'S REPUBLIC OF
+    KR='KR' # KOREA, REPUBLIC OF
+    KW='KW' # KUWAIT
+    KG='KG' # KYRGYZSTAN
+    LA='LA' # LAO PEOPLE'S DEMOCRATIC REPUBLIC
+    LV='LV' # LATVIA
+    LB='LB' # LEBANON
+    LS='LS' # LESOTHO
+    LR='LR' # LIBERIA
+    LY='LY' # LIBYA
+    LI='LI' # LIECHTENSTEIN
+    LT='LT' # LITHUANIA
+    LU='LU' # LUXEMBOURG
+    MO='MO' # MACAO
+    MK='MK' # NORTH MACEDONIA
+    MG='MG' # MADAGASCAR
+    MW='MW' # MALAWI
+    MY='MY' # MALAYSIA
+    MV='MV' # MALDIVES
+    ML='ML' # MALI
+    MT='MT' # MALTA
+    MH='MH' # MARSHALL ISLANDS
+    MQ='MQ' # MARTINIQUE
+    MR='MR' # MAURITANIA
+    MU='MU' # MAURITIUS
+    YT='YT' # MAYOTTE
+    MX='MX' # MEXICO
+    FM='FM' # MICRONESIA, FEDERATED STATES OF
+    MD='MD' # MOLDOVA, REPUBLIC OF
+    MC='MC' # MONACO
+    MN='MN' # MONGOLIA
+    ME='ME' # MONTENEGRO
+    MS='MS' # MONTSERRAT
+    MA='MA' # MOROCCO
+    MZ='MZ' # MOZAMBIQUE
+    MM='MM' # MYANMAR
+    NA='NA' # NAMIBIA
+    NR='NR' # NAURU
+    NP='NP' # NEPAL
+    NL='NL' # NETHERLANDS
+    NC='NC' # NEW CALEDONIA
+    NZ='NZ' # NEW ZEALAND
+    NI='NI' # NICARAGUA
+    NE='NE' # NIGER
+    NG='NG' # NIGERIA
+    NU='NU' # NIUE
+    NF='NF' # NORFOLK ISLAND
+    MP='MP' # NORTHERN MARIANA ISLANDS
+    NO='NO' # NORWAY
+    OM='OM' # OMAN
+    PK='PK' # PAKISTAN
+    PW='PW' # PALAU
+    PS='PS' # PALESTINE, STATE OF
+    PA='PA' # PANAMA
+    PG='PG' # PAPUA NEW GUINEA
+    PY='PY' # PARAGUAY
+    PE='PE' # PERU
+    PH='PH' # PHILIPPINES
+    PN='PN' # PITCAIRN
+    PL='PL' # POLAND
+    PT='PT' # PORTUGAL
+    PR='PR' # PUERTO RICO
+    QA='QA' # QATAR
+    RE='RE' # REUNION
+    RO='RO' # ROMANIA
+    RU='RU' # RUSSIAN FEDERATION
+    RW='RW' # RWANDA
+    BL='BL' # SAINT BARTHELEMY
+    SH='SH' # SAINT HELENA, ASCENSION AND TRISTAN DA CUNHA
+    KN='KN' # SAINT KITTS AND NEVIS
+    LC='LC' # SAINT LUCIA
+    MF='MF' # SAINT MARTIN (FRENCH PART)
+    PM='PM' # SAINT PIERRE AND MIQUELON
+    VC='VC' # SAINT VINCENT AND THE GRENADINES
+    WS='WS' # SAMOA
+    SM='SM' # SAN MARINO
+    ST='ST' # SAO TOME AND PRINCIPE
+    SA='SA' # SAUDI ARABIA
+    SN='SN' # SENEGAL
+    RS='RS' # SERBIA
+    SC='SC' # SEYCHELLES
+    SL='SL' # SIERRA LEONE
+    SG='SG' # SINGAPORE
+    SX='SX' # SINT MAARTEN (DUTCH PART)
+    SK='SK' # SLOVAKIA
+    SI='SI' # SLOVENIA
+    SB='SB' # SOLOMON ISLANDS
+    SO='SO' # SOMALIA
+    ZA='ZA' # SOUTH AFRICA
+    GS='GS' # SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS
+    SS='SS' # SOUTH SUDAN
+    ES='ES' # SPAIN
+    LK='LK' # SRI LANKA
+    SD='SD' # SUDAN
+    SR='SR' # SURINAME
+    SJ='SJ' # SVALBARD AND JAN MAYEN
+    SZ='SZ' # ESWATINI
+    SE='SE' # SWEDEN
+    CH='CH' # SWITZERLAND
+    SY='SY' # SYRIAN ARAB REPUBLIC
+    TW='TW' # TAIWAN, PROVINCE OF CHINA
+    TJ='TJ' # TAJIKISTAN
+    TZ='TZ' # TANZANIA, UNITED REPUBLIC OF
+    TH='TH' # THAILAND
+    TL='TL' # TIMOR-LESTE
+    TG='TG' # TOGO
+    TK='TK' # TOKELAU
+    TO='TO' # TONGA
+    TT='TT' # TRINIDAD AND TOBAGO
+    TN='TN' # TUNISIA
+    TR='TR' # TURKEY
+    TM='TM' # TURKMENISTAN
+    TC='TC' # TURKS AND CAICOS ISLANDS
+    TV='TV' # TUVALU
+    UG='UG' # UGANDA
+    UA='UA' # UKRAINE
+    AE='AE' # UNITED ARAB EMIRATES
+    GB='GB' # UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND
+    US='US' # UNITED STATES
+    UM='UM' # UNITED STATES MINOR OUTLYING ISLANDS
+    UY='UY' # URUGUAY
+    UZ='UZ' # UZBEKISTAN
+    VU='VU' # VANUATU
+    VE='VE' # VENEZUELA, BOLIVARIAN REPUBLIC OF
+    VN='VN' # VIET NAM
+    VG='VG' # VIRGIN ISLANDS, BRITISH
+    VI='VI' # VIRGIN ISLANDS, U.S.
+    WF='WF' # WALLIS AND FUTUNA
+    EH='EH' # WESTERN SAHARA
+    YE='YE' # YEMEN
+    ZM='ZM' # ZAMBIA
+    ZW='ZW' # ZIMBABWE
+    XK='XK' # KOSOVO
+    X_5='X5' # STATELESS
+    XX='XX' # OTHER COUNTRY
+
+
+class LanguageCode_Type(Enum):
+    """ISO 639 - Part 1 Language codes"""
+    AA='AA' # Afar
+    AB='AB' # Abkhazian
+    AF='AF' # Afrikaans
+    AK='AK' # Akan
+    SQ='SQ' # Albanian
+    AM='AM' # Amharic
+    AR='AR' # Arabic
+    AN='AN' # Aragonese
+    HY='HY' # Armenian
+    AS='AS' # Assamese
+    AV='AV' # Avaric
+    AE='AE' # Avestan
+    AY='AY' # Aymara
+    AZ='AZ' # Azerbaijani
+    BA='BA' # Bashkir
+    BM='BM' # Bambara
+    EU='EU' # Basque
+    BE='BE' # Belarusian
+    BN='BN' # Bengali
+    BH='BH' # Bihari languages
+    BI='BI' # Bislama
+    BS='BS' # Bosnian
+    BR='BR' # Breton
+    BG='BG' # Bulgarian
+    MY='MY' # Burmese
+    CA='CA' # Catalan; Valencian
+    CH='CH' # Chamorro
+    CE='CE' # Chechen
+    ZH='ZH' # Chinese
+    CU='CU' # Church Slavic; Old Slavonic; Church Slavonic; Old Bulgarian; Old Church Slavonic
+    CV='CV' # Chuvash
+    KW='KW' # Cornish
+    CO='CO' # Corsican
+    CR='CR' # Cree
+    CS='CS' # Czech
+    DA='DA' # Danish
+    DV='DV' # Divehi; Dhivehi; Maldivian
+    NL='NL' # Dutch; Flemish
+    DZ='DZ' # Dzongkha
+    EN='EN' # English
+    EO='EO' # Esperanto
+    ET='ET' # Estonian
+    EE='EE' # Ewe
+    FO='FO' # Faroese
+    FJ='FJ' # Fijian
+    FI='FI' # Finnish
+    FR='FR' # French
+    FY='FY' # Western Frisian
+    FF='FF' # Fulah
+    KA='KA' # Georgian
+    DE='DE' # German
+    GD='GD' # Gaelic; Scottish Gaelic
+    GA='GA' # Irish
+    GL='GL' # Galician
+    GV='GV' # Manx
+    EL='EL' # Greek
+    GN='GN' # Guarani
+    GU='GU' # Gujarati
+    HT='HT' # Haitian; Haitian Creole
+    HA='HA' # Hausa
+    HE='HE' # Hebrew
+    HZ='HZ' # Herero
+    HI='HI' # Hindi
+    HO='HO' # Hiri Motu
+    HR='HR' # Croatian
+    HU='HU' # Hungarian
+    IG='IG' # Igbo
+    IS='IS' # Icelandic
+    IO='IO' # Ido
+    II='II' # Sichuan Yi; Nuosu
+    IU='IU' # Inuktitut
+    IE='IE' # Interlingue; Occidental
+    IA='IA' # Interlingua (International Auxiliary Language Association)
+    ID='ID' # Indonesian
+    IK='IK' # Inupiaq
+    IT='IT' # Italian
+    JV='JV' # Javanese
+    JA='JA' # Japanese
+    KL='KL' # Kalaallisut; Greenlandic
+    KN='KN' # Kannada
+    KS='KS' # Kashmiri
+    KR='KR' # Kanuri
+    KK='KK' # Kazakh
+    KM='KM' # Central Khmer
+    KI='KI' # Kikuyu; Gikuyu
+    RW='RW' # Kinyarwanda
+    KY='KY' # Kirghiz; Kyrgyz
+    KV='KV' # Komi
+    KG='KG' # Kongo
+    KO='KO' # Korean
+    KJ='KJ' # Kuanyama; Kwanyama
+    KU='KU' # Kurdish
+    LO='LO' # Lao
+    LA='LA' # Latin
+    LV='LV' # Latvian
+    LI='LI' # Limburgan; Limburger; Limburgish
+    LN='LN' # Lingala
+    LT='LT' # Lithuanian
+    LB='LB' # Luxembourgish; Letzeburgesch
+    LU='LU' # Luba-Katanga
+    LG='LG' # Ganda
+    MK='MK' # Macedonian
+    MH='MH' # Marshallese
+    ML='ML' # Malayalam
+    MI='MI' # Maori
+    MR='MR' # Marathi
+    MS='MS' # Malay
+    MG='MG' # Malagasy
+    MT='MT' # Maltese
+    MN='MN' # Mongolian
+    NA='NA' # Nauru
+    NV='NV' # Navajo; Navaho
+    NR='NR' # Ndebele, South; South Ndebele
+    ND='ND' # Ndebele, North; North Ndebele
+    NG='NG' # Ndonga
+    NE='NE' # Nepali
+    NN='NN' # Norwegian Nynorsk; Nynorsk, Norwegian
+    NB='NB' # Bokmål, Norwegian; Norwegian Bokmål
+    NO='NO' # Norwegian
+    NY='NY' # Chichewa; Chewa; Nyanja
+    OC='OC' # Occitan; Provençal
+    OJ='OJ' # Ojibwa
+    OR='OR' # Oriya
+    OM='OM' # Oromo
+    OS='OS' # Ossetian; Ossetic
+    PA='PA' # Panjabi; Punjabi
+    FA='FA' # Persian
+    PI='PI' # Pali
+    PL='PL' # Polish
+    PT='PT' # Portuguese
+    PS='PS' # Pushto; Pashto
+    QU='QU' # Quechua
+    RM='RM' # Romansh
+    RO='RO' # Romanian; Moldavian; Moldovan
+    RN='RN' # Rundi
+    RU='RU' # Russian
+    SG='SG' # Sango
+    SA='SA' # Sanskrit
+    SI='SI' # Sinhala; Sinhalese
+    SK='SK' # Slovak
+    SL='SL' # Slovenian
+    SE='SE' # Northern Sami
+    SM='SM' # Samoan
+    SN='SN' # Shona
+    SD='SD' # Sindhi
+    SO='SO' # Somali
+    ST='ST' # Sotho, Southern
+    ES='ES' # Spanish; Castilian
+    SC='SC' # Sardinian
+    SR='SR' # Serbian
+    SS='SS' # Swati
+    SU='SU' # Sundanese
+    SW='SW' # Swahili
+    SV='SV' # Swedish
+    TY='TY' # Tahitian
+    TA='TA' # Tamil
+    TT='TT' # Tatar
+    TE='TE' # Telugu
+    TG='TG' # Tajik
+    TL='TL' # Tagalog
+    TH='TH' # Thai
+    BO='BO' # Tibetan
+    TI='TI' # Tigrinya
+    TO='TO' # Tonga (Tonga Islands)
+    TN='TN' # Tswana
+    TS='TS' # Tsonga
+    TK='TK' # Turkmen
+    TR='TR' # Turkish
+    TW='TW' # Twi
+    UG='UG' # Uighur; Uyghur
+    UK='UK' # Ukrainian
+    UR='UR' # Urdu
+    UZ='UZ' # Uzbek
+    VE='VE' # Venda
+    VI='VI' # Vietnamese
+    VO='VO' # Volapük
+    CY='CY' # Welsh
+    WA='WA' # Walloon
+    WO='WO' # Wolof
+    XH='XH' # Xhosa
+    YI='YI' # Yiddish
+    YO='YO' # Yoruba
+    ZA='ZA' # Zhuang; Chuang
+    ZU='ZU' # Zulu
+
+
+class MessageType_EnumType(Enum):
+    """Message type defines the type of reporting"""
+    CBC='CBC'
+
+
+class OECDDocTypeIndic_EnumType(Enum):
+    """This element specifies the type of data being submitted."""
+    OECD_0='OECD0' # Resent Data
+    OECD_1='OECD1' # New Data
+    OECD_2='OECD2' # Corrected Data
+    OECD_3='OECD3' # Deletion of Data
+    OECD_10='OECD10' # Resent Test Data
+    OECD_11='OECD11' # New Test Data
+    OECD_12='OECD12' # Corrected Test Data
+    OECD_13='OECD13' # Deletion of Test Data
+
+
+class OECDLegalAddressType_EnumType(Enum):
+    """This is a datatype for an attribute to an address. It serves to indicate
+    the legal character of that address (residential, business etc.)"""
+    OECD_301='OECD301' # residentialOrBusiness
+    OECD_302='OECD302' # residential
+    OECD_303='OECD303' # business
+    OECD_304='OECD304' # registeredOffice
+    OECD_305='OECD305' # unspecified
+
+
+class OECDNameType_EnumType(Enum):
+    """It is possible for stf documents to contain several names for the same
+    party. This is a qualifier to indicate the type of a particular name.
+    Such types include nicknames ('nick'), names under which a party does
+    business ('dba' a short name for the entity, or a name that is used for
+    public acquaintance instead of the official business name) etc."""
+    OECD_201='OECD201' # SMFAliasOrOther
+    OECD_202='OECD202' # indiv (individual)
+    OECD_203='OECD203' # alias (alias)
+    OECD_204='OECD204' # nick (nickname)
+    OECD_205='OECD205' # aka (also known as)
+    OECD_206='OECD206' # dba (doing business as)
+    OECD_207='OECD207' # legal (legal name)
+    OECD_208='OECD208' # atbirth (name at birth)
+
+
+class UltimateParentEntityRole_EnumType(Enum):
+    """Reporting role"""
+    CBC_801='CBC801' # Ultimate Parent Entity
+    CBC_802='CBC802' # Reporting Entity
+    CBC_803='CBC803' # Both (Ultimate Parent Entity and Reporting Entity)
+
+
+class currCode_Type(Enum):
+    """The appropriate currency code from the ISO 4217 three-byte alpha version
+    for the currency in which a monetary amount is expressed."""
+    AED='AED' # UAE Dirham: UNITED ARAB EMIRATES
+    AFN='AFN' # Afghani: AFGHANISTAN
+    ALL='ALL' # Lek: ALBANIA
+    AMD='AMD' # Armenian Dram: ARMENIA
+    ANG='ANG' # Netherlands Antillean Guilder: CURACAO; SINT MAARTEN (DUTCH PART)
+    AOA='AOA' # Kwanza: ANGOLA
+    ARS='ARS' # Argentine Peso: ARGENTINA
+    AUD='AUD' # Australian Dollar: AUSTRALIA; CHRISTMAS ISLAND; COCOS (KEELING) ISLANDS; HEARD ISLAND AND McDONALD ISLANDS; KIRIBATI; NAURU; NORFOLK ISLAND; TUVALU
+    AWG='AWG' # Aruban Florin: ARUBA
+    AZN='AZN' # Azerbaijan Manat: AZERBAIJAN
+    BAM='BAM' # Convertible Mark: BOSNIA AND HERZEGOVINA
+    BBD='BBD' # Barbados Dollar: BARBADOS
+    BDT='BDT' # Taka: BANGLADESH
+    BGN='BGN' # Bulgarian Lev: BULGARIA
+    BHD='BHD' # Bahraini Dinar: BAHRAIN
+    BIF='BIF' # Burundi Franc: BURUNDI
+    BMD='BMD' # Bermudian Dollar: BERMUDA
+    BND='BND' # Brunei Dollar: BRUNEI DARUSSALAM
+    BOB='BOB' # Boliviano: BOLIVIA, PLURINATIONAL STATE OF
+    BOV='BOV' # Mvdol: BOLIVIA, PLURINATIONAL STATE OF
+    BRL='BRL' # Brazilian Real: BRAZIL
+    BSD='BSD' # Bahamian Dollar: BAHAMAS
+    BTN='BTN' # Ngultrum: BHUTAN
+    BWP='BWP' # Pula: BOTSWANA
+    BYN='BYN' # Belarusian Ruble: BELARUS
+    BYR='BYR' # Historic use: Belarussian Ruble: BELARUS
+    BZD='BZD' # Belize Dollar: BELIZE
+    CAD='CAD' # Canadian Dollar: CANADA
+    CDF='CDF' # Congolese Franc: CONGO, THE DEMOCRATIC REPUBLIC OF
+    CHE='CHE' # WIR Euro: SWITZERLAND
+    CHF='CHF' # Swiss Franc: LIECHTENSTEIN; SWITZERLAND
+    CHW='CHW' # WIR Franc: SWITZERLAND
+    CLF='CLF' # Unidad de Fomento: CHILE
+    CLP='CLP' # Chilean Peso: CHILE
+    CNY='CNY' # Yuan Renminbi: CHINA
+    COP='COP' # Colombian Peso: COLOMBIA
+    COU='COU' # Unidad de Valor Real: COLOMBIA
+    CRC='CRC' # Costa Rican Colon: COSTA RICA
+    CUC='CUC' # Peso Convertible: CUBA
+    CUP='CUP' # Cuban Peso: CUBA
+    CVE='CVE' # Cabo Verde Escudo: CABO VERDE
+    CZK='CZK' # Czech Koruna: CZECHIA
+    DJF='DJF' # Djibouti Franc: DJIBOUTI
+    DKK='DKK' # Danish Krone: DENMARK; FAROE ISLANDS; GREENLAND
+    DOP='DOP' # Dominican Peso: DOMINICAN REPUBLIC
+    DZD='DZD' # Algerian Dinar: ALGERIA
+    EGP='EGP' # Egyptian Pound: EGYPT
+    ERN='ERN' # Nakfa: ERITREA
+    ETB='ETB' # Ethiopian Birr: ETHIOPIA
+    EUR='EUR' # Euro: ALAND ISLANDS; ANDORRA; AUSTRIA; BELGIUM; CYPRUS; ESTONIA; EUROPEAN UNION; FINLAND; FRANCE; FRENCH GUIANA; FRENCH SOUTHERN TERRITORIES; GERMANY; GREECE; GUADELOUPE; HOLY SEE (VATICAN CITY STATE); IRELAND; ITALY; LATVIA; LITHUANIA; LUXEMBOURG; MALTA; MARTINIQUE; MAYOTTE; MONACO; MONTENEGRO; NETHERLANDS; PORTUGAL; REUNION; SAINT BARTHELEMY; SAINT MARTIN (FRENCH PART); SAINT PIERRE AND MIQUELON; SAN MARINO; SLOVAKIA; SLOVENIA; SPAIN; Vatican City State (HOLY SEE)
+    FJD='FJD' # Fiji Dollar: FIJI
+    FKP='FKP' # Falkland Islands Pound: FALKLAND ISLANDS (MALVINAS)
+    GBP='GBP' # Pound Sterling: GUERNSEY; ISLE OF MAN; JERSEY; UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND
+    GEL='GEL' # Lari: GEORGIA
+    GHS='GHS' # Ghana Cedi: GHANA
+    GIP='GIP' # Gibraltar Pound: GIBRALTAR
+    GMD='GMD' # Dalasi: GAMBIA
+    GNF='GNF' # Guinean Franc: GUINEA
+    GTQ='GTQ' # Quetzal: GUATEMALA
+    GYD='GYD' # Guyana Dollar: GUYANA
+    HKD='HKD' # Hong Kong Dollar: HONG KONG
+    HNL='HNL' # Lempira: HONDURAS
+    HRK='HRK' # Kuna: CROATIA
+    HTG='HTG' # Gourde: HAITI
+    HUF='HUF' # Forint: HUNGARY
+    IDR='IDR' # Rupiah: INDONESIA
+    ILS='ILS' # New Israeli Sheqel: ISRAEL
+    INR='INR' # Indian Rupee: BHUTAN; INDIA
+    IQD='IQD' # Iraqi Dinar: IRAQ
+    IRR='IRR' # Iranian Rial: IRAN, ISLAMIC REPUBLIC OF
+    ISK='ISK' # Iceland Krona: ICELAND
+    JMD='JMD' # Jamaican Dollar: JAMAICA
+    JOD='JOD' # Jordanian Dinar: JORDAN
+    JPY='JPY' # Yen: JAPAN
+    KES='KES' # Kenyan Shilling: KENYA
+    KGS='KGS' # Som: KYRGYZSTAN
+    KHR='KHR' # Riel: CAMBODIA
+    KMF='KMF' # Comorian Franc : COMOROS
+    KPW='KPW' # North Korean Won: KOREA, DEMOCRATIC PEOPLE’S REPUBLIC OF
+    KRW='KRW' # Won: KOREA, REPUBLIC OF
+    KWD='KWD' # Kuwaiti Dinar: KUWAIT
+    KYD='KYD' # Cayman Islands Dollar: CAYMAN ISLANDS
+    KZT='KZT' # Tenge: KAZAKHSTAN
+    LAK='LAK' # Lao Kip: LAO PEOPLE’S DEMOCRATIC REPUBLIC
+    LBP='LBP' # Lebanese Pound: LEBANON
+    LKR='LKR' # Sri Lanka Rupee: SRI LANKA
+    LRD='LRD' # Liberian Dollar: LIBERIA
+    LSL='LSL' # Loti: LESOTHO
+    LTL='LTL' # Historic use: Lithuanian Litas: LITHUANIA
+    LVL='LVL' # Historic use: Latvian Lats: LATVIA
+    LYD='LYD' # Libyan Dinar: LIBYA
+    MAD='MAD' # Moroccan Dirham: MOROCCO; WESTERN SAHARA
+    MDL='MDL' # Moldovan Leu: MOLDOVA, REPUBLIC OF
+    MGA='MGA' # Malagasy Ariary: MADAGASCAR
+    MKD='MKD' # Denar: MACEDONIA, THE FORMER YUGOSLAV REPUBLIC OF
+    MMK='MMK' # Kyat: MYANMAR
+    MNT='MNT' # Tugrik: MONGOLIA
+    MOP='MOP' # Pataca: MACAO
+    MRO='MRO' # Historic use: Ouguiya: MAURITANIA
+    MRU='MRU' # Ouguiya: MAURITANIA
+    MUR='MUR' # Mauritius Rupee: MAURITIUS
+    MVR='MVR' # Rufiyaa: MALDIVES
+    MWK='MWK' # Malawi Kwacha: MALAWI
+    MXN='MXN' # Mexican Peso: MEXICO
+    MXV='MXV' # Mexican Unidad de Inversion (UDI): MEXICO
+    MYR='MYR' # Malaysian Ringgit: MALAYSIA
+    MZN='MZN' # Mozambique Metical: MOZAMBIQUE
+    NAD='NAD' # Namibia Dollar: NAMIBIA
+    NGN='NGN' # Naira: NIGERIA
+    NIO='NIO' # Cordoba Oro: NICARAGUA
+    NOK='NOK' # Norwegian Krone: BOUVET ISLAND; NORWAY; SVALBARD AND JAN MAYEN
+    NPR='NPR' # Nepalese Rupee: NEPAL
+    NZD='NZD' # New Zealand Dollar: COOK ISLANDS; NEW ZEALAND; NIUE; PITCAIRN; TOKELAU
+    OMR='OMR' # Rial Omani: OMAN
+    PAB='PAB' # Balboa: PANAMA
+    PEN='PEN' # Sol: PERU
+    PGK='PGK' # Kina: PAPUA NEW GUINEA
+    PHP='PHP' # Philippine Peso: PHILIPPINES
+    PKR='PKR' # Pakistan Rupee: PAKISTAN
+    PLN='PLN' # Zloty: POLAND
+    PYG='PYG' # Guarani: PARAGUAY
+    QAR='QAR' # Qatari Rial: QATAR
+    RON='RON' # Romanian Leu: ROMANIA
+    RSD='RSD' # Serbian Dinar: SERBIA
+    RUB='RUB' # Russian Ruble: RUSSIAN FEDERATION
+    RWF='RWF' # Rwanda Franc: RWANDA
+    SAR='SAR' # Saudi Riyal: SAUDI ARABIA
+    SBD='SBD' # Solomon Islands Dollar: SOLOMON ISLANDS
+    SCR='SCR' # Seychelles Rupee: SEYCHELLES
+    SDG='SDG' # Sudanese Pound: SUDAN
+    SEK='SEK' # Swedish Krona: SWEDEN
+    SGD='SGD' # Singapore Dollar: SINGAPORE
+    SHP='SHP' # Saint Helena Pound: SAINT HELENA, ASCENSION AND TRISTAN DA CUNHA
+    SLL='SLL' # Leone: SIERRA LEONE
+    SOS='SOS' # Somali Shilling: SOMALIA
+    SRD='SRD' # Surinam Dollar: SURINAME
+    SSP='SSP' # South Sudanese Pound: SOUTH SUDAN
+    STD='STD' # Historic use: Dobra: SAO TOME AND PRINCIPE
+    STN='STN' # Dobra: SAO TOME AND PRINCIPE
+    SVC='SVC' # El Salvador Colon: EL SALVADOR
+    SYP='SYP' # Syrian Pound: SYRIAN ARAB REPUBLIC
+    SZL='SZL' # Lilangeni: ESWATINI
+    THB='THB' # Baht: THAILAND
+    TJS='TJS' # Somoni: TAJIKISTAN
+    TMT='TMT' # Turkmenistan New Manat: TURKMENISTAN
+    TND='TND' # Tunisian Dinar: TUNISIA
+    TOP='TOP' # Pa’anga: TONGA
+    TRY='TRY' # Turkish Lira: TURKEY
+    TTD='TTD' # Trinidad and Tobago Dollar: TRINIDAD AND TOBAGO
+    TWD='TWD' # New Taiwan Dollar: TAIWAN, PROVINCE OF CHINA
+    TZS='TZS' # Tanzanian Shilling: TANZANIA, UNITED REPUBLIC OF
+    UAH='UAH' # Hryvnia: UKRAINE
+    UGX='UGX' # Uganda Shilling: UGANDA
+    USD='USD' # US Dollar: AMERICAN SAMOA; BONAIRE; SINT EUSTATIUS AND SABA; BRITISH INDIAN OCEAN TERRITORY; ECUADOR; EL SALVADOR; GUAM; HAITI; MARSHALL ISLANDS; MICRONESIA, FEDERATED STATES OF; NORTHERN MARIANA ISLANDS; PALAU; PANAMA; PUERTO RICO; TIMOR-LESTE; TURKS AND CAICOS ISLANDS; UNITED STATES; UNITED STATES MINOR OUTLYING ISLANDS; VIRGIN ISLANDS (BRITISH); VIRGIN ISLANDS (US)
+    USN='USN' # US Dollar (Next day): UNITED STATES
+    USS='USS' # Historic use: US Dollar (Same day): UNITED STATES
+    UYI='UYI' # Uruguay Peso en Unidades Indexadas (UI): URUGUAY
+    UYU='UYU' # Peso Uruguayo: URUGUAY
+    UYW='UYW' # Unidad Previsional: URUGUAY
+    UZS='UZS' # Uzbekistan Sum: UZBEKISTAN
+    VEF='VEF' # Historic use: Bolivar: VENEZUELA, BOLIVARIAN REPUBLIC OF
+    VES='VES' # Bolívar Soberano: VENEZUELA, BOLIVARIAN REPUBLIC OF
+    VND='VND' # Dong: VIET NAM
+    VUV='VUV' # Vatu: VANUATU
+    WST='WST' # Tala: SAMOA
+    XAF='XAF' # CFA Franc BEAC: CAMEROON; CENTRAL AFRICAN REPUBLIC; CHAD; CONGO; EQUATORIAL GUINEA; GABON
+    XAG='XAG' # Silver: ZZ11_Silver
+    XAU='XAU' # Gold: ZZ08_Gold
+    XBA='XBA' # Bond Markets Unit European Composite Unit (EURCO): ZZ01_Bond Markets Unit European_EURCO
+    XBB='XBB' # Bond Markets Unit European Monetary Unit (E.M.U.-6): ZZ02_Bond Markets Unit European_EMU-6
+    XBC='XBC' # Bond Markets Unit European Unit of Account 9 (E.U.A.-9): ZZ03_Bond Markets Unit European_EUA-9
+    XBD='XBD' # Bond Markets Unit European Unit of Account 17 (E.U.A.-17): ZZ04_Bond Markets Unit European_EUA-17
+    XCD='XCD' # East Caribbean Dollar: ANGUILLA; ANTIGUA AND BARBUDA; DOMINICA; GRENADA; MONTSERRAT; SAINT KITTS AND NEVIS; SAINT LUCIA; SAINT VINCENT AND THE GRENADINES
+    XDR='XDR' # SDR (Special Drawing Right): INTERNATIONAL MONETARY FUND (IMF)
+    XFU='XFU' # Historic use: UIC-Franc: ZZ05_UIC-Franc
+    XOF='XOF' # CFA Franc BCEAO: BENIN; BURKINA FASO; COTE D'IVOIRE; GUINEA-BISSAU; MALI; NIGER; SENEGAL; TOGO
+    XPD='XPD' # Palladium: ZZ09_Palladium
+    XPF='XPF' # CFP Franc: FRENCH POLYNESIA; NEW CALEDONIA; WALLIS AND FUTUNA
+    XPT='XPT' # Platinum: ZZ10_Platinum
+    XSU='XSU' # Sucre: SISTEMA UNITARIO DE COMPENSACION REGIONAL DE PAGOS "SUCRE"
+    XUA='XUA' # ADB Unit of Account: MEMBER COUNTRIES OF THE AFRICAN DEVELOPMENT BANK GROUP
+    XXX='XXX' # The codes assigned for transactions where no currency is involved: ZZ07_No_Currency
+    YER='YER' # Yemeni Rial: YEMEN
+    ZAR='ZAR' # Rand: LESOTHO; NAMIBIA; SOUTH AFRICA
+    ZMW='ZMW' # Zambian Kwacha: ZAMBIA
+    ZWL='ZWL' # Zimbabwe Dollar: ZIMBABWE
+
+
+class AddressFix_Type(GeneratedsSuper):
+    """Structure of the address for a party broken down into its logical parts,
+    recommended for easy matching. The 'City' element is the only required
+    subelement. All of the subelements are simple text - data type
+    'string'."""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, Street=None, BuildingIdentifier=None, SuiteIdentifier=None, FloorIdentifier=None, DistrictName=None, POB=None, PostCode=None, City=None, CountrySubentity=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.Street = Street
+        self.validate_StringMin1Max200_Type(self.Street)
+        self.Street_nsprefix_ = None
+        self.BuildingIdentifier = BuildingIdentifier
+        self.validate_StringMin1Max200_Type(self.BuildingIdentifier)
+        self.BuildingIdentifier_nsprefix_ = None
+        self.SuiteIdentifier = SuiteIdentifier
+        self.validate_StringMin1Max200_Type(self.SuiteIdentifier)
+        self.SuiteIdentifier_nsprefix_ = None
+        self.FloorIdentifier = FloorIdentifier
+        self.validate_StringMin1Max200_Type(self.FloorIdentifier)
+        self.FloorIdentifier_nsprefix_ = None
+        self.DistrictName = DistrictName
+        self.validate_StringMin1Max200_Type(self.DistrictName)
+        self.DistrictName_nsprefix_ = None
+        self.POB = POB
+        self.validate_StringMin1Max200_Type(self.POB)
+        self.POB_nsprefix_ = None
+        self.PostCode = PostCode
+        self.validate_StringMin1Max200_Type(self.PostCode)
+        self.PostCode_nsprefix_ = None
+        self.City = City
+        self.validate_StringMin1Max200_Type(self.City)
+        self.City_nsprefix_ = None
+        self.CountrySubentity = CountrySubentity
+        self.validate_StringMin1Max200_Type(self.CountrySubentity)
+        self.CountrySubentity_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, AddressFix_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if AddressFix_Type.subclass:
+            return AddressFix_Type.subclass(*args_, **kwargs_)
+        else:
+            return AddressFix_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_Street(self):
+        return self.Street
+    def set_Street(self, Street):
+        self.Street = Street
+    def get_BuildingIdentifier(self):
+        return self.BuildingIdentifier
+    def set_BuildingIdentifier(self, BuildingIdentifier):
+        self.BuildingIdentifier = BuildingIdentifier
+    def get_SuiteIdentifier(self):
+        return self.SuiteIdentifier
+    def set_SuiteIdentifier(self, SuiteIdentifier):
+        self.SuiteIdentifier = SuiteIdentifier
+    def get_FloorIdentifier(self):
+        return self.FloorIdentifier
+    def set_FloorIdentifier(self, FloorIdentifier):
+        self.FloorIdentifier = FloorIdentifier
+    def get_DistrictName(self):
+        return self.DistrictName
+    def set_DistrictName(self, DistrictName):
+        self.DistrictName = DistrictName
+    def get_POB(self):
+        return self.POB
+    def set_POB(self, POB):
+        self.POB = POB
+    def get_PostCode(self):
+        return self.PostCode
+    def set_PostCode(self, PostCode):
+        self.PostCode = PostCode
+    def get_City(self):
+        return self.City
+    def set_City(self, City):
+        self.City = City
+    def get_CountrySubentity(self):
+        return self.CountrySubentity
+    def set_CountrySubentity(self, CountrySubentity):
+        self.CountrySubentity = CountrySubentity
+    def validate_StringMin1Max200_Type(self, value):
+        result = True
+        # Validate type StringMin1Max200_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 200:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max200_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max200_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def hasContent_(self):
+        if (
+            self.Street is not None or
+            self.BuildingIdentifier is not None or
+            self.SuiteIdentifier is not None or
+            self.FloorIdentifier is not None or
+            self.DistrictName is not None or
+            self.POB is not None or
+            self.PostCode is not None or
+            self.City is not None or
+            self.CountrySubentity is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='AddressFix_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('AddressFix_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'AddressFix_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='AddressFix_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='AddressFix_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='AddressFix_Type'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='AddressFix_Type', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.Street is not None:
+            namespaceprefix_ = self.Street_nsprefix_ + ':' if (UseCapturedNS_ and self.Street_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sStreet>%s</%sStreet>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.Street), input_name='Street')), namespaceprefix_ , eol_))
+        if self.BuildingIdentifier is not None:
+            namespaceprefix_ = self.BuildingIdentifier_nsprefix_ + ':' if (UseCapturedNS_ and self.BuildingIdentifier_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sBuildingIdentifier>%s</%sBuildingIdentifier>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.BuildingIdentifier), input_name='BuildingIdentifier')), namespaceprefix_ , eol_))
+        if self.SuiteIdentifier is not None:
+            namespaceprefix_ = self.SuiteIdentifier_nsprefix_ + ':' if (UseCapturedNS_ and self.SuiteIdentifier_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sSuiteIdentifier>%s</%sSuiteIdentifier>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.SuiteIdentifier), input_name='SuiteIdentifier')), namespaceprefix_ , eol_))
+        if self.FloorIdentifier is not None:
+            namespaceprefix_ = self.FloorIdentifier_nsprefix_ + ':' if (UseCapturedNS_ and self.FloorIdentifier_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sFloorIdentifier>%s</%sFloorIdentifier>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.FloorIdentifier), input_name='FloorIdentifier')), namespaceprefix_ , eol_))
+        if self.DistrictName is not None:
+            namespaceprefix_ = self.DistrictName_nsprefix_ + ':' if (UseCapturedNS_ and self.DistrictName_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sDistrictName>%s</%sDistrictName>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.DistrictName), input_name='DistrictName')), namespaceprefix_ , eol_))
+        if self.POB is not None:
+            namespaceprefix_ = self.POB_nsprefix_ + ':' if (UseCapturedNS_ and self.POB_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sPOB>%s</%sPOB>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.POB), input_name='POB')), namespaceprefix_ , eol_))
+        if self.PostCode is not None:
+            namespaceprefix_ = self.PostCode_nsprefix_ + ':' if (UseCapturedNS_ and self.PostCode_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sPostCode>%s</%sPostCode>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.PostCode), input_name='PostCode')), namespaceprefix_ , eol_))
+        if self.City is not None:
+            namespaceprefix_ = self.City_nsprefix_ + ':' if (UseCapturedNS_ and self.City_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sCity>%s</%sCity>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.City), input_name='City')), namespaceprefix_ , eol_))
+        if self.CountrySubentity is not None:
+            namespaceprefix_ = self.CountrySubentity_nsprefix_ + ':' if (UseCapturedNS_ and self.CountrySubentity_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sCountrySubentity>%s</%sCountrySubentity>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.CountrySubentity), input_name='CountrySubentity')), namespaceprefix_ , eol_))
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'Street':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'Street')
+            value_ = self.gds_validate_string(value_, node, 'Street')
+            self.Street = value_
+            self.Street_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.Street)
+        elif nodeName_ == 'BuildingIdentifier':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'BuildingIdentifier')
+            value_ = self.gds_validate_string(value_, node, 'BuildingIdentifier')
+            self.BuildingIdentifier = value_
+            self.BuildingIdentifier_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.BuildingIdentifier)
+        elif nodeName_ == 'SuiteIdentifier':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'SuiteIdentifier')
+            value_ = self.gds_validate_string(value_, node, 'SuiteIdentifier')
+            self.SuiteIdentifier = value_
+            self.SuiteIdentifier_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.SuiteIdentifier)
+        elif nodeName_ == 'FloorIdentifier':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'FloorIdentifier')
+            value_ = self.gds_validate_string(value_, node, 'FloorIdentifier')
+            self.FloorIdentifier = value_
+            self.FloorIdentifier_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.FloorIdentifier)
+        elif nodeName_ == 'DistrictName':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'DistrictName')
+            value_ = self.gds_validate_string(value_, node, 'DistrictName')
+            self.DistrictName = value_
+            self.DistrictName_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.DistrictName)
+        elif nodeName_ == 'POB':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'POB')
+            value_ = self.gds_validate_string(value_, node, 'POB')
+            self.POB = value_
+            self.POB_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.POB)
+        elif nodeName_ == 'PostCode':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'PostCode')
+            value_ = self.gds_validate_string(value_, node, 'PostCode')
+            self.PostCode = value_
+            self.PostCode_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.PostCode)
+        elif nodeName_ == 'City':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'City')
+            value_ = self.gds_validate_string(value_, node, 'City')
+            self.City = value_
+            self.City_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.City)
+        elif nodeName_ == 'CountrySubentity':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'CountrySubentity')
+            value_ = self.gds_validate_string(value_, node, 'CountrySubentity')
+            self.CountrySubentity = value_
+            self.CountrySubentity_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.CountrySubentity)
+# end class AddressFix_Type
+
+
+class Address_Type(GeneratedsSuper):
+    """The user has the option to enter the data about the address of a party
+    either as one long field or to spread the data over up to eight
+    elements or even to use both formats. If the user chooses the option to
+    enter the data required in separate elements, the container element for
+    this will be 'AddressFix'. If the user chooses the option to enter the
+    data required in a less structured way in 'AddressFree' all available
+    address details shall be presented as one string of bytes, blank or "/"
+    (slash) or carriage return- line feed used as a delimiter between parts
+    of the address. PLEASE NOTE that the address country code is outside
+    both of these elements. The use of the fixed form is recommended as a
+    rule to allow easy matching. However, the use of the free form is
+    recommended if the sending state cannot reliably identify and
+    distinguish the different parts of the address. The user may want to
+    use both formats e.g. if besides separating the logical parts of the
+    address he also wants to indicate a suitable breakdown into print-lines
+    by delimiters in the free text form. In this case 'AddressFix' has to
+    precede 'AddressFree'."""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, legalAddressType=None, CountryCode=None, AddressFix=None, AddressFree=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.legalAddressType = _cast(None, legalAddressType)
+        self.legalAddressType_nsprefix_ = None
+        self.CountryCode = CountryCode
+        self.validate_CountryCode_Type(self.CountryCode)
+        self.CountryCode_nsprefix_ = None
+        self.AddressFix = AddressFix
+        self.AddressFix_nsprefix_ = None
+        self.AddressFree = AddressFree
+        self.validate_StringMin1Max4000_Type(self.AddressFree)
+        self.AddressFree_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, Address_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if Address_Type.subclass:
+            return Address_Type.subclass(*args_, **kwargs_)
+        else:
+            return Address_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_CountryCode(self):
+        return self.CountryCode
+    def set_CountryCode(self, CountryCode):
+        self.CountryCode = CountryCode
+    def get_AddressFix(self):
+        return self.AddressFix
+    def set_AddressFix(self, AddressFix):
+        self.AddressFix = AddressFix
+    def get_AddressFree(self):
+        return self.AddressFree
+    def set_AddressFree(self, AddressFree):
+        self.AddressFree = AddressFree
+    def get_legalAddressType(self):
+        return self.legalAddressType
+    def set_legalAddressType(self, legalAddressType):
+        self.legalAddressType = legalAddressType
+    def validate_CountryCode_Type(self, value):
+        result = True
+        # Validate type CountryCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AF', 'AX', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CG', 'CD', 'CK', 'CR', 'CI', 'HR', 'CU', 'CW', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'VA', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'BL', 'SH', 'KN', 'LC', 'MF', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SX', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'SS', 'ES', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UM', 'UY', 'UZ', 'VU', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW', 'XK', 'X5', 'XX']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CountryCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_StringMin1Max4000_Type(self, value):
+        result = True
+        # Validate type StringMin1Max4000_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 4000:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max4000_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max4000_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_OECDLegalAddressType_EnumType(self, value):
+        # Validate type stf:OECDLegalAddressType_EnumType, a restriction on xsd:token.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['OECD301', 'OECD302', 'OECD303', 'OECD304', 'OECD305']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on OECDLegalAddressType_EnumType' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+    def hasContent_(self):
+        if (
+            self.CountryCode is not None or
+            self.AddressFix is not None or
+            self.AddressFree is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:iso="urn:oecd:ties:isocbctypes:v1"  xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='Address_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('Address_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'Address_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='Address_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='Address_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='Address_Type'):
+        if self.legalAddressType is not None and 'legalAddressType' not in already_processed:
+            already_processed.add('legalAddressType')
+            outfile.write(' legalAddressType=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.legalAddressType), input_name='legalAddressType')), ))
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:iso="urn:oecd:ties:isocbctypes:v1"  xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='Address_Type', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.CountryCode is not None:
+            namespaceprefix_ = self.CountryCode_nsprefix_ + ':' if (UseCapturedNS_ and self.CountryCode_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sCountryCode>%s</%sCountryCode>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.CountryCode), input_name='CountryCode')), namespaceprefix_ , eol_))
+        if self.AddressFix is not None:
+            namespaceprefix_ = self.AddressFix_nsprefix_ + ':' if (UseCapturedNS_ and self.AddressFix_nsprefix_) else ''
+            self.AddressFix.export(outfile, level, namespaceprefix_, namespacedef_='', name_='AddressFix', pretty_print=pretty_print)
+        if self.AddressFree is not None:
+            namespaceprefix_ = self.AddressFree_nsprefix_ + ':' if (UseCapturedNS_ and self.AddressFree_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sAddressFree>%s</%sAddressFree>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.AddressFree), input_name='AddressFree')), namespaceprefix_ , eol_))
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('legalAddressType', node)
+        if value is not None and 'legalAddressType' not in already_processed:
+            already_processed.add('legalAddressType')
+            self.legalAddressType = value
+            self.legalAddressType = ' '.join(self.legalAddressType.split())
+            self.validate_OECDLegalAddressType_EnumType(self.legalAddressType)    # validate type OECDLegalAddressType_EnumType
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'CountryCode':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'CountryCode')
+            value_ = self.gds_validate_string(value_, node, 'CountryCode')
+            self.CountryCode = value_
+            self.CountryCode_nsprefix_ = child_.prefix
+            # validate type CountryCode_Type
+            self.validate_CountryCode_Type(self.CountryCode)
+        elif nodeName_ == 'AddressFix':
+            obj_ = AddressFix_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.AddressFix = obj_
+            obj_.original_tagname_ = 'AddressFix'
+        elif nodeName_ == 'AddressFree':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'AddressFree')
+            value_ = self.gds_validate_string(value_, node, 'AddressFree')
+            self.AddressFree = value_
+            self.AddressFree_nsprefix_ = child_.prefix
+            # validate type StringMin1Max4000_Type
+            self.validate_StringMin1Max4000_Type(self.AddressFree)
+# end class Address_Type
+
+
+class MonAmnt_Type(GeneratedsSuper):
+    """This data type is to be used whenever monetary amounts are to be
+    communicated. Such amounts shall be given in full units, i.e. without
+    decimals. The code for the currency in which the value is expressed has
+    to be
+    taken from the ISO codelist 4217 and added in attribute currCode."""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, currCode=None, valueOf_=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.currCode = _cast(None, currCode)
+        self.currCode_nsprefix_ = None
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, MonAmnt_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if MonAmnt_Type.subclass:
+            return MonAmnt_Type.subclass(*args_, **kwargs_)
+        else:
+            return MonAmnt_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_currCode(self):
+        return self.currCode
+    def set_currCode(self, currCode):
+        self.currCode = currCode
+    def get_valueOf_(self): return self.valueOf_
+    def set_valueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def validate_currCode_Type(self, value):
+        # Validate type iso:currCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BOV', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BYR', 'BZD', 'CAD', 'CDF', 'CHE', 'CHF', 'CHW', 'CLF', 'CLP', 'CNY', 'COP', 'COU', 'CRC', 'CUC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD', 'HNL', 'HRK', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LTL', 'LVL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRO', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MXV', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLL', 'SOS', 'SRD', 'SSP', 'STD', 'STN', 'SVC', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH', 'UGX', 'USD', 'USN', 'USS', 'UYI', 'UYU', 'UYW', 'UZS', 'VEF', 'VES', 'VND', 'VUV', 'WST', 'XAF', 'XAG', 'XAU', 'XBA', 'XBB', 'XBC', 'XBD', 'XCD', 'XDR', 'XFU', 'XOF', 'XPD', 'XPF', 'XPT', 'XSU', 'XUA', 'XXX', 'YER', 'ZAR', 'ZMW', 'ZWL']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on currCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+    def hasContent_(self):
+        if (
+            (1 if type(self.valueOf_) in [int,float] else self.valueOf_)
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='MonAmnt_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('MonAmnt_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'MonAmnt_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='MonAmnt_Type')
+        if self.hasContent_():
+            outfile.write('>')
+            outfile.write(self.convert_unicode(self.valueOf_))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='MonAmnt_Type', pretty_print=pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='MonAmnt_Type'):
+        if self.currCode is not None and 'currCode' not in already_processed:
+            already_processed.add('currCode')
+            outfile.write(' currCode=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.currCode), input_name='currCode')), ))
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='MonAmnt_Type', fromsubclass_=False, pretty_print=True):
+        pass
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        self.valueOf_ = get_all_text_(node)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('currCode', node)
+        if value is not None and 'currCode' not in already_processed:
+            already_processed.add('currCode')
+            self.currCode = value
+            self.validate_currCode_Type(self.currCode)    # validate type currCode_Type
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        pass
+# end class MonAmnt_Type
+
+
+class NameOrganisation_Type(GeneratedsSuper):
+    """Name of organisation"""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, valueOf_=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, NameOrganisation_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if NameOrganisation_Type.subclass:
+            return NameOrganisation_Type.subclass(*args_, **kwargs_)
+        else:
+            return NameOrganisation_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_valueOf_(self): return self.valueOf_
+    def set_valueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def hasContent_(self):
+        if (
+            (1 if type(self.valueOf_) in [int,float] else self.valueOf_)
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='NameOrganisation_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('NameOrganisation_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'NameOrganisation_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='NameOrganisation_Type')
+        if self.hasContent_():
+            outfile.write('>')
+            outfile.write(self.convert_unicode(self.valueOf_))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='NameOrganisation_Type', pretty_print=pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='NameOrganisation_Type'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='NameOrganisation_Type', fromsubclass_=False, pretty_print=True):
+        pass
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        self.valueOf_ = get_all_text_(node)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        pass
+# end class NameOrganisation_Type
+
+
+class TIN_Type(GeneratedsSuper):
+    """This is the identification number/identification code for the party in
+    question. As the identifier may be not strictly numeric, it is just
+    defined as a string of characters. Attribute 'issuedBy' is required to
+    designate the issuer of the identifier. Country code of issuing
+    country, indicating country of Residence (to taxes and other)"""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, issuedBy=None, valueOf_=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.issuedBy = _cast(None, issuedBy)
+        self.issuedBy_nsprefix_ = None
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, TIN_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if TIN_Type.subclass:
+            return TIN_Type.subclass(*args_, **kwargs_)
+        else:
+            return TIN_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_issuedBy(self):
+        return self.issuedBy
+    def set_issuedBy(self, issuedBy):
+        self.issuedBy = issuedBy
+    def get_valueOf_(self): return self.valueOf_
+    def set_valueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def validate_CountryCode_Type(self, value):
+        # Validate type iso:CountryCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AF', 'AX', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CG', 'CD', 'CK', 'CR', 'CI', 'HR', 'CU', 'CW', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'VA', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'BL', 'SH', 'KN', 'LC', 'MF', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SX', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'SS', 'ES', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UM', 'UY', 'UZ', 'VU', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW', 'XK', 'X5', 'XX']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CountryCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+    def hasContent_(self):
+        if (
+            (1 if type(self.valueOf_) in [int,float] else self.valueOf_)
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='TIN_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('TIN_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'TIN_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='TIN_Type')
+        if self.hasContent_():
+            outfile.write('>')
+            outfile.write(self.convert_unicode(self.valueOf_))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='TIN_Type', pretty_print=pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='TIN_Type'):
+        if self.issuedBy is not None and 'issuedBy' not in already_processed:
+            already_processed.add('issuedBy')
+            outfile.write(' issuedBy=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.issuedBy), input_name='issuedBy')), ))
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='TIN_Type', fromsubclass_=False, pretty_print=True):
+        pass
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        self.valueOf_ = get_all_text_(node)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('issuedBy', node)
+        if value is not None and 'issuedBy' not in already_processed:
+            already_processed.add('issuedBy')
+            self.issuedBy = value
+            self.validate_CountryCode_Type(self.issuedBy)    # validate type CountryCode_Type
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        pass
+# end class TIN_Type
+
+
+class MessageSpec_Type(GeneratedsSuper):
+    """Information in the message header identifies the Tax Administration that
+    is sending the message. It specifies when the message was created, what
+    period (normally a year) the report is for, and the nature of the
+    report (original, corrected, supplemental, etc)."""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, SendingEntityIN=None, TransmittingCountry=None, ReceivingCountry=None, MessageType=None, Language=None, Warning=None, Contact=None, MessageRefId=None, MessageTypeIndic=None, CorrMessageRefId=None, ReportingPeriod=None, Timestamp=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.SendingEntityIN = SendingEntityIN
+        self.validate_StringMin1Max200_Type(self.SendingEntityIN)
+        self.SendingEntityIN_nsprefix_ = None
+        self.TransmittingCountry = TransmittingCountry
+        self.validate_CountryCode_Type(self.TransmittingCountry)
+        self.TransmittingCountry_nsprefix_ = None
+        if ReceivingCountry is None:
+            self.ReceivingCountry = []
+        else:
+            self.ReceivingCountry = []
+            self.add_ReceivingCountry(ReceivingCountry)
+        self.ReceivingCountry_nsprefix_ = None
+        self.MessageType = MessageType
+        self.validate_MessageType_EnumType(self.MessageType)
+        self.MessageType_nsprefix_ = None
+        self.Language = Language
+        self.validate_LanguageCode_Type(self.Language)
+        self.Language_nsprefix_ = None
+        self.Warning = Warning
+        self.validate_StringMin1Max4000_Type(self.Warning)
+        self.Warning_nsprefix_ = None
+        self.Contact = Contact
+        self.validate_StringMin1Max4000_Type(self.Contact)
+        self.Contact_nsprefix_ = None
+        self.MessageRefId = MessageRefId
+        self.validate_StringMin1Max170_Type(self.MessageRefId)
+        self.MessageRefId_nsprefix_ = None
+        self.MessageTypeIndic = MessageTypeIndic
+        self.validate_CbcMessageTypeIndic_EnumType(self.MessageTypeIndic)
+        self.MessageTypeIndic_nsprefix_ = None
+        if CorrMessageRefId is None:
+            self.CorrMessageRefId = []
+        else:
+            self.CorrMessageRefId = CorrMessageRefId
+        self.CorrMessageRefId_nsprefix_ = None
+        if isinstance(ReportingPeriod, BaseStrType_):
+            initvalue_ = datetime_.datetime.strptime(ReportingPeriod, '%Y-%m-%d').date()
+        else:
+            initvalue_ = ReportingPeriod
+        self.ReportingPeriod = initvalue_
+        self.ReportingPeriod_nsprefix_ = None
+        if isinstance(Timestamp, BaseStrType_):
+            initvalue_ = datetime_.datetime.strptime(Timestamp, '%Y-%m-%dT%H:%M:%S')
+        else:
+            initvalue_ = Timestamp
+        self.Timestamp = initvalue_
+        self.Timestamp_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, MessageSpec_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if MessageSpec_Type.subclass:
+            return MessageSpec_Type.subclass(*args_, **kwargs_)
+        else:
+            return MessageSpec_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_SendingEntityIN(self):
+        return self.SendingEntityIN
+    def set_SendingEntityIN(self, SendingEntityIN):
+        self.SendingEntityIN = SendingEntityIN
+    def get_TransmittingCountry(self):
+        return self.TransmittingCountry
+    def set_TransmittingCountry(self, TransmittingCountry):
+        self.TransmittingCountry = TransmittingCountry
+    def get_ReceivingCountry(self):
+        return self.ReceivingCountry
+    def set_ReceivingCountry(self, ReceivingCountry):
+        self.ReceivingCountry = ReceivingCountry
+    def add_ReceivingCountry(self, value):
+        self.ReceivingCountry.append(value)
+    def insert_ReceivingCountry_at(self, index, value):
+        self.ReceivingCountry.insert(index, value)
+    def replace_ReceivingCountry_at(self, index, value):
+        self.ReceivingCountry[index] = value
+    def get_MessageType(self):
+        return self.MessageType
+    def set_MessageType(self, MessageType):
+        self.MessageType = MessageType
+    def get_Language(self):
+        return self.Language
+    def set_Language(self, Language):
+        self.Language = Language
+    def get_Warning(self):
+        return self.Warning
+    def set_Warning(self, Warning):
+        self.Warning = Warning
+    def get_Contact(self):
+        return self.Contact
+    def set_Contact(self, Contact):
+        self.Contact = Contact
+    def get_MessageRefId(self):
+        return self.MessageRefId
+    def set_MessageRefId(self, MessageRefId):
+        self.MessageRefId = MessageRefId
+    def get_MessageTypeIndic(self):
+        return self.MessageTypeIndic
+    def set_MessageTypeIndic(self, MessageTypeIndic):
+        self.MessageTypeIndic = MessageTypeIndic
+    def get_CorrMessageRefId(self):
+        return self.CorrMessageRefId
+    def set_CorrMessageRefId(self, CorrMessageRefId):
+        self.CorrMessageRefId = CorrMessageRefId
+    def add_CorrMessageRefId(self, value):
+        self.CorrMessageRefId.append(value)
+    def insert_CorrMessageRefId_at(self, index, value):
+        self.CorrMessageRefId.insert(index, value)
+    def replace_CorrMessageRefId_at(self, index, value):
+        self.CorrMessageRefId[index] = value
+    def get_ReportingPeriod(self):
+        return self.ReportingPeriod
+    def set_ReportingPeriod(self, ReportingPeriod):
+        self.ReportingPeriod = ReportingPeriod
+    def get_Timestamp(self):
+        return self.Timestamp
+    def set_Timestamp(self, Timestamp):
+        self.Timestamp = Timestamp
+    def validate_StringMin1Max200_Type(self, value):
+        result = True
+        # Validate type StringMin1Max200_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 200:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max200_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max200_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_CountryCode_Type(self, value):
+        result = True
+        # Validate type CountryCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AF', 'AX', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CG', 'CD', 'CK', 'CR', 'CI', 'HR', 'CU', 'CW', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'VA', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'BL', 'SH', 'KN', 'LC', 'MF', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SX', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'SS', 'ES', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UM', 'UY', 'UZ', 'VU', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW', 'XK', 'X5', 'XX']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CountryCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_MessageType_EnumType(self, value):
+        result = True
+        # Validate type MessageType_EnumType, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['CBC']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on MessageType_EnumType' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_LanguageCode_Type(self, value):
+        result = True
+        # Validate type LanguageCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AA', 'AB', 'AF', 'AK', 'SQ', 'AM', 'AR', 'AN', 'HY', 'AS', 'AV', 'AE', 'AY', 'AZ', 'BA', 'BM', 'EU', 'BE', 'BN', 'BH', 'BI', 'BS', 'BR', 'BG', 'MY', 'CA', 'CH', 'CE', 'ZH', 'CU', 'CV', 'KW', 'CO', 'CR', 'CS', 'DA', 'DV', 'NL', 'DZ', 'EN', 'EO', 'ET', 'EE', 'FO', 'FJ', 'FI', 'FR', 'FY', 'FF', 'KA', 'DE', 'GD', 'GA', 'GL', 'GV', 'EL', 'GN', 'GU', 'HT', 'HA', 'HE', 'HZ', 'HI', 'HO', 'HR', 'HU', 'IG', 'IS', 'IO', 'II', 'IU', 'IE', 'IA', 'ID', 'IK', 'IT', 'JV', 'JA', 'KL', 'KN', 'KS', 'KR', 'KK', 'KM', 'KI', 'RW', 'KY', 'KV', 'KG', 'KO', 'KJ', 'KU', 'LO', 'LA', 'LV', 'LI', 'LN', 'LT', 'LB', 'LU', 'LG', 'MK', 'MH', 'ML', 'MI', 'MR', 'MS', 'MG', 'MT', 'MN', 'NA', 'NV', 'NR', 'ND', 'NG', 'NE', 'NN', 'NB', 'NO', 'NY', 'OC', 'OJ', 'OR', 'OM', 'OS', 'PA', 'FA', 'PI', 'PL', 'PT', 'PS', 'QU', 'RM', 'RO', 'RN', 'RU', 'SG', 'SA', 'SI', 'SK', 'SL', 'SE', 'SM', 'SN', 'SD', 'SO', 'ST', 'ES', 'SC', 'SR', 'SS', 'SU', 'SW', 'SV', 'TY', 'TA', 'TT', 'TE', 'TG', 'TL', 'TH', 'BO', 'TI', 'TO', 'TN', 'TS', 'TK', 'TR', 'TW', 'UG', 'UK', 'UR', 'UZ', 'VE', 'VI', 'VO', 'CY', 'WA', 'WO', 'XH', 'YI', 'YO', 'ZA', 'ZU']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on LanguageCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_StringMin1Max4000_Type(self, value):
+        result = True
+        # Validate type StringMin1Max4000_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 4000:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max4000_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max4000_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_StringMin1Max170_Type(self, value):
+        result = True
+        # Validate type StringMin1Max170_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 170:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max170_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max170_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_CbcMessageTypeIndic_EnumType(self, value):
+        result = True
+        # Validate type CbcMessageTypeIndic_EnumType, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['CBC401', 'CBC402']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CbcMessageTypeIndic_EnumType' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def hasContent_(self):
+        if (
+            self.SendingEntityIN is not None or
+            self.TransmittingCountry is not None or
+            self.ReceivingCountry or
+            self.MessageType is not None or
+            self.Language is not None or
+            self.Warning is not None or
+            self.Contact is not None or
+            self.MessageRefId is not None or
+            self.MessageTypeIndic is not None or
+            self.CorrMessageRefId or
+            self.ReportingPeriod is not None or
+            self.Timestamp is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5"  xmlns:iso="urn:oecd:ties:isocbctypes:v1" ', name_='MessageSpec_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('MessageSpec_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'MessageSpec_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='MessageSpec_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='MessageSpec_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='MessageSpec_Type'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5"  xmlns:iso="urn:oecd:ties:isocbctypes:v1" ', name_='MessageSpec_Type', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.SendingEntityIN is not None:
+            namespaceprefix_ = self.SendingEntityIN_nsprefix_ + ':' if (UseCapturedNS_ and self.SendingEntityIN_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sSendingEntityIN>%s</%sSendingEntityIN>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.SendingEntityIN), input_name='SendingEntityIN')), namespaceprefix_ , eol_))
+        if self.TransmittingCountry is not None:
+            namespaceprefix_ = self.TransmittingCountry_nsprefix_ + ':' if (UseCapturedNS_ and self.TransmittingCountry_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sTransmittingCountry>%s</%sTransmittingCountry>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.TransmittingCountry), input_name='TransmittingCountry')), namespaceprefix_ , eol_))
+        for ReceivingCountry_ in self.ReceivingCountry:
+            namespaceprefix_ = self.ReceivingCountry_nsprefix_ + ':' if (UseCapturedNS_ and self.ReceivingCountry_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sReceivingCountry>%s</%sReceivingCountry>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(ReceivingCountry_), input_name='ReceivingCountry')), namespaceprefix_ , eol_))
+        if self.MessageType is not None:
+            namespaceprefix_ = self.MessageType_nsprefix_ + ':' if (UseCapturedNS_ and self.MessageType_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sMessageType>%s</%sMessageType>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.MessageType), input_name='MessageType')), namespaceprefix_ , eol_))
+        if self.Language is not None:
+            namespaceprefix_ = self.Language_nsprefix_ + ':' if (UseCapturedNS_ and self.Language_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sLanguage>%s</%sLanguage>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.Language), input_name='Language')), namespaceprefix_ , eol_))
+        if self.Warning is not None:
+            namespaceprefix_ = self.Warning_nsprefix_ + ':' if (UseCapturedNS_ and self.Warning_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sWarning>%s</%sWarning>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.Warning), input_name='Warning')), namespaceprefix_ , eol_))
+        if self.Contact is not None:
+            namespaceprefix_ = self.Contact_nsprefix_ + ':' if (UseCapturedNS_ and self.Contact_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sContact>%s</%sContact>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.Contact), input_name='Contact')), namespaceprefix_ , eol_))
+        if self.MessageRefId is not None:
+            namespaceprefix_ = self.MessageRefId_nsprefix_ + ':' if (UseCapturedNS_ and self.MessageRefId_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sMessageRefId>%s</%sMessageRefId>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.MessageRefId), input_name='MessageRefId')), namespaceprefix_ , eol_))
+        if self.MessageTypeIndic is not None:
+            namespaceprefix_ = self.MessageTypeIndic_nsprefix_ + ':' if (UseCapturedNS_ and self.MessageTypeIndic_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sMessageTypeIndic>%s</%sMessageTypeIndic>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.MessageTypeIndic), input_name='MessageTypeIndic')), namespaceprefix_ , eol_))
+        for CorrMessageRefId_ in self.CorrMessageRefId:
+            namespaceprefix_ = self.CorrMessageRefId_nsprefix_ + ':' if (UseCapturedNS_ and self.CorrMessageRefId_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sCorrMessageRefId>%s</%sCorrMessageRefId>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(CorrMessageRefId_), input_name='CorrMessageRefId')), namespaceprefix_ , eol_))
+        if self.ReportingPeriod is not None:
+            namespaceprefix_ = self.ReportingPeriod_nsprefix_ + ':' if (UseCapturedNS_ and self.ReportingPeriod_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sReportingPeriod>%s</%sReportingPeriod>%s' % (namespaceprefix_ , self.gds_format_date(self.ReportingPeriod, input_name='ReportingPeriod'), namespaceprefix_ , eol_))
+        if self.Timestamp is not None:
+            namespaceprefix_ = self.Timestamp_nsprefix_ + ':' if (UseCapturedNS_ and self.Timestamp_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sTimestamp>%s</%sTimestamp>%s' % (namespaceprefix_ , self.gds_format_datetime(self.Timestamp, input_name='Timestamp'), namespaceprefix_ , eol_))
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'SendingEntityIN':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'SendingEntityIN')
+            value_ = self.gds_validate_string(value_, node, 'SendingEntityIN')
+            self.SendingEntityIN = value_
+            self.SendingEntityIN_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.SendingEntityIN)
+        elif nodeName_ == 'TransmittingCountry':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'TransmittingCountry')
+            value_ = self.gds_validate_string(value_, node, 'TransmittingCountry')
+            self.TransmittingCountry = value_
+            self.TransmittingCountry_nsprefix_ = child_.prefix
+            # validate type CountryCode_Type
+            self.validate_CountryCode_Type(self.TransmittingCountry)
+        elif nodeName_ == 'ReceivingCountry':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'ReceivingCountry')
+            value_ = self.gds_validate_string(value_, node, 'ReceivingCountry')
+            self.ReceivingCountry.append(value_)
+            self.ReceivingCountry_nsprefix_ = child_.prefix
+            # validate type CountryCode_Type
+            self.validate_CountryCode_Type(self.ReceivingCountry[-1])
+        elif nodeName_ == 'MessageType':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'MessageType')
+            value_ = self.gds_validate_string(value_, node, 'MessageType')
+            self.MessageType = value_
+            self.MessageType_nsprefix_ = child_.prefix
+            # validate type MessageType_EnumType
+            self.validate_MessageType_EnumType(self.MessageType)
+        elif nodeName_ == 'Language':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'Language')
+            value_ = self.gds_validate_string(value_, node, 'Language')
+            self.Language = value_
+            self.Language_nsprefix_ = child_.prefix
+            # validate type LanguageCode_Type
+            self.validate_LanguageCode_Type(self.Language)
+        elif nodeName_ == 'Warning':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'Warning')
+            value_ = self.gds_validate_string(value_, node, 'Warning')
+            self.Warning = value_
+            self.Warning_nsprefix_ = child_.prefix
+            # validate type StringMin1Max4000_Type
+            self.validate_StringMin1Max4000_Type(self.Warning)
+        elif nodeName_ == 'Contact':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'Contact')
+            value_ = self.gds_validate_string(value_, node, 'Contact')
+            self.Contact = value_
+            self.Contact_nsprefix_ = child_.prefix
+            # validate type StringMin1Max4000_Type
+            self.validate_StringMin1Max4000_Type(self.Contact)
+        elif nodeName_ == 'MessageRefId':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'MessageRefId')
+            value_ = self.gds_validate_string(value_, node, 'MessageRefId')
+            self.MessageRefId = value_
+            self.MessageRefId_nsprefix_ = child_.prefix
+            # validate type StringMin1Max170_Type
+            self.validate_StringMin1Max170_Type(self.MessageRefId)
+        elif nodeName_ == 'MessageTypeIndic':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'MessageTypeIndic')
+            value_ = self.gds_validate_string(value_, node, 'MessageTypeIndic')
+            self.MessageTypeIndic = value_
+            self.MessageTypeIndic_nsprefix_ = child_.prefix
+            # validate type CbcMessageTypeIndic_EnumType
+            self.validate_CbcMessageTypeIndic_EnumType(self.MessageTypeIndic)
+        elif nodeName_ == 'CorrMessageRefId':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'CorrMessageRefId')
+            value_ = self.gds_validate_string(value_, node, 'CorrMessageRefId')
+            self.CorrMessageRefId.append(value_)
+            self.CorrMessageRefId_nsprefix_ = child_.prefix
+            # validate type StringMin1Max170_Type
+            self.validate_StringMin1Max170_Type(self.CorrMessageRefId[-1])
+        elif nodeName_ == 'ReportingPeriod':
+            sval_ = child_.text
+            dval_ = self.gds_parse_date(sval_)
+            self.ReportingPeriod = dval_
+            self.ReportingPeriod_nsprefix_ = child_.prefix
+        elif nodeName_ == 'Timestamp':
+            sval_ = child_.text
+            dval_ = self.gds_parse_datetime(sval_)
+            self.Timestamp = dval_
+            self.Timestamp_nsprefix_ = child_.prefix
+# end class MessageSpec_Type
+
+
+class ConstituentEntity_Type(GeneratedsSuper):
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, ConstEntity=None, Role=None, IncorpCountryCode=None, BizActivities=None, OtherEntityInfo=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.ConstEntity = ConstEntity
+        self.ConstEntity_nsprefix_ = None
+        self.Role = Role
+        self.validate_UltimateParentEntityRole_EnumType(self.Role)
+        self.Role_nsprefix_ = None
+        self.IncorpCountryCode = IncorpCountryCode
+        self.validate_CountryCode_Type(self.IncorpCountryCode)
+        self.IncorpCountryCode_nsprefix_ = None
+        if BizActivities is None:
+            self.BizActivities = []
+        else:
+            self.BizActivities = []
+            self.add_BizActivities(BizActivities)
+        self.BizActivities_nsprefix_ = None
+        self.OtherEntityInfo = OtherEntityInfo
+        self.validate_StringMin1Max4000_Type(self.OtherEntityInfo)
+        self.OtherEntityInfo_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, ConstituentEntity_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if ConstituentEntity_Type.subclass:
+            return ConstituentEntity_Type.subclass(*args_, **kwargs_)
+        else:
+            return ConstituentEntity_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_ConstEntity(self):
+        return self.ConstEntity
+    def set_ConstEntity(self, ConstEntity):
+        self.ConstEntity = ConstEntity
+    def get_Role(self):
+        return self.Role
+    def set_Role(self, Role):
+        self.Role = Role
+    def get_IncorpCountryCode(self):
+        return self.IncorpCountryCode
+    def set_IncorpCountryCode(self, IncorpCountryCode):
+        self.IncorpCountryCode = IncorpCountryCode
+    def get_BizActivities(self):
+        return self.BizActivities
+    def set_BizActivities(self, BizActivities):
+        self.BizActivities = BizActivities
+    def add_BizActivities(self, value):
+        self.BizActivities.append(value)
+    def insert_BizActivities_at(self, index, value):
+        self.BizActivities.insert(index, value)
+    def replace_BizActivities_at(self, index, value):
+        self.BizActivities[index] = value
+    def get_OtherEntityInfo(self):
+        return self.OtherEntityInfo
+    def set_OtherEntityInfo(self, OtherEntityInfo):
+        self.OtherEntityInfo = OtherEntityInfo
+    def validate_UltimateParentEntityRole_EnumType(self, value):
+        result = True
+        # Validate type UltimateParentEntityRole_EnumType, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['CBC801', 'CBC802', 'CBC803']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on UltimateParentEntityRole_EnumType' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_CountryCode_Type(self, value):
+        result = True
+        # Validate type CountryCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AF', 'AX', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CG', 'CD', 'CK', 'CR', 'CI', 'HR', 'CU', 'CW', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'VA', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'BL', 'SH', 'KN', 'LC', 'MF', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SX', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'SS', 'ES', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UM', 'UY', 'UZ', 'VU', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW', 'XK', 'X5', 'XX']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CountryCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_CbcBizActivityType_EnumType(self, value):
+        result = True
+        # Validate type CbcBizActivityType_EnumType, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['CBC501', 'CBC502', 'CBC503', 'CBC504', 'CBC505', 'CBC506', 'CBC507', 'CBC508', 'CBC509', 'CBC510', 'CBC511', 'CBC512', 'CBC513']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CbcBizActivityType_EnumType' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_StringMin1Max4000_Type(self, value):
+        result = True
+        # Validate type StringMin1Max4000_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 4000:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max4000_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max4000_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def hasContent_(self):
+        if (
+            self.ConstEntity is not None or
+            self.Role is not None or
+            self.IncorpCountryCode is not None or
+            self.BizActivities or
+            self.OtherEntityInfo is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:iso="urn:oecd:ties:isocbctypes:v1"  xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='ConstituentEntity_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('ConstituentEntity_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'ConstituentEntity_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='ConstituentEntity_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='ConstituentEntity_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='ConstituentEntity_Type'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:iso="urn:oecd:ties:isocbctypes:v1"  xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='ConstituentEntity_Type', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.ConstEntity is not None:
+            namespaceprefix_ = self.ConstEntity_nsprefix_ + ':' if (UseCapturedNS_ and self.ConstEntity_nsprefix_) else ''
+            self.ConstEntity.export(outfile, level, namespaceprefix_, namespacedef_='', name_='ConstEntity', pretty_print=pretty_print)
+        if self.Role is not None:
+            namespaceprefix_ = self.Role_nsprefix_ + ':' if (UseCapturedNS_ and self.Role_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sRole>%s</%sRole>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.Role), input_name='Role')), namespaceprefix_ , eol_))
+        if self.IncorpCountryCode is not None:
+            namespaceprefix_ = self.IncorpCountryCode_nsprefix_ + ':' if (UseCapturedNS_ and self.IncorpCountryCode_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sIncorpCountryCode>%s</%sIncorpCountryCode>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.IncorpCountryCode), input_name='IncorpCountryCode')), namespaceprefix_ , eol_))
+        for BizActivities_ in self.BizActivities:
+            namespaceprefix_ = self.BizActivities_nsprefix_ + ':' if (UseCapturedNS_ and self.BizActivities_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sBizActivities>%s</%sBizActivities>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(BizActivities_), input_name='BizActivities')), namespaceprefix_ , eol_))
+        if self.OtherEntityInfo is not None:
+            namespaceprefix_ = self.OtherEntityInfo_nsprefix_ + ':' if (UseCapturedNS_ and self.OtherEntityInfo_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sOtherEntityInfo>%s</%sOtherEntityInfo>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.OtherEntityInfo), input_name='OtherEntityInfo')), namespaceprefix_ , eol_))
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'ConstEntity':
+            obj_ = OrganisationParty_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.ConstEntity = obj_
+            obj_.original_tagname_ = 'ConstEntity'
+        elif nodeName_ == 'Role':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'Role')
+            value_ = self.gds_validate_string(value_, node, 'Role')
+            self.Role = value_
+            self.Role_nsprefix_ = child_.prefix
+            # validate type UltimateParentEntityRole_EnumType
+            self.validate_UltimateParentEntityRole_EnumType(self.Role)
+        elif nodeName_ == 'IncorpCountryCode':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'IncorpCountryCode')
+            value_ = self.gds_validate_string(value_, node, 'IncorpCountryCode')
+            self.IncorpCountryCode = value_
+            self.IncorpCountryCode_nsprefix_ = child_.prefix
+            # validate type CountryCode_Type
+            self.validate_CountryCode_Type(self.IncorpCountryCode)
+        elif nodeName_ == 'BizActivities':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'BizActivities')
+            value_ = self.gds_validate_string(value_, node, 'BizActivities')
+            self.BizActivities.append(value_)
+            self.BizActivities_nsprefix_ = child_.prefix
+            # validate type CbcBizActivityType_EnumType
+            self.validate_CbcBizActivityType_EnumType(self.BizActivities[-1])
+        elif nodeName_ == 'OtherEntityInfo':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'OtherEntityInfo')
+            value_ = self.gds_validate_string(value_, node, 'OtherEntityInfo')
+            self.OtherEntityInfo = value_
+            self.OtherEntityInfo_nsprefix_ = child_.prefix
+            # validate type StringMin1Max4000_Type
+            self.validate_StringMin1Max4000_Type(self.OtherEntityInfo)
+# end class ConstituentEntity_Type
+
+
+class CorrectableCbcReport_Type(GeneratedsSuper):
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, DocSpec=None, ResCountryCode=None, Summary=None, ConstEntities=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.DocSpec = DocSpec
+        self.DocSpec_nsprefix_ = None
+        self.ResCountryCode = ResCountryCode
+        self.validate_CountryCode_Type(self.ResCountryCode)
+        self.ResCountryCode_nsprefix_ = None
+        self.Summary = Summary
+        self.Summary_nsprefix_ = None
+        if ConstEntities is None:
+            self.ConstEntities = []
+        else:
+            self.ConstEntities = []
+            self.add_ConstEntities(ConstEntities)
+        self.ConstEntities_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, CorrectableCbcReport_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if CorrectableCbcReport_Type.subclass:
+            return CorrectableCbcReport_Type.subclass(*args_, **kwargs_)
+        else:
+            return CorrectableCbcReport_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_DocSpec(self):
+        return self.DocSpec
+    def set_DocSpec(self, DocSpec):
+        self.DocSpec = DocSpec
+    def get_ResCountryCode(self):
+        return self.ResCountryCode
+    def set_ResCountryCode(self, ResCountryCode):
+        self.ResCountryCode = ResCountryCode
+    def get_Summary(self):
+        return self.Summary
+    def set_Summary(self, Summary):
+        self.Summary = Summary
+    def get_ConstEntities(self):
+        return self.ConstEntities
+    def set_ConstEntities(self, ConstEntities):
+        self.ConstEntities = ConstEntities
+    def add_ConstEntities(self, value):
+        self.ConstEntities.append(value)
+    def insert_ConstEntities_at(self, index, value):
+        self.ConstEntities.insert(index, value)
+    def replace_ConstEntities_at(self, index, value):
+        self.ConstEntities[index] = value
+    def validate_CountryCode_Type(self, value):
+        result = True
+        # Validate type CountryCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AF', 'AX', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CG', 'CD', 'CK', 'CR', 'CI', 'HR', 'CU', 'CW', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'VA', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'BL', 'SH', 'KN', 'LC', 'MF', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SX', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'SS', 'ES', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UM', 'UY', 'UZ', 'VU', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW', 'XK', 'X5', 'XX']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CountryCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def hasContent_(self):
+        if (
+            self.DocSpec is not None or
+            self.ResCountryCode is not None or
+            self.Summary is not None or
+            self.ConstEntities
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5"  xmlns:iso="urn:oecd:ties:isocbctypes:v1" ', name_='CorrectableCbcReport_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('CorrectableCbcReport_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'CorrectableCbcReport_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='CorrectableCbcReport_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='CorrectableCbcReport_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='CorrectableCbcReport_Type'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5"  xmlns:iso="urn:oecd:ties:isocbctypes:v1" ', name_='CorrectableCbcReport_Type', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.DocSpec is not None:
+            namespaceprefix_ = self.DocSpec_nsprefix_ + ':' if (UseCapturedNS_ and self.DocSpec_nsprefix_) else ''
+            self.DocSpec.export(outfile, level, namespaceprefix_, namespacedef_='', name_='DocSpec', pretty_print=pretty_print)
+        if self.ResCountryCode is not None:
+            namespaceprefix_ = self.ResCountryCode_nsprefix_ + ':' if (UseCapturedNS_ and self.ResCountryCode_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sResCountryCode>%s</%sResCountryCode>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.ResCountryCode), input_name='ResCountryCode')), namespaceprefix_ , eol_))
+        if self.Summary is not None:
+            namespaceprefix_ = self.Summary_nsprefix_ + ':' if (UseCapturedNS_ and self.Summary_nsprefix_) else ''
+            self.Summary.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Summary', pretty_print=pretty_print)
+        for ConstEntities_ in self.ConstEntities:
+            namespaceprefix_ = self.ConstEntities_nsprefix_ + ':' if (UseCapturedNS_ and self.ConstEntities_nsprefix_) else ''
+            ConstEntities_.export(outfile, level, namespaceprefix_, namespacedef_='', name_='ConstEntities', pretty_print=pretty_print)
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'DocSpec':
+            obj_ = DocSpec_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.DocSpec = obj_
+            obj_.original_tagname_ = 'DocSpec'
+        elif nodeName_ == 'ResCountryCode':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'ResCountryCode')
+            value_ = self.gds_validate_string(value_, node, 'ResCountryCode')
+            self.ResCountryCode = value_
+            self.ResCountryCode_nsprefix_ = child_.prefix
+            # validate type CountryCode_Type
+            self.validate_CountryCode_Type(self.ResCountryCode)
+        elif nodeName_ == 'Summary':
+            obj_ = SummaryType.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Summary = obj_
+            obj_.original_tagname_ = 'Summary'
+        elif nodeName_ == 'ConstEntities':
+            obj_ = ConstituentEntity_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.ConstEntities.append(obj_)
+            obj_.original_tagname_ = 'ConstEntities'
+# end class CorrectableCbcReport_Type
+
+
+class OrganisationIN_Type(GeneratedsSuper):
+    """This is the identification number/identification code for the Entity in
+    question. As the identifier may be not strictly numeric, it is just
+    defined as a string of characters. Attribute 'issuedBy' is required to
+    designate the issuer of the identifier. Attribute 'INType' defines the
+    type of identification number. Country code of issuing country,
+    indicating country of Residence (to taxes and other)Identification
+    Number Type"""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, issuedBy=None, INType=None, valueOf_=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.issuedBy = _cast(None, issuedBy)
+        self.issuedBy_nsprefix_ = None
+        self.INType = _cast(None, INType)
+        self.INType_nsprefix_ = None
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, OrganisationIN_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if OrganisationIN_Type.subclass:
+            return OrganisationIN_Type.subclass(*args_, **kwargs_)
+        else:
+            return OrganisationIN_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_issuedBy(self):
+        return self.issuedBy
+    def set_issuedBy(self, issuedBy):
+        self.issuedBy = issuedBy
+    def get_INType(self):
+        return self.INType
+    def set_INType(self, INType):
+        self.INType = INType
+    def get_valueOf_(self): return self.valueOf_
+    def set_valueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def validate_CountryCode_Type(self, value):
+        # Validate type iso:CountryCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AF', 'AX', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CG', 'CD', 'CK', 'CR', 'CI', 'HR', 'CU', 'CW', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'VA', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'BL', 'SH', 'KN', 'LC', 'MF', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SX', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'SS', 'ES', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UM', 'UY', 'UZ', 'VU', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW', 'XK', 'X5', 'XX']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CountryCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+    def validate_StringMin1Max200_Type(self, value):
+        # Validate type stf:StringMin1Max200_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 200:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max200_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max200_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+    def hasContent_(self):
+        if (
+            (1 if type(self.valueOf_) in [int,float] else self.valueOf_)
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='OrganisationIN_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('OrganisationIN_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'OrganisationIN_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='OrganisationIN_Type')
+        if self.hasContent_():
+            outfile.write('>')
+            outfile.write(self.convert_unicode(self.valueOf_))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='OrganisationIN_Type', pretty_print=pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='OrganisationIN_Type'):
+        if self.issuedBy is not None and 'issuedBy' not in already_processed:
+            already_processed.add('issuedBy')
+            outfile.write(' issuedBy=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.issuedBy), input_name='issuedBy')), ))
+        if self.INType is not None and 'INType' not in already_processed:
+            already_processed.add('INType')
+            outfile.write(' INType=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.INType), input_name='INType')), ))
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='OrganisationIN_Type', fromsubclass_=False, pretty_print=True):
+        pass
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        self.valueOf_ = get_all_text_(node)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('issuedBy', node)
+        if value is not None and 'issuedBy' not in already_processed:
+            already_processed.add('issuedBy')
+            self.issuedBy = value
+            self.validate_CountryCode_Type(self.issuedBy)    # validate type CountryCode_Type
+        value = find_attr_value_('INType', node)
+        if value is not None and 'INType' not in already_processed:
+            already_processed.add('INType')
+            self.INType = value
+            self.validate_StringMin1Max200_Type(self.INType)    # validate type StringMin1Max200_Type
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        pass
+# end class OrganisationIN_Type
+
+
+class OrganisationParty_Type(GeneratedsSuper):
+    """This container brings together all data about an organisation as a
+    party. Name and address are required components and each can
+    be present more than once to enable as complete a description as possible.
+    Whenever possible one or more identifiers (TIN
+    etc) should be added as well as a residence country code. Additional data
+    that describes and identifies the party can be
+    given . The code for the legal type according to the OECD codelist must be
+    added. The structures of
+    all of the subelements are defined elsewhere in this schema."""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, ResCountryCode=None, TIN=None, IN=None, Name=None, Address=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        if ResCountryCode is None:
+            self.ResCountryCode = []
+        else:
+            self.ResCountryCode = []
+            self.add_ResCountryCode(ResCountryCode)
+        self.ResCountryCode_nsprefix_ = None
+        self.TIN = TIN
+        self.TIN_nsprefix_ = None
+        if IN is None:
+            self.IN = []
+        else:
+            self.IN = IN
+        self.IN_nsprefix_ = None
+        if Name is None:
+            self.Name = []
+        else:
+            self.Name = []
+            self.add_Name(Name)
+        self.Name_nsprefix_ = None
+        if Address is None:
+            self.Address = []
+        else:
+            self.Address = []
+            self.add_Address(Address)
+        self.Address_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, OrganisationParty_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if OrganisationParty_Type.subclass:
+            return OrganisationParty_Type.subclass(*args_, **kwargs_)
+        else:
+            return OrganisationParty_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_ResCountryCode(self):
+        return self.ResCountryCode
+    def set_ResCountryCode(self, ResCountryCode):
+        self.ResCountryCode = ResCountryCode
+    def add_ResCountryCode(self, value):
+        self.ResCountryCode.append(value)
+    def insert_ResCountryCode_at(self, index, value):
+        self.ResCountryCode.insert(index, value)
+    def replace_ResCountryCode_at(self, index, value):
+        self.ResCountryCode[index] = value
+    def get_TIN(self):
+        return self.TIN
+    def set_TIN(self, TIN):
+        self.TIN = TIN
+    def get_IN(self):
+        return self.IN
+    def set_IN(self, IN):
+        self.IN = IN
+    def add_IN(self, value):
+        self.IN.append(value)
+    def insert_IN_at(self, index, value):
+        self.IN.insert(index, value)
+    def replace_IN_at(self, index, value):
+        self.IN[index] = value
+    def get_Name(self):
+        return self.Name
+    def set_Name(self, Name):
+        self.Name = Name
+    def add_Name(self, value):
+        self.Name.append(value)
+    def insert_Name_at(self, index, value):
+        self.Name.insert(index, value)
+    def replace_Name_at(self, index, value):
+        self.Name[index] = value
+    def get_Address(self):
+        return self.Address
+    def set_Address(self, Address):
+        self.Address = Address
+    def add_Address(self, value):
+        self.Address.append(value)
+    def insert_Address_at(self, index, value):
+        self.Address.insert(index, value)
+    def replace_Address_at(self, index, value):
+        self.Address[index] = value
+    def validate_CountryCode_Type(self, value):
+        result = True
+        # Validate type CountryCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AF', 'AX', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CG', 'CD', 'CK', 'CR', 'CI', 'HR', 'CU', 'CW', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'VA', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'BL', 'SH', 'KN', 'LC', 'MF', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SX', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'SS', 'ES', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UM', 'UY', 'UZ', 'VU', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW', 'XK', 'X5', 'XX']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CountryCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def hasContent_(self):
+        if (
+            self.ResCountryCode or
+            self.TIN is not None or
+            self.IN or
+            self.Name or
+            self.Address
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:iso="urn:oecd:ties:isocbctypes:v1" ', name_='OrganisationParty_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('OrganisationParty_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'OrganisationParty_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='OrganisationParty_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='OrganisationParty_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='OrganisationParty_Type'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:iso="urn:oecd:ties:isocbctypes:v1" ', name_='OrganisationParty_Type', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        for ResCountryCode_ in self.ResCountryCode:
+            namespaceprefix_ = self.ResCountryCode_nsprefix_ + ':' if (UseCapturedNS_ and self.ResCountryCode_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sResCountryCode>%s</%sResCountryCode>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(ResCountryCode_), input_name='ResCountryCode')), namespaceprefix_ , eol_))
+        if self.TIN is not None:
+            namespaceprefix_ = self.TIN_nsprefix_ + ':' if (UseCapturedNS_ and self.TIN_nsprefix_) else ''
+            self.TIN.export(outfile, level, namespaceprefix_, namespacedef_='', name_='TIN', pretty_print=pretty_print)
+        for IN_ in self.IN:
+            namespaceprefix_ = self.IN_nsprefix_ + ':' if (UseCapturedNS_ and self.IN_nsprefix_) else ''
+            IN_.export(outfile, level, namespaceprefix_, namespacedef_='', name_='IN', pretty_print=pretty_print)
+        for Name_ in self.Name:
+            namespaceprefix_ = self.Name_nsprefix_ + ':' if (UseCapturedNS_ and self.Name_nsprefix_) else ''
+            Name_.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Name', pretty_print=pretty_print)
+        for Address_ in self.Address:
+            namespaceprefix_ = self.Address_nsprefix_ + ':' if (UseCapturedNS_ and self.Address_nsprefix_) else ''
+            Address_.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Address', pretty_print=pretty_print)
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'ResCountryCode':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'ResCountryCode')
+            value_ = self.gds_validate_string(value_, node, 'ResCountryCode')
+            self.ResCountryCode.append(value_)
+            self.ResCountryCode_nsprefix_ = child_.prefix
+            # validate type CountryCode_Type
+            self.validate_CountryCode_Type(self.ResCountryCode[-1])
+        elif nodeName_ == 'TIN':
+            obj_ = TIN_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.TIN = obj_
+            obj_.original_tagname_ = 'TIN'
+        elif nodeName_ == 'IN':
+            obj_ = OrganisationIN_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.IN.append(obj_)
+            obj_.original_tagname_ = 'IN'
+        elif nodeName_ == 'Name':
+            obj_ = NameOrganisation_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Name.append(obj_)
+            obj_.original_tagname_ = 'Name'
+        elif nodeName_ == 'Address':
+            obj_ = Address_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Address.append(obj_)
+            obj_.original_tagname_ = 'Address'
+# end class OrganisationParty_Type
+
+
+class ReportingEntity_Type(GeneratedsSuper):
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, Entity=None, NameMNEGroup=None, ReportingRole=None, ReportingPeriod=None, extensiontype_=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.Entity = Entity
+        self.Entity_nsprefix_ = None
+        self.NameMNEGroup = NameMNEGroup
+        self.validate_StringMin1Max200_Type(self.NameMNEGroup)
+        self.NameMNEGroup_nsprefix_ = None
+        self.ReportingRole = ReportingRole
+        self.validate_CbcReportingRole_EnumType(self.ReportingRole)
+        self.ReportingRole_nsprefix_ = None
+        self.ReportingPeriod = ReportingPeriod
+        self.ReportingPeriod_nsprefix_ = None
+        self.extensiontype_ = extensiontype_
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, ReportingEntity_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if ReportingEntity_Type.subclass:
+            return ReportingEntity_Type.subclass(*args_, **kwargs_)
+        else:
+            return ReportingEntity_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_Entity(self):
+        return self.Entity
+    def set_Entity(self, Entity):
+        self.Entity = Entity
+    def get_NameMNEGroup(self):
+        return self.NameMNEGroup
+    def set_NameMNEGroup(self, NameMNEGroup):
+        self.NameMNEGroup = NameMNEGroup
+    def get_ReportingRole(self):
+        return self.ReportingRole
+    def set_ReportingRole(self, ReportingRole):
+        self.ReportingRole = ReportingRole
+    def get_ReportingPeriod(self):
+        return self.ReportingPeriod
+    def set_ReportingPeriod(self, ReportingPeriod):
+        self.ReportingPeriod = ReportingPeriod
+    def get_extensiontype_(self): return self.extensiontype_
+    def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
+    def validate_StringMin1Max200_Type(self, value):
+        result = True
+        # Validate type StringMin1Max200_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 200:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max200_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max200_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_CbcReportingRole_EnumType(self, value):
+        result = True
+        # Validate type CbcReportingRole_EnumType, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['CBC701', 'CBC702', 'CBC703', 'CBC704']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CbcReportingRole_EnumType' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def hasContent_(self):
+        if (
+            self.Entity is not None or
+            self.NameMNEGroup is not None or
+            self.ReportingRole is not None or
+            self.ReportingPeriod is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='ReportingEntity_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('ReportingEntity_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'ReportingEntity_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='ReportingEntity_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='ReportingEntity_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='ReportingEntity_Type'):
+        if self.extensiontype_ is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            outfile.write(' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
+            if ":" not in self.extensiontype_:
+                imported_ns_type_prefix_ = GenerateDSNamespaceTypePrefixes_.get(self.extensiontype_, '')
+                outfile.write(' xsi:type="%s%s"' % (imported_ns_type_prefix_, self.extensiontype_))
+            else:
+                outfile.write(' xsi:type="%s"' % self.extensiontype_)
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='ReportingEntity_Type', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.Entity is not None:
+            namespaceprefix_ = self.Entity_nsprefix_ + ':' if (UseCapturedNS_ and self.Entity_nsprefix_) else ''
+            self.Entity.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Entity', pretty_print=pretty_print)
+        if self.NameMNEGroup is not None:
+            namespaceprefix_ = self.NameMNEGroup_nsprefix_ + ':' if (UseCapturedNS_ and self.NameMNEGroup_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sNameMNEGroup>%s</%sNameMNEGroup>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.NameMNEGroup), input_name='NameMNEGroup')), namespaceprefix_ , eol_))
+        if self.ReportingRole is not None:
+            namespaceprefix_ = self.ReportingRole_nsprefix_ + ':' if (UseCapturedNS_ and self.ReportingRole_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sReportingRole>%s</%sReportingRole>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.ReportingRole), input_name='ReportingRole')), namespaceprefix_ , eol_))
+        if self.ReportingPeriod is not None:
+            namespaceprefix_ = self.ReportingPeriod_nsprefix_ + ':' if (UseCapturedNS_ and self.ReportingPeriod_nsprefix_) else ''
+            self.ReportingPeriod.export(outfile, level, namespaceprefix_, namespacedef_='', name_='ReportingPeriod', pretty_print=pretty_print)
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('xsi:type', node)
+        if value is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            self.extensiontype_ = value
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'Entity':
+            obj_ = OrganisationParty_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Entity = obj_
+            obj_.original_tagname_ = 'Entity'
+        elif nodeName_ == 'NameMNEGroup':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'NameMNEGroup')
+            value_ = self.gds_validate_string(value_, node, 'NameMNEGroup')
+            self.NameMNEGroup = value_
+            self.NameMNEGroup_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.NameMNEGroup)
+        elif nodeName_ == 'ReportingRole':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'ReportingRole')
+            value_ = self.gds_validate_string(value_, node, 'ReportingRole')
+            self.ReportingRole = value_
+            self.ReportingRole_nsprefix_ = child_.prefix
+            # validate type CbcReportingRole_EnumType
+            self.validate_CbcReportingRole_EnumType(self.ReportingRole)
+        elif nodeName_ == 'ReportingPeriod':
+            obj_ = ReportingPeriodType.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.ReportingPeriod = obj_
+            obj_.original_tagname_ = 'ReportingPeriod'
+# end class ReportingEntity_Type
+
+
+class CorrectableReportingEntity_Type(ReportingEntity_Type):
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = ReportingEntity_Type
+    def __init__(self, Entity=None, NameMNEGroup=None, ReportingRole=None, ReportingPeriod=None, DocSpec=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        super(CorrectableReportingEntity_Type, self).__init__(Entity, NameMNEGroup, ReportingRole, ReportingPeriod,  **kwargs_)
+        self.DocSpec = DocSpec
+        self.DocSpec_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, CorrectableReportingEntity_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if CorrectableReportingEntity_Type.subclass:
+            return CorrectableReportingEntity_Type.subclass(*args_, **kwargs_)
+        else:
+            return CorrectableReportingEntity_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_DocSpec(self):
+        return self.DocSpec
+    def set_DocSpec(self, DocSpec):
+        self.DocSpec = DocSpec
+    def hasContent_(self):
+        if (
+            self.DocSpec is not None or
+            super(CorrectableReportingEntity_Type, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='CorrectableReportingEntity_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('CorrectableReportingEntity_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'CorrectableReportingEntity_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='CorrectableReportingEntity_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='CorrectableReportingEntity_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='CorrectableReportingEntity_Type'):
+        super(CorrectableReportingEntity_Type, self).exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='CorrectableReportingEntity_Type')
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='CorrectableReportingEntity_Type', fromsubclass_=False, pretty_print=True):
+        super(CorrectableReportingEntity_Type, self).exportChildren(outfile, level, namespaceprefix_, namespacedef_, name_, True, pretty_print=pretty_print)
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.DocSpec is not None:
+            namespaceprefix_ = self.DocSpec_nsprefix_ + ':' if (UseCapturedNS_ and self.DocSpec_nsprefix_) else ''
+            self.DocSpec.export(outfile, level, namespaceprefix_, namespacedef_='', name_='DocSpec', pretty_print=pretty_print)
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        super(CorrectableReportingEntity_Type, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'DocSpec':
+            obj_ = DocSpec_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.DocSpec = obj_
+            obj_.original_tagname_ = 'DocSpec'
+        super(CorrectableReportingEntity_Type, self).buildChildren(child_, node, nodeName_, True)
+# end class CorrectableReportingEntity_Type
+
+
+class CorrectableAdditionalInfo_Type(GeneratedsSuper):
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, DocSpec=None, OtherInfo=None, ResCountryCode=None, SummaryRef=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.DocSpec = DocSpec
+        self.DocSpec_nsprefix_ = None
+        if OtherInfo is None:
+            self.OtherInfo = []
+        else:
+            self.OtherInfo = OtherInfo
+        self.OtherInfo_nsprefix_ = None
+        if ResCountryCode is None:
+            self.ResCountryCode = []
+        else:
+            self.ResCountryCode = []
+            self.add_ResCountryCode(ResCountryCode)
+        self.ResCountryCode_nsprefix_ = None
+        if SummaryRef is None:
+            self.SummaryRef = []
+        else:
+            self.SummaryRef = SummaryRef
+        self.SummaryRef_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, CorrectableAdditionalInfo_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if CorrectableAdditionalInfo_Type.subclass:
+            return CorrectableAdditionalInfo_Type.subclass(*args_, **kwargs_)
+        else:
+            return CorrectableAdditionalInfo_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_DocSpec(self):
+        return self.DocSpec
+    def set_DocSpec(self, DocSpec):
+        self.DocSpec = DocSpec
+    def get_OtherInfo(self):
+        return self.OtherInfo
+    def set_OtherInfo(self, OtherInfo):
+        self.OtherInfo = OtherInfo
+    def add_OtherInfo(self, value):
+        self.OtherInfo.append(value)
+    def insert_OtherInfo_at(self, index, value):
+        self.OtherInfo.insert(index, value)
+    def replace_OtherInfo_at(self, index, value):
+        self.OtherInfo[index] = value
+    def get_ResCountryCode(self):
+        return self.ResCountryCode
+    def set_ResCountryCode(self, ResCountryCode):
+        self.ResCountryCode = ResCountryCode
+    def add_ResCountryCode(self, value):
+        self.ResCountryCode.append(value)
+    def insert_ResCountryCode_at(self, index, value):
+        self.ResCountryCode.insert(index, value)
+    def replace_ResCountryCode_at(self, index, value):
+        self.ResCountryCode[index] = value
+    def get_SummaryRef(self):
+        return self.SummaryRef
+    def set_SummaryRef(self, SummaryRef):
+        self.SummaryRef = SummaryRef
+    def add_SummaryRef(self, value):
+        self.SummaryRef.append(value)
+    def insert_SummaryRef_at(self, index, value):
+        self.SummaryRef.insert(index, value)
+    def replace_SummaryRef_at(self, index, value):
+        self.SummaryRef[index] = value
+    def validate_CountryCode_Type(self, value):
+        result = True
+        # Validate type CountryCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AF', 'AX', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CG', 'CD', 'CK', 'CR', 'CI', 'HR', 'CU', 'CW', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'VA', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'BL', 'SH', 'KN', 'LC', 'MF', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SX', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'SS', 'ES', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UM', 'UY', 'UZ', 'VU', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW', 'XK', 'X5', 'XX']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CountryCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_CbcSummaryListElementsType_EnumType(self, value):
+        result = True
+        # Validate type CbcSummaryListElementsType_EnumType, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['CBC601', 'CBC602', 'CBC603', 'CBC604', 'CBC605', 'CBC606', 'CBC607', 'CBC608', 'CBC609', 'CBC610', 'CBC611']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CbcSummaryListElementsType_EnumType' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def hasContent_(self):
+        if (
+            self.DocSpec is not None or
+            self.OtherInfo or
+            self.ResCountryCode or
+            self.SummaryRef
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5"  xmlns:iso="urn:oecd:ties:isocbctypes:v1" ', name_='CorrectableAdditionalInfo_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('CorrectableAdditionalInfo_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'CorrectableAdditionalInfo_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='CorrectableAdditionalInfo_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='CorrectableAdditionalInfo_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='CorrectableAdditionalInfo_Type'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5"  xmlns:iso="urn:oecd:ties:isocbctypes:v1" ', name_='CorrectableAdditionalInfo_Type', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.DocSpec is not None:
+            namespaceprefix_ = self.DocSpec_nsprefix_ + ':' if (UseCapturedNS_ and self.DocSpec_nsprefix_) else ''
+            self.DocSpec.export(outfile, level, namespaceprefix_, namespacedef_='', name_='DocSpec', pretty_print=pretty_print)
+        if self.OtherInfo is not None:
+            namespaceprefix_ = self.OtherInfo_nsprefix_ + ':' if (UseCapturedNS_ and self.OtherInfo_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sOtherInfo>%s</%sOtherInfo>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.OtherInfo), input_name='OtherInfo')), namespaceprefix_ , eol_))
+        # for OtherInfo_ in self.OtherInfo:
+        #     print("otherInfo = " + OtherInfo_)
+        #     namespaceprefix_ = self.OtherInfo_nsprefix_ + ':' if (UseCapturedNS_ and self.OtherInfo_nsprefix_) else ''
+        #     OtherInfo_.export(outfile, level, namespaceprefix_, namespacedef_='', name_='OtherInfo', pretty_print=pretty_print)
+        for ResCountryCode_ in self.ResCountryCode:
+            namespaceprefix_ = self.ResCountryCode_nsprefix_ + ':' if (UseCapturedNS_ and self.ResCountryCode_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sResCountryCode>%s</%sResCountryCode>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(ResCountryCode_), input_name='ResCountryCode')), namespaceprefix_ , eol_))
+        for SummaryRef_ in self.SummaryRef:
+            namespaceprefix_ = self.SummaryRef_nsprefix_ + ':' if (UseCapturedNS_ and self.SummaryRef_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sSummaryRef>%s</%sSummaryRef>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(SummaryRef_), input_name='SummaryRef')), namespaceprefix_ , eol_))
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'DocSpec':
+            obj_ = DocSpec_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.DocSpec = obj_
+            obj_.original_tagname_ = 'DocSpec'
+        elif nodeName_ == 'OtherInfo':
+            obj_ = StringMin1Max4000WithLang_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.OtherInfo.append(obj_)
+            obj_.original_tagname_ = 'OtherInfo'
+        elif nodeName_ == 'ResCountryCode':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'ResCountryCode')
+            value_ = self.gds_validate_string(value_, node, 'ResCountryCode')
+            self.ResCountryCode.append(value_)
+            self.ResCountryCode_nsprefix_ = child_.prefix
+            # validate type CountryCode_Type
+            self.validate_CountryCode_Type(self.ResCountryCode[-1])
+        elif nodeName_ == 'SummaryRef':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'SummaryRef')
+            value_ = self.gds_validate_string(value_, node, 'SummaryRef')
+            self.SummaryRef.append(value_)
+            self.SummaryRef_nsprefix_ = child_.prefix
+            # validate type CbcSummaryListElementsType_EnumType
+            self.validate_CbcSummaryListElementsType_EnumType(self.SummaryRef[-1])
+# end class CorrectableAdditionalInfo_Type
+
+
+class CbcBody_Type(GeneratedsSuper):
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, ReportingEntity=None, CbcReports=None, AdditionalInfo=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.ReportingEntity = ReportingEntity
+        self.ReportingEntity_nsprefix_ = None
+        if CbcReports is None:
+            self.CbcReports = []
+        else:
+            self.CbcReports = []
+            self.add_CbcReports(CbcReports)
+        self.CbcReports_nsprefix_ = None
+        if AdditionalInfo is None:
+            self.AdditionalInfo = []
+        else:
+            self.AdditionalInfo = []
+            self.add_AdditionalInfo(AdditionalInfo)
+        self.AdditionalInfo_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, CbcBody_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if CbcBody_Type.subclass:
+            return CbcBody_Type.subclass(*args_, **kwargs_)
+        else:
+            return CbcBody_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_ReportingEntity(self):
+        return self.ReportingEntity
+    def set_ReportingEntity(self, ReportingEntity):
+        self.ReportingEntity = ReportingEntity
+    def get_CbcReports(self):
+        return self.CbcReports
+    def set_CbcReports(self, CbcReports):
+        self.CbcReports = CbcReports
+    def add_CbcReports(self, value):
+        self.CbcReports.append(value)
+    def insert_CbcReports_at(self, index, value):
+        self.CbcReports.insert(index, value)
+    def replace_CbcReports_at(self, index, value):
+        self.CbcReports[index] = value
+    def get_AdditionalInfo(self):
+        return self.AdditionalInfo
+    def set_AdditionalInfo(self, AdditionalInfo):
+        self.AdditionalInfo = AdditionalInfo
+    def add_AdditionalInfo(self, value):
+        self.AdditionalInfo.append(value)
+    def insert_AdditionalInfo_at(self, index, value):
+        self.AdditionalInfo.insert(index, value)
+    def replace_AdditionalInfo_at(self, index, value):
+        self.AdditionalInfo[index] = value
+    def hasContent_(self):
+        if (
+            self.ReportingEntity is not None or
+            self.CbcReports or
+            self.AdditionalInfo
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='CbcBody_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('CbcBody_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'CbcBody_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='CbcBody_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='CbcBody_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='CbcBody_Type'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='CbcBody_Type', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.ReportingEntity is not None:
+            namespaceprefix_ = self.ReportingEntity_nsprefix_ + ':' if (UseCapturedNS_ and self.ReportingEntity_nsprefix_) else ''
+            self.ReportingEntity.export(outfile, level, namespaceprefix_, namespacedef_='', name_='ReportingEntity', pretty_print=pretty_print)
+        for CbcReports_ in self.CbcReports:
+            namespaceprefix_ = self.CbcReports_nsprefix_ + ':' if (UseCapturedNS_ and self.CbcReports_nsprefix_) else ''
+            CbcReports_.export(outfile, level, namespaceprefix_, namespacedef_='', name_='CbcReports', pretty_print=pretty_print)
+        for AdditionalInfo_ in self.AdditionalInfo:
+            namespaceprefix_ = self.AdditionalInfo_nsprefix_ + ':' if (UseCapturedNS_ and self.AdditionalInfo_nsprefix_) else ''
+            AdditionalInfo_.export(outfile, level, namespaceprefix_, namespacedef_='', name_='AdditionalInfo', pretty_print=pretty_print)
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'ReportingEntity':
+            obj_ = CorrectableReportingEntity_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.ReportingEntity = obj_
+            obj_.original_tagname_ = 'ReportingEntity'
+        elif nodeName_ == 'CbcReports':
+            obj_ = CorrectableCbcReport_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.CbcReports.append(obj_)
+            obj_.original_tagname_ = 'CbcReports'
+        elif nodeName_ == 'AdditionalInfo':
+            obj_ = CorrectableAdditionalInfo_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.AdditionalInfo.append(obj_)
+            obj_.original_tagname_ = 'AdditionalInfo'
+# end class CbcBody_Type
+
+
+class CBC_OECD(GeneratedsSuper):
+    """CBC Version"""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, version=None, MessageSpec=None, CbcBody=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.version = _cast(None, version)
+        self.version_nsprefix_ = None
+        self.MessageSpec = MessageSpec
+        self.MessageSpec_nsprefix_ = None
+        if CbcBody is None:
+            self.CbcBody = []
+        else:
+            self.CbcBody = []
+            self.add_CbcBody(CbcBody)
+        self.CbcBody_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, CBC_OECD)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if CBC_OECD.subclass:
+            return CBC_OECD.subclass(*args_, **kwargs_)
+        else:
+            return CBC_OECD(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_MessageSpec(self):
+        return self.MessageSpec
+    def set_MessageSpec(self, MessageSpec):
+        self.MessageSpec = MessageSpec
+    def get_CbcBody(self):
+        return self.CbcBody
+    def set_CbcBody(self, CbcBody):
+        self.CbcBody = CbcBody
+    def add_CbcBody(self, value):
+        self.CbcBody.append(value)
+    def insert_CbcBody_at(self, index, value):
+        self.CbcBody.insert(index, value)
+    def replace_CbcBody_at(self, index, value):
+        self.CbcBody[index] = value
+    def get_version(self):
+        return self.version
+    def set_version(self, version):
+        self.version = version
+    def validate_StringMin1Max10_Type(self, value):
+        # Validate type stf:StringMin1Max10_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 10:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max10_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max10_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+    def hasContent_(self):
+        if (
+            self.MessageSpec is not None or
+            self.CbcBody
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" xmlns:iso="urn:oecd:ties:isocbctypes:v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0"', name_='CBC_OECD', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('CBC_OECD')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'CBC_OECD':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='CBC_OECD')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='CBC_OECD', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='CBC_OECD'):
+        if self.version is not None and 'version' not in already_processed:
+            already_processed.add('version')
+            outfile.write(' version=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.version), input_name='version')), ))
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='CBC_OECD', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.MessageSpec is not None:
+            namespaceprefix_ = self.MessageSpec_nsprefix_ + ':' if (UseCapturedNS_ and self.MessageSpec_nsprefix_) else ''
+            self.MessageSpec.export(outfile, level, namespaceprefix_, namespacedef_='', name_='MessageSpec', pretty_print=pretty_print)
+        for CbcBody_ in self.CbcBody:
+            namespaceprefix_ = self.CbcBody_nsprefix_ + ':' if (UseCapturedNS_ and self.CbcBody_nsprefix_) else ''
+            CbcBody_.export(outfile, level, namespaceprefix_, namespacedef_='', name_='CbcBody', pretty_print=pretty_print)
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('version', node)
+        if value is not None and 'version' not in already_processed:
+            already_processed.add('version')
+            self.version = value
+            self.validate_StringMin1Max10_Type(self.version)    # validate type StringMin1Max10_Type
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'MessageSpec':
+            obj_ = MessageSpec_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.MessageSpec = obj_
+            obj_.original_tagname_ = 'MessageSpec'
+        elif nodeName_ == 'CbcBody':
+            obj_ = CbcBody_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.CbcBody.append(obj_)
+            obj_.original_tagname_ = 'CbcBody'
+# end class CBC_OECD
+
+
+class StringMin1Max4000WithLang_Type(GeneratedsSuper):
+    """Defines a string with minimum length 1 and maximum length of 4000, with
+    the Language attributeLanguage used"""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, language=None, valueOf_=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.language = _cast(None, language)
+        self.language_nsprefix_ = None
+        self.valueOf_ = valueOf_
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, StringMin1Max4000WithLang_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if StringMin1Max4000WithLang_Type.subclass:
+            return StringMin1Max4000WithLang_Type.subclass(*args_, **kwargs_)
+        else:
+            return StringMin1Max4000WithLang_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_language(self):
+        return self.language
+    def set_language(self, language):
+        self.language = language
+    def get_valueOf_(self): return self.valueOf_
+    def set_valueOf_(self, valueOf_): self.valueOf_ = valueOf_
+    def validate_LanguageCode_Type(self, value):
+        # Validate type iso:LanguageCode_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['AA', 'AB', 'AF', 'AK', 'SQ', 'AM', 'AR', 'AN', 'HY', 'AS', 'AV', 'AE', 'AY', 'AZ', 'BA', 'BM', 'EU', 'BE', 'BN', 'BH', 'BI', 'BS', 'BR', 'BG', 'MY', 'CA', 'CH', 'CE', 'ZH', 'CU', 'CV', 'KW', 'CO', 'CR', 'CS', 'DA', 'DV', 'NL', 'DZ', 'EN', 'EO', 'ET', 'EE', 'FO', 'FJ', 'FI', 'FR', 'FY', 'FF', 'KA', 'DE', 'GD', 'GA', 'GL', 'GV', 'EL', 'GN', 'GU', 'HT', 'HA', 'HE', 'HZ', 'HI', 'HO', 'HR', 'HU', 'IG', 'IS', 'IO', 'II', 'IU', 'IE', 'IA', 'ID', 'IK', 'IT', 'JV', 'JA', 'KL', 'KN', 'KS', 'KR', 'KK', 'KM', 'KI', 'RW', 'KY', 'KV', 'KG', 'KO', 'KJ', 'KU', 'LO', 'LA', 'LV', 'LI', 'LN', 'LT', 'LB', 'LU', 'LG', 'MK', 'MH', 'ML', 'MI', 'MR', 'MS', 'MG', 'MT', 'MN', 'NA', 'NV', 'NR', 'ND', 'NG', 'NE', 'NN', 'NB', 'NO', 'NY', 'OC', 'OJ', 'OR', 'OM', 'OS', 'PA', 'FA', 'PI', 'PL', 'PT', 'PS', 'QU', 'RM', 'RO', 'RN', 'RU', 'SG', 'SA', 'SI', 'SK', 'SL', 'SE', 'SM', 'SN', 'SD', 'SO', 'ST', 'ES', 'SC', 'SR', 'SS', 'SU', 'SW', 'SV', 'TY', 'TA', 'TT', 'TE', 'TG', 'TL', 'TH', 'BO', 'TI', 'TO', 'TN', 'TS', 'TK', 'TR', 'TW', 'UG', 'UK', 'UR', 'UZ', 'VE', 'VI', 'VO', 'CY', 'WA', 'WO', 'XH', 'YI', 'YO', 'ZA', 'ZU']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on LanguageCode_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+    def hasContent_(self):
+        if (
+            (1 if type(self.valueOf_) in [int,float] else self.valueOf_)
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='stf:', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5"', name_='StringMin1Max4000WithLang_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('StringMin1Max4000WithLang_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'StringMin1Max4000WithLang_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='StringMin1Max4000WithLang_Type')
+        if self.hasContent_():
+            outfile.write('>')
+            outfile.write(self.convert_unicode(self.valueOf_))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='StringMin1Max4000WithLang_Type', pretty_print=pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='stf:', name_='StringMin1Max4000WithLang_Type'):
+        if self.language is not None and 'language' not in already_processed:
+            already_processed.add('language')
+            outfile.write(' language=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.language), input_name='language')), ))
+    def exportChildren(self, outfile, level, namespaceprefix_='stf:', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5"', name_='StringMin1Max4000WithLang_Type', fromsubclass_=False, pretty_print=True):
+        pass
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        self.valueOf_ = get_all_text_(node)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('language', node)
+        if value is not None and 'language' not in already_processed:
+            already_processed.add('language')
+            self.language = value
+            self.validate_LanguageCode_Type(self.language)    # validate type LanguageCode_Type
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        pass
+# end class StringMin1Max4000WithLang_Type
+
+
+class DocSpec_Type(GeneratedsSuper):
+    """Document specification: Data identifying and describing the document,
+    where
+    'document' here means the part of a message that is to transmit the data
+    about a single block of CBC information."""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, DocTypeIndic=None, DocRefId=None, CorrMessageRefId=None, CorrDocRefId=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.DocTypeIndic = DocTypeIndic
+        self.validate_OECDDocTypeIndic_EnumType(self.DocTypeIndic)
+        self.DocTypeIndic_nsprefix_ = "stf"
+        self.DocRefId = DocRefId
+        self.validate_StringMin1Max200_Type(self.DocRefId)
+        self.DocRefId_nsprefix_ = "stf"
+        self.CorrMessageRefId = CorrMessageRefId
+        self.validate_StringMin1Max170_Type(self.CorrMessageRefId)
+        self.CorrMessageRefId_nsprefix_ = "stf"
+        self.CorrDocRefId = CorrDocRefId
+        self.validate_StringMin1Max200_Type(self.CorrDocRefId)
+        self.CorrDocRefId_nsprefix_ = "stf"
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, DocSpec_Type)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if DocSpec_Type.subclass:
+            return DocSpec_Type.subclass(*args_, **kwargs_)
+        else:
+            return DocSpec_Type(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_DocTypeIndic(self):
+        return self.DocTypeIndic
+    def set_DocTypeIndic(self, DocTypeIndic):
+        self.DocTypeIndic = DocTypeIndic
+    def get_DocRefId(self):
+        return self.DocRefId
+    def set_DocRefId(self, DocRefId):
+        self.DocRefId = DocRefId
+    def get_CorrMessageRefId(self):
+        return self.CorrMessageRefId
+    def set_CorrMessageRefId(self, CorrMessageRefId):
+        self.CorrMessageRefId = CorrMessageRefId
+    def get_CorrDocRefId(self):
+        return self.CorrDocRefId
+    def set_CorrDocRefId(self, CorrDocRefId):
+        self.CorrDocRefId = CorrDocRefId
+    def validate_OECDDocTypeIndic_EnumType(self, value):
+        result = True
+        # Validate type OECDDocTypeIndic_EnumType, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            value = value
+            enumerations = ['OECD0', 'OECD1', 'OECD2', 'OECD3', 'OECD10', 'OECD11', 'OECD12', 'OECD13']
+            if value not in enumerations:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on OECDDocTypeIndic_EnumType' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_StringMin1Max200_Type(self, value):
+        result = True
+        # Validate type StringMin1Max200_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 200:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max200_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max200_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def validate_StringMin1Max170_Type(self, value):
+        result = True
+        # Validate type StringMin1Max170_Type, a restriction on xsd:string.
+        if value is not None and Validate_simpletypes_ and self.gds_collector_ is not None:
+            if not isinstance(value, str):
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s is not of the correct base simple type (str)' % {"value": value, "lineno": lineno, })
+                return False
+            if len(value) > 170:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd maxLength restriction on StringMin1Max170_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+            if len(value) < 1:
+                lineno = self.gds_get_node_lineno_()
+                self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd minLength restriction on StringMin1Max170_Type' % {"value" : encode_str_2_3(value), "lineno": lineno} )
+                result = False
+        return result
+    def hasContent_(self):
+        if (
+            self.DocTypeIndic is not None or
+            self.DocRefId is not None or
+            self.CorrMessageRefId is not None or
+            self.CorrDocRefId is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='stf:', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='DocSpec_Type', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('DocSpec_Type')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'DocSpec_Type':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='DocSpec_Type')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='DocSpec_Type', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='stf:', name_='DocSpec_Type'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='stf:', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" ', name_='DocSpec_Type', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.DocTypeIndic is not None:
+            namespaceprefix_ = self.DocTypeIndic_nsprefix_ + ':' if (UseCapturedNS_ and self.DocTypeIndic_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sDocTypeIndic>%s</%sDocTypeIndic>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.DocTypeIndic), input_name='DocTypeIndic')), namespaceprefix_ , eol_))
+        if self.DocRefId is not None:
+            namespaceprefix_ = self.DocRefId_nsprefix_ + ':' if (UseCapturedNS_ and self.DocRefId_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sDocRefId>%s</%sDocRefId>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.DocRefId), input_name='DocRefId')), namespaceprefix_ , eol_))
+        if self.CorrMessageRefId is not None:
+            namespaceprefix_ = self.CorrMessageRefId_nsprefix_ + ':' if (UseCapturedNS_ and self.CorrMessageRefId_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sCorrMessageRefId>%s</%sCorrMessageRefId>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.CorrMessageRefId), input_name='CorrMessageRefId')), namespaceprefix_ , eol_))
+        if self.CorrDocRefId is not None:
+            namespaceprefix_ = self.CorrDocRefId_nsprefix_ + ':' if (UseCapturedNS_ and self.CorrDocRefId_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sCorrDocRefId>%s</%sCorrDocRefId>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.CorrDocRefId), input_name='CorrDocRefId')), namespaceprefix_ , eol_))
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'DocTypeIndic':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'DocTypeIndic')
+            value_ = self.gds_validate_string(value_, node, 'DocTypeIndic')
+            self.DocTypeIndic = value_
+            self.DocTypeIndic_nsprefix_ = child_.prefix
+            # validate type OECDDocTypeIndic_EnumType
+            self.validate_OECDDocTypeIndic_EnumType(self.DocTypeIndic)
+        elif nodeName_ == 'DocRefId':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'DocRefId')
+            value_ = self.gds_validate_string(value_, node, 'DocRefId')
+            self.DocRefId = value_
+            self.DocRefId_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.DocRefId)
+        elif nodeName_ == 'CorrMessageRefId':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'CorrMessageRefId')
+            value_ = self.gds_validate_string(value_, node, 'CorrMessageRefId')
+            self.CorrMessageRefId = value_
+            self.CorrMessageRefId_nsprefix_ = child_.prefix
+            # validate type StringMin1Max170_Type
+            self.validate_StringMin1Max170_Type(self.CorrMessageRefId)
+        elif nodeName_ == 'CorrDocRefId':
+            value_ = child_.text
+            value_ = self.gds_parse_string(value_, node, 'CorrDocRefId')
+            value_ = self.gds_validate_string(value_, node, 'CorrDocRefId')
+            self.CorrDocRefId = value_
+            self.CorrDocRefId_nsprefix_ = child_.prefix
+            # validate type StringMin1Max200_Type
+            self.validate_StringMin1Max200_Type(self.CorrDocRefId)
+# end class DocSpec_Type
+
+
+class SummaryType(GeneratedsSuper):
+    """Overview of allocation of income, taxes and business activities by tax
+    jurisdiction"""
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, Revenues=None, ProfitOrLoss=None, TaxPaid=None, TaxAccrued=None, Capital=None, Earnings=None, NbEmployees=None, Assets=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.Revenues = Revenues
+        self.Revenues_nsprefix_ = None
+        self.ProfitOrLoss = ProfitOrLoss
+        self.ProfitOrLoss_nsprefix_ = None
+        self.TaxPaid = TaxPaid
+        self.TaxPaid_nsprefix_ = None
+        self.TaxAccrued = TaxAccrued
+        self.TaxAccrued_nsprefix_ = None
+        self.Capital = Capital
+        self.Capital_nsprefix_ = None
+        self.Earnings = Earnings
+        self.Earnings_nsprefix_ = None
+        self.NbEmployees = NbEmployees
+        self.NbEmployees_nsprefix_ = None
+        self.Assets = Assets
+        self.Assets_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, SummaryType)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if SummaryType.subclass:
+            return SummaryType.subclass(*args_, **kwargs_)
+        else:
+            return SummaryType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_Revenues(self):
+        return self.Revenues
+    def set_Revenues(self, Revenues):
+        self.Revenues = Revenues
+    def get_ProfitOrLoss(self):
+        return self.ProfitOrLoss
+    def set_ProfitOrLoss(self, ProfitOrLoss):
+        self.ProfitOrLoss = ProfitOrLoss
+    def get_TaxPaid(self):
+        return self.TaxPaid
+    def set_TaxPaid(self, TaxPaid):
+        self.TaxPaid = TaxPaid
+    def get_TaxAccrued(self):
+        return self.TaxAccrued
+    def set_TaxAccrued(self, TaxAccrued):
+        self.TaxAccrued = TaxAccrued
+    def get_Capital(self):
+        return self.Capital
+    def set_Capital(self, Capital):
+        self.Capital = Capital
+    def get_Earnings(self):
+        return self.Earnings
+    def set_Earnings(self, Earnings):
+        self.Earnings = Earnings
+    def get_NbEmployees(self):
+        return self.NbEmployees
+    def set_NbEmployees(self, NbEmployees):
+        self.NbEmployees = NbEmployees
+    def get_Assets(self):
+        return self.Assets
+    def set_Assets(self, Assets):
+        self.Assets = Assets
+    def hasContent_(self):
+        if (
+            self.Revenues is not None or
+            self.ProfitOrLoss is not None or
+            self.TaxPaid is not None or
+            self.TaxAccrued is not None or
+            self.Capital is not None or
+            self.Earnings is not None or
+            self.NbEmployees is not None or
+            self.Assets is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='SummaryType', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('SummaryType')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'SummaryType':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='SummaryType')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='SummaryType', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='SummaryType'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='SummaryType', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.Revenues is not None:
+            namespaceprefix_ = self.Revenues_nsprefix_ + ':' if (UseCapturedNS_ and self.Revenues_nsprefix_) else ''
+            self.Revenues.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Revenues', pretty_print=pretty_print)
+        if self.ProfitOrLoss is not None:
+            namespaceprefix_ = self.ProfitOrLoss_nsprefix_ + ':' if (UseCapturedNS_ and self.ProfitOrLoss_nsprefix_) else ''
+            self.ProfitOrLoss.export(outfile, level, namespaceprefix_, namespacedef_='', name_='ProfitOrLoss', pretty_print=pretty_print)
+        if self.TaxPaid is not None:
+            namespaceprefix_ = self.TaxPaid_nsprefix_ + ':' if (UseCapturedNS_ and self.TaxPaid_nsprefix_) else ''
+            self.TaxPaid.export(outfile, level, namespaceprefix_, namespacedef_='', name_='TaxPaid', pretty_print=pretty_print)
+        if self.TaxAccrued is not None:
+            namespaceprefix_ = self.TaxAccrued_nsprefix_ + ':' if (UseCapturedNS_ and self.TaxAccrued_nsprefix_) else ''
+            self.TaxAccrued.export(outfile, level, namespaceprefix_, namespacedef_='', name_='TaxAccrued', pretty_print=pretty_print)
+        if self.Capital is not None:
+            namespaceprefix_ = self.Capital_nsprefix_ + ':' if (UseCapturedNS_ and self.Capital_nsprefix_) else ''
+            self.Capital.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Capital', pretty_print=pretty_print)
+        if self.Earnings is not None:
+            namespaceprefix_ = self.Earnings_nsprefix_ + ':' if (UseCapturedNS_ and self.Earnings_nsprefix_) else ''
+            self.Earnings.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Earnings', pretty_print=pretty_print)
+        if self.NbEmployees is not None:
+            namespaceprefix_ = self.NbEmployees_nsprefix_ + ':' if (UseCapturedNS_ and self.NbEmployees_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sNbEmployees>%s</%sNbEmployees>%s' % (namespaceprefix_ , self.gds_format_integer(self.NbEmployees, input_name='NbEmployees'), namespaceprefix_ , eol_))
+        if self.Assets is not None:
+            namespaceprefix_ = self.Assets_nsprefix_ + ':' if (UseCapturedNS_ and self.Assets_nsprefix_) else ''
+            self.Assets.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Assets', pretty_print=pretty_print)
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'Revenues':
+            obj_ = RevenuesType.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Revenues = obj_
+            obj_.original_tagname_ = 'Revenues'
+        elif nodeName_ == 'ProfitOrLoss':
+            obj_ = MonAmnt_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.ProfitOrLoss = obj_
+            obj_.original_tagname_ = 'ProfitOrLoss'
+        elif nodeName_ == 'TaxPaid':
+            obj_ = MonAmnt_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.TaxPaid = obj_
+            obj_.original_tagname_ = 'TaxPaid'
+        elif nodeName_ == 'TaxAccrued':
+            obj_ = MonAmnt_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.TaxAccrued = obj_
+            obj_.original_tagname_ = 'TaxAccrued'
+        elif nodeName_ == 'Capital':
+            obj_ = MonAmnt_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Capital = obj_
+            obj_.original_tagname_ = 'Capital'
+        elif nodeName_ == 'Earnings':
+            obj_ = MonAmnt_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Earnings = obj_
+            obj_.original_tagname_ = 'Earnings'
+        elif nodeName_ == 'NbEmployees' and child_.text:
+            sval_ = child_.text
+            ival_ = self.gds_parse_integer(sval_, node, 'NbEmployees')
+            ival_ = self.gds_validate_integer(ival_, node, 'NbEmployees')
+            self.NbEmployees = ival_
+            self.NbEmployees_nsprefix_ = child_.prefix
+        elif nodeName_ == 'Assets':
+            obj_ = MonAmnt_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Assets = obj_
+            obj_.original_tagname_ = 'Assets'
+# end class SummaryType
+
+
+class RevenuesType(GeneratedsSuper):
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, Unrelated=None, Related=None, Total=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        self.Unrelated = Unrelated
+        self.Unrelated_nsprefix_ = None
+        self.Related = Related
+        self.Related_nsprefix_ = None
+        self.Total = Total
+        self.Total_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, RevenuesType)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if RevenuesType.subclass:
+            return RevenuesType.subclass(*args_, **kwargs_)
+        else:
+            return RevenuesType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_Unrelated(self):
+        return self.Unrelated
+    def set_Unrelated(self, Unrelated):
+        self.Unrelated = Unrelated
+    def get_Related(self):
+        return self.Related
+    def set_Related(self, Related):
+        self.Related = Related
+    def get_Total(self):
+        return self.Total
+    def set_Total(self, Total):
+        self.Total = Total
+    def hasContent_(self):
+        if (
+            self.Unrelated is not None or
+            self.Related is not None or
+            self.Total is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='RevenuesType', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('RevenuesType')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'RevenuesType':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='RevenuesType')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='RevenuesType', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='RevenuesType'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='RevenuesType', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.Unrelated is not None:
+            namespaceprefix_ = self.Unrelated_nsprefix_ + ':' if (UseCapturedNS_ and self.Unrelated_nsprefix_) else ''
+            self.Unrelated.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Unrelated', pretty_print=pretty_print)
+        if self.Related is not None:
+            namespaceprefix_ = self.Related_nsprefix_ + ':' if (UseCapturedNS_ and self.Related_nsprefix_) else ''
+            self.Related.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Related', pretty_print=pretty_print)
+        if self.Total is not None:
+            namespaceprefix_ = self.Total_nsprefix_ + ':' if (UseCapturedNS_ and self.Total_nsprefix_) else ''
+            self.Total.export(outfile, level, namespaceprefix_, namespacedef_='', name_='Total', pretty_print=pretty_print)
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'Unrelated':
+            obj_ = MonAmnt_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Unrelated = obj_
+            obj_.original_tagname_ = 'Unrelated'
+        elif nodeName_ == 'Related':
+            obj_ = MonAmnt_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Related = obj_
+            obj_.original_tagname_ = 'Related'
+        elif nodeName_ == 'Total':
+            obj_ = MonAmnt_Type.factory(parent_object_=self)
+            obj_.build(child_, gds_collector_=gds_collector_)
+            self.Total = obj_
+            obj_.original_tagname_ = 'Total'
+# end class RevenuesType
+
+
+class ReportingPeriodType(GeneratedsSuper):
+    __hash__ = GeneratedsSuper.__hash__
+    subclass = None
+    superclass = None
+    def __init__(self, StartDate=None, EndDate=None, gds_collector_=None, **kwargs_):
+        self.gds_collector_ = gds_collector_
+        self.gds_elementtree_node_ = None
+        self.original_tagname_ = None
+        self.parent_object_ = kwargs_.get('parent_object_')
+        self.ns_prefix_ = None
+        if isinstance(StartDate, BaseStrType_):
+            initvalue_ = datetime_.datetime.strptime(StartDate, '%Y-%m-%d').date()
+        else:
+            initvalue_ = StartDate
+        self.StartDate = initvalue_
+        self.StartDate_nsprefix_ = None
+        if isinstance(EndDate, BaseStrType_):
+            initvalue_ = datetime_.datetime.strptime(EndDate, '%Y-%m-%d').date()
+        else:
+            initvalue_ = EndDate
+        self.EndDate = initvalue_
+        self.EndDate_nsprefix_ = None
+    def factory(*args_, **kwargs_):
+        if CurrentSubclassModule_ is not None:
+            subclass = getSubclassFromModule_(
+                CurrentSubclassModule_, ReportingPeriodType)
+            if subclass is not None:
+                return subclass(*args_, **kwargs_)
+        if ReportingPeriodType.subclass:
+            return ReportingPeriodType.subclass(*args_, **kwargs_)
+        else:
+            return ReportingPeriodType(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_ns_prefix_(self):
+        return self.ns_prefix_
+    def set_ns_prefix_(self, ns_prefix):
+        self.ns_prefix_ = ns_prefix
+    def get_StartDate(self):
+        return self.StartDate
+    def set_StartDate(self, StartDate):
+        self.StartDate = StartDate
+    def get_EndDate(self):
+        return self.EndDate
+    def set_EndDate(self, EndDate):
+        self.EndDate = EndDate
+    def hasContent_(self):
+        if (
+            self.StartDate is not None or
+            self.EndDate is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='ReportingPeriodType', pretty_print=True):
+        imported_ns_def_ = GenerateDSNamespaceDefs_.get('ReportingPeriodType')
+        if imported_ns_def_ is not None:
+            namespacedef_ = imported_ns_def_
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.original_tagname_ is not None and name_ == 'ReportingPeriodType':
+            name_ = self.original_tagname_
+        if UseCapturedNS_ and self.ns_prefix_:
+            namespaceprefix_ = self.ns_prefix_ + ':'
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='ReportingPeriodType')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='ReportingPeriodType', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='ReportingPeriodType'):
+        pass
+    def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"', name_='ReportingPeriodType', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.StartDate is not None:
+            namespaceprefix_ = self.StartDate_nsprefix_ + ':' if (UseCapturedNS_ and self.StartDate_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sStartDate>%s</%sStartDate>%s' % (namespaceprefix_ , self.gds_format_date(self.StartDate, input_name='StartDate'), namespaceprefix_ , eol_))
+        if self.EndDate is not None:
+            namespaceprefix_ = self.EndDate_nsprefix_ + ':' if (UseCapturedNS_ and self.EndDate_nsprefix_) else ''
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sEndDate>%s</%sEndDate>%s' % (namespaceprefix_ , self.gds_format_date(self.EndDate, input_name='EndDate'), namespaceprefix_ , eol_))
+    def build(self, node, gds_collector_=None):
+        self.gds_collector_ = gds_collector_
+        if SaveElementTreeNode:
+            self.gds_elementtree_node_ = node
+        already_processed = set()
+        self.ns_prefix_ = node.prefix
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_, gds_collector_=gds_collector_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False, gds_collector_=None):
+        if nodeName_ == 'StartDate':
+            sval_ = child_.text
+            dval_ = self.gds_parse_date(sval_)
+            self.StartDate = dval_
+            self.StartDate_nsprefix_ = child_.prefix
+        elif nodeName_ == 'EndDate':
+            sval_ = child_.text
+            dval_ = self.gds_parse_date(sval_)
+            self.EndDate = dval_
+            self.EndDate_nsprefix_ = child_.prefix
+# end class ReportingPeriodType
+
+
+GDSClassesMapping = {
+}
+
+
+USAGE_TEXT = """
+Usage: python <Parser>.py [ -s ] <in_xml_file>
+"""
+
+
+def usage():
+    print(USAGE_TEXT)
+    sys.exit(1)
+
+
+def get_root_tag(node):
+    tag = Tag_pattern_.match(node.tag).groups()[-1]
+    rootClass = GDSClassesMapping.get(tag)
+    if rootClass is None:
+        rootClass = globals().get(tag)
+    return tag, rootClass
+
+
+def get_required_ns_prefix_defs(rootNode):
+    '''Get all name space prefix definitions required in this XML doc.
+    Return a dictionary of definitions and a char string of definitions.
+    '''
+    nsmap = {
+        prefix: uri
+        for node in rootNode.iter()
+        for (prefix, uri) in node.nsmap.items()
+        if prefix is not None
+    }
+    namespacedefs = ' '.join([
+        'xmlns:{}="{}"'.format(prefix, uri)
+        for prefix, uri in nsmap.items()
+    ])
+    return nsmap, namespacedefs
+
+
+def parse(inFileName, silence=False, print_warnings=True):
+    global CapturedNsmap_
+    gds_collector = GdsCollector_()
+    parser = None
+    doc = parsexml_(inFileName, parser)
+    rootNode = doc.getroot()
+    rootTag, rootClass = get_root_tag(rootNode)
+    if rootClass is None:
+        rootTag = 'AddressFix_Type'
+        rootClass = AddressFix_Type
+    rootObj = rootClass.factory()
+    rootObj.build(rootNode, gds_collector_=gds_collector)
+    CapturedNsmap_, namespacedefs = get_required_ns_prefix_defs(rootNode)
+    if not SaveElementTreeNode:
+        doc = None
+        rootNode = None
+    if not silence:
+        sys.stdout.write('<?xml version="1.0" ?>\n')
+        rootObj.export(
+            sys.stdout, 0, name_=rootTag,
+            namespacedef_=namespacedefs,
+            pretty_print=True)
+    if print_warnings and len(gds_collector.get_messages()) > 0:
+        separator = ('-' * 50) + '\n'
+        sys.stderr.write(separator)
+        sys.stderr.write('----- Warnings -- count: {} -----\n'.format(
+            len(gds_collector.get_messages()), ))
+        gds_collector.write_messages(sys.stderr)
+        sys.stderr.write(separator)
+    return rootObj
+
+
+def parseEtree(inFileName, silence=False, print_warnings=True,
+               mapping=None, nsmap=None):
+    parser = None
+    doc = parsexml_(inFileName, parser)
+    gds_collector = GdsCollector_()
+    rootNode = doc.getroot()
+    rootTag, rootClass = get_root_tag(rootNode)
+    if rootClass is None:
+        rootTag = 'AddressFix_Type'
+        rootClass = AddressFix_Type
+    rootObj = rootClass.factory()
+    rootObj.build(rootNode, gds_collector_=gds_collector)
+    # Enable Python to collect the space used by the DOM.
+    if mapping is None:
+        mapping = {}
+    rootElement = rootObj.to_etree(
+        None, name_=rootTag, mapping_=mapping, nsmap_=nsmap)
+    reverse_mapping = rootObj.gds_reverse_node_mapping(mapping)
+    if not SaveElementTreeNode:
+        doc = None
+        rootNode = None
+    if not silence:
+        content = etree_.tostring(
+            rootElement, pretty_print=True,
+            xml_declaration=True, encoding="utf-8")
+        sys.stdout.write(str(content))
+        sys.stdout.write('\n')
+    if print_warnings and len(gds_collector.get_messages()) > 0:
+        separator = ('-' * 50) + '\n'
+        sys.stderr.write(separator)
+        sys.stderr.write('----- Warnings -- count: {} -----\n'.format(
+            len(gds_collector.get_messages()), ))
+        gds_collector.write_messages(sys.stderr)
+        sys.stderr.write(separator)
+    return rootObj, rootElement, mapping, reverse_mapping
+
+
+def parseString(inString, silence=False, print_warnings=True):
+    '''Parse a string, create the object tree, and export it.
+
+    Arguments:
+    - inString -- A string.  This XML fragment should not start
+      with an XML declaration containing an encoding.
+    - silence -- A boolean.  If False, export the object.
+    Returns -- The root object in the tree.
+    '''
+    parser = None
+    rootNode= parsexmlstring_(inString, parser)
+    gds_collector = GdsCollector_()
+    rootTag, rootClass = get_root_tag(rootNode)
+    if rootClass is None:
+        rootTag = 'AddressFix_Type'
+        rootClass = AddressFix_Type
+    rootObj = rootClass.factory()
+    rootObj.build(rootNode, gds_collector_=gds_collector)
+    if not SaveElementTreeNode:
+        rootNode = None
+    if not silence:
+        sys.stdout.write('<?xml version="1.0" ?>\n')
+        rootObj.export(
+            sys.stdout, 0, name_=rootTag,
+            namespacedef_='xmlns:cbc="urn:oecd:ties:cbc:v2"')
+    if print_warnings and len(gds_collector.get_messages()) > 0:
+        separator = ('-' * 50) + '\n'
+        sys.stderr.write(separator)
+        sys.stderr.write('----- Warnings -- count: {} -----\n'.format(
+            len(gds_collector.get_messages()), ))
+        gds_collector.write_messages(sys.stderr)
+        sys.stderr.write(separator)
+    return rootObj
+
+
+def parseLiteral(inFileName, silence=False, print_warnings=True):
+    parser = None
+    doc = parsexml_(inFileName, parser)
+    gds_collector = GdsCollector_()
+    rootNode = doc.getroot()
+    rootTag, rootClass = get_root_tag(rootNode)
+    if rootClass is None:
+        rootTag = 'AddressFix_Type'
+        rootClass = AddressFix_Type
+    rootObj = rootClass.factory()
+    rootObj.build(rootNode, gds_collector_=gds_collector)
+    # Enable Python to collect the space used by the DOM.
+    if not SaveElementTreeNode:
+        doc = None
+        rootNode = None
+    if not silence:
+        sys.stdout.write('#from cbcclasses import *\n\n')
+        sys.stdout.write('import cbcclasses as model_\n\n')
+        sys.stdout.write('rootObj = model_.rootClass(\n')
+        rootObj.exportLiteral(sys.stdout, 0, name_=rootTag)
+        sys.stdout.write(')\n')
+    if print_warnings and len(gds_collector.get_messages()) > 0:
+        separator = ('-' * 50) + '\n'
+        sys.stderr.write(separator)
+        sys.stderr.write('----- Warnings -- count: {} -----\n'.format(
+            len(gds_collector.get_messages()), ))
+        gds_collector.write_messages(sys.stderr)
+        sys.stderr.write(separator)
+    return rootObj
+
+
+def main():
+    args = sys.argv[1:]
+    if len(args) == 1:
+        parse(args[0])
+    else:
+        usage()
+
+
+if __name__ == '__main__':
+    #import pdb; pdb.set_trace()
+    main()
+
+RenameMappings_ = {
+}
+
+__all__ = [
+    "AddressFix_Type",
+    "Address_Type",
+    "CBC_OECD",
+    "CbcBody_Type",
+    "ConstituentEntity_Type",
+    "CorrectableAdditionalInfo_Type",
+    "CorrectableCbcReport_Type",
+    "CorrectableReportingEntity_Type",
+    "DocSpec_Type",
+    "MessageSpec_Type",
+    "MonAmnt_Type",
+    "NameOrganisation_Type",
+    "OrganisationIN_Type",
+    "OrganisationParty_Type",
+    "ReportingEntity_Type",
+    "ReportingPeriodType",
+    "RevenuesType",
+    "StringMin1Max4000WithLang_Type",
+    "SummaryType",
+    "TIN_Type"
+]

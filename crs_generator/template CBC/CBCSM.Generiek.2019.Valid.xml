@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<cbcstm:CbCStatusMessage_OECD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+						   xmlns:cbcstm="urn:oecd:ties:cbcstm:v2"
+               xmlns:isostm="urn:oecd:ties:cbcstm:isostmtypes:v1"
+						   xsi:schemaLocation="urn:oecd:ties:csm:v1 CbcStatusMessageXML_v2.0.xsd" version="2.0">
+  <cbcstm:MessageSpec>
+    <cbcstm:TransmittingCountry>SENDINGCOUNTRY</cbcstm:TransmittingCountry>
+    <cbcstm:ReceivingCountry>RECEIVINGCOUNTRY</cbcstm:ReceivingCountry>
+    <cbcstm:MessageType>CbCMessageStatus</cbcstm:MessageType>
+    <cbcstm:Warning>Warning about CBC</cbcstm:Warning>
+    <cbcstm:Contact>Contact John</cbcstm:Contact>
+    <cbcstm:MessageRefId>StatusSENDINGCOUNTRY2019RECEIVINGCOUNTRYRANDOMID</cbcstm:MessageRefId>    
+    <cbcstm:ReportingPeriod>2019-12-31</cbcstm:ReportingPeriod>
+    <cbcstm:Timestamp>2019-04-21T15:55:54.434910Z</cbcstm:Timestamp>
+  </cbcstm:MessageSpec>
+  <cbcstm:CbCStatusMessage>
+    <cbcstm:OriginalMessage>
+      <cbcstm:OriginalMessageRefID>RECEIVINGCOUNTRY2019-RANDOMNUMBER</cbcstm:OriginalMessageRefID>
+      <cbcstm:FileMetaData>
+        <cbcstm:CTSTransmissionID>12348901245678901234567890-12345</cbcstm:CTSTransmissionID>
+        <cbcstm:CTSSendingTimeStamp>2019-01-01T12:00:00.000Z</cbcstm:CTSSendingTimeStamp>
+      </cbcstm:FileMetaData>      
+    </cbcstm:OriginalMessage>
+    <!--<cbcstm:ValidationErrors>
+      <cbcstm:FileError>
+        <cbcstm:Code></cbcstm:Code>
+        <cbcstm:Details></cbcstm:Details>
+      </cbcstm:FileError>
+      <cbcstm:RecordError>
+        <cbcstm:Code></cbcstm:Code>
+        <cbcstm:Details></cbcstm:Details>
+        <cbcstm:DocRefIDInError></cbcstm:DocRefIDInError>
+        <cbcstm:FieldsInError>
+          <cbcstm:FieldPath></cbcstm:FieldPath>          
+        </cbcstm:FieldsInError>
+      </cbcstm:RecordError>
+    </cbcstm:ValidationErrors>-->
+    <cbcstm:ValidationErrors/>
+    <cbcstm:ValidationResult>
+      <cbcstm:Status>Accepted</cbcstm:Status>
+      <cbcstm:ValidatedBy>MDES 3.0</cbcstm:ValidatedBy>
+    </cbcstm:ValidationResult>
+  </cbcstm:CbCStatusMessage>
+</cbcstm:CbCStatusMessage_OECD>
