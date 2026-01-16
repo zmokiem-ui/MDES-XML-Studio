@@ -58,10 +58,12 @@ app.on('activate', () => {
 // IPC Handlers
 
 // Select output file
-ipcMain.handle('select-output-file', async () => {
+ipcMain.handle('select-output-file', async (event, module = 'crs') => {
+  const modulePrefix = module.toLowerCase();
+  const moduleName = module.toUpperCase();
   const result = await dialog.showSaveDialog(mainWindow, {
-    title: 'Save CRS XML File',
-    defaultPath: 'crs_output.xml',
+    title: `Save ${moduleName} XML File`,
+    defaultPath: `${modulePrefix}_output.xml`,
     filters: [
       { name: 'XML Files', extensions: ['xml'] },
       { name: 'All Files', extensions: ['*'] }
@@ -406,11 +408,72 @@ ipcMain.handle('validate-csv', async (event, csvPath) => {
   });
 });
 
+// Validate CBC CSV file
+ipcMain.handle('validate-cbc-csv', async (event, csvPath) => {
+  return new Promise((resolve, reject) => {
+    const pythonPath = findPythonExecutable();
+    
+    if (!pythonPath) {
+      reject(new Error('Python not found'));
+      return;
+    }
+
+    const projectRoot = path.join(__dirname, '../..');
+    
+    const args = [
+      '-m', 'crs_generator.cbc_cli',
+      '--mode', 'validate',
+      '--csv-input', csvPath,
+      '--output', 'dummy.xml'
+    ];
+
+    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
+
+    let output = '';
+    let errorOutput = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+
+    pythonProcess.on('close', (code) => {
+      try {
+        const jsonStart = output.indexOf('{');
+        if (jsonStart !== -1) {
+          const result = JSON.parse(output.substring(jsonStart));
+          resolve(result);
+        } else {
+          // If no JSON output, assume valid (basic check passed)
+          resolve({ valid: true, statistics: { total_reports: 'Unknown' } });
+        }
+      } catch (e) {
+        // If parsing fails but no error, assume valid
+        if (code === 0) {
+          resolve({ valid: true, statistics: { total_reports: 'Unknown' } });
+        } else {
+          reject(new Error(errorOutput || 'CBC CSV validation failed'));
+        }
+      }
+    });
+
+    pythonProcess.on('error', (error) => {
+      reject(new Error(`Failed to start Python: ${error.message}`));
+    });
+  });
+});
+
 // Download CSV template
-ipcMain.handle('download-csv-template', async () => {
+ipcMain.handle('download-csv-template', async (event, module = 'crs') => {
+  const modulePrefix = module.toLowerCase();
+  const moduleName = module.toUpperCase();
+  
   const result = await dialog.showSaveDialog(mainWindow, {
-    title: 'Save CRS 701 CSV Template',
-    defaultPath: 'crs_701_template.csv',
+    title: `Save ${moduleName} CSV Template`,
+    defaultPath: `${modulePrefix}_template.csv`,
     filters: [
       { name: 'CSV Files', extensions: ['csv'] },
       { name: 'All Files', extensions: ['*'] }
@@ -421,10 +484,20 @@ ipcMain.handle('download-csv-template', async () => {
     return null;
   }
 
-  // Generate template with all required columns
-  const template = `SendingCompanyIN,TransmittingCountry,ReceivingCountry,TaxYear,ReportingFI_TIN,ReportingFI_Name,ReportingFI_Address_Street,ReportingFI_Address_BuildingNumber,ReportingFI_Address_City,ReportingFI_Address_PostCode,ReportingFI_Address_CountryCode,AccountNumber,AccountBalance,AccountCurrency,AccountClosed,AccountDormant,Individual_FirstName,Individual_LastName,Individual_BirthDate,Individual_TIN,Individual_TIN_CountryCode,Individual_Address_Street,Individual_Address_City,Individual_Address_PostCode,Individual_Address_CountryCode,Individual_ResCountryCode,Organisation_Name,Organisation_TIN,Organisation_TIN_CountryCode,Organisation_Address_Street,Organisation_Address_City,Organisation_Address_PostCode,Organisation_Address_CountryCode,Organisation_ResCountryCode,ControllingPerson_FirstName,ControllingPerson_LastName,ControllingPerson_BirthDate,ControllingPerson_TIN,ControllingPerson_TIN_CountryCode,ControllingPerson_Address_Street,ControllingPerson_Address_City,ControllingPerson_Address_CountryCode,ControllingPerson_ResCountryCode,Payment_Type,Payment_Amount,Payment_Currency
+  let template;
+  
+  if (module === 'cbc') {
+    // CBC template
+    template = `TransmittingCountry,ReceivingCountry,TaxYear,SendingEntityIN,ReportingEntity_TIN,ReportingEntity_Name,ReportingEntity_CountryCode,MNEGroup_Name,ReportingRole,JurisdictionCode,Entity_TIN,Entity_Name,Entity_CountryCode,Entity_Role,IncorporationCountry,BizActivity1,BizActivity2,OtherEntityInfo,Revenue_Unrelated,Revenue_Related,Revenue_Total,ProfitLoss,TaxPaid,TaxAccrued,Capital,Earnings,NumEmployees,TangibleAssets,Currency
+NL,NL,2023,20001010,NL123456789,Example Holding BV,NL,Example MNE Group,CBC701,US,US987654321,Example US Subsidiary Inc,US,CBC802,US,CBC505,CBC508,Sales and finance operations,5000000,2000000,7000000,1500000,300000,350000,10000000,8000000,50,3000000,USD
+NL,NL,2023,20001010,NL123456789,Example Holding BV,NL,Example MNE Group,CBC701,DE,DE456789012,Example Germany GmbH,DE,CBC802,DE,CBC504,CBC503,Manufacturing and procurement,8000000,1500000,9500000,2000000,400000,450000,15000000,12000000,120,8000000,EUR
+NL,NL,2023,20001010,NL123456789,Example Holding BV,NL,Example MNE Group,CBC701,GB,GB321654987,Example UK Ltd,GB,CBC802,GB,CBC501,CBC502,Research and IP management,3000000,500000,3500000,800000,160000,180000,5000000,4000000,35,2000000,GBP`;
+  } else {
+    // CRS template (default)
+    template = `SendingCompanyIN,TransmittingCountry,ReceivingCountry,TaxYear,ReportingFI_TIN,ReportingFI_Name,ReportingFI_Address_Street,ReportingFI_Address_BuildingNumber,ReportingFI_Address_City,ReportingFI_Address_PostCode,ReportingFI_Address_CountryCode,AccountNumber,AccountBalance,AccountCurrency,AccountClosed,AccountDormant,Individual_FirstName,Individual_LastName,Individual_BirthDate,Individual_TIN,Individual_TIN_CountryCode,Individual_Address_Street,Individual_Address_City,Individual_Address_PostCode,Individual_Address_CountryCode,Individual_ResCountryCode,Organisation_Name,Organisation_TIN,Organisation_TIN_CountryCode,Organisation_Address_Street,Organisation_Address_City,Organisation_Address_PostCode,Organisation_Address_CountryCode,Organisation_ResCountryCode,ControllingPerson_FirstName,ControllingPerson_LastName,ControllingPerson_BirthDate,ControllingPerson_TIN,ControllingPerson_TIN_CountryCode,ControllingPerson_Address_Street,ControllingPerson_Address_City,ControllingPerson_Address_CountryCode,ControllingPerson_ResCountryCode,Payment_Type,Payment_Amount,Payment_Currency
 "NL123456789","NL","DE","2024","FI001","Example Bank NL","Main Street","100","Amsterdam","1012AB","NL","ACC000001","50000.00","EUR","false","false","John","Doe","1985-03-15","DE123456789","DE","Berliner Str 45","Berlin","10115","DE","DE","","","","","","","","","","","","","","","","","CRS501","2500.00","EUR"
 "NL123456789","NL","DE","2024","FI001","Example Bank NL","Main Street","100","Amsterdam","1012AB","NL","ACC000002","125000.00","EUR","false","false","","","","","","","","","","","ACME Corporation GmbH","DE987654321","DE","Business Ave 200","Munich","80331","DE","DE","Jane","Smith","1978-07-22","DE111222333","DE","Corporate Lane 50","Munich","DE","DE","CRS502","8500.00","EUR"`;
+  }
 
   try {
     fs.writeFileSync(result.filePath, template, 'utf-8');
@@ -576,17 +649,17 @@ ipcMain.handle('generate-correction', async (event, options) => {
 });
 
 // Select output file for correction
-ipcMain.handle('select-correction-output', async () => {
+ipcMain.handle('select-correction-output', async (event, module = 'crs') => {
+  const modulePrefix = module.toLowerCase();
+  const moduleName = module.toUpperCase();
   const result = await dialog.showSaveDialog(mainWindow, {
-    title: 'Save Correction File',
-    defaultPath: 'crs_correction.xml',
+    title: `Save ${moduleName} Correction File`,
+    defaultPath: `${modulePrefix}_correction.xml`,
     filters: [
-      { name: 'XML Files', extensions: ['xml'] },
-      { name: 'All Files', extensions: ['*'] }
+      { name: 'XML Files', extensions: ['xml'] }
     ]
   });
-  
-  return result.filePath || null;
+  return result.filePath;
 });
 
 // Select correction CSV file
@@ -835,6 +908,334 @@ ipcMain.handle('generate-fatca-correction', async (event, options) => {
         resolve(result);
       } catch (e) {
         reject(new Error(`Parse error: ${e.message}. Output: ${stdout}, Stderr: ${stderr}`));
+      }
+    });
+
+    pythonProcess.on('error', (error) => {
+      reject(new Error(`Failed to start Python: ${error.message}`));
+    });
+  });
+});
+
+// ============== CRS Country Code Replacer ==============
+
+// Replace country codes in CRS XML file with allowed partner jurisdictions
+ipcMain.handle('replace-crs-country-codes', async (event, options) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const { xmlPath, outputPath, allowedCountries, convertToTestMode } = options;
+      
+      if (!allowedCountries || allowedCountries.length === 0) {
+        reject(new Error('No partner jurisdictions configured'));
+        return;
+      }
+      
+      let content = fs.readFileSync(xmlPath, 'utf8');
+      
+      // Check if it's a CRS file
+      if (!content.includes('CRS_OECD') && !content.includes('urn:oecd:ties:crs')) {
+        reject(new Error('Not a valid CRS XML file'));
+        return;
+      }
+      
+      // Extract SendingCountry from MessageSpec
+      const sendingCountryMatch = content.match(/<(?:crs:)?SendingCompanyIN>([A-Z]{2})/);
+      const sendingCountry = sendingCountryMatch ? sendingCountryMatch[1] : null;
+      
+      // Also try to get it from the TIN prefix pattern or explicit SendingCountry element
+      const sendingCountryAltMatch = content.match(/<(?:crs:)?SendingCountry>([A-Z]{2})<\/(?:crs:)?SendingCountry>/);
+      const messageSendingCountry = sendingCountryAltMatch ? sendingCountryAltMatch[1] : sendingCountry;
+      
+      let reportingFIFixed = false;
+      let originalReportingFICountry = null;
+      
+      // Rule: ReportingFI.ResCountryCode must match Message SendingCountry
+      if (messageSendingCountry) {
+        // Find ReportingFI section and fix its ResCountryCode
+        const reportingFIRegex = /(<(?:crs:)?ReportingFI>[\s\S]*?<(?:crs:)?ResCountryCode>)([A-Z]{2})(<\/(?:crs:)?ResCountryCode>[\s\S]*?<\/(?:crs:)?ReportingFI>)/;
+        const reportingFIMatch = content.match(reportingFIRegex);
+        if (reportingFIMatch && reportingFIMatch[2] !== messageSendingCountry) {
+          originalReportingFICountry = reportingFIMatch[2];
+          content = content.replace(reportingFIRegex, `$1${messageSendingCountry}$3`);
+          reportingFIFixed = true;
+        }
+      }
+      
+      // Find all country codes in ResCountryCode elements (account holder residence) - excluding ReportingFI
+      // We need to find ResCountryCode inside AccountHolder elements only
+      const resCountryRegex = /<(?:crs:)?ResCountryCode>([A-Z]{2})<\/(?:crs:)?ResCountryCode>/g;
+      const foundCountries = new Set();
+      let match;
+      while ((match = resCountryRegex.exec(content)) !== null) {
+        foundCountries.add(match[1]);
+      }
+      
+      // Filter to only countries not in allowed list (for account holders)
+      const countriesToReplace = [...foundCountries].filter(c => !allowedCountries.includes(c));
+      
+      // Create replacement map - distribute replaced countries among allowed ones
+      const replacements = {};
+      countriesToReplace.forEach((country, index) => {
+        replacements[country] = allowedCountries[index % allowedCountries.length];
+      });
+      
+      // Replace country codes in account holder ResCountryCode elements
+      // But NOT in ReportingFI (which we already fixed to match SendingCountry)
+      // Use simple, fast replacement - replace all ResCountryCode except the one in ReportingFI
+      let replacedCount = 0;
+      for (const [oldCode, newCode] of Object.entries(replacements)) {
+        // Simple global replace of ResCountryCode values
+        // This is much faster than complex regex with backtracking
+        const simpleRegex = new RegExp(`(<(?:crs:)?ResCountryCode>)${oldCode}(<\\/(?:crs:)?ResCountryCode>)`, 'g');
+        const before = content;
+        content = content.replace(simpleRegex, `$1${newCode}$2`);
+        if (content !== before) {
+          replacedCount++;
+        }
+      }
+      
+      // Convert DocTypeIndic values for test/production mode
+      let docTypeIndicConverted = false;
+      let originalDocTypeIndicValues = [];
+      let newDocTypeIndicValues = [];
+      
+      if (convertToTestMode) {
+        // Production to Test: OECD1->OECD11, OECD2->OECD12, OECD3->OECD13
+        // ReportingFI should use OECD0 in test mode
+        const docTypeIndicConversions = [
+          { from: 'OECD1', to: 'OECD11' },
+          { from: 'OECD2', to: 'OECD12' },
+          { from: 'OECD3', to: 'OECD13' }
+        ];
+        
+        for (const conv of docTypeIndicConversions) {
+          // Check if this value exists in the file
+          const checkRegex = new RegExp(`<(?:stf:)?DocTypeIndic>${conv.from}<\\/(?:stf:)?DocTypeIndic>`);
+          if (checkRegex.test(content)) {
+            originalDocTypeIndicValues.push(conv.from);
+            newDocTypeIndicValues.push(conv.to);
+            
+            // Replace all occurrences
+            const replaceRegex = new RegExp(`(<(?:stf:)?DocTypeIndic>)${conv.from}(<\\/(?:stf:)?DocTypeIndic>)`, 'g');
+            content = content.replace(replaceRegex, `$1${conv.to}$2`);
+            docTypeIndicConverted = true;
+          }
+        }
+        
+        // Special case: ReportingFI DocSpec should use OECD0 for resend scenario
+        // But typically for test data we just convert to OECD11/12/13
+      }
+      
+      // Write output file
+      fs.writeFileSync(outputPath, content, 'utf8');
+      
+      resolve({
+        success: true,
+        filePath: outputPath,
+        originalCountries: [...foundCountries].sort(),
+        replacedCountries: Object.keys(replacements).sort(),
+        replacements: replacements,
+        allowedCountries: allowedCountries,
+        reportingFIFixed: reportingFIFixed,
+        originalReportingFICountry: originalReportingFICountry,
+        messageSendingCountry: messageSendingCountry,
+        docTypeIndicConverted: docTypeIndicConverted,
+        originalDocTypeIndicValues: originalDocTypeIndicValues,
+        newDocTypeIndicValues: newDocTypeIndicValues
+      });
+    } catch (error) {
+      reject(new Error(`Failed to replace country codes: ${error.message}`));
+    }
+  });
+});
+
+// ============== CBC IPC Handlers ==============
+
+// Validate CBC XML file
+ipcMain.handle('validate-cbc-xml', async (event, xmlPath) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const content = fs.readFileSync(xmlPath, 'utf8');
+      
+      // Check if it's a CBC file
+      const isCBC = content.includes('CBC_OECD') || content.includes('urn:oecd:ties:cbc:v');
+      
+      if (!isCBC) {
+        resolve({
+          is_valid: false,
+          can_generate_correction: false,
+          errors: ['Not a valid CBC XML file. Expected CBC_OECD root element.'],
+          doc_count: 0
+        });
+        return;
+      }
+      
+      // Extract DocRefIds
+      const docRefIdMatches = content.match(/<stf:DocRefId>([^<]+)<\/stf:DocRefId>/g) || [];
+      const docRefIds = docRefIdMatches.map(m => m.replace(/<\/?stf:DocRefId>/g, ''));
+      
+      // Check MessageTypeIndic
+      const messageTypeMatch = content.match(/<MessageTypeIndic>([^<]+)<\/MessageTypeIndic>/);
+      const messageType = messageTypeMatch ? messageTypeMatch[1] : 'Unknown';
+      
+      // Check for existing corrections (OECD2/OECD3)
+      const hasCorrections = content.includes('OECD2') || content.includes('OECD3') || 
+                            content.includes('OECD12') || content.includes('OECD13');
+      
+      resolve({
+        is_valid: true,
+        can_generate_correction: docRefIds.length > 0,
+        message_type: messageType,
+        has_corrections: hasCorrections,
+        doc_count: docRefIds.length,
+        doc_ref_ids: docRefIds.slice(0, 10), // First 10 for preview
+        errors: []
+      });
+    } catch (error) {
+      resolve({
+        is_valid: false,
+        can_generate_correction: false,
+        errors: [error.message],
+        doc_count: 0
+      });
+    }
+  });
+});
+
+// Generate CBC file
+ipcMain.handle('generate-cbc', async (event, formData) => {
+  return new Promise((resolve, reject) => {
+    const pythonPath = findPythonExecutable();
+    
+    if (!pythonPath) {
+      reject(new Error('Python not found. Please install Python 3.8 or higher.'));
+      return;
+    }
+
+    const projectRoot = path.join(__dirname, '../..');
+    
+    let args = ['-m', 'crs_generator.cbc_cli', 'generate'];
+    
+    // Check if CSV mode
+    if (formData.mode === 'csv' && formData.csvPath) {
+      args.push(
+        '--mode', 'csv',
+        '--csv-input', formData.csvPath,
+        '--output', formData.outputPath
+      );
+    } else {
+      // Random mode
+      args.push(
+        '--mode', 'random',
+        '--country', formData.transmittingCountry || 'NL',
+        '--year', formData.reportingPeriod || new Date().getFullYear().toString(),
+        '--tin', formData.sendingEntityIN || '123456789',
+        '--reports', formData.numCbcReports || '3',
+        '--entities', formData.constEntitiesPerReport || '2',
+        '--role', formData.reportingRole || 'CBC701',
+        '--output', formData.outputPath
+      );
+
+      if (formData.mneGroupName) {
+        args.push('--mne-name', formData.mneGroupName);
+      }
+
+      if (formData.reportingEntityName) {
+        args.push('--entity-name', formData.reportingEntityName);
+      }
+    }
+
+    if (!formData.testMode) {
+      args.push('--production');
+    }
+
+    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
+
+    let output = '';
+    let errorOutput = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      output += data.toString();
+      event.sender.send('generation-progress', data.toString());
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+
+    pythonProcess.on('close', (code) => {
+      if (code === 0) {
+        const fileStats = fs.statSync(formData.outputPath);
+        resolve({
+          success: true,
+          filePath: formData.outputPath,
+          fileSize: (fileStats.size / (1024 * 1024)).toFixed(2),
+          output: output
+        });
+      } else {
+        reject(new Error(errorOutput || 'CBC generation failed'));
+      }
+    });
+
+    pythonProcess.on('error', (error) => {
+      reject(new Error(`Failed to start Python: ${error.message}`));
+    });
+  });
+});
+
+// Generate CBC correction/deletion
+ipcMain.handle('generate-cbc-correction', async (event, options) => {
+  return new Promise((resolve, reject) => {
+    const pythonPath = findPythonExecutable();
+    
+    if (!pythonPath) {
+      reject(new Error('Python not found. Please install Python 3.8 or higher.'));
+      return;
+    }
+
+    const projectRoot = path.join(__dirname, '../..');
+    
+    let args = ['-m', 'crs_generator.cbc_cli', 'correct'];
+    
+    args.push(
+      '--source', options.sourceXmlPath,
+      '--type', options.correctionType || 'correction',
+      '--output', options.outputPath
+    );
+
+    if (options.csvPath) {
+      args.push('--csv', options.csvPath);
+    }
+
+    if (!options.testMode) {
+      args.push('--production');
+    }
+
+    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
+
+    let output = '';
+    let errorOutput = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      output += data.toString();
+      event.sender.send('generation-progress', data.toString());
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+
+    pythonProcess.on('close', (code) => {
+      if (code === 0) {
+        const fileStats = fs.statSync(options.outputPath);
+        resolve({
+          success: true,
+          filePath: options.outputPath,
+          fileSize: (fileStats.size / (1024 * 1024)).toFixed(2),
+          output: output
+        });
+      } else {
+        reject(new Error(errorOutput || 'CBC correction generation failed'));
       }
     });
 

@@ -544,6 +544,35 @@ function App() {
     { value: 'FATCA611', label: 'FATCA611 - Territory FI' }
   ]
 
+  // CBC Form state
+  const [cbcFormData, setCbcFormData] = useState({
+    sendingEntityIN: '',
+    transmittingCountry: '',
+    receivingCountry: '',
+    reportingPeriod: new Date().getFullYear().toString(),
+    mneGroupName: '',
+    reportingEntityName: '',
+    reportingRole: 'CBC701',
+    numCbcReports: '3',
+    constEntitiesPerReport: '2',
+    jurisdictionCountries: '',
+    outputPath: '',
+    testMode: true,
+    mode: 'random',
+    csvPath: ''
+  })
+  
+  const [cbcDataMode, setCbcDataMode] = useState('random') // 'random' or 'csv'
+  const [cbcCsvPath, setCbcCsvPath] = useState('')
+  const [cbcFileType, setCbcFileType] = useState('domestic') // 'domestic' or 'foreign'
+
+  // CBC Reporting Roles
+  const cbcReportingRoles = [
+    { value: 'CBC701', label: 'CBC701 - Ultimate Parent Entity' },
+    { value: 'CBC702', label: 'CBC702 - Surrogate Parent Entity' },
+    { value: 'CBC703', label: 'CBC703 - Constituent Entity Filing' }
+  ]
+
   const [expandedSections, setExpandedSections] = useState({
     messageHeader: true,
     fileSize: true,
@@ -587,6 +616,16 @@ function App() {
     testMode: true  // Use OECD11/12/13 for test data, OECD1/2/3 for production
   })
   const [showXmlErrorsModal, setShowXmlErrorsModal] = useState(false)
+  
+  // CBC Correction state
+  const [cbcCorrectionType, setCbcCorrectionType] = useState('correction') // 'correction' or 'deletion'
+  
+  // CRS Tools - Country Code Replacer state
+  const [countryReplacerXmlPath, setCountryReplacerXmlPath] = useState('')
+  const [countryReplacerOutputPath, setCountryReplacerOutputPath] = useState('')
+  const [countryReplacerResult, setCountryReplacerResult] = useState(null)
+  const [isReplacingCountries, setIsReplacingCountries] = useState(false)
+  const [convertToTestMode, setConvertToTestMode] = useState(true) // Convert production to test by default
   
   // Correction CSV mode state
   const [correctionDataMode, setCorrectionDataMode] = useState('xml') // 'xml' or 'csv'
@@ -735,7 +774,7 @@ function App() {
   }
 
   const handleSelectOutputFile = async () => {
-    const filePath = await window.electronAPI.selectOutputFile()
+    const filePath = await window.electronAPI.selectOutputFile(activeModule)
     if (filePath) handleInputChange('outputPath', filePath)
   }
 
@@ -782,7 +821,7 @@ function App() {
 
   const handleDownloadTemplate = async () => {
     try {
-      const filePath = await window.electronAPI.downloadCsvTemplate()
+      const filePath = await window.electronAPI.downloadCsvTemplate(activeModule)
       if (filePath) {
         setModalType('success')
         setModalMessage(`Template saved to: ${filePath}`)
@@ -790,7 +829,7 @@ function App() {
       }
     } catch (error) {
       setModalType('error')
-      setModalMessage(`Failed: ${error.message}`)
+      setModalMessage(`Failed to download template: ${error.message}`)
       setShowModal(true)
     }
   }
@@ -889,14 +928,23 @@ function App() {
       setIsValidatingXml(true)
       
       try {
-        const result = await window.electronAPI.validateXml(filePath)
+        // Use module-specific validation
+        let result
+        if (activeModule === 'cbc') {
+          result = await window.electronAPI.validateCbcXml(filePath)
+        } else if (activeModule === 'fatca') {
+          result = await window.electronAPI.validateFatcaXml(filePath)
+        } else {
+          result = await window.electronAPI.validateXml(filePath)
+        }
         setXmlValidation(result)
         
         if (!result.is_valid) {
-          updateStats({ totalValidationErrors: globalStats.totalValidationErrors + result.errors.length })
+          updateStats({ totalValidationErrors: globalStats.totalValidationErrors + (result.errors?.length || 0) })
         }
         
-        if (result.is_correction_file) {
+        // Check if already a correction file (for CRS only)
+        if (activeModule === 'crs' && result.is_correction_file) {
           setModalType('error')
           setModalMessage('This is already a correction file (CRS702). Please select a new file (CRS701).')
           setShowModal(true)
@@ -931,7 +979,7 @@ function App() {
   }
 
   const handleSelectCorrectionOutput = async () => {
-    const filePath = await window.electronAPI.selectCorrectionOutput()
+    const filePath = await window.electronAPI.selectCorrectionOutput(activeModule)
     if (filePath) {
       setCorrectionOutputPath(filePath)
     }
@@ -940,7 +988,7 @@ function App() {
   const handleGenerateCorrection = async () => {
     if (!correctionXmlPath || !xmlValidation?.can_generate_correction) {
       setModalType('error')
-      setModalMessage('Please select and validate a valid CRS701 XML file first.')
+      setModalMessage(`Please select and validate a valid ${activeModule.toUpperCase()} XML file first.`)
       setShowModal(true)
       return
     }
@@ -952,24 +1000,44 @@ function App() {
       return
     }
     
-    const totalCorrections = correctionOptions.correctIndividual + correctionOptions.correctOrganisation
-    const totalDeletions = correctionOptions.deleteIndividual + correctionOptions.deleteOrganisation
-    
-    if (totalCorrections === 0 && totalDeletions === 0 && !correctionOptions.correctFI) {
-      setModalType('error')
-      setModalMessage('Please select at least one correction or deletion option.')
-      setShowModal(true)
-      return
+    // CBC uses simpler correction options (just type)
+    if (activeModule === 'cbc') {
+      if (!cbcCorrectionType) {
+        setModalType('error')
+        setModalMessage('Please select correction or deletion type.')
+        setShowModal(true)
+        return
+      }
+    } else {
+      const totalCorrections = correctionOptions.correctIndividual + correctionOptions.correctOrganisation
+      const totalDeletions = correctionOptions.deleteIndividual + correctionOptions.deleteOrganisation
+      
+      if (totalCorrections === 0 && totalDeletions === 0 && !correctionOptions.correctFI) {
+        setModalType('error')
+        setModalMessage('Please select at least one correction or deletion option.')
+        setShowModal(true)
+        return
+      }
     }
     
     setIsGeneratingCorrection(true)
     
     try {
-      const result = await window.electronAPI.generateCorrection({
-        xmlPath: correctionXmlPath,
-        outputPath: correctionOutputPath,
-        ...correctionOptions
-      })
+      let result
+      if (activeModule === 'cbc') {
+        result = await window.electronAPI.generateCbcCorrection({
+          sourceXmlPath: correctionXmlPath,
+          outputPath: correctionOutputPath,
+          correctionType: cbcCorrectionType,
+          testMode: true
+        })
+      } else {
+        result = await window.electronAPI.generateCorrection({
+          xmlPath: correctionXmlPath,
+          outputPath: correctionOutputPath,
+          ...correctionOptions
+        })
+      }
       
       updateStats({
         totalCorrectionsGenerated: globalStats.totalCorrectionsGenerated + 1,
@@ -1005,6 +1073,54 @@ function App() {
       setShowModal(true)
     } finally {
       setIsGeneratingCorrection(false)
+    }
+  }
+
+  // CRS Country Code Replacer handler
+  const handleReplaceCountryCodes = async () => {
+    if (!countryReplacerXmlPath) {
+      setModalType('error')
+      setModalMessage('Please select a CRS XML file first.')
+      setShowModal(true)
+      return
+    }
+    
+    if (!countryReplacerOutputPath) {
+      setModalType('error')
+      setModalMessage('Please select an output location.')
+      setShowModal(true)
+      return
+    }
+    
+    if (!settings.partnerJurisdictions || settings.partnerJurisdictions.length === 0) {
+      setModalType('error')
+      setModalMessage('No partner jurisdictions configured. Go to Settings to add countries.')
+      setShowModal(true)
+      return
+    }
+    
+    setIsReplacingCountries(true)
+    setCountryReplacerResult(null)
+    
+    try {
+      const result = await window.electronAPI.replaceCrsCountryCodes({
+        xmlPath: countryReplacerXmlPath,
+        outputPath: countryReplacerOutputPath,
+        allowedCountries: settings.partnerJurisdictions,
+        convertToTestMode: convertToTestMode
+      })
+      
+      setCountryReplacerResult(result)
+      setModalType('success')
+      const testModeMsg = result.docTypeIndicConverted ? `\nDocTypeIndic converted to test mode` : ''
+      setModalMessage(`File processed successfully!\n\nOriginal countries: ${result.originalCountries.length}\nReplaced: ${result.replacedCountries.length}${testModeMsg}`)
+      setShowModal(true)
+    } catch (error) {
+      setModalType('error')
+      setModalMessage(`Failed to replace country codes: ${error.message}`)
+      setShowModal(true)
+    } finally {
+      setIsReplacingCountries(false)
     }
   }
 
@@ -1065,6 +1181,91 @@ function App() {
       
       setModalType('success')
       setModalMessage(`FATCA XML generated successfully!\nSize: ${result.fileSize} MB`)
+      setShowModal(true)
+    } catch (error) {
+      setGenerationProgress('')
+      setModalType('error')
+      setModalMessage(error.message || 'An error occurred')
+      setShowModal(true)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  // CBC Generate handler
+  const handleGenerateCBC = async () => {
+    // Basic validation
+    if (cbcDataMode === 'csv') {
+      if (!cbcCsvPath || !cbcFormData.outputPath) {
+        setModalType('error')
+        setModalMessage('Please select a CSV file and output path')
+        setShowModal(true)
+        return
+      }
+    } else {
+      if (!cbcFormData.transmittingCountry || !cbcFormData.outputPath) {
+        setModalType('error')
+        setModalMessage('Please fill in required fields (Transmitting Country and Output Path)')
+        setShowModal(true)
+        return
+      }
+      // For foreign file type, receiving country is required
+      if (cbcFileType === 'foreign' && !cbcFormData.receivingCountry) {
+        setModalType('error')
+        setModalMessage('For foreign exchange files, please specify the Receiving Country')
+        setShowModal(true)
+        return
+      }
+    }
+
+    setIsGenerating(true)
+    setGenerationProgress('Initializing CBC generation...')
+
+    try {
+      window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
+
+      // For domestic filing, receiving country = transmitting country
+      const effectiveReceivingCountry = cbcFileType === 'domestic' 
+        ? cbcFormData.transmittingCountry.toUpperCase()
+        : cbcFormData.receivingCountry.toUpperCase()
+
+      const generateData = {
+        ...cbcFormData,
+        mode: cbcDataMode,
+        csvPath: cbcCsvPath,
+        fileType: cbcFileType,
+        transmittingCountry: cbcFormData.transmittingCountry.toUpperCase(),
+        receivingCountry: effectiveReceivingCountry,
+        numCbcReports: parseInt(cbcFormData.numCbcReports) || 3,
+        constEntitiesPerReport: parseInt(cbcFormData.constEntitiesPerReport) || 2
+      }
+
+      const result = await window.electronAPI.generateCBC(generateData)
+      setGenerationProgress('')
+      
+      const reportCount = cbcDataMode === 'csv' ? 'N/A' : parseInt(cbcFormData.numCbcReports) || 3
+      const entitiesPerReport = cbcDataMode === 'csv' ? 'N/A' : parseInt(cbcFormData.constEntitiesPerReport) || 2
+      
+      updateStats({
+        totalXmlGenerated: globalStats.totalXmlGenerated + 1,
+        lastGenerated: new Date().toISOString()
+      })
+      
+      addToHistory({
+        id: Date.now().toString(),
+        type: 'cbc-xml',
+        mode: cbcDataMode,
+        fileName: result.filePath.split(/[\\/]/).pop(),
+        filePath: result.filePath,
+        fileSize: result.fileSize,
+        timestamp: new Date().toISOString(),
+        cbcReports: reportCount,
+        constEntities: cbcDataMode === 'csv' ? 'N/A' : reportCount * entitiesPerReport
+      })
+      
+      setModalType('success')
+      const modeMsg = cbcDataMode === 'csv' ? 'from CSV data' : `${reportCount} jurisdiction reports with ${reportCount * entitiesPerReport} constituent entities`
+      setModalMessage(`CBC XML generated successfully!\n${modeMsg}\nSize: ${result.fileSize} MB`)
       setShowModal(true)
     } catch (error) {
       setGenerationProgress('')
@@ -1161,14 +1362,27 @@ function App() {
       fullName: 'Common Reporting Standard',
       description: 'Generate CRS XML test data for automatic exchange of financial account information',
       icon: Globe,
+      color: 'from-blue-600 to-blue-500',
+      bgColor: 'bg-blue-600',
       features: ['Individual & Organisation Accounts', 'Controlling Persons', 'Corrections & Deletions', 'CSV Import/Export']
     },
     fatca: {
       name: 'FATCA',
       fullName: 'Foreign Account Tax Compliance Act',
       description: 'Generate FATCA XML test data for US tax compliance reporting',
-      icon: DollarSign,
+      icon: Landmark,
+      color: 'from-green-600 to-green-500',
+      bgColor: 'bg-green-600',
       features: ['Individual & Organisation Accounts', 'Substantial Owners', 'Corrections & Deletions', 'Filer Categories']
+    },
+    cbc: {
+      name: 'CBC',
+      fullName: 'Country-by-Country Reporting',
+      description: 'Generate CBC XML test data for multinational enterprise tax reporting',
+      icon: BarChart3,
+      color: 'from-purple-600 to-purple-500',
+      bgColor: 'bg-purple-600',
+      features: ['Multiple Jurisdictions', 'Constituent Entities', 'Financial Summaries', 'Corrections & Deletions']
     }
   }
 
@@ -1297,8 +1511,95 @@ function App() {
     return ''
   }
 
-  // Module selection screen
+  // Home page (module selection) or Settings
   if (!activeModule) {
+    // Settings page - separate return to avoid issues
+    if (currentPage === 'settings') {
+      return (
+        <div className={`min-h-screen ${theme.bg} transition-colors duration-300`}>
+          <header className={`${theme.header} border-b shadow-sm sticky top-0 z-40`}>
+            <div className="max-w-7xl mx-auto px-6 py-4">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setCurrentPage('generator')}
+                  className={`p-2 rounded-lg transition-colors ${theme.buttonSecondary}`}
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <Settings className={`w-6 h-6 ${theme.accentText}`} />
+                <h1 className={`text-xl font-bold ${theme.text}`}>Settings</h1>
+              </div>
+            </div>
+          </header>
+          <main className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+            <div className={`${theme.card} rounded-xl border p-6`}>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-4`}>Theme</h3>
+              <div className="grid grid-cols-4 gap-3">
+                {Object.entries(THEMES).map(([key, t]) => (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedTheme(key)}
+                    className={`p-3 rounded-xl border-2 transition-all ${
+                      selectedTheme === key 
+                        ? `${t.buttonPrimary} shadow-lg` 
+                        : `${theme.border} ${theme.cardHover}`
+                    }`}
+                  >
+                    <span className="text-2xl">{t.emoji}</span>
+                    <p className={`text-xs mt-1 ${theme.text}`}>{t.name}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={`${theme.card} rounded-xl border p-6`}>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-4`}>Preferences</h3>
+              <div className="space-y-4">
+                <label className="flex items-center justify-between">
+                  <span className={theme.text}>Enable animations</span>
+                  <button
+                    onClick={() => setSettings(prev => ({ ...prev, animationsEnabled: !prev.animationsEnabled }))}
+                    className={`w-12 h-6 rounded-full transition-colors relative ${settings.animationsEnabled ? 'bg-blue-600' : 'bg-gray-400'}`}
+                  >
+                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${settings.animationsEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                  </button>
+                </label>
+              </div>
+            </div>
+            <div className={`${theme.card} rounded-xl border p-6`}>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>CSV Validation</h3>
+              <p className={`text-sm ${theme.textMuted} mb-4`}>Control CSV validation for CRS, FATCA, and CBC uploads</p>
+              <div className="space-y-4">
+                <label className="flex items-center justify-between">
+                  <div>
+                    <span className={theme.text}>Validate CSV on upload</span>
+                    <p className={`text-xs ${theme.textMuted} mt-1`}>
+                      {settings.autoValidateCsv 
+                        ? 'CSV files will be validated before generating XML' 
+                        : 'Validation disabled - faulty CSVs can be used to generate test XMLs with errors'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setSettings(prev => ({ ...prev, autoValidateCsv: !prev.autoValidateCsv }))}
+                    className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ml-4 ${settings.autoValidateCsv ? 'bg-blue-600' : 'bg-gray-400'}`}
+                  >
+                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${settings.autoValidateCsv ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                  </button>
+                </label>
+              </div>
+              {!settings.autoValidateCsv && (
+                <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                  <p className={`text-sm text-amber-600 dark:text-amber-400`}>
+                    <strong>Warning:</strong> With validation disabled, faulty CSV data will be passed through to generate XMLs with intentional errors. Useful for testing error handling.
+                  </p>
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+      )
+    }
+
+    // Home page
     return (
       <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${getThemeClass()}`}>
         {/* Theme Background */}
@@ -1309,7 +1610,7 @@ function App() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl ${theme.gradient || theme.buttonPrimary} flex items-center justify-center shadow-lg`}>
-                  <Landmark className="w-6 h-6 text-white" />
+                  <FileCheck className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h1 className={`text-2xl font-bold ${theme.headerText || theme.text}`}>Tax Reporting Generator</h1>
@@ -1318,10 +1619,7 @@ function App() {
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => {
-                    setActiveModule('crs')
-                    setCurrentPage('settings')
-                  }}
+                  onClick={() => setCurrentPage('settings')}
                   className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
                   title="Settings"
                 >
@@ -1352,7 +1650,7 @@ function App() {
             <p className={`text-lg ${theme.headerTextMuted || theme.textMuted}`}>Choose the reporting standard you want to work with</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {Object.entries(modules).map(([key, module]) => {
               const Icon = module.icon
               return (
@@ -1362,26 +1660,26 @@ function App() {
                     setActiveModule(key)
                     setCurrentPage('generator')
                   }}
-                  className={`${theme.card} rounded-2xl border p-8 shadow-lg hover:shadow-xl transition-all duration-300 text-left group hover:scale-[1.02] ${
+                  className={`${theme.card} rounded-2xl border p-6 shadow-lg hover:shadow-xl transition-all duration-300 text-left group hover:scale-[1.02] ${
                     settings.animationsEnabled ? 'animate-fade-in' : ''
                   }`}
                 >
-                  <div className={`w-16 h-16 rounded-2xl ${theme.card} flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform border-2 ${theme.border}`}>
-                    <Icon className={`w-8 h-8 ${theme.accentText}`} />
+                  <div className={`w-14 h-14 rounded-xl ${theme.card} flex items-center justify-center shadow-lg mb-4 group-hover:scale-110 transition-transform border-2 ${theme.border}`}>
+                    <Icon className={`w-7 h-7 ${theme.accentText}`} />
                   </div>
-                  <h3 className={`text-2xl font-bold ${theme.text} mb-1`}>{module.name}</h3>
-                  <p className={`text-sm ${theme.textMuted} mb-4`}>{module.fullName}</p>
-                  <p className={`${theme.textMuted} mb-6`}>{module.description}</p>
-                  <div className="space-y-2">
+                  <h3 className={`text-xl font-bold ${theme.text} mb-1`}>{module.name}</h3>
+                  <p className={`text-xs ${theme.textMuted} mb-3`}>{module.fullName}</p>
+                  <p className={`text-sm ${theme.textMuted} mb-4`}>{module.description}</p>
+                  <div className="space-y-1.5">
                     {module.features.map((feature, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <CheckCircle2 className={`w-4 h-4 ${theme.accentText}`} />
-                        <span className={`text-sm ${theme.text}`}>{feature}</span>
+                        <CheckCircle2 className={`w-3.5 h-3.5 ${theme.accentText}`} />
+                        <span className={`text-xs ${theme.text}`}>{feature}</span>
                       </div>
                     ))}
                   </div>
-                  <div className={`mt-6 py-3 px-4 rounded-lg ${theme.buttonPrimary} font-semibold text-center group-hover:opacity-90 transition-opacity border-2 ${theme.border}`}>
-                    Open {module.name} Module
+                  <div className={`mt-4 py-2.5 px-3 rounded-lg ${theme.buttonPrimary} font-semibold text-center text-sm group-hover:opacity-90 transition-opacity border-2 ${theme.border}`}>
+                    Open {module.name}
                   </div>
                 </button>
               )
@@ -1389,18 +1687,13 @@ function App() {
           </div>
 
           {/* Coming Soon */}
-          <div className="mt-12 text-center">
-            <p className={`${theme.textMuted} text-sm mb-4`}>More modules coming soon</p>
+          <div className="mt-10 text-center">
+            <p className={`${theme.textMuted} text-sm mb-3`}>More modules coming soon</p>
             <div className="flex justify-center gap-4">
-              {[
-                { name: 'CBC', desc: 'Country-by-Country Reporting' },
-                { name: 'NTJ', desc: 'Non-Tax Jurisdiction' }
-              ].map((m) => (
-                <div key={m.name} className={`${theme.card} rounded-lg border px-4 py-2 opacity-50`}>
-                  <span className={`font-medium ${theme.text}`}>{m.name}</span>
-                  <span className={`text-xs ${theme.textMuted} ml-2`}>{m.desc}</span>
-                </div>
-              ))}
+              <div className={`${theme.card} rounded-lg border px-4 py-2 opacity-50`}>
+                <span className={`font-medium ${theme.text}`}>NTJ</span>
+                <span className={`text-xs ${theme.textMuted} ml-2`}>Non-Tax Jurisdiction</span>
+              </div>
             </div>
           </div>
         </main>
@@ -1429,8 +1722,8 @@ function App() {
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${currentModule.color} flex items-center justify-center shadow-lg`}>
-                <ModuleIcon className="w-5 h-5 text-white" />
+              <div className={`w-10 h-10 rounded-xl ${theme.buttonPrimary} flex items-center justify-center shadow-lg`}>
+                <ModuleIcon className="w-5 h-5" />
               </div>
               <div>
                 <h1 className={`text-xl font-bold ${theme.text}`}>{currentModule.name} Generator</h1>
@@ -1443,15 +1736,14 @@ function App() {
               {[
                 { id: 'generator', icon: Rocket, label: 'Generator' },
                 { id: 'corrections', icon: FileEdit, label: 'Corrections' },
-                { id: 'history', icon: History, label: 'History' },
-                { id: 'settings', icon: Settings, label: 'Settings' }
+                ...(activeModule === 'crs' ? [{ id: 'tools', icon: RefreshCw, label: 'Tools' }] : [])
               ].map(({ id, icon: Icon, label }) => (
                 <button
                   key={id}
                   onClick={() => setCurrentPage(id)}
                   className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
                     currentPage === id
-                      ? `${currentModule.bgColor} text-white shadow-md`
+                      ? `${theme.buttonPrimary} shadow-md`
                       : `${theme.icon} ${theme.iconHover} ${theme.cardHover}`
                   }`}
                 >
@@ -1485,9 +1777,9 @@ function App() {
         {currentPage === 'generator' && activeModule === 'fatca' && (
           <div className={`space-y-6 ${settings.animationsEnabled ? 'animate-fade-in' : ''}`}>
             {/* FATCA Message Header */}
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 border-l-green-500`}>
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
-                <DollarSign className={`w-6 h-6 ${theme.accentText}`} />
+                <Landmark className={`w-6 h-6 ${theme.accentText}`} />
                 <h2 className={`text-lg font-semibold ${theme.text}`}>FATCA Message Header</h2>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -1536,9 +1828,9 @@ function App() {
             </div>
 
             {/* FATCA Reporting FI */}
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 border-l-green-500`}>
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
-                <Building2 className={`w-6 h-6 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                <Building2 className={`w-6 h-6 ${theme.accentText}`} />
                 <h2 className={`text-lg font-semibold ${theme.text}`}>Reporting Financial Institution</h2>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -1568,9 +1860,9 @@ function App() {
             </div>
 
             {/* FATCA Account Configuration */}
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 border-l-green-500`}>
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
-                <Users className={`w-6 h-6 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                <Users className={`w-6 h-6 ${theme.accentText}`} />
                 <h2 className={`text-lg font-semibold ${theme.text}`}>Account Configuration</h2>
               </div>
               <div className="grid grid-cols-3 gap-4">
@@ -1621,9 +1913,9 @@ function App() {
             </div>
 
             {/* FATCA Output */}
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 border-l-green-500`}>
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
-                <Save className={`w-6 h-6 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                <Save className={`w-6 h-6 ${theme.accentText}`} />
                 <h2 className={`text-lg font-semibold ${theme.text}`}>Output</h2>
               </div>
               <div className="flex gap-2">
@@ -1636,10 +1928,10 @@ function App() {
                 />
                 <button
                   onClick={async () => {
-                    const result = await window.electronAPI.selectOutputFile()
+                    const result = await window.electronAPI.selectOutputFile('fatca')
                     if (result) setFatcaFormData({...fatcaFormData, outputPath: result})
                   }}
-                  className={`px-4 py-2 ${theme.buttonSuccess} font-medium rounded-lg transition-colors flex items-center gap-2`}
+                  className={`px-4 py-2 ${theme.buttonPrimary} font-medium rounded-lg transition-colors flex items-center gap-2`}
                 >
                   <FolderOpen className="w-4 h-4" />
                   Browse
@@ -1651,7 +1943,7 @@ function App() {
             <button
               onClick={handleGenerateFATCA}
               disabled={isGenerating}
-              className={`w-full py-4 ${theme.buttonSuccess} disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-3`}
+              className={`w-full py-4 ${theme.buttonPrimary} disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-3`}
             >
               {isGenerating ? (
                 <>
@@ -1662,6 +1954,360 @@ function App() {
                 <>
                   <Rocket className="w-6 h-6" />
                   <span>Generate FATCA XML</span>
+                </>
+              )}
+            </button>
+
+            {generationProgress && (
+              <div className={`${theme.card} rounded-lg border p-4`}>
+                <p className={`text-sm ${theme.textMuted}`}>{generationProgress}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* CBC Generator Page */}
+        {currentPage === 'generator' && activeModule === 'cbc' && (
+          <div className={`space-y-6 ${settings.animationsEnabled ? 'animate-fade-in' : ''}`}>
+            {/* Data Source Toggle */}
+            <div className={`${theme.card} rounded-xl border p-4 shadow-sm`}>
+              <div className="flex items-center gap-4">
+                <span className={`text-sm font-medium ${theme.text}`}>Data Source:</span>
+                <div className="flex gap-2">
+                  {[
+                    { id: 'random', icon: Sparkles, label: 'Random Data' },
+                    { id: 'csv', icon: Upload, label: 'Upload CSV' }
+                  ].map(({ id, icon: Icon, label }) => (
+                    <button
+                      key={id}
+                      onClick={() => setCbcDataMode(id)}
+                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
+                        cbcDataMode === id
+                          ? `${theme.buttonPrimary} shadow-md`
+                          : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* CSV Upload Section */}
+            {cbcDataMode === 'csv' && (
+              <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <Upload className={`w-6 h-6 ${theme.accentText}`} />
+                  <h2 className={`text-lg font-semibold ${theme.text}`}>Upload CBC CSV File</h2>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        className={`w-full px-4 py-3 rounded-lg border ${theme.input}`}
+                        placeholder="Select CBC CSV file..."
+                        value={cbcCsvPath}
+                        readOnly
+                      />
+                      {cbcCsvPath && (
+                        <button
+                          onClick={() => setCbcCsvPath('')}
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 ${theme.textMuted} hover:text-red-500`}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      onClick={async () => {
+                        const filePath = await window.electronAPI.selectCsvFile()
+                        if (filePath) {
+                          setCbcCsvPath(filePath)
+                          if (settings.autoValidateCsv) {
+                            try {
+                              const result = await window.electronAPI.validateCbcCsv(filePath)
+                              if (result.valid) {
+                                setModalType('success')
+                                setModalMessage(`CBC CSV validated! ${result.statistics?.total_reports || 'Multiple'} reports found.`)
+                                setShowModal(true)
+                              } else {
+                                setValidationErrors(result.errors || [])
+                                setShowValidationModal(true)
+                                setCbcCsvPath('')
+                              }
+                            } catch (error) {
+                              setModalType('error')
+                              setModalMessage(`CBC CSV validation failed: ${error.message}`)
+                              setShowModal(true)
+                              setCbcCsvPath('')
+                            }
+                          }
+                        }
+                      }}
+                      className={`px-6 py-3 ${theme.buttonPrimary} font-medium rounded-lg transition-colors flex items-center gap-2`}
+                    >
+                      <Upload className="w-4 h-4" />
+                      Browse
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-start gap-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className={`text-sm ${theme.text} font-medium mb-1`}>Need a template?</p>
+                      <p className={`text-xs ${theme.textMuted} mb-2`}>Download the CBC CSV template with example data</p>
+                      <button
+                        onClick={handleDownloadTemplate}
+                        className={`text-sm px-3 py-1.5 ${theme.buttonPrimary} rounded-lg flex items-center gap-1`}
+                      >
+                        <Download className="w-4 h-4" />
+                        Download Template
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* CBC File Type Selection */}
+            {cbcDataMode === 'random' && (
+              <>
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
+              <div className="flex items-center gap-3 mb-4">
+                <FileCheck className={`w-6 h-6 ${theme.accentText}`} />
+                <h2 className={`text-lg font-semibold ${theme.text}`}>CBC File Type</h2>
+              </div>
+              <div className="flex gap-4 mb-4">
+                {[
+                  { id: 'domestic', icon: Home, label: 'Domestic Filing' },
+                  { id: 'foreign', icon: Globe, label: 'Foreign Exchange' }
+                ].map(({ id, icon: Icon, label }) => (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      setCbcFileType(id)
+                      if (id === 'domestic') {
+                        setCbcFormData({...cbcFormData, receivingCountry: ''})
+                      }
+                    }}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
+                      cbcFileType === id
+                        ? `${theme.buttonPrimary} shadow-md`
+                        : `${theme.buttonSecondary}`
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className={`${theme.accentLight} border rounded-lg p-3`}>
+                <p className={`text-sm ${theme.text}`}>
+                  {cbcFileType === 'domestic' ? (
+                    <>
+                      <strong>Domestic Filing:</strong> File submitted to your local tax authority. 
+                      Receiving country will be the same as the transmitting country.
+                    </>
+                  ) : (
+                    <>
+                      <strong>Foreign Exchange:</strong> File for automatic exchange with foreign tax authorities. 
+                      You must specify the receiving country (partner jurisdiction).
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* CBC Message Header */}
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
+              <div className="flex items-center gap-3 mb-4">
+                <BarChart3 className={`w-6 h-6 ${theme.accentText}`} />
+                <h2 className={`text-lg font-semibold ${theme.text}`}>CBC Message Header</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Sending Entity TIN *</label>
+                  <input
+                    type="text"
+                    className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+                    placeholder="123456789"
+                    value={cbcFormData.sendingEntityIN}
+                    onChange={(e) => setCbcFormData({...cbcFormData, sendingEntityIN: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Transmitting Country *</label>
+                  <input
+                    type="text"
+                    className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+                    placeholder="NL"
+                    maxLength={2}
+                    value={cbcFormData.transmittingCountry}
+                    onChange={(e) => setCbcFormData({...cbcFormData, transmittingCountry: e.target.value.toUpperCase()})}
+                  />
+                </div>
+                {cbcFileType === 'foreign' && (
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Receiving Country *</label>
+                    <input
+                      type="text"
+                      className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+                      placeholder="US, DE, GB..."
+                      maxLength={2}
+                      value={cbcFormData.receivingCountry}
+                      onChange={(e) => setCbcFormData({...cbcFormData, receivingCountry: e.target.value.toUpperCase()})}
+                    />
+                    <p className={`text-xs ${theme.textMuted} mt-1`}>Partner jurisdiction to exchange with</p>
+                  </div>
+                )}
+                <div>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Reporting Period (Year)</label>
+                  <select
+                    className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+                    value={cbcFormData.reportingPeriod}
+                    onChange={(e) => setCbcFormData({...cbcFormData, reportingPeriod: e.target.value})}
+                  >
+                    {years.map(year => <option key={year} value={year}>{year}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* CBC Reporting Entity */}
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
+              <div className="flex items-center gap-3 mb-4">
+                <Building2 className={`w-6 h-6 ${theme.accentText}`} />
+                <h2 className={`text-lg font-semibold ${theme.text}`}>Reporting Entity (MNE)</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>MNE Group Name</label>
+                  <input
+                    type="text"
+                    className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+                    placeholder="Auto-generated if empty"
+                    value={cbcFormData.mneGroupName}
+                    onChange={(e) => setCbcFormData({...cbcFormData, mneGroupName: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Reporting Entity Name</label>
+                  <input
+                    type="text"
+                    className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+                    placeholder="Auto-generated if empty"
+                    value={cbcFormData.reportingEntityName}
+                    onChange={(e) => setCbcFormData({...cbcFormData, reportingEntityName: e.target.value})}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Reporting Role *</label>
+                  <select
+                    className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+                    value={cbcFormData.reportingRole}
+                    onChange={(e) => setCbcFormData({...cbcFormData, reportingRole: e.target.value})}
+                  >
+                    {cbcReportingRoles.map(role => (
+                      <option key={role.value} value={role.value}>{role.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* CBC Report Configuration */}
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
+              <div className="flex items-center gap-3 mb-4">
+                <Globe className={`w-6 h-6 ${theme.accentText}`} />
+                <h2 className={`text-lg font-semibold ${theme.text}`}>CBC Report Configuration</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Number of Jurisdiction Reports</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+                    value={cbcFormData.numCbcReports}
+                    onChange={(e) => setCbcFormData({...cbcFormData, numCbcReports: e.target.value})}
+                  />
+                  <p className={`text-xs ${theme.textMuted} mt-1`}>One report per tax jurisdiction</p>
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Constituent Entities per Report</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+                    value={cbcFormData.constEntitiesPerReport}
+                    onChange={(e) => setCbcFormData({...cbcFormData, constEntitiesPerReport: e.target.value})}
+                  />
+                  <p className={`text-xs ${theme.textMuted} mt-1`}>Companies in each jurisdiction</p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={cbcFormData.testMode}
+                    onChange={(e) => setCbcFormData({...cbcFormData, testMode: e.target.checked})}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <span className={`text-sm ${theme.text}`}>Test Mode (OECD11-13 indicators)</span>
+                </label>
+              </div>
+            </div>
+              </>
+            )}
+
+            {/* CBC Output */}
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
+              <div className="flex items-center gap-3 mb-4">
+                <Save className={`w-6 h-6 ${theme.accentText}`} />
+                <h2 className={`text-lg font-semibold ${theme.text}`}>Output</h2>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className={`flex-1 px-4 py-2 rounded-lg border ${theme.input}`}
+                  placeholder="Select output file location..."
+                  value={cbcFormData.outputPath}
+                  readOnly
+                />
+                <button
+                  onClick={async () => {
+                    const result = await window.electronAPI.selectOutputFile('cbc')
+                    if (result) setCbcFormData({...cbcFormData, outputPath: result})
+                  }}
+                  className={`px-4 py-2 ${theme.buttonPrimary} font-medium rounded-lg transition-colors flex items-center gap-2`}
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  Browse
+                </button>
+              </div>
+            </div>
+
+            {/* CBC Generate Button */}
+            <button
+              onClick={handleGenerateCBC}
+              disabled={isGenerating}
+              className={`w-full py-4 ${theme.buttonPrimary} disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-3`}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <span>Generating CBC XML...</span>
+                </>
+              ) : (
+                <>
+                  <Rocket className="w-6 h-6" />
+                  <span>Generate CBC XML</span>
                 </>
               )}
             </button>
@@ -1705,9 +2351,9 @@ function App() {
 
             {/* CSV Upload Section */}
             {dataMode === 'csv' && (
-              <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 border-l-green-500`}>
+              <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
                 <div className="flex items-center gap-3 mb-4">
-                  <Upload className={`w-6 h-6 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                  <Upload className={`w-6 h-6 ${theme.accentText}`} />
                   <h2 className={`text-lg font-semibold ${theme.text}`}>Upload CSV File</h2>
                 </div>
                 
@@ -2015,14 +2661,17 @@ function App() {
                 <Info className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className={`font-medium ${darkMode ? 'text-orange-300' : 'text-orange-800'}`}>
-                    {activeModule === 'fatca' ? 'Generate FATCA Correction Files' : 'Generate CRS702 Correction Files'}
+                    {activeModule === 'cbc' ? 'Generate CBC Correction Files' : 
+                     activeModule === 'fatca' ? 'Generate FATCA Correction Files' : 'Generate CRS702 Correction Files'}
                   </p>
                   <p className={`text-sm ${darkMode ? 'text-orange-400' : 'text-orange-700'} mt-1`}>
-                    {activeModule === 'fatca'
-                      ? 'Upload a valid FATCA XML file to generate corrections (FATCA2) or voids (FATCA3).'
-                      : correctionDataMode === 'xml' 
-                        ? 'Upload a valid CRS701 (new) XML file to generate corrections (OECD2) or deletions (OECD3).'
-                        : 'Upload a CSV file with DocRefId column to specify exactly which accounts to correct or delete.'}
+                    {activeModule === 'cbc'
+                      ? 'Upload a valid CBC XML file to generate corrections (OECD2) or deletions (OECD3).'
+                      : activeModule === 'fatca'
+                        ? 'Upload a valid FATCA XML file to generate corrections (FATCA2) or voids (FATCA3).'
+                        : correctionDataMode === 'xml' 
+                          ? 'Upload a valid CRS701 (new) XML file to generate corrections (OECD2) or deletions (OECD3).'
+                          : 'Upload a CSV file with DocRefId column to specify exactly which accounts to correct or delete.'}
                   </p>
                 </div>
               </div>
@@ -2035,7 +2684,7 @@ function App() {
                   onClick={() => setCorrectionDataMode('xml')}
                   className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                     correctionDataMode === 'xml'
-                      ? 'bg-orange-600 text-white shadow-lg'
+                      ? `${theme.buttonPrimary} shadow-lg`
                       : `${theme.text} ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`
                   }`}
                 >
@@ -2046,7 +2695,7 @@ function App() {
                   onClick={() => setCorrectionDataMode('csv')}
                   className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                     correctionDataMode === 'csv'
-                      ? 'bg-orange-600 text-white shadow-lg'
+                      ? `${theme.buttonPrimary} shadow-lg`
                       : `${theme.text} ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`
                   }`}
                 >
@@ -2058,9 +2707,9 @@ function App() {
 
             {/* Upload XML Section - Only show in XML mode */}
             {correctionDataMode === 'xml' && (
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 border-l-orange-500`}>
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
-                <Upload className={`w-6 h-6 ${darkMode ? 'text-orange-400' : 'text-orange-600'}`} />
+                <Upload className={`w-6 h-6 ${theme.accentText}`} />
                 <h2 className={`text-lg font-semibold ${theme.text}`}>Source XML File</h2>
               </div>
               
@@ -2073,7 +2722,7 @@ function App() {
                         xmlValidation?.is_valid === false ? 'border-red-500' : 
                         xmlValidation?.can_generate_correction ? 'border-green-500' : ''
                       }`}
-                      placeholder="Select CRS XML file (CRS701)..."
+                      placeholder={activeModule === 'cbc' ? 'Select CBC XML file...' : activeModule === 'fatca' ? 'Select FATCA XML file...' : 'Select CRS XML file (CRS701)...'}
                       value={correctionXmlPath}
                       readOnly
                     />
@@ -2089,7 +2738,7 @@ function App() {
                   <button
                     onClick={handleSelectXmlFile}
                     disabled={isValidatingXml}
-                    className="px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                    className={`px-6 py-3 ${theme.buttonPrimary} disabled:bg-gray-400 font-medium rounded-lg transition-colors flex items-center gap-2`}
                   >
                     {isValidatingXml ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderOpen className="w-4 h-4" />}
                     {isValidatingXml ? 'Validating...' : 'Browse'}
@@ -2166,9 +2815,9 @@ function App() {
 
             {/* CSV Correction Section - Only show in CSV mode */}
             {correctionDataMode === 'csv' && (
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 border-l-orange-500`}>
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
-                <Table className={`w-6 h-6 ${darkMode ? 'text-orange-400' : 'text-orange-600'}`} />
+                <Table className={`w-6 h-6 ${theme.accentText}`} />
                 <h2 className={`text-lg font-semibold ${theme.text}`}>Correction CSV File</h2>
               </div>
               
@@ -2237,7 +2886,7 @@ function App() {
                         console.error('CSV select error:', err)
                       }
                     }}
-                    className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                    className={`px-6 py-3 ${theme.buttonPrimary} font-medium rounded-lg transition-colors flex items-center gap-2`}
                   >
                     <FolderOpen className="w-4 h-4" />
                     Browse
@@ -2275,11 +2924,62 @@ function App() {
             </div>
             )}
 
-            {/* Correction Options - Show for both modes when valid */}
-            {((correctionDataMode === 'xml' && xmlValidation?.can_generate_correction) || (correctionDataMode === 'csv' && correctionCsvPreview)) && (
+            {/* CBC Correction Options */}
+            {activeModule === 'cbc' && xmlValidation?.can_generate_correction && (
+              <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <RefreshCw className={`w-6 h-6 ${theme.accentText}`} />
+                  <h2 className={`text-lg font-semibold ${theme.text}`}>CBC Correction Options</h2>
+                </div>
+                
+                <div className="space-y-4">
+                  <p className={`text-sm ${theme.textMuted}`}>
+                    Found {xmlValidation.doc_count} DocRefIds in the CBC file. Select the type of correction to generate.
+                  </p>
+                  
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setCbcCorrectionType('correction')}
+                      className={`flex-1 p-4 rounded-xl border-2 transition-all ${
+                        cbcCorrectionType === 'correction'
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                          : `${theme.border} hover:border-purple-300`
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileEdit className={`w-6 h-6 ${cbcCorrectionType === 'correction' ? 'text-purple-600' : theme.textMuted}`} />
+                        <div className="text-left">
+                          <p className={`font-semibold ${theme.text}`}>Correction (OECD2)</p>
+                          <p className={`text-sm ${theme.textMuted}`}>Modify existing CBC report data</p>
+                        </div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setCbcCorrectionType('deletion')}
+                      className={`flex-1 p-4 rounded-xl border-2 transition-all ${
+                        cbcCorrectionType === 'deletion'
+                          ? 'border-red-500 bg-red-50 dark:bg-red-900/30'
+                          : `${theme.border} hover:border-red-300`
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Trash2 className={`w-6 h-6 ${cbcCorrectionType === 'deletion' ? 'text-red-600' : theme.textMuted}`} />
+                        <div className="text-left">
+                          <p className={`font-semibold ${theme.text}`}>Deletion (OECD3)</p>
+                          <p className={`text-sm ${theme.textMuted}`}>Remove/void CBC report data</p>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* CRS/FATCA Correction Options - Show for both modes when valid */}
+            {activeModule !== 'cbc' && ((correctionDataMode === 'xml' && xmlValidation?.can_generate_correction) || (correctionDataMode === 'csv' && correctionCsvPreview)) && (
               <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
                 <div className="flex items-center gap-3 mb-4">
-                  <RefreshCw className={`w-6 h-6 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                  <RefreshCw className={`w-6 h-6 ${theme.accentText}`} />
                   <h2 className={`text-lg font-semibold ${theme.text}`}>Correction Options</h2>
                 </div>
                 
@@ -2516,22 +3216,209 @@ function App() {
                 <button
                   onClick={handleGenerateCorrection}
                   disabled={isGeneratingCorrection || !correctionOutputPath}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
+                  className={`w-full px-6 py-4 bg-gradient-to-r ${
+                    activeModule === 'cbc' 
+                      ? 'from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600' 
+                      : 'from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600'
+                  } disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl`}
                 >
                   {isGeneratingCorrection ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Generating Correction...</span>
+                      <span>Generating {activeModule === 'cbc' ? 'CBC' : activeModule === 'fatca' ? 'FATCA' : 'CRS702'} Correction...</span>
                     </>
                   ) : (
                     <>
                       <FileEdit className="w-5 h-5" />
-                      <span>Generate CRS702 Correction File</span>
+                      <span>Generate {activeModule === 'cbc' ? 'CBC' : activeModule === 'fatca' ? 'FATCA' : 'CRS702'} Correction File</span>
                     </>
                   )}
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Tools Page (CRS only) */}
+        {currentPage === 'tools' && activeModule === 'crs' && (
+          <div className={`space-y-6 ${settings.animationsEnabled ? 'animate-fade-in' : ''}`}>
+            {/* Country Code Replacer */}
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
+              <div className="flex items-center gap-3 mb-4">
+                <RefreshCw className={`w-6 h-6 ${theme.accentText}`} />
+                <div>
+                  <h2 className={`text-lg font-semibold ${theme.text}`}>Country Code Replacer</h2>
+                  <p className={`text-sm ${theme.textMuted}`}>Replace account holder country codes with your allowed partner jurisdictions</p>
+                </div>
+              </div>
+              
+              {/* Info Banner */}
+              <div className={`${darkMode ? 'bg-blue-900/30 border-blue-700' : 'bg-blue-50 border-blue-200'} border rounded-lg p-4 mb-6`}>
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className={`text-sm ${darkMode ? 'text-blue-300' : 'text-blue-800'}`}>
+                      This tool will replace all <strong>ResCountryCode</strong> values in account holder records with countries from your Partner Jurisdictions settings.
+                      Countries not in your allowed list will be mapped to allowed ones.
+                    </p>
+                    <p className={`text-xs ${theme.accentText} mt-2`}>
+                      Current allowed countries: <strong>{settings.partnerJurisdictions?.join(', ') || 'None configured'}</strong>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {/* Source XML File */}
+                <div>
+                  <label className={`block text-sm font-medium ${theme.text} mb-2`}>Source CRS XML File</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      className={`flex-1 px-4 py-3 rounded-lg border ${theme.input}`}
+                      placeholder="Select CRS XML file..."
+                      value={countryReplacerXmlPath}
+                      readOnly
+                    />
+                    <button
+                      onClick={async () => {
+                        const filePath = await window.electronAPI.selectXmlFile()
+                        if (filePath) setCountryReplacerXmlPath(filePath)
+                      }}
+                      className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                        darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      <FolderOpen className="w-4 h-4" />
+                      Browse
+                    </button>
+                  </div>
+                </div>
+
+                {/* Output Path */}
+                <div>
+                  <label className={`block text-sm font-medium ${theme.text} mb-2`}>Output File</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      className={`flex-1 px-4 py-3 rounded-lg border ${theme.input}`}
+                      placeholder="Select output location..."
+                      value={countryReplacerOutputPath}
+                      readOnly
+                    />
+                    <button
+                      onClick={async () => {
+                        const filePath = await window.electronAPI.selectCorrectionOutput('crs')
+                        if (filePath) setCountryReplacerOutputPath(filePath)
+                      }}
+                      className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                        darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      <FolderOpen className="w-4 h-4" />
+                      Browse
+                    </button>
+                  </div>
+                </div>
+
+                {/* Test Mode Toggle */}
+                <div className={`${darkMode ? 'bg-purple-900/30 border-purple-700' : 'bg-purple-50 border-purple-200'} border rounded-lg p-4`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className={`w-5 h-5 ${theme.accentText}`} />
+                      <div>
+                        <p className={`font-medium ${theme.text}`}>Convert to Test Mode</p>
+                        <p className={`text-xs ${theme.textMuted}`}>
+                          Changes DocTypeIndic: OECD1→OECD11, OECD2→OECD12, OECD3→OECD13
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setConvertToTestMode(!convertToTestMode)}
+                      className={`w-12 h-6 rounded-full transition-colors relative ${convertToTestMode ? theme.toggleOn : darkMode ? 'bg-gray-600' : 'bg-gray-300'}`}
+                    >
+                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${convertToTestMode ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Replace Button */}
+                <button
+                  onClick={handleReplaceCountryCodes}
+                  disabled={isReplacingCountries || !countryReplacerXmlPath || !countryReplacerOutputPath}
+                  className={`w-full px-6 py-4 ${theme.buttonPrimary} disabled:opacity-50 font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl`}
+                >
+                  {isReplacingCountries ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Processing File...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-5 h-5" />
+                      <span>Process CRS File</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Result */}
+                {countryReplacerResult && (
+                  <div className={`${darkMode ? 'bg-green-900/30 border-green-700' : 'bg-green-50 border-green-200'} border rounded-lg p-4 mt-4`}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <span className={`font-medium ${darkMode ? 'text-green-300' : 'text-green-800'}`}>Replacement Complete</span>
+                    </div>
+                    
+                    {/* DocTypeIndic Conversion Notice */}
+                    {countryReplacerResult.docTypeIndicConverted && (
+                      <div className={`${darkMode ? 'bg-purple-900/30 border-purple-700' : 'bg-purple-50 border-purple-200'} border rounded-lg p-3 mb-3`}>
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-purple-500" />
+                          <span className={`text-sm ${darkMode ? 'text-purple-300' : 'text-purple-800'}`}>
+                            <strong>DocTypeIndic</strong> converted to test mode: {countryReplacerResult.originalDocTypeIndicValues.map((v, i) => `${v}→${countryReplacerResult.newDocTypeIndicValues[i]}`).join(', ')}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* ReportingFI Fix Notice */}
+                    {countryReplacerResult.reportingFIFixed && (
+                      <div className={`${darkMode ? 'bg-yellow-900/30 border-yellow-700' : 'bg-yellow-50 border-yellow-200'} border rounded-lg p-3 mb-3`}>
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 text-yellow-500" />
+                          <span className={`text-sm ${darkMode ? 'text-yellow-300' : 'text-yellow-800'}`}>
+                            <strong>ReportingFI.ResCountryCode</strong> fixed: {countryReplacerResult.originalReportingFICountry} → {countryReplacerResult.messageSendingCountry} (must match SendingCountry)
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className={`${theme.textMuted}`}>Original Countries Found:</p>
+                        <p className={`font-mono ${theme.text}`}>{countryReplacerResult.originalCountries.join(', ')}</p>
+                      </div>
+                      <div>
+                        <p className={`${theme.textMuted}`}>Countries Replaced:</p>
+                        <p className={`font-mono ${theme.text}`}>{countryReplacerResult.replacedCountries.length > 0 ? countryReplacerResult.replacedCountries.join(', ') : 'None (all already allowed)'}</p>
+                      </div>
+                    </div>
+                    {Object.keys(countryReplacerResult.replacements).length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700">
+                        <p className={`text-sm ${theme.textMuted} mb-2`}>Account Holder Replacement Map:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(countryReplacerResult.replacements).map(([from, to]) => (
+                            <span key={from} className={`px-2 py-1 rounded text-xs font-mono ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                              {from} → {to}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
