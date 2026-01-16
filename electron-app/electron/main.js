@@ -95,19 +95,12 @@ ipcMain.handle('get-csv-template-path', async () => {
 
 // Generate CSV preview
 ipcMain.handle('generate-csv-preview', async (event, formData) => {
-  return new Promise((resolve, reject) => {
-    const pythonPath = findPythonExecutable();
-    
-    if (!pythonPath) {
-      reject(new Error('Python not found.'));
-      return;
-    }
-
-    const projectRoot = path.join(__dirname, '../..');
-    const tempCsvPath = path.join(projectRoot, 'temp_preview.csv');
-    
-    const args = [
-      '-m', 'crs_generator.cli',
+  const projectRoot = path.join(__dirname, '../..');
+  const tempCsvPath = path.join(projectRoot, 'temp_preview.csv');
+  
+  return runPythonCommand({
+    module: 'crs_generator.cli',
+    args: [
       '--mode', 'preview',
       '--sending-country', formData.transmittingCountry,
       '--receiving-country', formData.receivingCountry,
@@ -120,49 +113,13 @@ ipcMain.handle('generate-csv-preview', async (event, formData) => {
       '--output', tempCsvPath,
       '--preview-limit', '20',
       '--preview-json'
-    ];
-
-    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
-
-    let output = '';
-    let errorOutput = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      output += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        try {
-          // Find JSON in output (skip any print statements before it)
-          const jsonStart = output.indexOf('{');
-          if (jsonStart !== -1) {
-            const jsonData = JSON.parse(output.substring(jsonStart));
-            resolve(jsonData);
-          } else {
-            reject(new Error('No JSON data in output'));
-          }
-        } catch (e) {
-          reject(new Error(`Failed to parse preview data: ${e.message}`));
-        }
-      } else {
-        reject(new Error(errorOutput || 'Preview generation failed'));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python: ${error.message}`));
-    });
+    ]
   });
 });
 
 // Save CSV preview to file
 ipcMain.handle('save-csv-preview', async (event, formData) => {
-  const result = await dialog.showSaveDialog(mainWindow, {
+  const dialogResult = await dialog.showSaveDialog(mainWindow, {
     title: 'Save CSV Preview',
     defaultPath: 'crs_data_preview.csv',
     filters: [
@@ -171,22 +128,11 @@ ipcMain.handle('save-csv-preview', async (event, formData) => {
     ]
   });
   
-  if (!result.filePath) {
-    return null;
-  }
+  if (!dialogResult.filePath) return null;
 
-  return new Promise((resolve, reject) => {
-    const pythonPath = findPythonExecutable();
-    
-    if (!pythonPath) {
-      reject(new Error('Python not found.'));
-      return;
-    }
-
-    const projectRoot = path.join(__dirname, '../..');
-    
-    const args = [
-      '-m', 'crs_generator.cli',
+  return runPythonCommand({
+    module: 'crs_generator.cli',
+    args: [
       '--mode', 'preview',
       '--sending-country', formData.transmittingCountry,
       '--receiving-country', formData.receivingCountry,
@@ -196,121 +142,55 @@ ipcMain.handle('save-csv-preview', async (event, formData) => {
       '--individual-accounts', formData.individualAccounts || '0',
       '--organisation-accounts', formData.organisationAccounts || '0',
       '--controlling-persons', formData.controllingPersons || '1',
-      '--output', result.filePath
-    ];
-
-    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
-
-    let errorOutput = '';
-
-    pythonProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        resolve({ success: true, filePath: result.filePath });
-      } else {
-        reject(new Error(errorOutput || 'CSV save failed'));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python: ${error.message}`));
-    });
+      '--output', dialogResult.filePath
+    ],
+    parseJson: false,
+    outputPath: dialogResult.filePath
   });
 });
 
 // Generate CRS file
 ipcMain.handle('generate-crs', async (event, formData) => {
-  return new Promise((resolve, reject) => {
-    // Find Python executable
-    const pythonPath = findPythonExecutable();
-    
-    if (!pythonPath) {
-      reject(new Error('Python not found. Please install Python 3.8 or higher.'));
-      return;
+  let args = [];
+  
+  if (formData.mode === 'csv') {
+    args.push('--mode', 'csv', '--csv-input', formData.csvPath, '--output', formData.outputPath);
+  } else {
+    args.push(
+      '--mode', 'random',
+      '--sending-country', formData.transmittingCountry,
+      '--receiving-country', formData.receivingCountry,
+      '--tax-year', formData.reportingPeriod,
+      '--mytin', formData.sendingCompanyIN,
+      '--num-fis', formData.numReportingFIs,
+      '--individual-accounts', formData.individualAccounts,
+      '--organisation-accounts', formData.organisationAccounts,
+      '--controlling-persons', formData.controllingPersons,
+      '--output', formData.outputPath
+    );
+
+    if (formData.reportingFITINs && formData.reportingFITINs.length > 0) {
+      args.push('--reporting-fi-tins', formData.reportingFITINs.join(','));
     }
 
-    // Path to the project root (where crs_generator package is)
-    const projectRoot = path.join(__dirname, '../..');
-    
-    // Build command arguments based on mode
-    let args = ['-m', 'crs_generator.cli'];
-    
-    if (formData.mode === 'csv') {
-      // CSV mode - generate from uploaded CSV file
-      args.push(
-        '--mode', 'csv',
-        '--csv-input', formData.csvPath,
-        '--output', formData.outputPath
-      );
-    } else {
-      // Random mode (default)
-      args.push(
-        '--mode', 'random',
-        '--sending-country', formData.transmittingCountry,
-        '--receiving-country', formData.receivingCountry,
-        '--tax-year', formData.reportingPeriod,
-        '--mytin', formData.sendingCompanyIN,
-        '--num-fis', formData.numReportingFIs,
-        '--individual-accounts', formData.individualAccounts,
-        '--organisation-accounts', formData.organisationAccounts,
-        '--controlling-persons', formData.controllingPersons,
-        '--output', formData.outputPath
-      );
-
-      // Add optional parameters
-      if (formData.reportingFITINs && formData.reportingFITINs.length > 0) {
-        args.push('--reporting-fi-tins', formData.reportingFITINs.join(','));
-      }
-
-      if (formData.accountHolderMode !== 'random') {
-        args.push('--account-holder-mode', formData.accountHolderMode);
-        if (formData.accountHolderCountries) {
-          args.push('--account-holder-countries', formData.accountHolderCountries);
-        }
+    if (formData.accountHolderMode !== 'random') {
+      args.push('--account-holder-mode', formData.accountHolderMode);
+      if (formData.accountHolderCountries) {
+        args.push('--account-holder-countries', formData.accountHolderCountries);
       }
     }
+  }
 
-    // Spawn Python process with cwd set to project root
-    const pythonProcess = spawn(pythonPath, args, {
-      cwd: projectRoot
-    });
-
-    let output = '';
-    let errorOutput = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      output += data.toString();
-      // Send progress updates to renderer
-      event.sender.send('generation-progress', data.toString());
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        // Success
-        const fileStats = fs.statSync(formData.outputPath);
-        resolve({
-          success: true,
-          filePath: formData.outputPath,
-          fileSize: (fileStats.size / (1024 * 1024)).toFixed(2),
-          message: 'CRS file generated successfully!'
-        });
-      } else {
-        // Error
-        reject(new Error(errorOutput || 'Generation failed with unknown error'));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python process: ${error.message}`));
-    });
+  const result = await runPythonCommand({
+    module: 'crs_generator.cli',
+    args,
+    event,
+    parseJson: false,
+    outputPath: formData.outputPath
   });
+  
+  result.message = 'CRS file generated successfully!';
+  return result;
 });
 
 // Open file location
@@ -356,114 +236,113 @@ function findPythonExecutable() {
   return null;
 }
 
-// Validate CSV file
-ipcMain.handle('validate-csv', async (event, csvPath) => {
+/**
+ * Reusable helper to run Python CLI commands and return results.
+ * @param {object} options - Configuration options
+ * @param {string} options.module - Python module to run (e.g., 'crs_generator.cli')
+ * @param {string[]} options.args - Arguments to pass to the module
+ * @param {object} [options.event] - IPC event for progress updates (optional)
+ * @param {boolean} [options.parseJson=true] - Whether to parse output as JSON
+ * @param {string} [options.outputPath] - Path to output file for file stats
+ * @returns {Promise<object>} - Parsed result or raw output
+ */
+function runPythonCommand({ module, args, event = null, parseJson = true, outputPath = null }) {
   return new Promise((resolve, reject) => {
     const pythonPath = findPythonExecutable();
     
     if (!pythonPath) {
-      reject(new Error('Python not found'));
+      reject(new Error('Python not found. Please install Python 3.8 or higher.'));
       return;
     }
 
     const projectRoot = path.join(__dirname, '../..');
-    
-    const args = [
-      '-m', 'crs_generator.cli',
-      '--mode', 'validate',
-      '--csv-input', csvPath,
-      '--output', 'dummy.xml'
-    ];
+    const fullArgs = ['-m', module, ...args];
 
-    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
+    const pythonProcess = spawn(pythonPath, fullArgs, {
+      cwd: projectRoot,
+      env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+    });
 
-    let output = '';
-    let errorOutput = '';
+    let stdout = '';
+    let stderr = '';
 
     pythonProcess.stdout.on('data', (data) => {
-      output += data.toString();
+      stdout += data.toString();
+      if (event) {
+        event.sender.send('generation-progress', data.toString());
+      }
     });
 
     pythonProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
+      stderr += data.toString();
     });
 
     pythonProcess.on('close', (code) => {
-      try {
-        const jsonStart = output.indexOf('{');
-        if (jsonStart !== -1) {
-          const result = JSON.parse(output.substring(jsonStart));
-          resolve(result);
+      if (code === 0) {
+        if (parseJson) {
+          try {
+            // Find JSON in output (skip any print statements before it)
+            const jsonMatch = stdout.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              const result = JSON.parse(jsonMatch[0]);
+              // Add file stats if outputPath provided
+              if (outputPath && fs.existsSync(outputPath)) {
+                const fileStats = fs.statSync(outputPath);
+                result.filePath = outputPath;
+                result.fileSize = (fileStats.size / (1024 * 1024)).toFixed(2);
+              }
+              resolve(result);
+            } else {
+              // No JSON found, return success with output
+              resolve({ success: true, output: stdout });
+            }
+          } catch (e) {
+            reject(new Error(`Failed to parse output: ${e.message}. Output: ${stdout}`));
+          }
         } else {
-          reject(new Error('No validation result'));
+          // Return raw output
+          if (outputPath && fs.existsSync(outputPath)) {
+            const fileStats = fs.statSync(outputPath);
+            resolve({
+              success: true,
+              filePath: outputPath,
+              fileSize: (fileStats.size / (1024 * 1024)).toFixed(2),
+              output: stdout
+            });
+          } else {
+            resolve({ success: true, output: stdout });
+          }
         }
-      } catch (e) {
-        reject(new Error(errorOutput || 'Validation failed'));
+      } else {
+        reject(new Error(stderr || `Command failed with exit code ${code}`));
       }
     });
 
     pythonProcess.on('error', (error) => {
       reject(new Error(`Failed to start Python: ${error.message}`));
     });
+  });
+}
+
+// Validate CSV file
+ipcMain.handle('validate-csv', async (event, csvPath) => {
+  return runPythonCommand({
+    module: 'crs_generator.cli',
+    args: ['--mode', 'validate', '--csv-input', csvPath, '--output', 'dummy.xml']
   });
 });
 
 // Validate CBC CSV file
 ipcMain.handle('validate-cbc-csv', async (event, csvPath) => {
-  return new Promise((resolve, reject) => {
-    const pythonPath = findPythonExecutable();
-    
-    if (!pythonPath) {
-      reject(new Error('Python not found'));
-      return;
-    }
-
-    const projectRoot = path.join(__dirname, '../..');
-    
-    const args = [
-      '-m', 'crs_generator.cbc_cli',
-      '--mode', 'validate',
-      '--csv-input', csvPath,
-      '--output', 'dummy.xml'
-    ];
-
-    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
-
-    let output = '';
-    let errorOutput = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      output += data.toString();
+  try {
+    return await runPythonCommand({
+      module: 'crs_generator.cbc_cli',
+      args: ['--mode', 'validate', '--csv-input', csvPath, '--output', 'dummy.xml']
     });
-
-    pythonProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      try {
-        const jsonStart = output.indexOf('{');
-        if (jsonStart !== -1) {
-          const result = JSON.parse(output.substring(jsonStart));
-          resolve(result);
-        } else {
-          // If no JSON output, assume valid (basic check passed)
-          resolve({ valid: true, statistics: { total_reports: 'Unknown' } });
-        }
-      } catch (e) {
-        // If parsing fails but no error, assume valid
-        if (code === 0) {
-          resolve({ valid: true, statistics: { total_reports: 'Unknown' } });
-        } else {
-          reject(new Error(errorOutput || 'CBC CSV validation failed'));
-        }
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python: ${error.message}`));
-    });
-  });
+  } catch (e) {
+    // If no JSON output, assume valid (basic check passed)
+    return { valid: true, statistics: { total_reports: 'Unknown' } };
+  }
 });
 
 // Download CSV template
@@ -527,125 +406,40 @@ ipcMain.handle('select-xml-file', async () => {
 
 // Validate XML file
 ipcMain.handle('validate-xml', async (event, xmlPath) => {
-  const projectRoot = path.join(__dirname, '../..');
-  const pythonPath = await findPythonExecutable();
-  
-  return new Promise((resolve, reject) => {
-    const args = [
-      '-m', 'crs_generator.cli',
-      '--mode', 'validate-xml',
-      '--xml-input', xmlPath,
-      '--output', 'dummy'
-    ];
-
-    let stdout = '';
-    let stderr = '';
-
-    const pythonProcess = spawn(pythonPath, args, {
-      cwd: projectRoot,
-      env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
-    });
-
-    pythonProcess.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      try {
-        // Find JSON in output
-        const jsonMatch = stdout.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const result = JSON.parse(jsonMatch[0]);
-          resolve(result);
-        } else {
-          reject(new Error(stderr || 'Failed to parse validation result'));
-        }
-      } catch (e) {
-        reject(new Error(`Parse error: ${e.message}. Output: ${stdout}`));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python: ${error.message}`));
-    });
+  return runPythonCommand({
+    module: 'crs_generator.cli',
+    args: ['--mode', 'validate-xml', '--xml-input', xmlPath, '--output', 'dummy']
   });
 });
 
 // Generate correction file
 ipcMain.handle('generate-correction', async (event, options) => {
-  const projectRoot = path.join(__dirname, '../..');
-  const pythonPath = await findPythonExecutable();
+  const args = [
+    '--mode', 'correction',
+    '--xml-input', options.xmlPath,
+    '--output', options.outputPath,
+    '--correct-individual', options.correctIndividual?.toString() || '0',
+    '--correct-organisation', options.correctOrganisation?.toString() || '0',
+    '--delete-individual', options.deleteIndividual?.toString() || '0',
+    '--delete-organisation', options.deleteOrganisation?.toString() || '0'
+  ];
   
-  return new Promise((resolve, reject) => {
-    const args = [
-      '-m', 'crs_generator.cli',
-      '--mode', 'correction',
-      '--xml-input', options.xmlPath,
-      '--output', options.outputPath,
-      '--correct-individual', options.correctIndividual?.toString() || '0',
-      '--correct-organisation', options.correctOrganisation?.toString() || '0',
-      '--delete-individual', options.deleteIndividual?.toString() || '0',
-      '--delete-organisation', options.deleteOrganisation?.toString() || '0'
-    ];
-    
-    if (options.correctFI) {
-      args.push('--correct-fi');
-    }
-    if (options.modifyBalance) {
-      args.push('--modify-balance');
-    }
-    if (options.modifyAddress) {
-      args.push('--modify-address');
-    }
-    if (options.modifyName) {
-      args.push('--modify-name');
-    }
-    if (options.testMode) {
-      args.push('--test-mode');
-    }
+  if (options.correctFI) args.push('--correct-fi');
+  if (options.modifyBalance) args.push('--modify-balance');
+  if (options.modifyAddress) args.push('--modify-address');
+  if (options.modifyName) args.push('--modify-name');
+  if (options.testMode) args.push('--test-mode');
 
-    let stdout = '';
-    let stderr = '';
-
-    const pythonProcess = spawn(pythonPath, args, {
-      cwd: projectRoot,
-      env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
-    });
-
-    pythonProcess.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      try {
-        const jsonMatch = stdout.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const result = JSON.parse(jsonMatch[0]);
-          if (result.success) {
-            resolve(result);
-          } else {
-            reject(new Error(result.error || 'Correction generation failed'));
-          }
-        } else {
-          reject(new Error(stderr || 'Failed to parse result'));
-        }
-      } catch (e) {
-        reject(new Error(`Parse error: ${e.message}. Output: ${stdout}`));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python: ${error.message}`));
-    });
+  const result = await runPythonCommand({
+    module: 'crs_generator.cli',
+    args,
+    outputPath: options.outputPath
   });
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Correction generation failed');
+  }
+  return result;
 });
 
 // Select output file for correction
@@ -734,186 +528,72 @@ ipcMain.handle('download-correction-csv-template', async () => {
 
 // Generate FATCA file
 ipcMain.handle('generate-fatca', async (event, formData) => {
-  return new Promise((resolve, reject) => {
-    const pythonPath = findPythonExecutable();
-    
-    if (!pythonPath) {
-      reject(new Error('Python not found. Please install Python 3.8 or higher.'));
-      return;
+  const args = [
+    '--mode', 'random',
+    '--sending-country', formData.transmittingCountry || 'NL',
+    '--receiving-country', formData.receivingCountry || 'US',
+    '--tax-year', formData.reportingPeriod || new Date().getFullYear().toString(),
+    '--sending-company-in', formData.sendingCompanyIN || '000000.00000.TA.531',
+    '--num-fis', formData.numReportingFIs || '1',
+    '--filer-category', formData.filerCategory || 'FATCA601',
+    '--individual-accounts', formData.individualAccounts || '0',
+    '--organisation-accounts', formData.organisationAccounts || '0',
+    '--substantial-owners', formData.substantialOwners || '1',
+    '--output', formData.outputPath
+  ];
+
+  if (formData.reportingFITINs && formData.reportingFITINs.length > 0) {
+    args.push('--reporting-fi-tins', formData.reportingFITINs.join(','));
+  }
+
+  if (formData.accountHolderMode !== 'random') {
+    args.push('--account-holder-mode', formData.accountHolderMode);
+    if (formData.accountHolderCountries) {
+      args.push('--account-holder-countries', formData.accountHolderCountries);
     }
+  }
 
-    const projectRoot = path.join(__dirname, '../..');
-    
-    let args = ['-m', 'crs_generator.fatca_cli'];
-    
-    args.push(
-      '--mode', 'random',
-      '--sending-country', formData.transmittingCountry || 'NL',
-      '--receiving-country', formData.receivingCountry || 'US',
-      '--tax-year', formData.reportingPeriod || new Date().getFullYear().toString(),
-      '--sending-company-in', formData.sendingCompanyIN || '000000.00000.TA.531',
-      '--num-fis', formData.numReportingFIs || '1',
-      '--filer-category', formData.filerCategory || 'FATCA601',
-      '--individual-accounts', formData.individualAccounts || '0',
-      '--organisation-accounts', formData.organisationAccounts || '0',
-      '--substantial-owners', formData.substantialOwners || '1',
-      '--output', formData.outputPath
-    );
+  if (formData.testMode) args.push('--test-mode');
 
-    if (formData.reportingFITINs && formData.reportingFITINs.length > 0) {
-      args.push('--reporting-fi-tins', formData.reportingFITINs.join(','));
-    }
-
-    if (formData.accountHolderMode !== 'random') {
-      args.push('--account-holder-mode', formData.accountHolderMode);
-      if (formData.accountHolderCountries) {
-        args.push('--account-holder-countries', formData.accountHolderCountries);
-      }
-    }
-
-    if (formData.testMode) {
-      args.push('--test-mode');
-    }
-
-    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
-
-    let output = '';
-    let errorOutput = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      output += data.toString();
-      event.sender.send('generation-progress', data.toString());
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        const fileStats = fs.statSync(formData.outputPath);
-        resolve({
-          success: true,
-          filePath: formData.outputPath,
-          fileSize: (fileStats.size / (1024 * 1024)).toFixed(2),
-          output: output
-        });
-      } else {
-        reject(new Error(errorOutput || 'FATCA generation failed'));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python: ${error.message}`));
-    });
+  return runPythonCommand({
+    module: 'crs_generator.fatca_cli',
+    args,
+    event,
+    parseJson: false,
+    outputPath: formData.outputPath
   });
 });
 
 // Validate FATCA XML file
 ipcMain.handle('validate-fatca-xml', async (event, xmlPath) => {
-  return new Promise((resolve, reject) => {
-    const pythonPath = findPythonExecutable();
-    
-    if (!pythonPath) {
-      reject(new Error('Python not found'));
-      return;
-    }
-
-    const projectRoot = path.join(__dirname, '../..');
-    const args = ['-m', 'crs_generator.fatca_cli', '--mode', 'validate-xml', '--xml-input', xmlPath, '--output', 'dummy'];
-
-    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
-
-    let stdout = '';
-    let stderr = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      try {
-        const result = JSON.parse(stdout);
-        resolve(result);
-      } catch (e) {
-        reject(new Error(`Parse error: ${e.message}. Output: ${stdout}`));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python: ${error.message}`));
-    });
+  return runPythonCommand({
+    module: 'crs_generator.fatca_cli',
+    args: ['--mode', 'validate-xml', '--xml-input', xmlPath, '--output', 'dummy']
   });
 });
 
 // Generate FATCA correction
 ipcMain.handle('generate-fatca-correction', async (event, options) => {
-  return new Promise((resolve, reject) => {
-    const pythonPath = findPythonExecutable();
-    
-    if (!pythonPath) {
-      reject(new Error('Python not found'));
-      return;
-    }
+  const args = [
+    '--mode', 'correction',
+    '--xml-input', options.xmlPath,
+    '--output', options.outputPath,
+    '--correct-individual', options.correctIndividual.toString(),
+    '--correct-organisation', options.correctOrganisation.toString(),
+    '--delete-individual', options.deleteIndividual.toString(),
+    '--delete-organisation', options.deleteOrganisation.toString()
+  ];
 
-    const projectRoot = path.join(__dirname, '../..');
-    
-    let args = [
-      '-m', 'crs_generator.fatca_cli',
-      '--mode', 'correction',
-      '--xml-input', options.xmlPath,
-      '--output', options.outputPath,
-      '--correct-individual', options.correctIndividual.toString(),
-      '--correct-organisation', options.correctOrganisation.toString(),
-      '--delete-individual', options.deleteIndividual.toString(),
-      '--delete-organisation', options.deleteOrganisation.toString()
-    ];
+  if (options.correctFI) args.push('--correct-fi');
+  if (options.modifyBalance) args.push('--modify-balance');
+  if (options.modifyAddress) args.push('--modify-address');
+  if (options.modifyName) args.push('--modify-name');
+  if (options.testMode) args.push('--test-mode');
 
-    if (options.correctFI) {
-      args.push('--correct-fi');
-    }
-    if (options.modifyBalance) {
-      args.push('--modify-balance');
-    }
-    if (options.modifyAddress) {
-      args.push('--modify-address');
-    }
-    if (options.modifyName) {
-      args.push('--modify-name');
-    }
-    if (options.testMode) {
-      args.push('--test-mode');
-    }
-
-    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
-
-    let stdout = '';
-    let stderr = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      try {
-        const result = JSON.parse(stdout);
-        resolve(result);
-      } catch (e) {
-        reject(new Error(`Parse error: ${e.message}. Output: ${stdout}, Stderr: ${stderr}`));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python: ${error.message}`));
-    });
+  return runPythonCommand({
+    module: 'crs_generator.fatca_cli',
+    args,
+    outputPath: options.outputPath
   });
 });
 
@@ -1104,143 +784,56 @@ ipcMain.handle('validate-cbc-xml', async (event, xmlPath) => {
 
 // Generate CBC file
 ipcMain.handle('generate-cbc', async (event, formData) => {
-  return new Promise((resolve, reject) => {
-    const pythonPath = findPythonExecutable();
-    
-    if (!pythonPath) {
-      reject(new Error('Python not found. Please install Python 3.8 or higher.'));
-      return;
-    }
+  let args = ['generate'];
+  
+  // Check if CSV mode
+  if (formData.mode === 'csv' && formData.csvPath) {
+    args.push('--mode', 'csv', '--csv-input', formData.csvPath, '--output', formData.outputPath);
+  } else {
+    // Random mode
+    args.push(
+      '--mode', 'random',
+      '--country', formData.transmittingCountry || 'NL',
+      '--year', formData.reportingPeriod || new Date().getFullYear().toString(),
+      '--tin', formData.sendingEntityIN || '123456789',
+      '--reports', formData.numCbcReports || '3',
+      '--entities', formData.constEntitiesPerReport || '2',
+      '--role', formData.reportingRole || 'CBC701',
+      '--output', formData.outputPath
+    );
 
-    const projectRoot = path.join(__dirname, '../..');
-    
-    let args = ['-m', 'crs_generator.cbc_cli', 'generate'];
-    
-    // Check if CSV mode
-    if (formData.mode === 'csv' && formData.csvPath) {
-      args.push(
-        '--mode', 'csv',
-        '--csv-input', formData.csvPath,
-        '--output', formData.outputPath
-      );
-    } else {
-      // Random mode
-      args.push(
-        '--mode', 'random',
-        '--country', formData.transmittingCountry || 'NL',
-        '--year', formData.reportingPeriod || new Date().getFullYear().toString(),
-        '--tin', formData.sendingEntityIN || '123456789',
-        '--reports', formData.numCbcReports || '3',
-        '--entities', formData.constEntitiesPerReport || '2',
-        '--role', formData.reportingRole || 'CBC701',
-        '--output', formData.outputPath
-      );
+    if (formData.mneGroupName) args.push('--mne-name', formData.mneGroupName);
+    if (formData.reportingEntityName) args.push('--entity-name', formData.reportingEntityName);
+  }
 
-      if (formData.mneGroupName) {
-        args.push('--mne-name', formData.mneGroupName);
-      }
+  if (!formData.testMode) args.push('--production');
 
-      if (formData.reportingEntityName) {
-        args.push('--entity-name', formData.reportingEntityName);
-      }
-    }
-
-    if (!formData.testMode) {
-      args.push('--production');
-    }
-
-    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
-
-    let output = '';
-    let errorOutput = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      output += data.toString();
-      event.sender.send('generation-progress', data.toString());
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        const fileStats = fs.statSync(formData.outputPath);
-        resolve({
-          success: true,
-          filePath: formData.outputPath,
-          fileSize: (fileStats.size / (1024 * 1024)).toFixed(2),
-          output: output
-        });
-      } else {
-        reject(new Error(errorOutput || 'CBC generation failed'));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python: ${error.message}`));
-    });
+  return runPythonCommand({
+    module: 'crs_generator.cbc_cli',
+    args,
+    event,
+    parseJson: false,
+    outputPath: formData.outputPath
   });
 });
 
 // Generate CBC correction/deletion
 ipcMain.handle('generate-cbc-correction', async (event, options) => {
-  return new Promise((resolve, reject) => {
-    const pythonPath = findPythonExecutable();
-    
-    if (!pythonPath) {
-      reject(new Error('Python not found. Please install Python 3.8 or higher.'));
-      return;
-    }
+  const args = [
+    'correct',
+    '--source', options.sourceXmlPath,
+    '--type', options.correctionType || 'correction',
+    '--output', options.outputPath
+  ];
 
-    const projectRoot = path.join(__dirname, '../..');
-    
-    let args = ['-m', 'crs_generator.cbc_cli', 'correct'];
-    
-    args.push(
-      '--source', options.sourceXmlPath,
-      '--type', options.correctionType || 'correction',
-      '--output', options.outputPath
-    );
+  if (options.csvPath) args.push('--csv', options.csvPath);
+  if (!options.testMode) args.push('--production');
 
-    if (options.csvPath) {
-      args.push('--csv', options.csvPath);
-    }
-
-    if (!options.testMode) {
-      args.push('--production');
-    }
-
-    const pythonProcess = spawn(pythonPath, args, { cwd: projectRoot });
-
-    let output = '';
-    let errorOutput = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      output += data.toString();
-      event.sender.send('generation-progress', data.toString());
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        const fileStats = fs.statSync(options.outputPath);
-        resolve({
-          success: true,
-          filePath: options.outputPath,
-          fileSize: (fileStats.size / (1024 * 1024)).toFixed(2),
-          output: output
-        });
-      } else {
-        reject(new Error(errorOutput || 'CBC correction generation failed'));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python: ${error.message}`));
-    });
+  return runPythonCommand({
+    module: 'crs_generator.cbc_cli',
+    args,
+    event,
+    parseJson: false,
+    outputPath: options.outputPath
   });
 });
