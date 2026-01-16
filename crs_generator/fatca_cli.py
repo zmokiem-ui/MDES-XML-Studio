@@ -8,6 +8,11 @@ import sys
 import json
 from pathlib import Path
 
+from .cli_utils import (
+    output_json, error_exit, parse_comma_list,
+    CorrectionConfig, format_validation_result, format_correction_result
+)
+
 
 def validate_fatca_xml_mode(args):
     """Validate FATCA XML file and return validation results as JSON"""
@@ -22,23 +27,7 @@ def validate_fatca_xml_mode(args):
     
     validator = FATCAXMLValidator()
     result = validator.validate_file(args.xml_input)
-    
-    return {
-        'is_valid': result.is_valid,
-        'errors': result.errors,
-        'warnings': result.warnings,
-        'version': result.xml_version,
-        'message_type': result.message_type,
-        'message_ref_id': result.message_ref_id,
-        'transmitting_country': result.transmitting_country,
-        'receiving_country': result.receiving_country,
-        'reporting_period': result.reporting_period,
-        'reporting_fi_count': result.reporting_fi_count,
-        'total_accounts': result.account_count,
-        'individual_accounts': result.individual_accounts,
-        'organisation_accounts': result.organisation_accounts,
-        'can_generate_correction': result.is_valid and result.is_new_data
-    }
+    return format_validation_result(result, 'fatca')
 
 
 def generate_fatca_correction_mode(args):
@@ -46,59 +35,35 @@ def generate_fatca_correction_mode(args):
     from .fatca_correction_generator import FATCACorrectionGenerator, FATCACorrectionOptions
     
     if not args.xml_input:
-        print(json.dumps({'success': False, 'error': 'No XML file specified. Use --xml-input'}))
-        sys.exit(1)
-    
+        error_exit('No XML file specified. Use --xml-input')
     if not args.output:
-        print(json.dumps({'success': False, 'error': 'No output file specified. Use --output'}))
-        sys.exit(1)
+        error_exit('No output file specified. Use --output')
     
+    config = CorrectionConfig.from_args(args)
     options = FATCACorrectionOptions(
-        correct_reporting_fi=args.correct_fi,
-        correct_individual_accounts=args.correct_individual,
-        correct_organisation_accounts=args.correct_organisation,
-        delete_individual_accounts=args.delete_individual,
-        delete_organisation_accounts=args.delete_organisation,
-        modify_balance=args.modify_balance,
-        modify_address=args.modify_address,
-        modify_name=args.modify_name,
-        test_mode=args.test_mode,
-        output_path=args.output
+        correct_reporting_fi=config.correct_fi,
+        correct_individual_accounts=config.correct_individual,
+        correct_organisation_accounts=config.correct_organisation,
+        delete_individual_accounts=config.delete_individual,
+        delete_organisation_accounts=config.delete_organisation,
+        modify_balance=config.modify_balance,
+        modify_address=config.modify_address,
+        modify_name=config.modify_name,
+        test_mode=config.test_mode,
+        output_path=config.output_path
     )
     
     generator = FATCACorrectionGenerator()
     result = generator.generate_correction(args.xml_input, options)
-    
-    if result.success:
-        print(json.dumps({
-            'success': True,
-            'output_path': result.output_path,
-            'corrections_made': result.corrections_made,
-            'deletions_made': result.deletions_made,
-            'fi_corrected': result.fi_corrected
-        }))
-        sys.exit(0)
-    else:
-        print(json.dumps({
-            'success': False,
-            'error': result.error_message
-        }))
-        sys.exit(1)
+    output_json(format_correction_result(result))
 
 
 def generate_fatca_random_mode(args):
     """Generate random FATCA XML data"""
     from .fatca_generator import FATCAGeneratorConfig, FATCAGenerator
     
-    # Parse reporting FI TINs if provided
-    reporting_fi_tins = []
-    if args.reporting_fi_tins:
-        reporting_fi_tins = [t.strip() for t in args.reporting_fi_tins.split(',')]
-    
-    # Parse account holder countries if provided
-    account_holder_countries = []
-    if args.account_holder_countries:
-        account_holder_countries = [c.strip().upper() for c in args.account_holder_countries.split(',')]
+    reporting_fi_tins = parse_comma_list(args.reporting_fi_tins)
+    account_holder_countries = parse_comma_list(args.account_holder_countries, uppercase=True)
     
     config = FATCAGeneratorConfig(
         sending_country=args.sending_country or 'NL',

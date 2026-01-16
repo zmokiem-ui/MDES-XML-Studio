@@ -8,6 +8,12 @@ import sys
 import json
 from pathlib import Path
 
+from .cli_utils import (
+    output_json, error_exit, parse_comma_list,
+    add_correction_arguments, add_account_holder_arguments, add_generation_arguments,
+    CorrectionConfig, format_validation_result, format_correction_result
+)
+
 
 def validate_xml_mode(args):
     """Validate XML file and return validation results as JSON"""
@@ -22,24 +28,7 @@ def validate_xml_mode(args):
     
     validator = CRSXMLValidator()
     result = validator.validate_file(args.xml_input)
-    
-    return {
-        'is_valid': result.is_valid,
-        'errors': result.errors,
-        'warnings': result.warnings,
-        'version': result.xml_version,
-        'message_type_indic': result.message_type_indic,
-        'message_ref_id': result.message_ref_id,
-        'transmitting_country': result.transmitting_country,
-        'receiving_country': result.receiving_country,
-        'reporting_period': result.reporting_period,
-        'reporting_fi_count': result.reporting_fi_count,
-        'total_accounts': result.account_count,
-        'individual_accounts': result.individual_accounts,
-        'organisation_accounts': result.organisation_accounts,
-        'is_correction_file': result.message_type_indic == 'CRS702',
-        'can_generate_correction': result.is_valid and result.message_type_indic == 'CRS701'
-    }
+    return format_validation_result(result, 'crs')
 
 
 def generate_correction_mode(args):
@@ -47,44 +36,27 @@ def generate_correction_mode(args):
     from .correction_generator import CRSCorrectionGenerator, CorrectionOptions
     
     if not args.xml_input:
-        print(json.dumps({'success': False, 'error': 'No XML file specified. Use --xml-input'}))
-        sys.exit(1)
-    
+        error_exit('No XML file specified. Use --xml-input')
     if not args.output:
-        print(json.dumps({'success': False, 'error': 'No output file specified. Use --output'}))
-        sys.exit(1)
+        error_exit('No output file specified. Use --output')
     
+    config = CorrectionConfig.from_args(args)
     options = CorrectionOptions(
-        correct_reporting_fi=args.correct_fi,
-        correct_individual_accounts=args.correct_individual,
-        correct_organisation_accounts=args.correct_organisation,
-        delete_individual_accounts=args.delete_individual,
-        delete_organisation_accounts=args.delete_organisation,
-        modify_balance=args.modify_balance,
-        modify_address=args.modify_address,
-        modify_name=args.modify_name,
-        test_mode=args.test_mode,
-        output_path=args.output
+        correct_reporting_fi=config.correct_fi,
+        correct_individual_accounts=config.correct_individual,
+        correct_organisation_accounts=config.correct_organisation,
+        delete_individual_accounts=config.delete_individual,
+        delete_organisation_accounts=config.delete_organisation,
+        modify_balance=config.modify_balance,
+        modify_address=config.modify_address,
+        modify_name=config.modify_name,
+        test_mode=config.test_mode,
+        output_path=config.output_path
     )
     
     generator = CRSCorrectionGenerator()
     result = generator.generate_correction(args.xml_input, options)
-    
-    if result.success:
-        print(json.dumps({
-            'success': True,
-            'output_path': result.output_path,
-            'corrections_made': result.corrections_made,
-            'deletions_made': result.deletions_made,
-            'fi_corrected': result.fi_corrected
-        }))
-        sys.exit(0)
-    else:
-        print(json.dumps({
-            'success': False,
-            'error': result.error_message
-        }))
-        sys.exit(1)
+    output_json(format_correction_result(result))
 
 
 def validate_csv_mode(args):
@@ -312,13 +284,8 @@ def generate_random_mode(args):
         sys.exit(1)
     
     # Parse optional lists
-    reporting_fi_tins = None
-    if args.reporting_fi_tins:
-        reporting_fi_tins = [tin.strip() for tin in args.reporting_fi_tins.split(',')]
-    
-    account_holder_countries = []
-    if args.account_holder_countries:
-        account_holder_countries = [c.strip() for c in args.account_holder_countries.split(',')]
+    reporting_fi_tins = parse_comma_list(args.reporting_fi_tins) or None
+    account_holder_countries = parse_comma_list(args.account_holder_countries)
     
     # Determine parallel processing
     total_accounts = args.num_fis * (args.individual_accounts + args.organisation_accounts)
