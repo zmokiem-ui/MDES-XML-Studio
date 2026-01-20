@@ -817,6 +817,122 @@ ipcMain.handle('generate-cbc', async (event, formData) => {
   });
 });
 
+// Select multiple CSV/XML files for batch processing
+ipcMain.handle('select-batch-files', async (event, fileType = 'csv') => {
+  const filters = fileType === 'csv' 
+    ? [{ name: 'CSV Files', extensions: ['csv'] }, { name: 'Excel Files', extensions: ['xlsx', 'xls'] }]
+    : [{ name: 'XML Files', extensions: ['xml'] }];
+  
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: `Select ${fileType.toUpperCase()} Files for Batch Processing`,
+    filters: [...filters, { name: 'All Files', extensions: ['*'] }],
+    properties: ['openFile', 'multiSelections']
+  });
+  
+  if (result.canceled || !result.filePaths.length) return [];
+  
+  return result.filePaths.map(filePath => ({
+    path: filePath,
+    name: path.basename(filePath),
+    type: path.extname(filePath).slice(1).toLowerCase()
+  }));
+});
+
+// Read XML file content for diff comparison
+ipcMain.handle('read-xml-file', async (event, filePath) => {
+  try {
+    if (!filePath) {
+      const result = await dialog.showOpenDialog(mainWindow, {
+        title: 'Select XML File',
+        filters: [
+          { name: 'XML Files', extensions: ['xml'] },
+          { name: 'All Files', extensions: ['*'] }
+        ],
+        properties: ['openFile']
+      });
+      
+      if (result.canceled || !result.filePaths.length) return null;
+      filePath = result.filePaths[0];
+    }
+    
+    const content = fs.readFileSync(filePath, 'utf8');
+    return {
+      path: filePath,
+      name: path.basename(filePath),
+      content,
+      size: content.length
+    };
+  } catch (error) {
+    return { error: error.message };
+  }
+});
+
+// Read Excel file and convert to CSV format
+ipcMain.handle('read-excel-file', async (event, filePath) => {
+  try {
+    // For now, return an error suggesting Excel support needs xlsx package
+    // This can be enhanced later with actual xlsx parsing
+    return {
+      error: 'Excel support requires additional setup. Please convert to CSV first.',
+      suggestion: 'Use Excel to save as CSV, or install xlsx package for direct support.'
+    };
+  } catch (error) {
+    return { error: error.message };
+  }
+});
+
+// Get app statistics from storage
+ipcMain.handle('get-app-stats', async () => {
+  try {
+    const statsPath = path.join(app.getPath('userData'), 'app-stats.json');
+    if (fs.existsSync(statsPath)) {
+      return JSON.parse(fs.readFileSync(statsPath, 'utf8'));
+    }
+    return { totalGenerated: 0, totalAccounts: 0, byModule: {}, lastGeneration: null };
+  } catch (error) {
+    return { totalGenerated: 0, totalAccounts: 0, byModule: {}, lastGeneration: null };
+  }
+});
+
+// Save app statistics
+ipcMain.handle('save-app-stats', async (event, stats) => {
+  try {
+    const statsPath = path.join(app.getPath('userData'), 'app-stats.json');
+    fs.writeFileSync(statsPath, JSON.stringify(stats, null, 2));
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Auto-save form state
+ipcMain.handle('save-form-state', async (event, { module, state }) => {
+  try {
+    const statePath = path.join(app.getPath('userData'), `${module}-form-state.json`);
+    fs.writeFileSync(statePath, JSON.stringify({ state, savedAt: Date.now() }, null, 2));
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Load saved form state
+ipcMain.handle('load-form-state', async (event, module) => {
+  try {
+    const statePath = path.join(app.getPath('userData'), `${module}-form-state.json`);
+    if (fs.existsSync(statePath)) {
+      const data = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+      // Only return if saved within last 24 hours
+      if (Date.now() - data.savedAt < 24 * 60 * 60 * 1000) {
+        return data.state;
+      }
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
+});
+
 // Generate CBC correction/deletion
 ipcMain.handle('generate-cbc-correction', async (event, options) => {
   const args = [

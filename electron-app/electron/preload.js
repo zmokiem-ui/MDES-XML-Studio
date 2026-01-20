@@ -33,5 +33,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
   generateCBC: (formData) => ipcRenderer.invoke('generate-cbc', formData),
   validateCbcXml: (xmlPath) => ipcRenderer.invoke('validate-cbc-xml', xmlPath),
   validateCbcCsv: (csvPath) => ipcRenderer.invoke('validate-cbc-csv', csvPath),
-  generateCbcCorrection: (options) => ipcRenderer.invoke('generate-cbc-correction', options)
+  generateCbcCorrection: (options) => ipcRenderer.invoke('generate-cbc-correction', options),
+  
+  // Batch Processing APIs
+  selectBatchFiles: (fileType) => ipcRenderer.invoke('select-batch-files', fileType),
+  
+  // XML Diff APIs
+  readXmlFile: (filePath) => ipcRenderer.invoke('read-xml-file', filePath),
+  
+  // Excel Support
+  readExcelFile: (filePath) => ipcRenderer.invoke('read-excel-file', filePath),
+  
+  // Statistics & Auto-save APIs
+  getAppStats: () => ipcRenderer.invoke('get-app-stats'),
+  saveAppStats: (stats) => ipcRenderer.invoke('save-app-stats', stats),
+  saveFormState: (data) => ipcRenderer.invoke('save-form-state', data),
+  loadFormState: (module) => ipcRenderer.invoke('load-form-state', module)
 });

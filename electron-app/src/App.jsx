@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { 
   Globe, FileText, Database, Map, Save, Rocket, 
   ChevronDown, ChevronUp, Building2, Users, User, 
@@ -7,9 +7,20 @@ import {
   BarChart3, History, Trash2, Calendar, Settings,
   Moon, Sun, Home, XCircle, RefreshCw, FileEdit,
   AlertTriangle, Minus, Plus, Search, Flag, ArrowLeft,
-  DollarSign, Landmark, FileCheck
+  DollarSign, Landmark, FileCheck, Keyboard, ArrowLeftRight,
+  Languages, Layers
 } from 'lucide-react'
 import { COUNTRIES, DEFAULT_PARTNER_JURISDICTIONS, getCountryName, searchCountries } from './countryData'
+
+// Hooks
+import { useLocalStorage, useRecentFiles, useProfiles, useAppSettings, useGenerationHistory } from './hooks/useLocalStorage'
+import { useKeyboardShortcuts, SHORTCUTS } from './hooks/useKeyboardShortcuts'
+
+// Components
+import { RecentFiles, ProfileManager, KeyboardShortcutsModal, BatchProcessor, XMLDiff, Dashboard } from './components'
+
+// i18n
+import { translations, t, LANGUAGES } from './i18n/translations'
 
 function App() {
   // Module selection (CRS, FATCA, future: CBC, NTJ)
@@ -465,6 +476,18 @@ function App() {
   // Backward compatibility helper
   const darkMode = THEMES[selectedTheme]?.isDark ?? false
 
+  // New feature hooks
+  const { recentFiles, addRecentFile, removeRecentFile, clearRecentFiles } = useRecentFiles(10)
+  const { profiles, saveProfile, deleteProfile, getProfile } = useProfiles()
+  const { history: generationHistory, stats: generationStats, addToHistory: addToGenHistory, clearHistory: clearGenHistory } = useGenerationHistory()
+  const [language, setLanguage] = useLocalStorage('app-language', 'en')
+  
+  // New UI state
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  const [showDashboard, setShowDashboard] = useState(false)
+  const [showBatchProcessor, setShowBatchProcessor] = useState(false)
+  const [showXMLDiff, setShowXMLDiff] = useState(false)
+
   // Settings - merge saved with defaults to ensure new fields get default values
   const [settings, setSettings] = useState(() => {
     const defaults = {
@@ -728,6 +751,30 @@ function App() {
     setGlobalStats(resetStats)
     localStorage.setItem('crs-global-stats', JSON.stringify(resetStats))
   }
+
+  // Keyboard shortcuts
+  const keyboardHandlers = useCallback(() => ({
+    GO_HOME: () => setActiveModule(null),
+    GO_SETTINGS: () => setCurrentPage('settings'),
+    TOGGLE_THEME: () => {
+      const themeKeys = Object.keys(THEMES)
+      const currentIndex = themeKeys.indexOf(selectedTheme)
+      const nextIndex = (currentIndex + 1) % themeKeys.length
+      setSelectedTheme(themeKeys[nextIndex])
+    },
+    ESCAPE: () => {
+      setShowKeyboardShortcuts(false)
+      setShowDashboard(false)
+      setShowBatchProcessor(false)
+      setShowXMLDiff(false)
+    },
+    HELP: () => setShowKeyboardShortcuts(true),
+    SELECT_CRS: () => setActiveModule('crs'),
+    SELECT_FATCA: () => setActiveModule('fatca'),
+    SELECT_CBC: () => setActiveModule('cbc')
+  }), [selectedTheme, THEMES])
+
+  useKeyboardShortcuts(keyboardHandlers(), true)
 
   const handleNumFIsChange = (value) => {
     const num = parseInt(value) || 0
@@ -1618,6 +1665,34 @@ function App() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowDashboard(true)}
+                  className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
+                  title="Dashboard"
+                >
+                  <BarChart3 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setShowBatchProcessor(true)}
+                  className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
+                  title="Batch Processing"
+                >
+                  <Layers className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setShowXMLDiff(true)}
+                  className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
+                  title="XML Comparison"
+                >
+                  <ArrowLeftRight className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setShowKeyboardShortcuts(true)}
+                  className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
+                  title="Keyboard Shortcuts (Shift + ?)"
+                >
+                  <Keyboard className="w-5 h-5" />
+                </button>
                 <button
                   onClick={() => setCurrentPage('settings')}
                   className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
@@ -3997,7 +4072,7 @@ function App() {
         </div>
       )}
 
-      {/* Correction CSV Template Preview Modal */}
+      {/* Correction CSV Template Modal */}
       {showCorrectionCsvPreview && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className={`${theme.card} rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col ${settings.animationsEnabled ? 'animate-slide-up' : ''}`}>
