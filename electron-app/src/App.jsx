@@ -1288,6 +1288,17 @@ function App() {
     return saved && THEMES[saved] ? saved : 'light'
   })
 
+  // Live theme animations toggle
+  const [liveAnimations, setLiveAnimations] = useState(() => {
+    const saved = localStorage.getItem('crs-live-animations')
+    return saved !== null ? saved === 'true' : true
+  })
+
+  // Save live animations preference
+  useEffect(() => {
+    localStorage.setItem('crs-live-animations', liveAnimations.toString())
+  }, [liveAnimations])
+
   // Backward compatibility helper
   const darkMode = THEMES[selectedTheme]?.isDark ?? false
 
@@ -2836,7 +2847,7 @@ function App() {
         </header>
 
         {/* Theme-Specific Animated Backgrounds */}
-        {selectedTheme === 'ocean' && (
+        {liveAnimations && selectedTheme === 'ocean' && (
           <>
             {/* Ocean Depth Gradient Background */}
             <div className="fixed inset-0 pointer-events-none z-0">
@@ -2942,7 +2953,7 @@ function App() {
           </>
         )}
         
-        {selectedTheme === 'forest' && (
+        {liveAnimations && selectedTheme === 'forest' && (
           <>
             {/* Trees */}
             <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
@@ -3080,7 +3091,7 @@ function App() {
           </>
         )}
         
-        {selectedTheme === 'sunset' && (
+        {liveAnimations && selectedTheme === 'sunset' && (
           <>
             {/* Rainbow in Left Corner */}
             <div className="fixed top-32 -left-32 pointer-events-none z-0">
@@ -3148,7 +3159,7 @@ function App() {
           </>
         )}
         
-        {selectedTheme === 'lavender' && (
+        {liveAnimations && selectedTheme === 'lavender' && (
           <>
             {/* Sparkles */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
@@ -3294,7 +3305,7 @@ function App() {
           </>
         )}
         
-        {selectedTheme === 'midnight' && (
+        {liveAnimations && selectedTheme === 'midnight' && (
           <>
             {/* Crescent Moon */}
             <div className="fixed top-32 left-12 pointer-events-none z-0">
@@ -3361,7 +3372,7 @@ function App() {
           </>
         )}
         
-        {selectedTheme === 'spaceGalaxy' && (
+        {liveAnimations && selectedTheme === 'spaceGalaxy' && (
           <>
             {/* Stars */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
@@ -3479,7 +3490,7 @@ function App() {
           </>
         )}
         
-        {selectedTheme === 'cyberpunkNeon' && (
+        {liveAnimations && selectedTheme === 'cyberpunkNeon' && (
           <>
             {/* Scanlines */}
             <div className="fixed inset-0 pointer-events-none z-0 opacity-10">
@@ -3529,7 +3540,7 @@ function App() {
           </>
         )}
         
-        {selectedTheme === 'organicForest' && (
+        {liveAnimations && selectedTheme === 'organicForest' && (
           <>
             {/* Creek/Stream at Bottom */}
             <div className="fixed bottom-0 left-0 w-full h-40 pointer-events-none z-0">
@@ -3678,7 +3689,7 @@ function App() {
           </>
         )}
         
-        {selectedTheme === 'oceanUnderwater' && (
+        {liveAnimations && selectedTheme === 'oceanUnderwater' && (
           <>
             {/* Ocean Depth Gradient Background */}
             <div className="fixed inset-0 pointer-events-none z-0">
@@ -3835,7 +3846,7 @@ function App() {
           </>
         )}
         
-        {selectedTheme === 'steampunkVictorian' && (
+        {liveAnimations && selectedTheme === 'steampunkVictorian' && (
           <>
             {/* Floating Gears */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
@@ -3956,7 +3967,7 @@ function App() {
           </>
         )}
         
-        {(selectedTheme === 'light' || selectedTheme === 'dark') && (
+        {liveAnimations && (selectedTheme === 'light' || selectedTheme === 'dark') && (
           <>
             {/* Subtle Gradient Orbs */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
@@ -5917,7 +5928,21 @@ function App() {
         {currentPage === 'settings' && (
           <div className={`space-y-6 ${settings.animationsEnabled ? 'animate-fade-in' : ''}`}>
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>Theme</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className={`text-lg font-semibold ${theme.text}`}>Theme</h3>
+                <button
+                  onClick={() => setLiveAnimations(!liveAnimations)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                    liveAnimations 
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30' 
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                  }`}
+                  title={liveAnimations ? 'Click to disable live animations' : 'Click to enable live animations'}
+                >
+                  <span className="text-lg">{liveAnimations ? '✨' : '🎬'}</span>
+                  <span className="text-sm">{liveAnimations ? 'Live Animations ON' : 'Live Animations OFF'}</span>
+                </button>
+              </div>
               <p className="text-sm text-gray-500 mb-6">Choose your preferred color scheme</p>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
