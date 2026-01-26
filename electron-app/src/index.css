@@ -966,3 +966,62 @@
 .steampunk-victorian ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #d4af37, #b87333, #c87533); border-radius: 2px; border: 1px solid #2c2c2c; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3); }
 
 @media (prefers-reduced-motion: reduce) { .steampunk-victorian *, .steampunk-gear, .steampunk-steam-particle { animation: none !important; } }
+
+/* ============================================
+   FLOATING ORB ANIMATION
+   ============================================ */
+
+@keyframes floating-orb {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.2;
+  }
+  25% {
+    transform: translate(30px, -30px) scale(1.1);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate(-20px, 20px) scale(0.9);
+    opacity: 0.15;
+  }
+  75% {
+    transform: translate(-30px, -20px) scale(1.05);
+    opacity: 0.22;
+  }
+}
+
+.animate-float {
+  animation: floating-orb 15s ease-in-out infinite;
+}
+
+/* Wave animation for ocean theme */
+@keyframes animate-wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-wave {
+  animation: animate-wave 3s ease-in-out infinite;
+}
+
+/* Data stream animation for cyberpunk theme */
+@keyframes data-stream {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.2;
+  }
+  90% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
