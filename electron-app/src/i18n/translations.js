@@ -3,8 +3,9 @@
  */
 
 export const LANGUAGES = {
-  en: { name: 'English', flag: '🇬🇧' },
-  nl: { name: 'Nederlands', flag: '🇳🇱' }
+  en: { name: 'English', flag: '🇬🇧', nativeName: 'English' },
+  nl: { name: 'Dutch', flag: '🇳🇱', nativeName: 'Nederlands' },
+  es: { name: 'Spanish', flag: '🇪🇸', nativeName: 'Español' }
 };
 
 export const translations = {
@@ -177,6 +178,61 @@ export const translations = {
       shortcuts: 'Keyboard Shortcuts',
       documentation: 'Documentation',
       about: 'About'
+    },
+
+    // Dashboard
+    dashboard: {
+      title: 'Dashboard',
+      welcome: 'Welcome',
+      quickActions: 'Quick Actions',
+      statistics: 'Statistics',
+      recentActivity: 'Recent Activity'
+    },
+
+    // Templates
+    templates: {
+      title: 'Template Library',
+      select: 'Select Template',
+      apply: 'Apply Template',
+      basicIndividual: 'Basic Individual Accounts',
+      basicOrg: 'Basic Organisation Accounts',
+      mixed: 'Mixed Account Types',
+      correction: 'Correction File',
+      largeDataset: 'Large Dataset'
+    },
+
+    // Common
+    common: {
+      loading: 'Loading...',
+      saving: 'Saving...',
+      processing: 'Processing...',
+      done: 'Done',
+      yes: 'Yes',
+      no: 'No',
+      ok: 'OK',
+      or: 'or',
+      and: 'and',
+      all: 'All',
+      none: 'None',
+      select: 'Select',
+      selected: 'Selected',
+      search: 'Search',
+      filter: 'Filter',
+      sort: 'Sort',
+      more: 'More',
+      less: 'Less',
+      show: 'Show',
+      hide: 'Hide',
+      expand: 'Expand',
+      collapse: 'Collapse',
+      refresh: 'Refresh',
+      retry: 'Retry',
+      copy: 'Copy',
+      copied: 'Copied!',
+      paste: 'Paste',
+      cut: 'Cut',
+      undo: 'Undo',
+      redo: 'Redo'
     }
   },
   
@@ -349,6 +405,294 @@ export const translations = {
       shortcuts: 'Sneltoetsen',
       documentation: 'Documentatie',
       about: 'Over'
+    },
+
+    // Dashboard
+    dashboard: {
+      title: 'Dashboard',
+      welcome: 'Welkom',
+      quickActions: 'Snelle Acties',
+      statistics: 'Statistieken',
+      recentActivity: 'Recente Activiteit'
+    },
+
+    // Templates
+    templates: {
+      title: 'Sjabloonbibliotheek',
+      select: 'Sjabloon Selecteren',
+      apply: 'Sjabloon Toepassen',
+      basicIndividual: 'Basis Individuele Rekeningen',
+      basicOrg: 'Basis Organisatie Rekeningen',
+      mixed: 'Gemengde Rekeningtypen',
+      correction: 'Correctiebestand',
+      largeDataset: 'Grote Dataset'
+    },
+
+    // Common
+    common: {
+      loading: 'Laden...',
+      saving: 'Opslaan...',
+      processing: 'Verwerken...',
+      done: 'Klaar',
+      yes: 'Ja',
+      no: 'Nee',
+      ok: 'OK',
+      or: 'of',
+      and: 'en',
+      all: 'Alles',
+      none: 'Geen',
+      select: 'Selecteren',
+      selected: 'Geselecteerd',
+      search: 'Zoeken',
+      filter: 'Filteren',
+      sort: 'Sorteren',
+      more: 'Meer',
+      less: 'Minder',
+      show: 'Tonen',
+      hide: 'Verbergen',
+      expand: 'Uitvouwen',
+      collapse: 'Invouwen',
+      refresh: 'Vernieuwen',
+      retry: 'Opnieuw proberen',
+      copy: 'Kopiëren',
+      copied: 'Gekopieerd!',
+      paste: 'Plakken',
+      cut: 'Knippen',
+      undo: 'Ongedaan maken',
+      redo: 'Opnieuw doen'
+    }
+  },
+
+  // Spanish translations
+  es: {
+    // App
+    appTitle: 'Generador de Informes Fiscales',
+    selectModule: 'Seleccionar Módulo',
+    
+    // Modules
+    modules: {
+      crs: 'Generador CRS',
+      fatca: 'Generador FATCA',
+      cbc: 'Generador CBC'
+    },
+    moduleDescriptions: {
+      crs: 'Estándar Común de Reporte',
+      fatca: 'Ley de Cumplimiento Fiscal de Cuentas Extranjeras',
+      cbc: 'Informe País por País'
+    },
+    
+    // Navigation
+    nav: {
+      home: 'Inicio',
+      generator: 'Generador',
+      validator: 'Validador',
+      correction: 'Corrección',
+      history: 'Historial',
+      settings: 'Configuración',
+      help: 'Ayuda'
+    },
+    
+    // Actions
+    actions: {
+      generate: 'Generar',
+      validate: 'Validar',
+      save: 'Guardar',
+      export: 'Exportar',
+      import: 'Importar',
+      cancel: 'Cancelar',
+      confirm: 'Confirmar',
+      delete: 'Eliminar',
+      edit: 'Editar',
+      preview: 'Vista previa',
+      download: 'Descargar',
+      upload: 'Subir',
+      browse: 'Examinar',
+      clear: 'Limpiar',
+      reset: 'Restablecer',
+      apply: 'Aplicar',
+      close: 'Cerrar',
+      back: 'Atrás',
+      next: 'Siguiente',
+      finish: 'Finalizar'
+    },
+    
+    // Form labels
+    form: {
+      sendingCountry: 'País Emisor',
+      receivingCountry: 'País Receptor',
+      taxYear: 'Año Fiscal',
+      reportingFI: 'Institución Financiera Reportante',
+      numFIs: 'Número de Instituciones Financieras',
+      individualAccounts: 'Cuentas Individuales',
+      organisationAccounts: 'Cuentas de Organizaciones',
+      controllingPersons: 'Personas Controladoras por Organización',
+      outputFile: 'Archivo de Salida',
+      inputFile: 'Archivo de Entrada',
+      csvFile: 'Archivo CSV',
+      xmlFile: 'Archivo XML'
+    },
+    
+    // Messages
+    messages: {
+      generating: 'Generando...',
+      validating: 'Validando...',
+      success: '¡Éxito!',
+      error: 'Error',
+      warning: 'Advertencia',
+      info: 'Información',
+      fileGenerated: 'Archivo generado correctamente',
+      validationPassed: 'Validación exitosa',
+      validationFailed: 'Validación fallida',
+      noFileSelected: 'Ningún archivo seleccionado',
+      invalidInput: 'Entrada no válida',
+      requiredField: 'Este campo es obligatorio',
+      confirmDelete: '¿Está seguro de que desea eliminar esto?',
+      unsavedChanges: 'Tiene cambios sin guardar'
+    },
+    
+    // Settings
+    settings: {
+      title: 'Configuración',
+      theme: 'Tema',
+      language: 'Idioma',
+      autoSave: 'Guardado automático',
+      showTips: 'Mostrar consejos',
+      recentFiles: 'Archivos recientes',
+      partnerJurisdictions: 'Jurisdicciones Asociadas',
+      keyboardShortcuts: 'Atajos de Teclado',
+      appearance: 'Apariencia',
+      darkMode: 'Modo Oscuro',
+      lightMode: 'Modo Claro',
+      general: 'General',
+      advanced: 'Avanzado'
+    },
+    
+    // History
+    history: {
+      title: 'Historial de Generación',
+      noHistory: 'Sin historial de generación',
+      clearHistory: 'Limpiar Historial',
+      totalGenerated: 'Total Generado',
+      totalAccounts: 'Total de Cuentas',
+      lastGeneration: 'Última Generación'
+    },
+    
+    // Recent files
+    recentFiles: {
+      title: 'Archivos Recientes',
+      noFiles: 'Sin archivos recientes',
+      clear: 'Limpiar archivos recientes',
+      open: 'Abrir',
+      remove: 'Quitar de la lista'
+    },
+    
+    // Profiles
+    profiles: {
+      title: 'Perfiles Guardados',
+      save: 'Guardar Perfil',
+      load: 'Cargar Perfil',
+      delete: 'Eliminar Perfil',
+      name: 'Nombre del Perfil',
+      noProfiles: 'Sin perfiles guardados',
+      saveSuccess: 'Perfil guardado correctamente',
+      loadSuccess: 'Perfil cargado correctamente'
+    },
+    
+    // Validation
+    validation: {
+      title: 'Resultados de Validación',
+      valid: 'Válido',
+      invalid: 'No válido',
+      errors: 'Errores',
+      warnings: 'Advertencias',
+      details: 'Detalles'
+    },
+    
+    // Batch
+    batch: {
+      title: 'Procesamiento por Lotes',
+      addFiles: 'Agregar Archivos',
+      removeAll: 'Eliminar Todo',
+      processAll: 'Procesar Todo',
+      progress: 'Progreso',
+      completed: 'Completado',
+      failed: 'Fallido',
+      pending: 'Pendiente'
+    },
+    
+    // Diff
+    diff: {
+      title: 'Comparación XML',
+      original: 'Original',
+      modified: 'Modificado',
+      differences: 'Diferencias',
+      noDifferences: 'No se encontraron diferencias',
+      added: 'Agregado',
+      removed: 'Eliminado',
+      changed: 'Modificado'
+    },
+    
+    // Help
+    help: {
+      title: 'Ayuda',
+      shortcuts: 'Atajos de Teclado',
+      documentation: 'Documentación',
+      about: 'Acerca de'
+    },
+
+    // Dashboard
+    dashboard: {
+      title: 'Panel de Control',
+      welcome: 'Bienvenido',
+      quickActions: 'Acciones Rápidas',
+      statistics: 'Estadísticas',
+      recentActivity: 'Actividad Reciente'
+    },
+
+    // Templates
+    templates: {
+      title: 'Biblioteca de Plantillas',
+      select: 'Seleccionar Plantilla',
+      apply: 'Aplicar Plantilla',
+      basicIndividual: 'Cuentas Individuales Básicas',
+      basicOrg: 'Cuentas de Organizaciones Básicas',
+      mixed: 'Tipos de Cuenta Mixtos',
+      correction: 'Archivo de Corrección',
+      largeDataset: 'Conjunto de Datos Grande'
+    },
+
+    // Common
+    common: {
+      loading: 'Cargando...',
+      saving: 'Guardando...',
+      processing: 'Procesando...',
+      done: 'Hecho',
+      yes: 'Sí',
+      no: 'No',
+      ok: 'Aceptar',
+      or: 'o',
+      and: 'y',
+      all: 'Todo',
+      none: 'Ninguno',
+      select: 'Seleccionar',
+      selected: 'Seleccionado',
+      search: 'Buscar',
+      filter: 'Filtrar',
+      sort: 'Ordenar',
+      more: 'Más',
+      less: 'Menos',
+      show: 'Mostrar',
+      hide: 'Ocultar',
+      expand: 'Expandir',
+      collapse: 'Contraer',
+      refresh: 'Actualizar',
+      retry: 'Reintentar',
+      copy: 'Copiar',
+      copied: '¡Copiado!',
+      paste: 'Pegar',
+      cut: 'Cortar',
+      undo: 'Deshacer',
+      redo: 'Rehacer'
     }
   }
 };

@@ -881,7 +881,7 @@ class CRSGenerator:
         root.remove(template_crs_body)
         
         # Prepare work chunks
-        logger.info(f"\n⚡ Preparing {num_workers} parallel workers...")
+        logger.info(f"\n⚡ Processing data in parallel mode...")
         
         # Split ReportingFIs across workers
         fis_per_worker = max(1, self.config.num_reporting_fis // num_workers)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { 
   Globe, FileText, Database, Map, Save, Rocket, 
   ChevronDown, ChevronUp, Building2, Users, User, 
@@ -8,19 +8,834 @@ import {
   Moon, Sun, Home, XCircle, RefreshCw, FileEdit,
   AlertTriangle, Minus, Plus, Search, Flag, ArrowLeft,
   DollarSign, Landmark, FileCheck, Keyboard, ArrowLeftRight,
-  Languages, Layers
+  Languages, Layers, Maximize2, Minimize2, Copy, RotateCcw,
+  Zap, Star, Library
 } from 'lucide-react'
+import { DiffEditor } from '@monaco-editor/react'
+import * as Diff from 'diff'
 import { COUNTRIES, DEFAULT_PARTNER_JURISDICTIONS, getCountryName, searchCountries } from './countryData'
 
 // Hooks
 import { useLocalStorage, useRecentFiles, useProfiles, useAppSettings, useGenerationHistory } from './hooks/useLocalStorage'
 import { useKeyboardShortcuts, SHORTCUTS } from './hooks/useKeyboardShortcuts'
+import { useDebounce, useDebouncedCallback } from './hooks/useDebounce'
+import { useThemeTransition, ThemeToggleButton } from './hooks/useThemeTransition.jsx'
 
 // Components
-import { RecentFiles, ProfileManager, KeyboardShortcutsModal, BatchProcessor, XMLDiff, Dashboard } from './components'
+import { 
+  RecentFiles, ProfileManager, KeyboardShortcutsModal, BatchProcessor, XMLDiff, Dashboard,
+  // New UI Components
+  ToastProvider, useToast,
+  FadeIn, SlideIn, PageTransition,
+  LinearProgress, GenerationProgress,
+  DragDropUpload,
+  ErrorBoundary,
+  TemplateLibraryModal, QuickTemplateButton, TEMPLATES,
+  QuickGenerateButton, useLastSettings,
+  CopyButton, CopyXMLButton
+} from './components'
 
 // i18n
 import { translations, t, LANGUAGES } from './i18n/translations'
+
+// Batch Processor Modal Component
+function BatchProcessorModal({ theme, onClose, onGenerate }) {
+  const [jobs, setJobs] = useState([])
+  const [processing, setProcessing] = useState(false)
+  const [results, setResults] = useState([])
+  const [outputFolder, setOutputFolder] = useState('')
+
+  const addJob = (module) => {
+    const newJob = {
+      id: Date.now(),
+      module,
+      name: `${module.toUpperCase()} File ${jobs.filter(j => j.module === module).length + 1}`,
+      config: {
+        numReportingFIs: 1,
+        individualAccounts: module === 'cbc' ? 0 : 3,
+        organisationAccounts: module === 'cbc' ? 0 : 2,
+        numCbcReports: module === 'cbc' ? 3 : 0,
+        testMode: false
+      },
+      status: 'pending'
+    }
+    setJobs(prev => [...prev, newJob])
+  }
+
+  const removeJob = (id) => {
+    setJobs(prev => prev.filter(j => j.id !== id))
+  }
+
+  const updateJobConfig = (id, field, value) => {
+    setJobs(prev => prev.map(j => 
+      j.id === id ? { ...j, config: { ...j.config, [field]: value } } : j
+    ))
+  }
+
+  const selectOutputFolder = async () => {
+    const folder = await window.electronAPI?.selectOutputFile?.('batch')
+    if (folder) setOutputFolder(folder.replace(/[^/\\]+$/, ''))
+  }
+
+  const runBatch = async () => {
+    if (jobs.length === 0 || !outputFolder) return
+    setProcessing(true)
+    setResults([])
+    
+    const newResults = []
+    for (let i = 0; i < jobs.length; i++) {
+      const job = jobs[i]
+      setJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: 'processing' } : j))
+      
+      try {
+        const timestamp = Date.now()
+        const outputPath = `${outputFolder}${job.module}_batch_${timestamp}_${i + 1}.xml`
+        
+        const generateData = {
+          ...job.config,
+          outputPath,
+          transmittingCountry: 'NL',
+          receivingCountry: job.module === 'fatca' ? 'US' : 'DE',
+          reportingPeriod: new Date().getFullYear().toString(),
+          sendingCompanyIN: job.module === 'fatca' ? '000000.00000.TA.531' : 'NL123456789'
+        }
+        
+        if (job.module === 'crs') {
+          await window.electronAPI.generateCRS(generateData)
+        } else if (job.module === 'fatca') {
+          await window.electronAPI.generateFATCA(generateData)
+        } else if (job.module === 'cbc') {
+          await window.electronAPI.generateCBC({
+            ...generateData,
+            numCbcReports: job.config.numCbcReports || 3,
+            constEntitiesPerReport: 2
+          })
+        }
+        
+        setJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: 'success' } : j))
+        newResults.push({ ...job, success: true, outputPath })
+      } catch (error) {
+        setJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: 'error', error: error.message } : j))
+        newResults.push({ ...job, success: false, error: error.message })
+      }
+    }
+    
+    setResults(newResults)
+    setProcessing(false)
+  }
+
+  const successCount = results.filter(r => r.success).length
+  const errorCount = results.filter(r => !r.success).length
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+      <div className={`w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4 p-6 rounded-xl shadow-2xl ${theme.card} border ${theme.border}`} onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Layers className={`w-6 h-6 ${theme.accentText}`} />
+            <h2 className={`text-xl font-semibold ${theme.text}`}>Batch Processing</h2>
+          </div>
+          <button onClick={onClose} className={`p-2 rounded-lg ${theme.buttonSecondary}`}>
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Add Jobs */}
+        <div className={`p-4 rounded-lg border ${theme.border} mb-4`}>
+          <p className={`text-sm ${theme.textMuted} mb-3`}>Add files to generate in batch:</p>
+          <div className="flex gap-2">
+            <button onClick={() => addJob('crs')} className={`px-4 py-2 rounded-lg ${theme.buttonPrimary} text-sm font-medium flex items-center gap-2`}>
+              <Plus className="w-4 h-4" /> CRS File
+            </button>
+            <button onClick={() => addJob('fatca')} className={`px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium flex items-center gap-2`}>
+              <Plus className="w-4 h-4" /> FATCA File
+            </button>
+            <button onClick={() => addJob('cbc')} className={`px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium flex items-center gap-2`}>
+              <Plus className="w-4 h-4" /> CBC File
+            </button>
+          </div>
+        </div>
+
+        {/* Job List */}
+        {jobs.length > 0 && (
+          <div className={`p-4 rounded-lg border ${theme.border} mb-4`}>
+            <div className="flex items-center justify-between mb-3">
+              <p className={`font-medium ${theme.text}`}>{jobs.length} file(s) queued</p>
+              <button onClick={() => setJobs([])} className={`text-xs ${theme.textMuted} hover:underline`}>Clear All</button>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {jobs.map((job, idx) => (
+                <div key={job.id} className={`flex items-center gap-3 p-3 rounded-lg ${theme.bg}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold ${
+                    job.module === 'crs' ? 'bg-blue-500' : job.module === 'fatca' ? 'bg-green-500' : 'bg-purple-500'
+                  }`}>
+                    {idx + 1}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-sm font-medium ${theme.text}`}>{job.name}</p>
+                    <div className="flex gap-4 mt-1">
+                      {job.module !== 'cbc' ? (
+                        <>
+                          <label className="flex items-center gap-1">
+                            <span className={`text-xs ${theme.textMuted}`}>Ind:</span>
+                            <input 
+                              type="number" 
+                              min="0" 
+                              max="100"
+                              value={job.config.individualAccounts}
+                              onChange={(e) => updateJobConfig(job.id, 'individualAccounts', parseInt(e.target.value) || 0)}
+                              className={`w-12 px-1 py-0.5 text-xs rounded ${theme.input}`}
+                              disabled={processing}
+                            />
+                          </label>
+                          <label className="flex items-center gap-1">
+                            <span className={`text-xs ${theme.textMuted}`}>Org:</span>
+                            <input 
+                              type="number" 
+                              min="0" 
+                              max="100"
+                              value={job.config.organisationAccounts}
+                              onChange={(e) => updateJobConfig(job.id, 'organisationAccounts', parseInt(e.target.value) || 0)}
+                              className={`w-12 px-1 py-0.5 text-xs rounded ${theme.input}`}
+                              disabled={processing}
+                            />
+                          </label>
+                        </>
+                      ) : (
+                        <label className="flex items-center gap-1">
+                          <span className={`text-xs ${theme.textMuted}`}>Reports:</span>
+                          <input 
+                            type="number" 
+                            min="1" 
+                            max="20"
+                            value={job.config.numCbcReports}
+                            onChange={(e) => updateJobConfig(job.id, 'numCbcReports', parseInt(e.target.value) || 1)}
+                            className={`w-12 px-1 py-0.5 text-xs rounded ${theme.input}`}
+                            disabled={processing}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {job.status === 'processing' && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
+                    {job.status === 'success' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                    {job.status === 'error' && <XCircle className="w-4 h-4 text-red-500" />}
+                    {!processing && (
+                      <button onClick={() => removeJob(job.id)} className={`p-1 rounded ${theme.buttonSecondary}`}>
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Output Folder */}
+        <div className={`p-4 rounded-lg border ${theme.border} mb-4`}>
+          <p className={`text-sm font-medium ${theme.text} mb-2`}>Output Location</p>
+          <div className="flex gap-2">
+            <input 
+              type="text" 
+              value={outputFolder} 
+              readOnly 
+              placeholder="Select output folder..."
+              className={`flex-1 px-3 py-2 rounded-lg ${theme.input}`}
+            />
+            <button onClick={selectOutputFolder} className={`px-4 py-2 rounded-lg ${theme.buttonSecondary}`}>
+              <FolderOpen className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Results */}
+        {results.length > 0 && (
+          <div className={`p-4 rounded-lg border ${theme.border} mb-4 ${successCount === results.length ? 'border-green-500/50 bg-green-500/5' : 'border-amber-500/50 bg-amber-500/5'}`}>
+            <p className={`font-medium ${theme.text} mb-2`}>
+              Batch Complete: {successCount} succeeded, {errorCount} failed
+            </p>
+            {errorCount > 0 && (
+              <div className="text-sm text-red-500">
+                {results.filter(r => !r.success).map((r, i) => (
+                  <p key={i}>{r.name}: {r.error}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <button 
+            onClick={runBatch}
+            disabled={jobs.length === 0 || !outputFolder || processing}
+            className={`flex-1 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 ${
+              jobs.length === 0 || !outputFolder || processing 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : theme.buttonPrimary
+            }`}
+          >
+            {processing ? (
+              <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+            ) : (
+              <><Rocket className="w-5 h-5" /> Generate {jobs.length} File(s)</>
+            )}
+          </button>
+          <button onClick={onClose} className={`px-6 py-3 rounded-lg font-semibold ${theme.buttonSecondary}`}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// XML Diff Modal Component - Powered by Monaco Editor (VS Code's editor)
+function XMLDiffModal({ theme, onClose }) {
+  const [leftFile, setLeftFile] = useState(null)
+  const [rightFile, setRightFile] = useState(null)
+  const [leftContent, setLeftContent] = useState('')
+  const [rightContent, setRightContent] = useState('')
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [viewMode, setViewMode] = useState('side') // 'side' or 'inline'
+  const [loading, setLoading] = useState(false)
+  const [editorLoading, setEditorLoading] = useState(true)
+  const [editorError, setEditorError] = useState(null)
+  const [diffStats, setDiffStats] = useState({ added: 0, removed: 0, modified: 0 })
+  const diffEditorRef = useRef(null)
+
+  const selectFile = async (side) => {
+    setLoading(true)
+    try {
+      const filePath = await window.electronAPI?.selectXmlFile?.()
+      console.log('Selected file path:', filePath)
+      
+      if (filePath) {
+        const result = await window.electronAPI?.readXmlFile?.(filePath)
+        console.log('Read file result:', typeof result, result ? 'has content' : 'no content')
+        
+        // Handle both object response {path, content} and string response
+        let content = ''
+        let fileName = filePath
+        
+        if (typeof result === 'string') {
+          content = result
+        } else if (result && typeof result === 'object') {
+          content = result.content || ''
+          fileName = result.path || filePath
+        }
+        
+        console.log('Parsed content length:', content.length, 'for side:', side)
+        
+        if (content && content.length > 0) {
+          if (side === 'left') {
+            setLeftFile(fileName)
+            setLeftContent(content)
+            console.log('Set left content, length:', content.length)
+          } else {
+            setRightFile(fileName)
+            setRightContent(content)
+            console.log('Set right content, length:', content.length)
+          }
+        } else if (result?.error) {
+          console.error('Error reading file:', result.error)
+          alert('Error reading file: ' + result.error)
+        } else {
+          console.error('No content in result')
+          alert('Could not read file content')
+        }
+      }
+    } catch (error) {
+      console.error('Error reading file:', error)
+      alert('Error: ' + error.message)
+    }
+    setLoading(false)
+  }
+
+  const handleEditorDidMount = (editor) => {
+    diffEditorRef.current = editor
+    setEditorLoading(false)
+    setEditorError(null)
+    updateDiffStats()
+  }
+
+  const updateDiffStats = () => {
+    if (!leftContent || !rightContent) {
+      setDiffStats({ added: 0, removed: 0, modified: 0 })
+      return
+    }
+    
+    // Use proper diff algorithm
+    const diffResult = Diff.diffLines(leftContent, rightContent)
+    const added = diffResult.filter(p => p.added).reduce((sum, p) => sum + (p.count || 0), 0)
+    const removed = diffResult.filter(p => p.removed).reduce((sum, p) => sum + (p.count || 0), 0)
+    const unchanged = diffResult.filter(p => !p.added && !p.removed).reduce((sum, p) => sum + (p.count || 0), 0)
+    
+    setDiffStats({ added, removed, modified: 0, unchanged })
+  }
+
+  useEffect(() => {
+    updateDiffStats()
+  }, [leftContent, rightContent])
+
+  const getFileName = (path) => path?.split(/[/\\]/).pop() || 'No file selected'
+  
+  const swapFiles = () => {
+    const tempFile = leftFile
+    const tempContent = leftContent
+    setLeftFile(rightFile)
+    setLeftContent(rightContent)
+    setRightFile(tempFile)
+    setRightContent(tempContent)
+  }
+
+  const clearAll = () => {
+    setLeftFile(null)
+    setRightFile(null)
+    setLeftContent('')
+    setRightContent('')
+    setDiffStats({ added: 0, removed: 0, modified: 0 })
+  }
+
+  const copyDiffSummary = () => {
+    const summary = `XML Comparison Summary
+━━━━━━━━━━━━━━━━━━━━━━
+Original: ${getFileName(leftFile)}
+Modified: ${getFileName(rightFile)}
+
+Changes:
+• ${diffStats.added} lines added
+• ${diffStats.removed} lines removed  
+• ${diffStats.modified} lines modified
+• Total: ${diffStats.added + diffStats.removed + diffStats.modified} differences
+
+Generated by CRS Test Data Generator`
+    navigator.clipboard.writeText(summary)
+  }
+
+  // Detect if theme is dark based on various theme properties
+  const isDark = theme.isDark || 
+    theme.bg?.includes('gray-9') || 
+    theme.bg?.includes('slate-9') || 
+    theme.bg?.includes('zinc-9') || 
+    theme.bg?.includes('gray-800') ||
+    theme.bg?.includes('gray-900') ||
+    theme.name?.toLowerCase().includes('dark') ||
+    theme.name?.toLowerCase().includes('space') ||
+    theme.name?.toLowerCase().includes('cyber')
+
+  const modalClass = isFullscreen 
+    ? 'fixed inset-0 z-50' 
+    : 'fixed inset-0 bg-black/50 flex items-center justify-center z-50'
+
+  const contentClass = isFullscreen
+    ? `w-full h-full ${theme.card} flex flex-col`
+    : `w-full max-w-[95vw] h-[90vh] mx-4 p-6 rounded-xl shadow-2xl ${theme.card} border ${theme.border} flex flex-col`
+
+  return (
+    <div className={modalClass} onClick={isFullscreen ? undefined : onClose}>
+      <div className={contentClass} onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className={`flex items-center justify-between ${isFullscreen ? 'p-4 border-b ' + theme.border : 'mb-4'}`}>
+          <div className="flex items-center gap-3">
+            <ArrowLeftRight className={`w-6 h-6 ${theme.accentText}`} />
+            <div>
+              <h2 className={`text-xl font-semibold ${theme.text}`}>XML Comparison</h2>
+              <p className={`text-xs ${theme.textMuted}`}>Powered by Monaco Editor (VS Code)</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className={`flex rounded-lg overflow-hidden border ${theme.border}`}>
+              <button 
+                onClick={() => setViewMode('side')}
+                className={`px-3 py-1.5 text-xs font-medium ${viewMode === 'side' ? theme.buttonPrimary : theme.buttonSecondary}`}
+              >
+                Side by Side
+              </button>
+              <button 
+                onClick={() => setViewMode('inline')}
+                className={`px-3 py-1.5 text-xs font-medium ${viewMode === 'inline' ? theme.buttonPrimary : theme.buttonSecondary}`}
+              >
+                Inline
+              </button>
+            </div>
+            <button 
+              onClick={() => setIsFullscreen(!isFullscreen)} 
+              className={`p-2 rounded-lg ${theme.buttonSecondary}`}
+              title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            >
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+            <button onClick={onClose} className={`p-2 rounded-lg ${theme.buttonSecondary}`}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* File Selection Bar */}
+        <div className={`grid grid-cols-2 gap-4 ${isFullscreen ? 'px-4 py-3' : 'mb-3'}`}>
+          <div className={`flex items-center gap-2 p-2 rounded-lg border ${theme.border} ${leftFile ? 'border-blue-500/50' : ''}`}>
+            <FileText className={`w-4 h-4 ${leftFile ? 'text-blue-500' : theme.textMuted}`} />
+            <div className="flex-1 min-w-0">
+              <p className={`text-xs ${theme.textMuted}`}>Original</p>
+              <p className={`text-sm font-medium ${theme.text} truncate`}>{getFileName(leftFile)}</p>
+            </div>
+            <button 
+              onClick={() => selectFile('left')} 
+              disabled={loading}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium ${theme.buttonPrimary} flex items-center gap-1`}
+            >
+              {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+              Load
+            </button>
+          </div>
+          
+          <div className={`flex items-center gap-2 p-2 rounded-lg border ${theme.border} ${rightFile ? 'border-green-500/50' : ''}`}>
+            <FileText className={`w-4 h-4 ${rightFile ? 'text-green-500' : theme.textMuted}`} />
+            <div className="flex-1 min-w-0">
+              <p className={`text-xs ${theme.textMuted}`}>Modified</p>
+              <p className={`text-sm font-medium ${theme.text} truncate`}>{getFileName(rightFile)}</p>
+            </div>
+            <button 
+              onClick={() => selectFile('right')} 
+              disabled={loading}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium bg-green-600 hover:bg-green-700 text-white flex items-center gap-1`}
+            >
+              {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+              Load
+            </button>
+          </div>
+        </div>
+
+        {/* Stats Bar */}
+        {(leftContent || rightContent) && (
+          <div className={`flex items-center justify-between ${isFullscreen ? 'px-4 py-2 border-b ' + theme.border : 'mb-3 p-2 rounded-lg border ' + theme.border}`}>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                <span className={`text-sm ${theme.text}`}><strong>{diffStats.added}</strong> added</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                <span className={`text-sm ${theme.text}`}><strong>{diffStats.removed}</strong> removed</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-amber-500"></span>
+                <span className={`text-sm ${theme.text}`}><strong>{diffStats.modified}</strong> modified</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={swapFiles}
+                disabled={!leftContent && !rightContent}
+                className={`p-1.5 rounded ${theme.buttonSecondary}`}
+                title="Swap files"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={copyDiffSummary}
+                disabled={!leftContent || !rightContent}
+                className={`p-1.5 rounded ${theme.buttonSecondary}`}
+                title="Copy summary"
+              >
+                <Copy className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={clearAll}
+                className={`p-1.5 rounded ${theme.buttonSecondary}`}
+                title="Clear all"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Monaco Diff Editor */}
+        <div className={`flex-1 rounded-lg overflow-hidden border ${theme.border} relative min-h-[400px]`} style={{ backgroundColor: isDark ? '#1e1e1e' : '#ffffff' }}>
+          {(!leftContent || !rightContent) ? (
+            <div className={`h-full flex flex-col items-center justify-center p-8`} style={{ backgroundColor: isDark ? '#1e1e1e' : '#f5f5f5' }}>
+              <ArrowLeftRight className={`w-16 h-16 mb-6 ${theme.textMuted} opacity-30`} />
+              <h3 className={`text-xl font-semibold ${theme.text} mb-2`}>Professional XML Comparison</h3>
+              <p className={`text-sm mb-6 text-center max-w-md ${theme.textMuted}`}>
+                Load two XML files to compare them side-by-side with full syntax highlighting,
+                inline diff view, and VS Code-quality editing experience.
+              </p>
+              
+              {/* File Status */}
+              <div className="flex gap-6 mb-6">
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${leftContent ? 'bg-blue-500/20 border border-blue-500/50' : theme.bg + ' border ' + theme.border}`}>
+                  {leftContent ? (
+                    <CheckCircle2 className="w-5 h-5 text-blue-500" />
+                  ) : (
+                    <XCircle className={`w-5 h-5 ${theme.textMuted}`} />
+                  )}
+                  <span className={`text-sm ${leftContent ? 'text-blue-500 font-medium' : theme.textMuted}`}>
+                    {leftContent ? `Original: ${getFileName(leftFile)}` : 'Original file not loaded'}
+                  </span>
+                </div>
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${rightContent ? 'bg-green-500/20 border border-green-500/50' : theme.bg + ' border ' + theme.border}`}>
+                  {rightContent ? (
+                    <CheckCircle2 className="w-5 h-5 text-green-500" />
+                  ) : (
+                    <XCircle className={`w-5 h-5 ${theme.textMuted}`} />
+                  )}
+                  <span className={`text-sm ${rightContent ? 'text-green-500 font-medium' : theme.textMuted}`}>
+                    {rightContent ? `Modified: ${getFileName(rightFile)}` : 'Modified file not loaded'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                {!leftContent && (
+                  <button 
+                    onClick={() => selectFile('left')}
+                    disabled={loading}
+                    className={`px-4 py-2 rounded-lg ${theme.buttonPrimary} flex items-center gap-2`}
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />} 
+                    Load Original
+                  </button>
+                )}
+                {!rightContent && (
+                  <button 
+                    onClick={() => selectFile('right')}
+                    disabled={loading}
+                    className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />} 
+                    Load Modified
+                  </button>
+                )}
+              </div>
+              
+              <div className={`mt-8 p-4 rounded-lg max-w-lg`} style={{ backgroundColor: isDark ? '#2d2d2d' : '#e8e8e8' }}>
+                <p className={`text-xs ${theme.textMuted} text-center`}>
+                  <strong>Use cases:</strong> Compare original XML with correction files, 
+                  verify generated test data, review changes before submission, 
+                  or debug XML generation issues.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="h-full flex flex-col">
+              {/* Professional Diff Viewer using diff library */}
+              {(() => {
+                // Use proper diff algorithm
+                const diffResult = Diff.diffLines(leftContent, rightContent)
+                const addedCount = diffResult.filter(p => p.added).reduce((sum, p) => sum + p.count, 0)
+                const removedCount = diffResult.filter(p => p.removed).reduce((sum, p) => sum + p.count, 0)
+                const unchangedCount = diffResult.filter(p => !p.added && !p.removed).reduce((sum, p) => sum + p.count, 0)
+                
+                // Build unified view
+                const buildUnifiedView = () => {
+                  const rows = []
+                  let leftLineNum = 1
+                  let rightLineNum = 1
+                  
+                  diffResult.forEach((part, partIdx) => {
+                    const lines = part.value.split('\n').filter((_, i, arr) => i < arr.length - 1 || part.value.slice(-1) !== '\n' || i === 0)
+                    // Handle trailing newline
+                    const actualLines = part.value.endsWith('\n') ? part.value.slice(0, -1).split('\n') : part.value.split('\n')
+                    
+                    actualLines.forEach((line, lineIdx) => {
+                      if (part.added) {
+                        rows.push(
+                          <div key={`${partIdx}-${lineIdx}`} className="flex bg-green-900/40">
+                            <span className="w-14 px-2 py-0.5 text-right text-gray-600 bg-gray-800/50 select-none border-r border-gray-700"></span>
+                            <span className="w-14 px-2 py-0.5 text-right text-green-400 bg-green-900/20 select-none border-r border-gray-700">{rightLineNum++}</span>
+                            <span className="w-8 px-2 py-0.5 text-center text-green-400 bg-green-900/30 select-none font-bold">+</span>
+                            <pre className="flex-1 px-3 py-0.5 text-green-300 whitespace-pre overflow-x-auto">{line || ' '}</pre>
+                          </div>
+                        )
+                      } else if (part.removed) {
+                        rows.push(
+                          <div key={`${partIdx}-${lineIdx}`} className="flex bg-red-900/40">
+                            <span className="w-14 px-2 py-0.5 text-right text-red-400 bg-red-900/20 select-none border-r border-gray-700">{leftLineNum++}</span>
+                            <span className="w-14 px-2 py-0.5 text-right text-gray-600 bg-gray-800/50 select-none border-r border-gray-700"></span>
+                            <span className="w-8 px-2 py-0.5 text-center text-red-400 bg-red-900/30 select-none font-bold">−</span>
+                            <pre className="flex-1 px-3 py-0.5 text-red-300 whitespace-pre overflow-x-auto">{line || ' '}</pre>
+                          </div>
+                        )
+                      } else {
+                        rows.push(
+                          <div key={`${partIdx}-${lineIdx}`} className="flex hover:bg-gray-800/30">
+                            <span className="w-14 px-2 py-0.5 text-right text-gray-500 bg-gray-800/50 select-none border-r border-gray-700">{leftLineNum++}</span>
+                            <span className="w-14 px-2 py-0.5 text-right text-gray-500 bg-gray-800/50 select-none border-r border-gray-700">{rightLineNum++}</span>
+                            <span className="w-8 px-2 py-0.5 text-center text-gray-600 bg-gray-800/30 select-none"> </span>
+                            <pre className="flex-1 px-3 py-0.5 text-gray-300 whitespace-pre overflow-x-auto">{line || ' '}</pre>
+                          </div>
+                        )
+                      }
+                    })
+                  })
+                  return rows
+                }
+
+                // Build side-by-side view
+                const buildSideBySideView = () => {
+                  const leftRows = []
+                  const rightRows = []
+                  let leftLineNum = 1
+                  let rightLineNum = 1
+                  
+                  diffResult.forEach((part, partIdx) => {
+                    const actualLines = part.value.endsWith('\n') ? part.value.slice(0, -1).split('\n') : part.value.split('\n')
+                    
+                    actualLines.forEach((line, lineIdx) => {
+                      if (part.added) {
+                        // Add empty placeholder on left, content on right
+                        leftRows.push(
+                          <div key={`l-${partIdx}-${lineIdx}`} className="flex bg-gray-800/20 min-h-[24px]">
+                            <span className="w-12 px-2 py-0.5 text-right text-gray-600 bg-gray-800/50 select-none border-r border-gray-700"></span>
+                            <pre className="flex-1 px-3 py-0.5 text-gray-600 whitespace-pre overflow-x-auto"></pre>
+                          </div>
+                        )
+                        rightRows.push(
+                          <div key={`r-${partIdx}-${lineIdx}`} className="flex bg-green-900/40 min-h-[24px]">
+                            <span className="w-12 px-2 py-0.5 text-right text-green-400 bg-green-900/20 select-none border-r border-gray-700">{rightLineNum++}</span>
+                            <pre className="flex-1 px-3 py-0.5 text-green-300 whitespace-pre overflow-x-auto">{line || ' '}</pre>
+                          </div>
+                        )
+                      } else if (part.removed) {
+                        // Add content on left, empty placeholder on right
+                        leftRows.push(
+                          <div key={`l-${partIdx}-${lineIdx}`} className="flex bg-red-900/40 min-h-[24px]">
+                            <span className="w-12 px-2 py-0.5 text-right text-red-400 bg-red-900/20 select-none border-r border-gray-700">{leftLineNum++}</span>
+                            <pre className="flex-1 px-3 py-0.5 text-red-300 whitespace-pre overflow-x-auto">{line || ' '}</pre>
+                          </div>
+                        )
+                        rightRows.push(
+                          <div key={`r-${partIdx}-${lineIdx}`} className="flex bg-gray-800/20 min-h-[24px]">
+                            <span className="w-12 px-2 py-0.5 text-right text-gray-600 bg-gray-800/50 select-none border-r border-gray-700"></span>
+                            <pre className="flex-1 px-3 py-0.5 text-gray-600 whitespace-pre overflow-x-auto"></pre>
+                          </div>
+                        )
+                      } else {
+                        // Same content on both sides
+                        leftRows.push(
+                          <div key={`l-${partIdx}-${lineIdx}`} className="flex hover:bg-gray-800/30 min-h-[24px]">
+                            <span className="w-12 px-2 py-0.5 text-right text-gray-500 bg-gray-800/50 select-none border-r border-gray-700">{leftLineNum++}</span>
+                            <pre className="flex-1 px-3 py-0.5 text-gray-300 whitespace-pre overflow-x-auto">{line || ' '}</pre>
+                          </div>
+                        )
+                        rightRows.push(
+                          <div key={`r-${partIdx}-${lineIdx}`} className="flex hover:bg-gray-800/30 min-h-[24px]">
+                            <span className="w-12 px-2 py-0.5 text-right text-gray-500 bg-gray-800/50 select-none border-r border-gray-700">{rightLineNum++}</span>
+                            <pre className="flex-1 px-3 py-0.5 text-gray-300 whitespace-pre overflow-x-auto">{line || ' '}</pre>
+                          </div>
+                        )
+                      }
+                    })
+                  })
+                  return { leftRows, rightRows }
+                }
+
+                const { leftRows, rightRows } = buildSideBySideView()
+                
+                return (
+                  <>
+                    {/* Summary Bar */}
+                    <div className="px-4 py-2 bg-gray-800 border-b border-gray-600 flex items-center justify-between">
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                          <span className="text-green-400 font-medium">{addedCount}</span>
+                          <span className="text-gray-400">added</span>
+                        </span>
+                        <span className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                          <span className="text-red-400 font-medium">{removedCount}</span>
+                          <span className="text-gray-400">removed</span>
+                        </span>
+                        <span className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-gray-500"></span>
+                          <span className="text-gray-300 font-medium">{unchangedCount}</span>
+                          <span className="text-gray-400">unchanged</span>
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {addedCount === 0 && removedCount === 0 ? (
+                          <span className="text-green-400 font-medium">✓ Files are identical</span>
+                        ) : (
+                          <span>{Math.round((unchangedCount / (addedCount + removedCount + unchangedCount)) * 100)}% similarity</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Diff Content */}
+                    <div className={`flex-1 overflow-hidden ${viewMode === 'side' ? 'grid grid-cols-2' : ''}`}>
+                      {viewMode === 'side' ? (
+                        <>
+                          {/* Left Panel */}
+                          <div className="flex flex-col border-r border-gray-600 overflow-hidden">
+                            <div className="px-3 py-1.5 bg-red-900/20 border-b border-gray-600 flex items-center gap-2">
+                              <Minus className="w-4 h-4 text-red-400" />
+                              <span className="text-sm font-medium text-red-300">Original</span>
+                              <span className="text-xs text-gray-400 ml-auto">{getFileName(leftFile)}</span>
+                            </div>
+                            <div className="flex-1 overflow-auto font-mono text-xs" style={{ backgroundColor: '#1e1e1e' }}>
+                              {leftRows}
+                            </div>
+                          </div>
+                          
+                          {/* Right Panel */}
+                          <div className="flex flex-col overflow-hidden">
+                            <div className="px-3 py-1.5 bg-green-900/20 border-b border-gray-600 flex items-center gap-2">
+                              <Plus className="w-4 h-4 text-green-400" />
+                              <span className="text-sm font-medium text-green-300">Modified</span>
+                              <span className="text-xs text-gray-400 ml-auto">{getFileName(rightFile)}</span>
+                            </div>
+                            <div className="flex-1 overflow-auto font-mono text-xs" style={{ backgroundColor: '#1e1e1e' }}>
+                              {rightRows}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        /* Unified View */
+                        <div className="flex flex-col overflow-hidden">
+                          <div className="px-3 py-1.5 bg-gray-800 border-b border-gray-600 flex items-center gap-4">
+                            <span className="text-sm font-medium text-gray-300">Unified Diff</span>
+                            <span className="text-xs text-gray-500">Left: {getFileName(leftFile)} → Right: {getFileName(rightFile)}</span>
+                          </div>
+                          <div className="flex-1 overflow-auto font-mono text-xs" style={{ backgroundColor: '#1e1e1e' }}>
+                            {buildUnifiedView()}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className={`flex items-center justify-between ${isFullscreen ? 'p-3 border-t ' + theme.border : 'mt-3'}`}>
+          <p className={`text-xs ${theme.textMuted}`}>
+            {leftContent && rightContent ? (
+              <>
+                Comparing {leftContent.split('\n').length} lines (original) vs {rightContent.split('\n').length} lines (modified)
+              </>
+            ) : (
+              'Load files to start comparing'
+            )}
+          </p>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs ${theme.textMuted}`}>
+              Tip: Use scroll wheel to navigate, Ctrl+F to search
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function App() {
   // Module selection (CRS, FATCA, future: CBC, NTJ)
@@ -1405,27 +2220,27 @@ function App() {
   // Module configuration
   const modules = {
     crs: {
-      name: 'CRS',
-      fullName: 'Common Reporting Standard',
-      description: 'Generate CRS XML test data for automatic exchange of financial account information',
+      name: t(language, 'modules.crs'),
+      fullName: t(language, 'moduleDescriptions.crs'),
+      description: `${t(language, 'actions.generate')} ${t(language, 'modules.crs')} XML test data for automatic exchange of financial account information`,
       icon: Globe,
       color: 'from-blue-600 to-blue-500',
       bgColor: 'bg-blue-600',
       features: ['Individual & Organisation Accounts', 'Controlling Persons', 'Corrections & Deletions', 'CSV Import/Export']
     },
     fatca: {
-      name: 'FATCA',
-      fullName: 'Foreign Account Tax Compliance Act',
-      description: 'Generate FATCA XML test data for US tax compliance reporting',
+      name: t(language, 'modules.fatca'),
+      fullName: t(language, 'moduleDescriptions.fatca'),
+      description: `${t(language, 'actions.generate')} ${t(language, 'modules.fatca')} XML test data for US tax compliance reporting`,
       icon: Landmark,
       color: 'from-green-600 to-green-500',
       bgColor: 'bg-green-600',
       features: ['Individual & Organisation Accounts', 'Substantial Owners', 'Corrections & Deletions', 'Filer Categories']
     },
     cbc: {
-      name: 'CBC',
-      fullName: 'Country-by-Country Reporting',
-      description: 'Generate CBC XML test data for multinational enterprise tax reporting',
+      name: t(language, 'modules.cbc'),
+      fullName: t(language, 'moduleDescriptions.cbc'),
+      description: `${t(language, 'actions.generate')} ${t(language, 'modules.cbc')} XML test data for multinational enterprise tax reporting`,
       icon: BarChart3,
       color: 'from-purple-600 to-purple-500',
       bgColor: 'bg-purple-600',
@@ -1574,35 +2389,117 @@ function App() {
                   <ArrowLeft className="w-5 h-5" />
                 </button>
                 <Settings className={`w-6 h-6 ${theme.accentText}`} />
-                <h1 className={`text-xl font-bold ${theme.text}`}>Settings</h1>
+                <h1 className={`text-xl font-bold ${theme.text}`}>{t(language, 'settings.title')}</h1>
               </div>
             </div>
           </header>
           <main className="max-w-3xl mx-auto px-6 py-8 space-y-6">
             <div className={`${theme.card} rounded-xl border p-6`}>
-              <h3 className={`text-lg font-semibold ${theme.text} mb-4`}>Theme</h3>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-4`}>{t(language, 'settings.theme')}</h3>
               <div className="grid grid-cols-4 gap-3">
-                {Object.entries(THEMES).map(([key, t]) => (
+                {Object.entries(THEMES).map(([key, themeObj]) => (
                   <button
                     key={key}
                     onClick={() => setSelectedTheme(key)}
                     className={`p-3 rounded-xl border-2 transition-all ${
                       selectedTheme === key 
-                        ? `${t.buttonPrimary} shadow-lg` 
+                        ? `${themeObj.buttonPrimary} shadow-lg` 
                         : `${theme.border} ${theme.cardHover}`
                     }`}
                   >
-                    <span className="text-2xl">{t.emoji}</span>
-                    <p className={`text-xs mt-1 ${theme.text}`}>{t.name}</p>
+                    <span className="text-2xl">{themeObj.emoji}</span>
+                    <p className={`text-xs mt-1 ${theme.text}`}>{themeObj.name}</p>
                   </button>
                 ))}
               </div>
             </div>
             <div className={`${theme.card} rounded-xl border p-6`}>
-              <h3 className={`text-lg font-semibold ${theme.text} mb-4`}>Preferences</h3>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>Tools & Features</h3>
+              <p className={`text-sm ${theme.textMuted} mb-4`}>Access advanced tools and utilities</p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setShowDashboard(true)}
+                  className={`p-4 rounded-lg border-2 ${theme.border} ${theme.cardHover} transition-all hover:scale-105 hover:shadow-md`}
+                >
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className={`w-6 h-6 ${theme.accentText}`} />
+                    <div className="text-left">
+                      <p className={`font-semibold ${theme.text}`}>{t(language, 'dashboard.title')}</p>
+                      <p className={`text-xs ${theme.textMuted}`}>{t(language, 'dashboard.statistics')} & {t(language, 'dashboard.recentActivity')}</p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setShowBatchProcessor(true)}
+                  className={`p-4 rounded-lg border-2 ${theme.border} ${theme.cardHover} transition-all hover:scale-105 hover:shadow-md`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Layers className={`w-6 h-6 ${theme.accentText}`} />
+                    <div className="text-left">
+                      <p className={`font-semibold ${theme.text}`}>{t(language, 'batch.title')}</p>
+                      <p className={`text-xs ${theme.textMuted}`}>{t(language, 'batch.processAll')}</p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setShowXMLDiff(true)}
+                  className={`p-4 rounded-lg border-2 ${theme.border} ${theme.cardHover} transition-all hover:scale-105 hover:shadow-md`}
+                >
+                  <div className="flex items-center gap-3">
+                    <ArrowLeftRight className={`w-6 h-6 ${theme.accentText}`} />
+                    <div className="text-left">
+                      <p className={`font-semibold ${theme.text}`}>{t(language, 'diff.title')}</p>
+                      <p className={`text-xs ${theme.textMuted}`}>{t(language, 'diff.title')}</p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setShowKeyboardShortcuts(true)}
+                  className={`p-4 rounded-lg border-2 ${theme.border} ${theme.cardHover} transition-all hover:scale-105 hover:shadow-md`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Keyboard className={`w-6 h-6 ${theme.accentText}`} />
+                    <div className="text-left">
+                      <p className={`font-semibold ${theme.text}`}>{t(language, 'settings.keyboardShortcuts')}</p>
+                      <p className={`text-xs ${theme.textMuted}`}>{t(language, 'help.shortcuts')}</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+            {/* Language Settings */}
+            <div className={`${theme.card} rounded-xl border p-6`}>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'settings.language')}</h3>
+              <p className={`text-sm ${theme.textMuted} mb-4`}>{t(language, 'common.select')} {t(language, 'settings.language').toLowerCase()}</p>
+              <div className="grid grid-cols-3 gap-3">
+                {Object.entries(LANGUAGES).map(([code, lang]) => (
+                  <button
+                    key={code}
+                    onClick={() => setLanguage(code)}
+                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                      language === code
+                        ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/30'
+                        : `${theme.border} hover:border-gray-400`
+                    }`}
+                  >
+                    <span className="text-2xl">{lang.flag}</span>
+                    <div className="text-left">
+                      <p className={`font-medium ${theme.text}`}>{lang.nativeName}</p>
+                      <p className={`text-xs ${theme.textMuted}`}>{lang.name}</p>
+                    </div>
+                    {language === code && (
+                      <CheckCircle2 className="w-5 h-5 text-blue-500 ml-auto" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={`${theme.card} rounded-xl border p-6`}>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-4`}>{t(language, 'settings.general')}</h3>
               <div className="space-y-4">
                 <label className="flex items-center justify-between">
-                  <span className={theme.text}>Enable animations</span>
+                  <span className={theme.text}>{t(language, 'common.show')} {t(language, 'settings.appearance').toLowerCase()}</span>
                   <button
                     onClick={() => setSettings(prev => ({ ...prev, animationsEnabled: !prev.animationsEnabled }))}
                     className={`w-12 h-6 rounded-full transition-colors relative ${settings.animationsEnabled ? 'bg-blue-600' : 'bg-gray-400'}`}
@@ -1613,12 +2510,12 @@ function App() {
               </div>
             </div>
             <div className={`${theme.card} rounded-xl border p-6`}>
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>CSV Validation</h3>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>CSV {t(language, 'validation.title')}</h3>
               <p className={`text-sm ${theme.textMuted} mb-4`}>Control CSV validation for CRS, FATCA, and CBC uploads</p>
               <div className="space-y-4">
                 <label className="flex items-center justify-between">
                   <div>
-                    <span className={theme.text}>Validate CSV on upload</span>
+                    <span className={theme.text}>{t(language, 'actions.validate')} CSV {t(language, 'actions.upload')}</span>
                     <p className={`text-xs ${theme.textMuted} mt-1`}>
                       {settings.autoValidateCsv 
                         ? 'CSV files will be validated before generating XML' 
@@ -1642,6 +2539,254 @@ function App() {
               )}
             </div>
           </main>
+
+          {/* Modals for Settings page - must be inside this return */}
+          {showDashboard && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowDashboard(false)}>
+              <div className={`w-full max-w-5xl max-h-[90vh] overflow-y-auto mx-4 p-6 rounded-xl shadow-2xl ${theme.card} border ${theme.border}`} onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className={`w-6 h-6 ${theme.accentText}`} />
+                    <h2 className={`text-xl font-semibold ${theme.text}`}>Dashboard</h2>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => { if(window.confirm('Reset all statistics?')) resetStats() }}
+                      className={`px-3 py-1.5 text-sm rounded-lg ${theme.buttonSecondary}`}
+                    >
+                      Reset Stats
+                    </button>
+                    <button onClick={() => setShowDashboard(false)} className={`p-2 rounded-lg ${theme.buttonSecondary}`}>
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Main Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className={`p-4 rounded-xl border ${theme.border} bg-gradient-to-br from-blue-500/10 to-blue-600/5`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="w-5 h-5 text-blue-500" />
+                      <p className={`text-sm ${theme.textMuted}`}>XML Files</p>
+                    </div>
+                    <p className={`text-3xl font-bold ${theme.text}`}>{globalStats?.totalXmlGenerated || 0}</p>
+                    <p className={`text-xs ${theme.textMuted} mt-1`}>Total generated</p>
+                  </div>
+                  <div className={`p-4 rounded-xl border ${theme.border} bg-gradient-to-br from-green-500/10 to-green-600/5`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="w-5 h-5 text-green-500" />
+                      <p className={`text-sm ${theme.textMuted}`}>Accounts</p>
+                    </div>
+                    <p className={`text-3xl font-bold ${theme.text}`}>{(globalStats?.totalIndividualAccounts || 0) + (globalStats?.totalOrganisationAccounts || 0)}</p>
+                    <p className={`text-xs ${theme.textMuted} mt-1`}>{globalStats?.totalIndividualAccounts || 0} individual, {globalStats?.totalOrganisationAccounts || 0} org</p>
+                  </div>
+                  <div className={`p-4 rounded-xl border ${theme.border} bg-gradient-to-br from-purple-500/10 to-purple-600/5`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileEdit className="w-5 h-5 text-purple-500" />
+                      <p className={`text-sm ${theme.textMuted}`}>Corrections</p>
+                    </div>
+                    <p className={`text-3xl font-bold ${theme.text}`}>{globalStats?.totalCorrectionsGenerated || 0}</p>
+                    <p className={`text-xs ${theme.textMuted} mt-1`}>Files corrected</p>
+                  </div>
+                  <div className={`p-4 rounded-xl border ${theme.border} bg-gradient-to-br from-amber-500/10 to-amber-600/5`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="w-5 h-5 text-amber-500" />
+                      <p className={`text-sm ${theme.textMuted}`}>Errors</p>
+                    </div>
+                    <p className={`text-3xl font-bold ${theme.text}`}>{globalStats?.totalValidationErrors || 0}</p>
+                    <p className={`text-xs ${theme.textMuted} mt-1`}>Validation issues</p>
+                  </div>
+                </div>
+
+                {/* Secondary Stats */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className={`p-4 rounded-lg border ${theme.border}`}>
+                    <p className={`text-sm ${theme.textMuted} mb-1`}>CSV Uploads</p>
+                    <p className={`text-2xl font-bold ${theme.text}`}>{globalStats?.totalCsvUploaded || 0}</p>
+                  </div>
+                  <div className={`p-4 rounded-lg border ${theme.border}`}>
+                    <p className={`text-sm ${theme.textMuted} mb-1`}>Templates Downloaded</p>
+                    <p className={`text-2xl font-bold ${theme.text}`}>{globalStats?.totalCsvDownloaded || 0}</p>
+                  </div>
+                  <div className={`p-4 rounded-lg border ${theme.border}`}>
+                    <p className={`text-sm ${theme.textMuted} mb-1`}>Reporting FIs</p>
+                    <p className={`text-2xl font-bold ${theme.text}`}>{globalStats?.totalReportingFIs || 0}</p>
+                  </div>
+                </div>
+
+                {/* Recent Activity */}
+                <div className={`p-4 rounded-xl border ${theme.border}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`font-semibold ${theme.text}`}>Recent File History</h3>
+                    {fileHistory.length > 0 && (
+                      <button 
+                        onClick={() => { setFileHistory([]); localStorage.removeItem('crs-file-history') }}
+                        className={`text-xs ${theme.textMuted} hover:underline`}
+                      >
+                        Clear History
+                      </button>
+                    )}
+                  </div>
+                  {fileHistory.length === 0 ? (
+                    <p className={`text-sm ${theme.textMuted} text-center py-4`}>No recent files. Generate some XML files to see them here!</p>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {fileHistory.slice(0, 10).map((file, idx) => (
+                        <div key={idx} className={`flex items-center justify-between p-3 rounded-lg ${theme.bg}`}>
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${file.module === 'crs' ? 'bg-blue-500/10' : file.module === 'fatca' ? 'bg-green-500/10' : 'bg-purple-500/10'}`}>
+                              <FileText className={`w-4 h-4 ${file.module === 'crs' ? 'text-blue-500' : file.module === 'fatca' ? 'text-green-500' : 'text-purple-500'}`} />
+                            </div>
+                            <div>
+                              <p className={`text-sm font-medium ${theme.text}`}>{file.module?.toUpperCase()} - {file.type || 'Generation'}</p>
+                              <p className={`text-xs ${theme.textMuted}`}>{file.accounts ? `${file.accounts} accounts • ` : ''}{new Date(file.timestamp).toLocaleString()}</p>
+                            </div>
+                          </div>
+                          {file.path && (
+                            <button 
+                              onClick={() => window.electronAPI?.openFileLocation(file.path)}
+                              className={`text-xs px-2 py-1 rounded ${theme.buttonSecondary}`}
+                            >
+                              Open
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Last Generated */}
+                {globalStats?.lastGenerated && (
+                  <p className={`text-xs ${theme.textMuted} mt-4 text-center`}>
+                    Last activity: {new Date(globalStats.lastGenerated).toLocaleString()}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {showBatchProcessor && (
+            <BatchProcessorModal 
+              theme={theme}
+              onClose={() => setShowBatchProcessor(false)}
+              onGenerate={async (configs) => {
+                const results = []
+                for (const config of configs) {
+                  try {
+                    if (config.module === 'crs') {
+                      await window.electronAPI.generateCRS(config.data)
+                    } else if (config.module === 'fatca') {
+                      await window.electronAPI.generateFATCA(config.data)
+                    } else if (config.module === 'cbc') {
+                      await window.electronAPI.generateCBC(config.data)
+                    }
+                    results.push({ ...config, success: true })
+                    updateStats({ totalXmlGenerated: globalStats.totalXmlGenerated + 1 })
+                  } catch (error) {
+                    results.push({ ...config, success: false, error: error.message })
+                  }
+                }
+                return results
+              }}
+            />
+          )}
+
+          {showXMLDiff && (
+            <XMLDiffModal 
+              theme={theme}
+              onClose={() => setShowXMLDiff(false)}
+            />
+          )}
+
+          {showKeyboardShortcuts && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowKeyboardShortcuts(false)}>
+              <div className={`w-full max-w-2xl max-h-[85vh] overflow-y-auto mx-4 p-6 rounded-xl shadow-2xl ${theme.card} border ${theme.border}`} onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <Keyboard className={`w-6 h-6 ${theme.accentText}`} />
+                    <h2 className={`text-xl font-semibold ${theme.text}`}>Keyboard Shortcuts</h2>
+                  </div>
+                  <button onClick={() => setShowKeyboardShortcuts(false)} className={`p-2 rounded-lg ${theme.buttonSecondary}`}>
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <div className="space-y-6">
+                  <div>
+                    <h3 className={`text-sm font-semibold ${theme.textMuted} mb-3 flex items-center gap-2`}>
+                      <Home className="w-4 h-4" /> Navigation
+                    </h3>
+                    <div className="space-y-2">
+                      <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                        <span className={`text-sm ${theme.text}`}>Go to Home / Module Selection</span>
+                        <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl + H</kbd>
+                      </div>
+                      <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                        <span className={`text-sm ${theme.text}`}>Open Settings</span>
+                        <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl + ,</kbd>
+                      </div>
+                      <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                        <span className={`text-sm ${theme.text}`}>Close Modal / Go Back</span>
+                        <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Escape</kbd>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className={`text-sm font-semibold ${theme.textMuted} mb-3 flex items-center gap-2`}>
+                      <Globe className="w-4 h-4" /> Quick Module Access
+                    </h3>
+                    <div className="space-y-2">
+                      <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-500">C</span>
+                          <span className={`text-sm ${theme.text}`}>Open CRS Module</span>
+                        </div>
+                        <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl + 1</kbd>
+                      </div>
+                      <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded bg-green-500/20 flex items-center justify-center text-xs font-bold text-green-500">F</span>
+                          <span className={`text-sm ${theme.text}`}>Open FATCA Module</span>
+                        </div>
+                        <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl + 2</kbd>
+                      </div>
+                      <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center text-xs font-bold text-purple-500">B</span>
+                          <span className={`text-sm ${theme.text}`}>Open CBC Module</span>
+                        </div>
+                        <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl + 3</kbd>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className={`text-sm font-semibold ${theme.textMuted} mb-3 flex items-center gap-2`}>
+                      <Settings className="w-4 h-4" /> Other
+                    </h3>
+                    <div className="space-y-2">
+                      <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                        <span className={`text-sm ${theme.text}`}>Cycle Through Themes</span>
+                        <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl + T</kbd>
+                      </div>
+                      <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                        <span className={`text-sm ${theme.text}`}>Show This Help</span>
+                        <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Shift + ?</kbd>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className={`mt-6 pt-4 border-t ${theme.border}`}>
+                  <p className={`text-xs ${theme.textMuted} text-center`}>
+                    Pro tip: Press <kbd className={`px-1.5 py-0.5 text-xs font-mono rounded ${theme.buttonSecondary}`}>Shift + ?</kbd> anywhere in the app to show this dialog
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )
     }
@@ -1660,39 +2805,11 @@ function App() {
                   <FileCheck className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className={`text-2xl font-bold ${theme.headerText || theme.text}`}>Tax Reporting Generator</h1>
-                  <p className={`text-sm ${theme.headerTextMuted || theme.textMuted}`}>Generate compliant XML test data</p>
+                  <h1 className={`text-2xl font-bold ${theme.headerText || theme.text}`}>{t(language, 'appTitle')}</h1>
+                  <p className={`text-sm ${theme.headerTextMuted || theme.textMuted}`}>{t(language, 'actions.generate')} compliant XML test data</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowDashboard(true)}
-                  className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
-                  title="Dashboard"
-                >
-                  <BarChart3 className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setShowBatchProcessor(true)}
-                  className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
-                  title="Batch Processing"
-                >
-                  <Layers className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setShowXMLDiff(true)}
-                  className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
-                  title="XML Comparison"
-                >
-                  <ArrowLeftRight className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setShowKeyboardShortcuts(true)}
-                  className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
-                  title="Keyboard Shortcuts (Shift + ?)"
-                >
-                  <Keyboard className="w-5 h-5" />
-                </button>
                 <button
                   onClick={() => setCurrentPage('settings')}
                   className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
@@ -1721,8 +2838,8 @@ function App() {
         {/* Module Selection */}
         <main className="max-w-5xl mx-auto px-6 py-12">
           <div className="text-center mb-12">
-            <h2 className={`text-3xl font-bold ${theme.headerText || theme.text} mb-3`}>Select a Module</h2>
-            <p className={`text-lg ${theme.headerTextMuted || theme.textMuted}`}>Choose the reporting standard you want to work with</p>
+            <h2 className={`text-3xl font-bold ${theme.headerText || theme.text} mb-3`}>{t(language, 'selectModule')}</h2>
+            <p className={`text-lg ${theme.headerTextMuted || theme.textMuted}`}>{t(language, 'common.select')} the reporting standard you want to work with</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1880,7 +2997,7 @@ function App() {
                   />
                 </div>
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Receiving Country</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.receivingCountry')}</label>
                   <input
                     type="text"
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input} opacity-60`}
@@ -1906,11 +3023,11 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <Building2 className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>Reporting Financial Institution</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'form.reportingFI')}</h2>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Number of Reporting FIs</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.numFIs')}</label>
                   <input
                     type="number"
                     min="1"
@@ -2227,7 +3344,7 @@ function App() {
                 </div>
                 {cbcFileType === 'foreign' && (
                   <div>
-                    <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Receiving Country *</label>
+                    <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.receivingCountry')}</label>
                     <input
                       type="text"
                       className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
@@ -2526,7 +3643,7 @@ function App() {
                         {errors.sendingCompanyIN && <p className="text-xs text-red-500 mt-1">{errors.sendingCompanyIN}</p>}
                       </div>
                       <div>
-                        <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Tax Year *</label>
+                        <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.taxYear')} *</label>
                         <select
                           className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
                           value={formData.reportingPeriod}
@@ -2548,7 +3665,7 @@ function App() {
                         {errors.transmittingCountry && <p className="text-xs text-red-500 mt-1">{errors.transmittingCountry}</p>}
                       </div>
                       <div>
-                        <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Receiving Country *</label>
+                        <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.receivingCountry')} *</label>
                         <input
                           type="text"
                           className={`w-full px-4 py-2 rounded-lg border ${theme.input} ${errors.receivingCountry ? 'border-red-500' : ''}`}
@@ -2580,7 +3697,7 @@ function App() {
                     <div className="px-6 pb-6 space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Number of Reporting FIs *</label>
+                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.numFIs')} *</label>
                           <input
                             type="number"
                             min="1"
@@ -3690,6 +4807,35 @@ function App() {
               </div>
             </div>
 
+            {/* Language Settings */}
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>Language</h3>
+              <p className={`text-sm ${theme.textMuted} mb-6`}>Choose your preferred language for the application</p>
+              
+              <div className="grid grid-cols-3 gap-3">
+                {Object.entries(LANGUAGES).map(([code, lang]) => (
+                  <button
+                    key={code}
+                    onClick={() => setLanguage(code)}
+                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                      language === code
+                        ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/30'
+                        : `${theme.border} hover:border-gray-500 ${theme.card}`
+                    }`}
+                  >
+                    <span className="text-2xl">{lang.flag}</span>
+                    <div className="text-left">
+                      <p className={`font-medium ${theme.text}`}>{lang.nativeName}</p>
+                      <p className={`text-xs ${theme.textMuted}`}>{lang.name}</p>
+                    </div>
+                    {language === code && (
+                      <CheckCircle2 className="w-5 h-5 text-blue-500 ml-auto" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
               <h3 className={`text-lg font-semibold ${theme.text} mb-6`}>CSV Settings</h3>
               
@@ -4147,8 +5293,207 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Modals for new features - Simplified versions */}
+      {showDashboard && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowDashboard(false)}>
+          <div className={`w-full max-w-4xl max-h-[85vh] overflow-y-auto mx-4 p-6 rounded-xl shadow-2xl ${theme.card} border ${theme.border}`} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <BarChart3 className={`w-6 h-6 ${theme.accentText}`} />
+                <h2 className={`text-xl font-semibold ${theme.text}`}>Dashboard</h2>
+              </div>
+              <button
+                onClick={() => setShowDashboard(false)}
+                className={`p-2 rounded-lg ${theme.buttonSecondary} hover:opacity-80`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Statistics Cards */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className={`p-4 rounded-lg border ${theme.border} ${theme.card}`}>
+                  <p className={`text-sm ${theme.textMuted}`}>Total Files Generated</p>
+                  <p className={`text-3xl font-bold ${theme.text} mt-2`}>{globalStats?.totalXmlGenerated || 0}</p>
+                </div>
+                <div className={`p-4 rounded-lg border ${theme.border} ${theme.card}`}>
+                  <p className={`text-sm ${theme.textMuted}`}>Total Accounts</p>
+                  <p className={`text-3xl font-bold ${theme.text} mt-2`}>{globalStats?.totalAccounts || 0}</p>
+                </div>
+                <div className={`p-4 rounded-lg border ${theme.border} ${theme.card}`}>
+                  <p className={`text-sm ${theme.textMuted}`}>Total Corrections</p>
+                  <p className={`text-3xl font-bold ${theme.text} mt-2`}>{globalStats?.totalCorrections || 0}</p>
+                </div>
+                <div className={`p-4 rounded-lg border ${theme.border} ${theme.card}`}>
+                  <p className={`text-sm ${theme.textMuted}`}>Validation Errors</p>
+                  <p className={`text-3xl font-bold ${theme.text} mt-2`}>{globalStats?.totalValidationErrors || 0}</p>
+                </div>
+              </div>
+              
+              {/* Module Breakdown */}
+              <div className={`p-4 rounded-lg border ${theme.border} ${theme.card}`}>
+                <h3 className={`text-lg font-semibold ${theme.text} mb-4`}>By Module</h3>
+                <div className="space-y-3">
+                  {['CRS', 'FATCA', 'CBC'].map((mod) => {
+                    const count = globalStats?.byModule?.[mod.toLowerCase()] || 0;
+                    const total = globalStats?.totalXmlGenerated || 1;
+                    const percentage = Math.round((count / total) * 100) || 0;
+                    return (
+                      <div key={mod}>
+                        <div className="flex justify-between mb-1">
+                          <span className={`text-sm font-medium ${theme.text}`}>{mod}</span>
+                          <span className={`text-sm ${theme.textMuted}`}>{count} files ({percentage}%)</span>
+                        </div>
+                        <div className={`h-2 rounded-full overflow-hidden ${theme.bg}`}>
+                          <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${percentage}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBatchProcessor && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowBatchProcessor(false)}>
+          <div className={`w-full max-w-3xl max-h-[85vh] overflow-y-auto mx-4 p-6 rounded-xl shadow-2xl ${theme.card} border ${theme.border}`} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <Layers className={`w-6 h-6 ${theme.accentText}`} />
+                <h2 className={`text-xl font-semibold ${theme.text}`}>Batch Processing</h2>
+              </div>
+              <button
+                onClick={() => setShowBatchProcessor(false)}
+                className={`p-2 rounded-lg ${theme.buttonSecondary} hover:opacity-80`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className={`text-center py-12 ${theme.textMuted}`}>
+              <Layers className="w-16 h-16 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium mb-2">Batch Processing</p>
+              <p className="text-sm">This feature allows you to process multiple files at once.</p>
+              <p className="text-sm mt-4">Coming soon with full implementation!</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showXMLDiff && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowXMLDiff(false)}>
+          <div className={`w-full max-w-4xl max-h-[85vh] overflow-y-auto mx-4 p-6 rounded-xl shadow-2xl ${theme.card} border ${theme.border}`} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <ArrowLeftRight className={`w-6 h-6 ${theme.accentText}`} />
+                <h2 className={`text-xl font-semibold ${theme.text}`}>XML Comparison</h2>
+              </div>
+              <button
+                onClick={() => setShowXMLDiff(false)}
+                className={`p-2 rounded-lg ${theme.buttonSecondary} hover:opacity-80`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className={`text-center py-12 ${theme.textMuted}`}>
+              <ArrowLeftRight className="w-16 h-16 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium mb-2">XML File Comparison</p>
+              <p className="text-sm">Compare two XML files side-by-side to identify differences.</p>
+              <p className="text-sm mt-4">Coming soon with full diff viewer!</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showKeyboardShortcuts && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowKeyboardShortcuts(false)}>
+          <div className={`w-full max-w-2xl max-h-[85vh] overflow-y-auto mx-4 p-6 rounded-xl shadow-2xl ${theme.card} border ${theme.border}`} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <Keyboard className={`w-6 h-6 ${theme.accentText}`} />
+                <h2 className={`text-xl font-semibold ${theme.text}`}>Keyboard Shortcuts</h2>
+              </div>
+              <button
+                onClick={() => setShowKeyboardShortcuts(false)}
+                className={`p-2 rounded-lg ${theme.buttonSecondary} hover:opacity-80`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className={`text-sm font-semibold ${theme.textMuted} mb-3`}>Navigation</h3>
+                <div className="space-y-2">
+                  <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                    <span className={`text-sm ${theme.text}`}>Go to Home</span>
+                    <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl+H</kbd>
+                  </div>
+                  <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                    <span className={`text-sm ${theme.text}`}>Go to Settings</span>
+                    <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl+,</kbd>
+                  </div>
+                  <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                    <span className={`text-sm ${theme.text}`}>Escape / Close</span>
+                    <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Esc</kbd>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className={`text-sm font-semibold ${theme.textMuted} mb-3`}>Modules</h3>
+                <div className="space-y-2">
+                  <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                    <span className={`text-sm ${theme.text}`}>Select CRS</span>
+                    <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl+1</kbd>
+                  </div>
+                  <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                    <span className={`text-sm ${theme.text}`}>Select FATCA</span>
+                    <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl+2</kbd>
+                  </div>
+                  <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                    <span className={`text-sm ${theme.text}`}>Select CBC</span>
+                    <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl+3</kbd>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className={`text-sm font-semibold ${theme.textMuted} mb-3`}>Other</h3>
+                <div className="space-y-2">
+                  <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                    <span className={`text-sm ${theme.text}`}>Toggle Theme</span>
+                    <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Ctrl+T</kbd>
+                  </div>
+                  <div className={`flex justify-between items-center p-3 rounded-lg ${theme.bg}`}>
+                    <span className={`text-sm ${theme.text}`}>Show This Help</span>
+                    <kbd className={`px-3 py-1 text-xs font-mono rounded ${theme.buttonSecondary}`}>Shift+?</kbd>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-export default App
+// Wrap App with providers
+function AppWithProviders() {
+  return (
+    <ErrorBoundary>
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    </ErrorBoundary>
+  )
+}
+
+export default AppWithProviders
