@@ -2406,7 +2406,21 @@ function App() {
           </header>
           <main className="max-w-3xl mx-auto px-6 py-8 space-y-6">
             <div className={`${theme.card} rounded-xl border p-6`}>
-              <h3 className={`text-lg font-semibold ${theme.text} mb-4`}>{t(language, 'settings.theme')}</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'settings.theme')}</h3>
+                <button
+                  onClick={() => setLiveAnimations(!liveAnimations)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                    liveAnimations 
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30' 
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                  }`}
+                  title={liveAnimations ? 'Click to disable live animations' : 'Click to enable live animations'}
+                >
+                  <span className="text-lg">{liveAnimations ? '✨' : '🎬'}</span>
+                  <span className="text-sm">{liveAnimations ? 'Live Animations ON' : 'Live Animations OFF'}</span>
+                </button>
+              </div>
               <div className="grid grid-cols-4 gap-3">
                 {Object.entries(THEMES).map(([key, themeObj]) => (
                   <button
