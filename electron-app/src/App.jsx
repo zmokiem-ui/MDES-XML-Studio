@@ -1718,8 +1718,1154 @@ function App() {
           </div>
         </header>
 
+        {/* Theme-Specific Animated Backgrounds */}
+        {selectedTheme === 'ocean' && (
+          <>
+            {/* Ocean Depth Gradient Background */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+              <div className="absolute inset-0 bg-gradient-to-b from-cyan-900/20 via-blue-900/30 to-blue-950/40" />
+            </div>
+            
+            {/* Caustic Light Effect (sunlight through water) */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full blur-3xl"
+                  style={{
+                    width: `${150 + i * 50}px`,
+                    height: `${100 + i * 30}px`,
+                    left: `${i * 20}%`,
+                    top: `${i * 10}%`,
+                    background: 'radial-gradient(ellipse, rgba(0, 255, 255, 0.4), transparent)',
+                    animation: `caustic-light ${4 + i}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.5}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Swimming Fish */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute text-3xl opacity-60"
+                  style={{
+                    top: `${20 + Math.random() * 60}%`,
+                    left: '-100px',
+                    animation: `fish-swim ${15 + Math.random() * 10}s linear infinite`,
+                    animationDelay: `${i * 3}s`,
+                    transform: i % 2 === 0 ? 'scaleX(1)' : 'scaleX(-1)'
+                  }}
+                >
+                  🐠
+                </div>
+              ))}
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={`fish2-${i}`}
+                  className="absolute text-2xl opacity-50"
+                  style={{
+                    top: `${30 + Math.random() * 50}%`,
+                    left: '-80px',
+                    animation: `fish-swim ${20 + Math.random() * 8}s linear infinite`,
+                    animationDelay: `${i * 4}s`
+                  }}
+                >
+                  🐟
+                </div>
+              ))}
+            </div>
+            
+            {/* Ocean Bubbles */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(15)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full bg-white opacity-30"
+                  style={{
+                    width: `${5 + Math.random() * 15}px`,
+                    height: `${5 + Math.random() * 15}px`,
+                    left: `${Math.random() * 100}%`,
+                    bottom: '-50px',
+                    animation: `bubble-rise ${6 + Math.random() * 4}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.4}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Wave Layers at Bottom */}
+            <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
+              <div className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-cyan-600/20 to-transparent animate-wave" 
+                style={{ animationDuration: '4s' }} />
+              <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-blue-500/15 to-transparent animate-wave" 
+                style={{ animationDuration: '5s', animationDelay: '0.5s' }} />
+              <div className="absolute bottom-0 w-full h-24 bg-gradient-to-t from-cyan-400/10 to-transparent animate-wave" 
+                style={{ animationDuration: '6s', animationDelay: '1s' }} />
+            </div>
+            
+            {/* Floating Seaweed/Kelp */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute bottom-0 text-4xl opacity-40"
+                  style={{
+                    left: `${10 + i * 25}%`,
+                    animation: `wave-motion ${3 + i * 0.5}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.3}s`
+                  }}
+                >
+                  🌊
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        
+        {selectedTheme === 'forest' && (
+          <>
+            {/* Trees */}
+            <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
+              {/* Left Side Trees */}
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={`tree-left-${i}`}
+                  className="absolute bottom-0 text-8xl opacity-80"
+                  style={{
+                    left: `${i * 8}%`,
+                    animation: `wave-motion ${3 + i * 0.5}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.3}s`
+                  }}
+                >
+                  🌳
+                </div>
+              ))}
+              {/* Right Side Trees */}
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={`tree-right-${i}`}
+                  className="absolute bottom-0 text-8xl opacity-80"
+                  style={{
+                    right: `${i * 8}%`,
+                    animation: `wave-motion ${3 + i * 0.5}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.4}s`
+                  }}
+                >
+                  🌲
+                </div>
+              ))}
+            </div>
+            
+            {/* Grass Ground */}
+            <div className="fixed bottom-0 left-0 w-full h-32 pointer-events-none z-0">
+              <div className="absolute inset-0 bg-gradient-to-t from-green-600/40 via-green-500/30 to-transparent" />
+              {/* Grass Blades */}
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute bottom-0 text-4xl opacity-70"
+                  style={{
+                    left: `${i * 5}%`,
+                    animation: `wave-motion ${2 + (i % 3) * 0.3}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.1}s`
+                  }}
+                >
+                  🌿
+                </div>
+              ))}
+            </div>
+            
+            {/* Flying Birds */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute text-3xl opacity-60"
+                  style={{
+                    left: '-100px',
+                    top: `${10 + i * 12}%`,
+                    animation: `fish-swim ${20 + Math.random() * 10}s linear infinite`,
+                    animationDelay: `${i * 4}s`
+                  }}
+                >
+                  🦅
+                </div>
+              ))}
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={`bird2-${i}`}
+                  className="absolute text-2xl opacity-50"
+                  style={{
+                    left: '-80px',
+                    top: `${20 + i * 15}%`,
+                    animation: `fish-swim ${25 + Math.random() * 8}s linear infinite`,
+                    animationDelay: `${i * 5}s`
+                  }}
+                >
+                  🕊️
+                </div>
+              ))}
+            </div>
+            
+            {/* Falling Leaves */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(12)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute text-2xl opacity-60"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: '-50px',
+                    animation: `leaf-fall ${15 + Math.random() * 10}s linear infinite`,
+                    animationDelay: `${i * 2}s`
+                  }}
+                >
+                  {i % 3 === 0 ? '🍃' : i % 3 === 1 ? '🍂' : '🌿'}
+                </div>
+              ))}
+            </div>
+            
+            {/* Sunlight Rays */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute top-0 w-32 h-full bg-gradient-to-b from-yellow-200/15 to-transparent blur-xl"
+                  style={{
+                    left: `${15 + i * 25}%`,
+                    animation: `sunlight-filter ${8 + i * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 1}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Butterflies */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute text-xl opacity-70"
+                  style={{
+                    left: `${20 + i * 15}%`,
+                    top: `${30 + i * 10}%`,
+                    animation: `particle-float ${4 + Math.random() * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.5}s`
+                  }}
+                >
+                  🦋
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        
+        {selectedTheme === 'sunset' && (
+          <>
+            {/* Rainbow in Left Corner */}
+            <div className="fixed top-32 -left-32 pointer-events-none z-0">
+              <div className="relative w-96 h-96">
+                {/* Rainbow Arcs */}
+                {[
+                  { color: 'rgba(239, 68, 68, 0.3)', size: 380 },    // Red
+                  { color: 'rgba(249, 115, 22, 0.3)', size: 360 },   // Orange
+                  { color: 'rgba(251, 191, 36, 0.3)', size: 340 },   // Yellow
+                  { color: 'rgba(34, 197, 94, 0.3)', size: 320 },    // Green
+                  { color: 'rgba(59, 130, 246, 0.3)', size: 300 },   // Blue
+                  { color: 'rgba(99, 102, 241, 0.3)', size: 280 },   // Indigo
+                  { color: 'rgba(168, 85, 247, 0.3)', size: 260 }    // Violet
+                ].map((arc, i) => (
+                  <div
+                    key={i}
+                    className="absolute top-0 left-0 rounded-full"
+                    style={{
+                      width: `${arc.size}px`,
+                      height: `${arc.size}px`,
+                      border: `12px solid ${arc.color}`,
+                      borderBottom: 'none',
+                      borderLeft: 'none',
+                      transform: 'rotate(45deg)',
+                      animation: `gentle-float ${6 + i * 0.3}s ease-in-out infinite`,
+                      animationDelay: `${i * 0.2}s`
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            {/* Golden Hour Glow */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-200/15 via-orange-200/10 to-rose-200/15" />
+              <div className="absolute inset-0 bg-gradient-to-t from-orange-300/20 via-yellow-200/8 to-transparent" />
+            </div>
+            
+            {/* Floating Light Particles */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(30)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    width: `${3 + Math.random() * 5}px`,
+                    height: `${3 + Math.random() * 5}px`,
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    background: i % 3 === 0 ? '#fbbf24' : i % 3 === 1 ? '#f97316' : '#fb923c',
+                    opacity: 0.4,
+                    animation: `particle-float ${5 + Math.random() * 4}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.2}s`,
+                    boxShadow: '0 0 8px rgba(251, 191, 36, 0.4)'
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Warm Shimmer Effect */}
+            <div className="fixed inset-0 pointer-events-none z-0 opacity-20">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-transparent to-orange-400/20 animate-pulse" 
+                style={{ animationDuration: '5s' }} />
+            </div>
+          </>
+        )}
+        
+        {selectedTheme === 'lavender' && (
+          <>
+            {/* Sparkles */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(25)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute text-xl"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animation: `twinkle ${2 + Math.random() * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.15}s`,
+                    filter: 'drop-shadow(0 0 4px rgba(168, 85, 247, 0.6))'
+                  }}
+                >
+                  ✨
+                </div>
+              ))}
+            </div>
+            
+            {/* Floating Butterflies */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={`butterfly-${i}`}
+                  className="absolute text-3xl opacity-70"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animation: `particle-float ${5 + Math.random() * 3}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.5}s`,
+                    filter: 'drop-shadow(0 0 6px rgba(192, 132, 252, 0.5))'
+                  }}
+                >
+                  🦋
+                </div>
+              ))}
+            </div>
+            
+            {/* Lavender Flowers */}
+            <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
+              {[...Array(12)].map((_, i) => (
+                <div
+                  key={`flower-${i}`}
+                  className="absolute text-4xl opacity-60"
+                  style={{
+                    left: `${i * 8.5}%`,
+                    bottom: '0px',
+                    animation: `wave-motion ${2.5 + (i % 3) * 0.4}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.15}s`
+                  }}
+                >
+                  🌸
+                </div>
+              ))}
+            </div>
+            
+            {/* Fairy Lights */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={`light-${i}`}
+                  className="absolute rounded-full"
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    background: i % 2 === 0 ? '#a78bfa' : '#c084fc',
+                    opacity: 0,
+                    animation: `bioluminescence ${3 + Math.random() * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.3}s`,
+                    boxShadow: '0 0 10px currentColor'
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Floating Hearts */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={`heart-${i}`}
+                  className="absolute text-2xl opacity-40"
+                  style={{
+                    left: `${15 + i * 15}%`,
+                    top: `${20 + i * 12}%`,
+                    animation: `gentle-float ${10 + i * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 1.2}s`,
+                    filter: 'drop-shadow(0 0 4px rgba(192, 132, 252, 0.4))'
+                  }}
+                >
+                  💜
+                </div>
+              ))}
+            </div>
+            
+            {/* Magic Dust Particles */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(30)].map((_, i) => (
+                <div
+                  key={`dust-${i}`}
+                  className="absolute rounded-full"
+                  style={{
+                    width: `${2 + Math.random() * 4}px`,
+                    height: `${2 + Math.random() * 4}px`,
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    background: i % 3 === 0 ? '#a78bfa' : i % 3 === 1 ? '#c084fc' : '#e9d5ff',
+                    opacity: 0.5,
+                    animation: `particle-float ${6 + Math.random() * 4}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.2}s`,
+                    filter: 'blur(1px)'
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Soft Glow Orbs */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full blur-3xl opacity-20"
+                  style={{
+                    width: `${200 + i * 50}px`,
+                    height: `${200 + i * 50}px`,
+                    left: `${i * 22}%`,
+                    top: `${i * 18}%`,
+                    background: 'linear-gradient(135deg, #a78bfa, #c084fc)',
+                    animation: `gentle-float ${12 + i * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 1}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Dreamy Shimmer */}
+            <div className="fixed inset-0 pointer-events-none z-0 opacity-15">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-300/20 via-transparent to-pink-300/20 animate-pulse" 
+                style={{ animationDuration: '6s' }} />
+            </div>
+          </>
+        )}
+        
+        {selectedTheme === 'midnight' && (
+          <>
+            {/* Crescent Moon */}
+            <div className="fixed top-32 left-12 pointer-events-none z-0">
+              <div className="relative">
+                {/* Moon Glow - Reduced */}
+                <div className="absolute -inset-4 w-28 h-28 rounded-full bg-violet-300/5 blur-3xl animate-pulse" 
+                  style={{ animationDuration: '4s' }} />
+                {/* Moon Body - Crescent Shape */}
+                <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-gray-100 to-gray-300 shadow-2xl overflow-hidden">
+                  {/* Dark Side Creating Crescent */}
+                  <div className="absolute -right-3 top-0 w-20 h-20 rounded-full bg-[#0f0f23]" />
+                  {/* Moon Craters on Visible Side */}
+                  <div className="absolute top-4 left-3 w-3 h-3 rounded-full bg-gray-400/40" />
+                  <div className="absolute top-10 left-5 w-4 h-4 rounded-full bg-gray-400/30" />
+                  <div className="absolute bottom-4 left-2 w-2 h-2 rounded-full bg-gray-400/35" />
+                  {/* Moon Shine */}
+                  <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-white/40 blur-sm" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Moonlight Beam - Reduced */}
+            <div className="fixed top-32 left-16 w-48 h-full pointer-events-none z-0 opacity-5">
+              <div className="w-full h-full bg-gradient-to-b from-violet-200 via-violet-300/30 to-transparent blur-2xl" />
+            </div>
+            
+            {/* Twinkling Stars */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(50)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full bg-white"
+                  style={{
+                    width: `${1 + Math.random() * 2}px`,
+                    height: `${1 + Math.random() * 2}px`,
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    opacity: 0.3,
+                    animation: `twinkle ${2 + Math.random() * 3}s ease-in-out infinite`,
+                    animationDelay: `${Math.random() * 2}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Violet Nebula Clouds */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full blur-3xl opacity-20"
+                  style={{
+                    width: `${300 + i * 100}px`,
+                    height: `${300 + i * 100}px`,
+                    left: `${i * 30}%`,
+                    top: `${i * 25}%`,
+                    background: 'radial-gradient(circle, #8b5cf6, transparent)',
+                    animation: `nebula-drift ${40 + i * 10}s ease-in-out infinite`,
+                    animationDelay: `${i * 2}s`
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        
+        {selectedTheme === 'spaceGalaxy' && (
+          <>
+            {/* Stars */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(100)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    width: `${1 + Math.random() * 3}px`,
+                    height: `${1 + Math.random() * 3}px`,
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    background: i % 3 === 0 ? '#00d9ff' : i % 3 === 1 ? '#ff006e' : '#f0f6ff',
+                    opacity: 0.6,
+                    animation: `twinkle ${1 + Math.random() * 2}s ease-in-out infinite`,
+                    animationDelay: `${Math.random() * 2}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Space Rockets */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={`rocket-${i}`}
+                  className="absolute text-4xl"
+                  style={{
+                    left: '-100px',
+                    top: `${15 + i * 18}%`,
+                    animation: `fish-swim ${18 + Math.random() * 8}s linear infinite`,
+                    animationDelay: `${i * 5}s`,
+                    transform: 'rotate(-45deg)',
+                    filter: 'drop-shadow(0 0 8px rgba(0, 217, 255, 0.6))'
+                  }}
+                >
+                  🚀
+                </div>
+              ))}
+            </div>
+            
+            {/* Rocket Trails */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={`trail-${i}`}
+                  className="absolute h-1 bg-gradient-to-r from-cyan-400/40 via-pink-400/30 to-transparent blur-sm"
+                  style={{
+                    width: '150px',
+                    left: '-150px',
+                    top: `${15 + i * 18}%`,
+                    animation: `fish-swim ${18 + Math.random() * 8}s linear infinite`,
+                    animationDelay: `${i * 5}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Shooting Stars */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute h-0.5 w-20 bg-gradient-to-r from-cyan-400 to-transparent rounded-full"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 50}%`,
+                    animation: `shooting-star ${3 + Math.random() * 2}s linear infinite`,
+                    animationDelay: `${i * 4}s`,
+                    opacity: 0
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Planets */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={`planet-${i}`}
+                  className="absolute text-5xl opacity-70"
+                  style={{
+                    left: `${20 + i * 35}%`,
+                    top: `${10 + i * 25}%`,
+                    animation: `gentle-float ${15 + i * 3}s ease-in-out infinite`,
+                    animationDelay: `${i * 2}s`,
+                    filter: 'drop-shadow(0 0 10px rgba(0, 217, 255, 0.4))'
+                  }}
+                >
+                  {i === 0 ? '🪐' : i === 1 ? '🌍' : '🌙'}
+                </div>
+              ))}
+            </div>
+            
+            {/* Cosmic Nebula */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full blur-3xl"
+                  style={{
+                    width: `${250 + i * 80}px`,
+                    height: `${250 + i * 80}px`,
+                    left: `${i * 25}%`,
+                    top: `${i * 20}%`,
+                    background: i % 2 === 0 
+                      ? 'radial-gradient(circle, rgba(0, 217, 255, 0.15), transparent)'
+                      : 'radial-gradient(circle, rgba(255, 0, 110, 0.15), transparent)',
+                    animation: `nebula-drift ${50 + i * 10}s ease-in-out infinite`,
+                    animationDelay: `${i * 3}s`
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        
+        {selectedTheme === 'cyberpunkNeon' && (
+          <>
+            {/* Scanlines */}
+            <div className="fixed inset-0 pointer-events-none z-0 opacity-10">
+              <div className="w-full h-full" style={{
+                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,240,255,0.3) 2px, rgba(0,240,255,0.3) 4px)'
+              }} />
+            </div>
+            {/* Glitch Effect Bars */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-full h-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent opacity-30"
+                  style={{
+                    top: `${i * 20}%`,
+                    animation: `glitch ${2 + Math.random()}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.5}s`
+                  }}
+                />
+              ))}
+            </div>
+            {/* Neon Grid */}
+            <div className="fixed inset-0 pointer-events-none z-0 opacity-5">
+              <div className="w-full h-full" style={{
+                backgroundImage: 'linear-gradient(rgba(255,0,110,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.5) 1px, transparent 1px)',
+                backgroundSize: '50px 50px'
+              }} />
+            </div>
+            {/* Floating Data Particles */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute text-xs font-mono opacity-20"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    color: i % 2 === 0 ? '#ff006e' : '#00f0ff',
+                    animation: `data-stream ${5 + Math.random() * 3}s linear infinite`,
+                    animationDelay: `${i * 0.3}s`
+                  }}
+                >
+                  {['01', '10', '11', '00'][Math.floor(Math.random() * 4)]}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        
+        {selectedTheme === 'organicForest' && (
+          <>
+            {/* Creek/Stream at Bottom */}
+            <div className="fixed bottom-0 left-0 w-full h-40 pointer-events-none z-0">
+              <div className="absolute inset-0 bg-gradient-to-t from-blue-400/30 via-cyan-300/20 to-transparent" />
+              {/* Water Ripples */}
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute bottom-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-300/30 to-transparent"
+                  style={{
+                    bottom: `${i * 5}px`,
+                    animation: `animate-wave ${3 + i * 0.3}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.2}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Swans in Creek */}
+            <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={`swan-${i}`}
+                  className="absolute text-5xl opacity-80"
+                  style={{
+                    left: `${20 + i * 30}%`,
+                    bottom: '40px',
+                    animation: `float-bob ${4 + i * 0.5}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.8}s`
+                  }}
+                >
+                  🦢
+                </div>
+              ))}
+            </div>
+            
+            {/* Peacocks on Grass */}
+            <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
+              {[...Array(2)].map((_, i) => (
+                <div
+                  key={`peacock-${i}`}
+                  className="absolute text-6xl opacity-85"
+                  style={{
+                    left: i === 0 ? '5%' : '85%',
+                    bottom: '80px',
+                    animation: `gentle-float ${5 + i}s ease-in-out infinite`,
+                    animationDelay: `${i * 1.5}s`
+                  }}
+                >
+                  🦚
+                </div>
+              ))}
+            </div>
+            
+            {/* Grass Along Creek */}
+            <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
+              {[...Array(15)].map((_, i) => (
+                <div
+                  key={`grass-${i}`}
+                  className="absolute text-3xl opacity-70"
+                  style={{
+                    left: `${i * 7}%`,
+                    bottom: '60px',
+                    animation: `wave-motion ${2 + (i % 3) * 0.4}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.1}s`
+                  }}
+                >
+                  🌾
+                </div>
+              ))}
+            </div>
+            
+            {/* Trees in Background */}
+            <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={`tree-${i}`}
+                  className="absolute text-7xl opacity-60"
+                  style={{
+                    left: `${10 + i * 25}%`,
+                    bottom: '100px',
+                    animation: `wave-motion ${4 + i * 0.5}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.4}s`
+                  }}
+                >
+                  🌳
+                </div>
+              ))}
+            </div>
+            
+            {/* Floating Leaves */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(10)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute text-xl opacity-40"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: '-50px',
+                    animation: `leaf-fall ${20 + Math.random() * 10}s linear infinite`,
+                    animationDelay: `${i * 2.5}s`
+                  }}
+                >
+                  {['🍂', '🍃', '🌿'][Math.floor(Math.random() * 3)]}
+                </div>
+              ))}
+            </div>
+            
+            {/* Butterflies */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={`butterfly-${i}`}
+                  className="absolute text-2xl opacity-60"
+                  style={{
+                    left: `${25 + i * 20}%`,
+                    top: `${30 + i * 15}%`,
+                    animation: `particle-float ${4 + Math.random() * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.6}s`
+                  }}
+                >
+                  🦋
+                </div>
+              ))}
+            </div>
+            
+            {/* Sunlight Beams */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute top-0 w-24 h-full bg-gradient-to-b from-yellow-100/20 to-transparent blur-2xl"
+                  style={{
+                    left: `${15 + i * 25}%`,
+                    animation: `sunlight-filter ${10 + i * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 1.5}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Soft Green Glow */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-100/10 via-transparent to-emerald-100/10" />
+            </div>
+          </>
+        )}
+        
+        {selectedTheme === 'oceanUnderwater' && (
+          <>
+            {/* Ocean Depth Gradient Background */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+              <div className="absolute inset-0 bg-gradient-to-b from-cyan-900/30 via-blue-900/40 to-indigo-950/50" />
+            </div>
+            
+            {/* Caustic Light Effect (sunlight through water) */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-25">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full blur-3xl"
+                  style={{
+                    width: `${180 + i * 60}px`,
+                    height: `${120 + i * 40}px`,
+                    left: `${i * 18}%`,
+                    top: `${i * 12}%`,
+                    background: 'radial-gradient(ellipse, rgba(57, 204, 204, 0.5), transparent)',
+                    animation: `caustic-light ${3 + i * 0.8}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.4}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Swimming Fish - Multiple Species */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {/* Tropical Fish */}
+              {[...Array(10)].map((_, i) => (
+                <div
+                  key={`tropical-${i}`}
+                  className="absolute text-3xl opacity-70"
+                  style={{
+                    top: `${15 + Math.random() * 70}%`,
+                    left: '-100px',
+                    animation: `fish-swim ${12 + Math.random() * 8}s linear infinite`,
+                    animationDelay: `${i * 2.5}s`,
+                    transform: i % 2 === 0 ? 'scaleX(1)' : 'scaleX(-1)'
+                  }}
+                >
+                  🐠
+                </div>
+              ))}
+              {/* Regular Fish */}
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={`regular-${i}`}
+                  className="absolute text-2xl opacity-60"
+                  style={{
+                    top: `${25 + Math.random() * 60}%`,
+                    left: '-80px',
+                    animation: `fish-swim ${18 + Math.random() * 10}s linear infinite`,
+                    animationDelay: `${i * 3.5}s`
+                  }}
+                >
+                  🐟
+                </div>
+              ))}
+              {/* Jellyfish */}
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={`jellyfish-${i}`}
+                  className="absolute text-2xl opacity-50"
+                  style={{
+                    left: `${20 + i * 25}%`,
+                    top: `${10 + i * 15}%`,
+                    animation: `float-bob ${4 + i * 0.5}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.8}s`
+                  }}
+                >
+                  🪼
+                </div>
+              ))}
+              {/* Dolphins */}
+              {[...Array(2)].map((_, i) => (
+                <div
+                  key={`dolphin-${i}`}
+                  className="absolute text-4xl opacity-65"
+                  style={{
+                    top: `${30 + i * 20}%`,
+                    left: '-120px',
+                    animation: `fish-swim ${25 + Math.random() * 5}s linear infinite`,
+                    animationDelay: `${i * 15}s`
+                  }}
+                >
+                  🐬
+                </div>
+              ))}
+            </div>
+            
+            {/* Ocean Bubbles */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full bg-cyan-200 opacity-40"
+                  style={{
+                    width: `${4 + Math.random() * 12}px`,
+                    height: `${4 + Math.random() * 12}px`,
+                    left: `${Math.random() * 100}%`,
+                    bottom: '-50px',
+                    animation: `bubble-rise ${5 + Math.random() * 4}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.3}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Wave Layers at Bottom */}
+            <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
+              <div className="absolute bottom-0 w-full h-48 bg-gradient-to-t from-cyan-700/25 to-transparent animate-wave" 
+                style={{ animationDuration: '3.5s' }} />
+              <div className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-blue-600/20 to-transparent animate-wave" 
+                style={{ animationDuration: '4.5s', animationDelay: '0.5s' }} />
+              <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-cyan-500/15 to-transparent animate-wave" 
+                style={{ animationDuration: '5.5s', animationDelay: '1s' }} />
+            </div>
+            
+            {/* Coral and Seaweed at Bottom */}
+            <div className="fixed bottom-0 left-0 w-full overflow-hidden pointer-events-none z-0">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute bottom-0 text-4xl opacity-50"
+                  style={{
+                    left: `${5 + i * 18}%`,
+                    animation: `wave-motion ${2.5 + i * 0.4}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.25}s`
+                  }}
+                >
+                  {i % 3 === 0 ? '🪸' : i % 3 === 1 ? '🌊' : '🌿'}
+                </div>
+              ))}
+            </div>
+            
+            {/* Bioluminescent Particles */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(15)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full bg-cyan-400 blur-sm"
+                  style={{
+                    width: '3px',
+                    height: '3px',
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    opacity: 0,
+                    animation: `bioluminescence ${3 + Math.random() * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.4}s`
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        
+        {selectedTheme === 'steampunkVictorian' && (
+          <>
+            {/* Floating Gears */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={`gear-${i}`}
+                  className="absolute text-6xl opacity-20"
+                  style={{
+                    left: `${10 + i * 12}%`,
+                    top: `${5 + i * 11}%`,
+                    animation: `gear-rotate ${10 + i * 2}s linear infinite`,
+                    color: i % 2 === 0 ? '#b87333' : '#d4af37'
+                  }}
+                >
+                  ⚙️
+                </div>
+              ))}
+            </div>
+            
+            {/* Steam Pipes */}
+            <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={`pipe-${i}`}
+                  className="absolute bottom-0 w-12 bg-gradient-to-t from-amber-900/40 to-transparent"
+                  style={{
+                    height: '200px',
+                    left: `${15 + i * 25}%`,
+                    borderLeft: '3px solid rgba(139, 69, 19, 0.3)',
+                    borderRight: '3px solid rgba(139, 69, 19, 0.3)'
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Rising Steam */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(12)].map((_, i) => (
+                <div
+                  key={`steam-${i}`}
+                  className="absolute text-3xl opacity-30"
+                  style={{
+                    left: `${15 + (i % 4) * 25}%`,
+                    bottom: '-50px',
+                    animation: `steam-rise ${4 + Math.random() * 2}s ease-out infinite`,
+                    animationDelay: `${i * 0.5}s`
+                  }}
+                >
+                  💨
+                </div>
+              ))}
+            </div>
+            
+            {/* Clockwork Elements */}
+            <div className="fixed top-20 right-10 pointer-events-none z-0 opacity-25">
+              <div className="relative w-32 h-32">
+                {/* Clock Face */}
+                <div className="absolute inset-0 rounded-full border-4 border-amber-700/50 bg-amber-100/10" />
+                {/* Clock Hands */}
+                <div 
+                  className="absolute top-1/2 left-1/2 w-1 h-12 bg-amber-800 origin-bottom"
+                  style={{
+                    transform: 'translate(-50%, -100%)',
+                    animation: 'gear-rotate 60s linear infinite'
+                  }}
+                />
+                <div 
+                  className="absolute top-1/2 left-1/2 w-1 h-8 bg-amber-600 origin-bottom"
+                  style={{
+                    transform: 'translate(-50%, -100%)',
+                    animation: 'gear-rotate 5s linear infinite'
+                  }}
+                />
+              </div>
+            </div>
+            
+            {/* Brass Machinery Parts */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={`machine-${i}`}
+                  className="absolute text-5xl opacity-15"
+                  style={{
+                    left: `${5 + i * 18}%`,
+                    top: `${60 + (i % 3) * 10}%`,
+                    animation: `gentle-float ${8 + i}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.7}s`,
+                    color: '#b87333'
+                  }}
+                >
+                  {i % 3 === 0 ? '🔧' : i % 3 === 1 ? '🔩' : '⚙️'}
+                </div>
+              ))}
+            </div>
+            
+            {/* Victorian Lamp Posts */}
+            <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
+              {[...Array(2)].map((_, i) => (
+                <div
+                  key={`lamp-${i}`}
+                  className="absolute text-6xl opacity-40"
+                  style={{
+                    left: i === 0 ? '8%' : '88%',
+                    bottom: '20px',
+                    animation: `lamp-flicker ${3 + i}s ease-in-out infinite`,
+                    filter: 'drop-shadow(0 0 10px rgba(255, 170, 0, 0.5))'
+                  }}
+                >
+                  🕯️
+                </div>
+              ))}
+            </div>
+            
+            {/* Brass Glow */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-900/10 via-transparent to-orange-900/10" />
+            </div>
+          </>
+        )}
+        
+        {(selectedTheme === 'light' || selectedTheme === 'dark') && (
+          <>
+            {/* Subtle Gradient Orbs */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full blur-3xl"
+                  style={{
+                    width: `${250 + i * 50}px`,
+                    height: `${250 + i * 50}px`,
+                    left: `${i * 20}%`,
+                    top: `${i * 15}%`,
+                    background: selectedTheme === 'light' 
+                      ? 'radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent)'
+                      : 'radial-gradient(circle, rgba(96, 165, 250, 0.1), transparent)',
+                    animation: `gentle-float ${15 + i * 2}s ease-in-out infinite`,
+                    animationDelay: `${i * 0.8}s`
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
         {/* Module Selection */}
-        <main className="max-w-5xl mx-auto px-6 py-12">
+        <main className="max-w-5xl mx-auto px-6 py-12 relative z-10">
           <div className="text-center mb-12">
             <h2 className={`text-3xl font-bold ${theme.headerText || theme.text} mb-3`}>Select a Module</h2>
             <p className={`text-lg ${theme.headerTextMuted || theme.textMuted}`}>Choose the reporting standard you want to work with</p>
@@ -1770,6 +2916,31 @@ function App() {
                 <span className={`text-xs ${theme.textMuted} ml-2`}>Non-Tax Jurisdiction</span>
               </div>
             </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-16 text-center">
+            <p 
+              className="text-lg font-bold bg-clip-text text-transparent animate-pulse" 
+              style={{ 
+                animationDuration: '3s',
+                backgroundImage: selectedTheme === 'ocean' ? 'linear-gradient(to right, #06b6d4, #0284c7, #0369a1)' :
+                                 selectedTheme === 'forest' ? 'linear-gradient(to right, #10b981, #059669, #047857)' :
+                                 selectedTheme === 'sunset' ? 'linear-gradient(to right, #fb923c, #f97316, #ea580c)' :
+                                 selectedTheme === 'lavender' ? 'linear-gradient(to right, #a78bfa, #c084fc, #e879f9)' :
+                                 selectedTheme === 'midnight' ? 'linear-gradient(to right, #8b5cf6, #7c3aed, #6d28d9)' :
+                                 selectedTheme === 'spaceGalaxy' ? 'linear-gradient(to right, #00d9ff, #7b2cbf, #ff006e)' :
+                                 selectedTheme === 'cyberpunkNeon' ? 'linear-gradient(to right, #ff006e, #00f0ff, #b400ff)' :
+                                 selectedTheme === 'organicForest' ? 'linear-gradient(to right, #4a7c39, #2d5016, #65a30d)' :
+                                 selectedTheme === 'oceanUnderwater' ? 'linear-gradient(to right, #06b6d4, #0891b2, #0e7490)' :
+                                 selectedTheme === 'steampunkVictorian' ? 'linear-gradient(to right, #d4af37, #b87333, #8b4513)' :
+                                 selectedTheme === 'dark' ? 'linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899)' :
+                                 'linear-gradient(to right, #2563eb, #7c3aed, #db2777)',
+                filter: 'drop-shadow(0 0 10px rgba(147, 51, 234, 0.5))'
+              }}
+            >
+              Created by Team MDES - All Rights Reserved
+            </p>
           </div>
         </main>
       </div>
@@ -3634,18 +4805,18 @@ function App() {
               
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {[
-                  { key: 'light', name: 'Light', icon: '☀️', preview: 'from-blue-500 to-indigo-600', dark: false },
-                  { key: 'dark', name: 'Dark', icon: '🌙', preview: 'from-blue-600 to-indigo-800', dark: true },
-                  { key: 'midnight', name: 'Midnight', icon: '🌌', preview: 'from-violet-600 to-purple-900', dark: true },
-                  { key: 'ocean', name: 'Ocean', icon: '🌊', preview: 'from-cyan-500 to-blue-700', dark: true },
-                  { key: 'sunset', name: 'Sunset', icon: '🌅', preview: 'from-orange-400 to-rose-500', dark: false },
-                  { key: 'forest', name: 'Forest', icon: '🌲', preview: 'from-emerald-500 to-green-700', dark: true },
-                  { key: 'lavender', name: 'Lavender', icon: '💜', preview: 'from-purple-400 to-fuchsia-500', dark: false },
-                  { key: 'spaceGalaxy', name: 'Space Galaxy', icon: '🚀', preview: 'from-[#00d9ff] via-[#7b2cbf] to-[#ff006e]', dark: true },
-                  { key: 'cyberpunkNeon', name: 'Cyberpunk', icon: '⚡', preview: 'from-[#ff006e] via-[#00f0ff] to-[#b400ff]', dark: true },
-                  { key: 'organicForest', name: 'Organic Forest', icon: '🌿', preview: 'from-[#4a7c39] to-[#2d5016]', dark: false },
-                  { key: 'oceanUnderwater', name: 'Ocean Depths', icon: '🐠', preview: 'from-[#39cccc] to-[#001f3f]', dark: true },
-                  { key: 'steampunkVictorian', name: 'Steampunk', icon: '⚙️', preview: 'from-[#d4af37] via-[#b87333] to-[#8b4513]', dark: false },
+                  { key: 'light', name: 'Light', icon: '☀️', dark: false },
+                  { key: 'dark', name: 'Dark', icon: '🌙', dark: true },
+                  { key: 'midnight', name: 'Midnight', icon: '🌌', dark: true },
+                  { key: 'ocean', name: 'Ocean', icon: '🌊', dark: true },
+                  { key: 'sunset', name: 'Sunset', icon: '🌅', dark: false },
+                  { key: 'forest', name: 'Forest', icon: '🌲', dark: true },
+                  { key: 'lavender', name: 'Lavender', icon: '💜', dark: false },
+                  { key: 'spaceGalaxy', name: 'Space Galaxy', icon: '🚀', dark: true },
+                  { key: 'cyberpunkNeon', name: 'Cyberpunk', icon: '⚡', dark: true },
+                  { key: 'organicForest', name: 'Organic Forest', icon: '🌿', dark: false },
+                  { key: 'oceanUnderwater', name: 'Ocean Depths', icon: '🐠', dark: true },
+                  { key: 'steampunkVictorian', name: 'Steampunk', icon: '⚙️', dark: false },
                 ].map((item) => (
                   <button
                     key={item.key}
@@ -3656,7 +4827,137 @@ function App() {
                         : 'border-2 border-gray-200 hover:border-gray-400'
                     }`}
                   >
-                    <div className={`h-14 bg-gradient-to-br ${item.preview}`} />
+                    {/* Animated Preview */}
+                    <div className={`h-32 relative overflow-hidden ${item.dark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+                      {/* Ocean */}
+                      {item.key === 'ocean' && (
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-b from-cyan-700/40 to-blue-800/50" />
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="absolute text-2xl" style={{ left: `${15 + i * 30}%`, top: `${40 + i * 5}%`, animation: `float-bob ${3 + i}s ease-in-out infinite` }}>🐠</div>
+                          ))}
+                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xl opacity-70">🌊</div>
+                        </>
+                      )}
+                      {/* Forest */}
+                      {item.key === 'forest' && (
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-b from-green-800/30 to-green-900/40" />
+                          <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-green-600/50 to-transparent" />
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="absolute text-3xl opacity-80" style={{ left: `${i * 35}%`, bottom: '5px', animation: `wave-motion ${2 + i}s ease-in-out infinite` }}>🌳</div>
+                          ))}
+                          <div className="absolute top-2 right-2 text-lg">🦅</div>
+                        </>
+                      )}
+                      {/* Sunset */}
+                      {item.key === 'sunset' && (
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-br from-amber-300/40 to-rose-300/40" />
+                          <div className="absolute top-3 left-3 w-10 h-10 rounded-full bg-gradient-to-br from-yellow-300 to-orange-400 shadow-lg" />
+                          <div className="absolute top-2 right-2 text-3xl opacity-80">🌈</div>
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="absolute w-0.5 h-16 bg-gradient-to-b from-yellow-300/40 to-transparent" style={{ left: `${30 + i * 15}%`, top: '15px', transform: `rotate(${-30 + i * 30}deg)` }} />
+                          ))}
+                        </>
+                      )}
+                      {/* Lavender */}
+                      {item.key === 'lavender' && (
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-br from-purple-300/40 to-pink-300/40" />
+                          {[...Array(6)].map((_, i) => (
+                            <div key={i} className="absolute text-lg" style={{ left: `${10 + i * 15}%`, top: `${10 + i * 12}%`, animation: `twinkle ${2 + i * 0.3}s ease-in-out infinite` }}>✨</div>
+                          ))}
+                          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-2xl">🌸</div>
+                          <div className="absolute top-1/2 right-2 text-xl opacity-70">🦋</div>
+                        </>
+                      )}
+                      {/* Midnight */}
+                      {item.key === 'midnight' && (
+                        <>
+                          <div className="absolute inset-0 bg-[#0f0f23]" />
+                          {[...Array(15)].map((_, i) => (
+                            <div key={i} className="absolute w-1 h-1 bg-white rounded-full" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, opacity: 0.8, animation: `twinkle ${2 + Math.random()}s ease-in-out infinite` }} />
+                          ))}
+                          <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-300 overflow-hidden shadow-lg">
+                            <div className="absolute -right-1.5 top-0 w-8 h-8 rounded-full bg-[#0f0f23]" />
+                          </div>
+                        </>
+                      )}
+                      {/* Space Galaxy */}
+                      {item.key === 'spaceGalaxy' && (
+                        <>
+                          <div className="absolute inset-0 bg-[#0a0e27]" />
+                          {[...Array(20)].map((_, i) => (
+                            <div key={i} className="absolute w-1 h-1 rounded-full" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, background: i % 3 === 0 ? '#00d9ff' : i % 3 === 1 ? '#ff006e' : '#fff', opacity: 0.9, animation: `twinkle ${1 + Math.random()}s ease-in-out infinite` }} />
+                          ))}
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl transform -rotate-45 drop-shadow-[0_0_8px_rgba(0,217,255,0.8)]">🚀</div>
+                          <div className="absolute bottom-2 right-2 text-xl opacity-70">🪐</div>
+                        </>
+                      )}
+                      {/* Cyberpunk */}
+                      {item.key === 'cyberpunkNeon' && (
+                        <>
+                          <div className="absolute inset-0 bg-[#0a0a0a]" />
+                          <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(255,0,110,0.4) 1px, transparent 1px)', backgroundSize: '15px 15px', opacity: 0.3 }} />
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl" style={{ textShadow: '0 0 15px #ff006e, 0 0 30px #ff006e' }}>⚡</div>
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-40" style={{ top: `${30 + i * 20}%` }} />
+                          ))}
+                        </>
+                      )}
+                      {/* Organic Forest */}
+                      {item.key === 'organicForest' && (
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-br from-green-200/30 to-emerald-200/30" />
+                          <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-blue-400/40 to-transparent" />
+                          <div className="absolute bottom-3 left-1/4 text-2xl" style={{ animation: 'float-bob 3s ease-in-out infinite' }}>🦢</div>
+                          <div className="absolute bottom-3 right-1/4 text-2xl">🦚</div>
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="absolute text-lg opacity-60" style={{ left: `${20 + i * 30}%`, bottom: '10px' }}>🌾</div>
+                          ))}
+                        </>
+                      )}
+                      {/* Ocean Depths */}
+                      {item.key === 'oceanUnderwater' && (
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-b from-cyan-800/50 to-indigo-950/60" />
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="absolute text-xl" style={{ left: `${20 + i * 30}%`, top: `${30 + i * 15}%`, animation: `float-bob ${3 + i}s ease-in-out infinite` }}>🐠</div>
+                          ))}
+                          <div className="absolute bottom-1 left-1/3 text-xl">🪸</div>
+                          <div className="absolute top-1/4 right-1/4 text-lg opacity-60" style={{ animation: 'float-bob 4s ease-in-out infinite' }}>🪼</div>
+                        </>
+                      )}
+                      {/* Steampunk */}
+                      {item.key === 'steampunkVictorian' && (
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-br from-amber-800/40 to-orange-900/40" />
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="absolute text-2xl opacity-50" style={{ left: `${15 + i * 30}%`, top: `${15 + i * 20}%`, animation: `gear-rotate ${5 + i * 2}s linear infinite`, color: '#b87333' }}>⚙️</div>
+                          ))}
+                          <div className="absolute bottom-2 left-2 text-lg opacity-60">💨</div>
+                          <div className="absolute bottom-2 right-2 text-lg opacity-50">🕯️</div>
+                        </>
+                      )}
+                      {/* Light */}
+                      {item.key === 'light' && (
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/30 to-indigo-500/30" />
+                          <div className="absolute top-2 right-2 text-3xl">☀️</div>
+                        </>
+                      )}
+                      {/* Dark */}
+                      {item.key === 'dark' && (
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-700/40 to-indigo-900/50" />
+                          <div className="absolute top-2 right-2 text-3xl">🌙</div>
+                          {[...Array(8)].map((_, i) => (
+                            <div key={i} className="absolute w-0.5 h-0.5 bg-white rounded-full" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, opacity: 0.6 }} />
+                          ))}
+                        </>
+                      )}
+                    </div>
                     <div className={`py-2.5 px-2 text-center ${item.dark ? 'bg-gray-800' : 'bg-white'}`}>
                       <span className="mr-1">{item.icon}</span>
                       <span className={`font-medium text-sm ${item.dark ? 'text-white' : 'text-gray-900'}`}>{item.name}</span>
