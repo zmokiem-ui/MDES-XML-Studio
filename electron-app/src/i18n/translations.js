@@ -16,9 +16,9 @@ export const translations = {
     
     // Modules
     modules: {
-      crs: 'CRS Generator',
-      fatca: 'FATCA Generator',
-      cbc: 'CBC Generator'
+      crs: 'CRS',
+      fatca: 'FATCA',
+      cbc: 'CBC'
     },
     moduleDescriptions: {
       crs: 'Common Reporting Standard',
@@ -243,9 +243,9 @@ export const translations = {
     
     // Modules
     modules: {
-      crs: 'CRS Generator',
-      fatca: 'FATCA Generator',
-      cbc: 'CBC Generator'
+      crs: 'CRS',
+      fatca: 'FATCA',
+      cbc: 'CBC'
     },
     moduleDescriptions: {
       crs: 'Common Reporting Standard',
@@ -471,9 +471,9 @@ export const translations = {
     
     // Modules
     modules: {
-      crs: 'Generador CRS',
-      fatca: 'Generador FATCA',
-      cbc: 'Generador CBC'
+      crs: 'CRS',
+      fatca: 'FATCA',
+      cbc: 'CBC'
     },
     moduleDescriptions: {
       crs: 'Estándar Común de Reporte',

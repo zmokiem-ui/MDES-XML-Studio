@@ -1852,9 +1852,20 @@ function App() {
   }
 
   const handleSelectCorrectionOutput = async () => {
-    const filePath = await window.electronAPI.selectCorrectionOutput(activeModule)
-    if (filePath) {
-      setCorrectionOutputPath(filePath)
+    console.log('Correction Browse button clicked, module:', activeModule)
+    if (!window.electronAPI) {
+      console.error('electronAPI not available - are you running in Electron?')
+      alert('File browser only works in Electron app. Please run: npm run electron')
+      return
+    }
+    try {
+      const filePath = await window.electronAPI.selectCorrectionOutput(activeModule)
+      console.log('selectCorrectionOutput result:', filePath)
+      if (filePath) {
+        setCorrectionOutputPath(filePath)
+      }
+    } catch (err) {
+      console.error('Correction Browse error:', err)
     }
   }
 
@@ -4670,8 +4681,19 @@ function App() {
                 />
                 <button
                   onClick={async () => {
-                    const result = await window.electronAPI.selectOutputFile('cbc')
-                    if (result) setCbcFormData({...cbcFormData, outputPath: result})
+                    console.log('CBC Browse button clicked')
+                    if (!window.electronAPI) {
+                      console.error('electronAPI not available - are you running in Electron?')
+                      alert('File browser only works in Electron app. Please run: npm run electron')
+                      return
+                    }
+                    try {
+                      const result = await window.electronAPI.selectOutputFile('cbc')
+                      console.log('selectOutputFile result:', result)
+                      if (result) setCbcFormData(prev => ({...prev, outputPath: result}))
+                    } catch (err) {
+                      console.error('Browse error:', err)
+                    }
                   }}
                   className={`px-4 py-2 ${theme.buttonPrimary} font-medium rounded-lg transition-colors flex items-center gap-2`}
                 >
