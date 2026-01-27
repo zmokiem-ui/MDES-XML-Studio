@@ -10,8 +10,7 @@ import sys
 from pathlib import Path
 
 from .cbc_generator import generate_cbc_xml, CBCGeneratorConfig, CBCGenerator
-# TODO: Implement CBC correction generator
-# from .cbc_correction_generator import generate_cbc_correction, load_doc_ref_ids_from_csv
+from .cbc_correction_generator import generate_cbc_correction, load_doc_ref_ids_from_csv
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -137,34 +136,29 @@ def cmd_generate(args) -> int:
 
 def cmd_correct(args) -> int:
     """Handle the correct command."""
-    print("Error: CBC correction generator is not yet implemented.", file=sys.stderr)
-    print("Please use the Electron app's correction feature or implement cbc_correction_generator.py", file=sys.stderr)
-    return 1
+    print(f"Generating CBC {args.type} from {args.source}")
     
-    # TODO: Implement CBC correction functionality
-    # print(f"Generating CBC {args.type} from {args.source}")
-    # 
-    # # Load DocRefIds from CSV if provided
-    # doc_ref_ids = None
-    # if args.csv:
-    #     doc_ref_ids = load_doc_ref_ids_from_csv(args.csv)
-    #     print(f"  Loaded {len(doc_ref_ids)} DocRefIds from CSV")
-    # 
-    # try:
-    #     output_path = generate_cbc_correction(
-    #         source_xml_path=args.source,
-    #         correction_type=args.type,
-    #         output_path=args.output,
-    #         test_mode=not args.production,
-    #         doc_ref_ids=doc_ref_ids,
-    #         modify_entity_names=args.modify_names,
-    #         modification_percentage=args.change_percent
-    #     )
-    #     print(f"\nSuccess! Generated: {output_path}")
-    #     return 0
-    # except Exception as e:
-    #     print(f"Error: {e}", file=sys.stderr)
-    #     return 1
+    # Load DocRefIds from CSV if provided
+    doc_ref_ids = None
+    if args.csv:
+        doc_ref_ids = load_doc_ref_ids_from_csv(args.csv)
+        print(f"  Loaded {len(doc_ref_ids)} DocRefIds from CSV")
+    
+    try:
+        output_path = generate_cbc_correction(
+            source_xml_path=args.source,
+            correction_type=args.type,
+            output_path=args.output,
+            test_mode=not args.production,
+            doc_ref_ids=doc_ref_ids,
+            modify_entity_names=args.modify_names,
+            modification_percentage=args.change_percent
+        )
+        print(f"\nSuccess! Generated: {output_path}")
+        return 0
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
 
 
 def main():
