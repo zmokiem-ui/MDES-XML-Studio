@@ -9,7 +9,7 @@ import {
   AlertTriangle, Minus, Plus, Search, Flag, ArrowLeft,
   DollarSign, Landmark, FileCheck, Keyboard, ArrowLeftRight,
   Languages, Layers, Maximize2, Minimize2, Copy, RotateCcw,
-  Zap, Star, Library
+  Zap, Star, Library, Code
 } from 'lucide-react'
 import { DiffEditor } from '@monaco-editor/react'
 import * as Diff from 'diff'
@@ -142,16 +142,16 @@ function BatchProcessorModal({ theme, onClose, onGenerate }) {
 
         {/* Add Jobs */}
         <div className={`p-4 rounded-lg border ${theme.border} mb-4`}>
-          <p className={`text-sm ${theme.textMuted} mb-3`}>Add files to generate in batch:</p>
+          <p className={`text-sm ${theme.textMuted} mb-3`}>{t(language, 'batch.addFilesPrompt')}</p>
           <div className="flex gap-2">
             <button onClick={() => addJob('crs')} className={`px-4 py-2 rounded-lg ${theme.buttonPrimary} text-sm font-medium flex items-center gap-2`}>
-              <Plus className="w-4 h-4" /> CRS File
+              <Plus className="w-4 h-4" /> {t(language, 'batch.crsFile')}
             </button>
             <button onClick={() => addJob('fatca')} className={`px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium flex items-center gap-2`}>
-              <Plus className="w-4 h-4" /> FATCA File
+              <Plus className="w-4 h-4" /> {t(language, 'batch.fatcaFile')}
             </button>
             <button onClick={() => addJob('cbc')} className={`px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium flex items-center gap-2`}>
-              <Plus className="w-4 h-4" /> CBC File
+              <Plus className="w-4 h-4" /> {t(language, 'batch.cbcFile')}
             </button>
           </div>
         </div>
@@ -160,8 +160,8 @@ function BatchProcessorModal({ theme, onClose, onGenerate }) {
         {jobs.length > 0 && (
           <div className={`p-4 rounded-lg border ${theme.border} mb-4`}>
             <div className="flex items-center justify-between mb-3">
-              <p className={`font-medium ${theme.text}`}>{jobs.length} file(s) queued</p>
-              <button onClick={() => setJobs([])} className={`text-xs ${theme.textMuted} hover:underline`}>Clear All</button>
+              <p className={`font-medium ${theme.text}`}>{jobs.length} {t(language, 'batch.filesQueued')}</p>
+              <button onClick={() => setJobs([])} className={`text-xs ${theme.textMuted} hover:underline`}>{t(language, 'batch.clearAll')}</button>
             </div>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {jobs.map((job, idx) => (
@@ -177,7 +177,7 @@ function BatchProcessorModal({ theme, onClose, onGenerate }) {
                       {job.module !== 'cbc' ? (
                         <>
                           <label className="flex items-center gap-1">
-                            <span className={`text-xs ${theme.textMuted}`}>Ind:</span>
+                            <span className={`text-xs ${theme.textMuted}`}>{t(language, 'batch.ind')}:</span>
                             <input 
                               type="number" 
                               min="0" 
@@ -189,7 +189,7 @@ function BatchProcessorModal({ theme, onClose, onGenerate }) {
                             />
                           </label>
                           <label className="flex items-center gap-1">
-                            <span className={`text-xs ${theme.textMuted}`}>Org:</span>
+                            <span className={`text-xs ${theme.textMuted}`}>{t(language, 'batch.org')}:</span>
                             <input 
                               type="number" 
                               min="0" 
@@ -203,7 +203,7 @@ function BatchProcessorModal({ theme, onClose, onGenerate }) {
                         </>
                       ) : (
                         <label className="flex items-center gap-1">
-                          <span className={`text-xs ${theme.textMuted}`}>Reports:</span>
+                          <span className={`text-xs ${theme.textMuted}`}>{t(language, 'batch.reports')}:</span>
                           <input 
                             type="number" 
                             min="1" 
@@ -235,13 +235,13 @@ function BatchProcessorModal({ theme, onClose, onGenerate }) {
 
         {/* Output Folder */}
         <div className={`p-4 rounded-lg border ${theme.border} mb-4`}>
-          <p className={`text-sm font-medium ${theme.text} mb-2`}>Output Location</p>
+          <p className={`text-sm font-medium ${theme.text} mb-2`}>{t(language, 'batch.outputLocation')}</p>
           <div className="flex gap-2">
             <input 
               type="text" 
               value={outputFolder} 
               readOnly 
-              placeholder="Select output folder..."
+              placeholder={t(language, 'batch.selectOutputFolder')}
               className={`flex-1 px-3 py-2 rounded-lg ${theme.input}`}
             />
             <button onClick={selectOutputFolder} className={`px-4 py-2 rounded-lg ${theme.buttonSecondary}`}>
@@ -254,7 +254,7 @@ function BatchProcessorModal({ theme, onClose, onGenerate }) {
         {results.length > 0 && (
           <div className={`p-4 rounded-lg border ${theme.border} mb-4 ${successCount === results.length ? 'border-green-500/50 bg-green-500/5' : 'border-amber-500/50 bg-amber-500/5'}`}>
             <p className={`font-medium ${theme.text} mb-2`}>
-              Batch Complete: {successCount} succeeded, {errorCount} failed
+              {t(language, 'batch.batchComplete')}: {successCount} {t(language, 'batch.succeeded')}, {errorCount} {t(language, 'batch.failed')}
             </p>
             {errorCount > 0 && (
               <div className="text-sm text-red-500">
@@ -278,13 +278,13 @@ function BatchProcessorModal({ theme, onClose, onGenerate }) {
             }`}
           >
             {processing ? (
-              <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+              <><Loader2 className="w-5 h-5 animate-spin" /> {t(language, 'actions.processing')}</>
             ) : (
-              <><Rocket className="w-5 h-5" /> Generate {jobs.length} File(s)</>
+              <><Rocket className="w-5 h-5" /> {t(language, 'actions.generate')} {jobs.length} File(s)</>
             )}
           </button>
           <button onClick={onClose} className={`px-6 py-3 rounded-lg font-semibold ${theme.buttonSecondary}`}>
-            Close
+            {t(language, 'actions.close')}
           </button>
         </div>
       </div>
@@ -380,7 +380,7 @@ function XMLDiffModal({ theme, onClose }) {
     updateDiffStats()
   }, [leftContent, rightContent])
 
-  const getFileName = (path) => path?.split(/[/\\]/).pop() || 'No file selected'
+  const getFileName = (path) => path?.split(/[/\\]/).pop() || t(language, 'diff.noFileSelected')
   
   const swapFiles = () => {
     const tempFile = leftFile
@@ -453,13 +453,13 @@ Generated by CRS Test Data Generator`
                 onClick={() => setViewMode('side')}
                 className={`px-3 py-1.5 text-xs font-medium ${viewMode === 'side' ? theme.buttonPrimary : theme.buttonSecondary}`}
               >
-                Side by Side
+                {t(language, 'diff.sideBySide')}
               </button>
               <button 
                 onClick={() => setViewMode('inline')}
                 className={`px-3 py-1.5 text-xs font-medium ${viewMode === 'inline' ? theme.buttonPrimary : theme.buttonSecondary}`}
               >
-                Inline
+                {t(language, 'diff.inline')}
               </button>
             </div>
             <button 
@@ -489,7 +489,7 @@ Generated by CRS Test Data Generator`
               className={`px-3 py-1.5 rounded-lg text-xs font-medium ${theme.buttonPrimary} flex items-center gap-1`}
             >
               {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-              Load
+              {t(language, 'diff.load')}
             </button>
           </div>
           
@@ -505,7 +505,7 @@ Generated by CRS Test Data Generator`
               className={`px-3 py-1.5 rounded-lg text-xs font-medium bg-green-600 hover:bg-green-700 text-white flex items-center gap-1`}
             >
               {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-              Load
+              {t(language, 'diff.load')}
             </button>
           </div>
         </div>
@@ -532,7 +532,7 @@ Generated by CRS Test Data Generator`
                 onClick={swapFiles}
                 disabled={!leftContent && !rightContent}
                 className={`p-1.5 rounded ${theme.buttonSecondary}`}
-                title="Swap files"
+                title={t(language, 'diff.swap')}
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -540,14 +540,14 @@ Generated by CRS Test Data Generator`
                 onClick={copyDiffSummary}
                 disabled={!leftContent || !rightContent}
                 className={`p-1.5 rounded ${theme.buttonSecondary}`}
-                title="Copy summary"
+                title={t(language, 'diff.copySummary')}
               >
                 <Copy className="w-4 h-4" />
               </button>
               <button 
                 onClick={clearAll}
                 className={`p-1.5 rounded ${theme.buttonSecondary}`}
-                title="Clear all"
+                title={t(language, 'diff.clear')}
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -560,10 +560,9 @@ Generated by CRS Test Data Generator`
           {(!leftContent || !rightContent) ? (
             <div className={`h-full flex flex-col items-center justify-center p-8`} style={{ backgroundColor: isDark ? '#1e1e1e' : '#f5f5f5' }}>
               <ArrowLeftRight className={`w-16 h-16 mb-6 ${theme.textMuted} opacity-30`} />
-              <h3 className={`text-xl font-semibold ${theme.text} mb-2`}>Professional XML Comparison</h3>
+              <h3 className={`text-xl font-semibold ${theme.text} mb-2`}>{t(language, 'diff.title')}</h3>
               <p className={`text-sm mb-6 text-center max-w-md ${theme.textMuted}`}>
-                Load two XML files to compare them side-by-side with full syntax highlighting,
-                inline diff view, and VS Code-quality editing experience.
+                {t(language, 'diff.loadFiles')}
               </p>
               
               {/* File Status */}
@@ -575,7 +574,7 @@ Generated by CRS Test Data Generator`
                     <XCircle className={`w-5 h-5 ${theme.textMuted}`} />
                   )}
                   <span className={`text-sm ${leftContent ? 'text-blue-500 font-medium' : theme.textMuted}`}>
-                    {leftContent ? `Original: ${getFileName(leftFile)}` : 'Original file not loaded'}
+                    {leftContent ? `${t(language, 'diff.original')}: ${getFileName(leftFile)}` : `${t(language, 'diff.originalFile')} ${t(language, 'diff.notLoaded')}`}
                   </span>
                 </div>
                 <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${rightContent ? 'bg-green-500/20 border border-green-500/50' : theme.bg + ' border ' + theme.border}`}>
@@ -585,7 +584,7 @@ Generated by CRS Test Data Generator`
                     <XCircle className={`w-5 h-5 ${theme.textMuted}`} />
                   )}
                   <span className={`text-sm ${rightContent ? 'text-green-500 font-medium' : theme.textMuted}`}>
-                    {rightContent ? `Modified: ${getFileName(rightFile)}` : 'Modified file not loaded'}
+                    {rightContent ? `${t(language, 'diff.modified')}: ${getFileName(rightFile)}` : `${t(language, 'diff.modifiedFile')} ${t(language, 'diff.notLoaded')}`}
                   </span>
                 </div>
               </div>
@@ -4133,9 +4132,9 @@ function App() {
             {/* Navigation */}
             <nav className="flex items-center gap-1">
               {[
-                { id: 'generator', icon: Rocket, label: 'Generator' },
-                { id: 'corrections', icon: FileEdit, label: 'Corrections' },
-                ...(activeModule === 'crs' ? [{ id: 'tools', icon: RefreshCw, label: 'Tools' }] : [])
+                { id: 'generator', icon: Rocket, label: t(language || 'en', 'nav.generator') },
+                { id: 'corrections', icon: FileEdit, label: t(language || 'en', 'nav.correction') },
+                ...(activeModule === 'crs' ? [{ id: 'tools', icon: RefreshCw, label: t(language || 'en', 'tools.title') }] : [])
               ].map(({ id, icon: Icon, label }) => (
                 <button
                   key={id}
@@ -4179,11 +4178,11 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <Landmark className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>FATCA Message Header</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'form.fatcaMessageHeader')}</h2>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Sending Company GIIN *</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.sendingCompanyGIIN')} *</label>
                   <input
                     type="text"
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
@@ -4193,7 +4192,7 @@ function App() {
                   />
                 </div>
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Transmitting Country *</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.transmittingCountry')} *</label>
                   <input
                     type="text"
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
@@ -4211,10 +4210,10 @@ function App() {
                     value={fatcaFormData.receivingCountry}
                     readOnly
                   />
-                  <p className={`text-xs ${theme.textMuted} mt-1`}>Always US for FATCA</p>
+                  <p className={`text-xs ${theme.textMuted} mt-1`}>{t(language, 'ui.alwaysUSForFATCA')}</p>
                 </div>
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Reporting Period (Year)</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.reportingPeriod')}</label>
                   <select
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
                     value={fatcaFormData.reportingPeriod}
@@ -4244,7 +4243,7 @@ function App() {
                   />
                 </div>
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Filer Category *</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.filerCategory')} *</label>
                   <select
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
                     value={fatcaFormData.filerCategory}
@@ -4262,11 +4261,11 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <Users className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>Account Configuration</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'form.accountConfiguration')}</h2>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Individual Accounts</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.individualAccounts')}</label>
                   <input
                     type="number"
                     min="0"
@@ -4277,7 +4276,7 @@ function App() {
                   />
                 </div>
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Organisation Accounts</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.organisationAccounts')}</label>
                   <input
                     type="number"
                     min="0"
@@ -4288,7 +4287,7 @@ function App() {
                   />
                 </div>
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Substantial Owners per Org</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.substantialOwners')}</label>
                   <input
                     type="number"
                     min="0"
@@ -4306,7 +4305,7 @@ function App() {
                     onChange={(e) => setFatcaFormData({...fatcaFormData, testMode: e.target.checked})}
                     className="w-4 h-4 rounded border-gray-300"
                   />
-                  <span className={`text-sm ${theme.text}`}>Test Mode (FATCA11-14 indicators)</span>
+                  <span className={`text-sm ${theme.text}`}>{t(language, 'form.fatcaTestMode')}</span>
                 </label>
               </div>
             </div>
@@ -4315,13 +4314,13 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <Save className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>Output</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'common.output')}</h2>
               </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   className={`flex-1 px-4 py-2 rounded-lg border ${theme.input}`}
-                  placeholder="Select output file location..."
+                  placeholder={t(language, 'form.selectOutputLocation')}
                   value={fatcaFormData.outputPath}
                   readOnly
                 />
@@ -4333,7 +4332,7 @@ function App() {
                   className={`px-4 py-2 ${theme.buttonPrimary} font-medium rounded-lg transition-colors flex items-center gap-2`}
                 >
                   <FolderOpen className="w-4 h-4" />
-                  Browse
+                  {t(language, 'actions.browse')}
                 </button>
               </div>
             </div>
@@ -4347,12 +4346,12 @@ function App() {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-6 h-6 animate-spin" />
-                  <span>Generating FATCA XML...</span>
+                  <span>{t(language, 'actions.generatingFATCA')}</span>
                 </>
               ) : (
                 <>
                   <Rocket className="w-6 h-6" />
-                  <span>Generate FATCA XML</span>
+                  <span>{t(language, 'actions.generateFATCA')}</span>
                 </>
               )}
             </button>
@@ -4371,11 +4370,11 @@ function App() {
             {/* Data Source Toggle */}
             <div className={`${theme.card} rounded-xl border p-4 shadow-sm`}>
               <div className="flex items-center gap-4">
-                <span className={`text-sm font-medium ${theme.text}`}>Data Source:</span>
+                <span className={`text-sm font-medium ${theme.text}`}>{t(language, 'form.dataSource')}:</span>
                 <div className="flex gap-2">
                   {[
-                    { id: 'random', icon: Sparkles, label: 'Random Data' },
-                    { id: 'csv', icon: Upload, label: 'Upload CSV' }
+                    { id: 'random', icon: Sparkles, label: t(language, 'form.randomData') },
+                    { id: 'csv', icon: Upload, label: t(language, 'form.uploadCSV') }
                   ].map(({ id, icon: Icon, label }) => (
                     <button
                       key={id}
@@ -4399,7 +4398,7 @@ function App() {
               <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
                 <div className="flex items-center gap-3 mb-4">
                   <Upload className={`w-6 h-6 ${theme.accentText}`} />
-                  <h2 className={`text-lg font-semibold ${theme.text}`}>Upload CBC CSV File</h2>
+                  <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'form.uploadCSV')} CBC</h2>
                 </div>
                 
                 <div className="space-y-4">
@@ -4408,7 +4407,7 @@ function App() {
                       <input
                         type="text"
                         className={`w-full px-4 py-3 rounded-lg border ${theme.input}`}
-                        placeholder="Select CBC CSV file..."
+                        placeholder={t(language, 'form.selectOutputLocation')}
                         value={cbcCsvPath}
                         readOnly
                       />
@@ -4450,21 +4449,21 @@ function App() {
                       className={`px-6 py-3 ${theme.buttonPrimary} font-medium rounded-lg transition-colors flex items-center gap-2`}
                     >
                       <Upload className="w-4 h-4" />
-                      Browse
+                      {t(language, 'actions.browse')}
                     </button>
                   </div>
                   
                   <div className="flex items-start gap-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
                     <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
-                      <p className={`text-sm ${theme.text} font-medium mb-1`}>Need a template?</p>
-                      <p className={`text-xs ${theme.textMuted} mb-2`}>Download the CBC CSV template with example data</p>
+                      <p className={`text-sm ${theme.text} font-medium mb-1`}>{t(language, 'ui.needTemplate')}</p>
+                      <p className={`text-xs ${theme.textMuted} mb-2`}>{t(language, 'ui.cbcCsvTemplateDesc')}</p>
                       <button
                         onClick={handleDownloadTemplate}
                         className={`text-sm px-3 py-1.5 ${theme.buttonPrimary} rounded-lg flex items-center gap-1`}
                       >
                         <Download className="w-4 h-4" />
-                        Download Template
+                        {t(language, 'actions.download')} Template
                       </button>
                     </div>
                   </div>
@@ -4478,12 +4477,12 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
               <div className="flex items-center gap-3 mb-4">
                 <FileCheck className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>CBC File Type</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'form.cbcFileType')}</h2>
               </div>
               <div className="flex gap-4 mb-4">
                 {[
-                  { id: 'domestic', icon: Home, label: 'Domestic Filing' },
-                  { id: 'foreign', icon: Globe, label: 'Foreign Exchange' }
+                  { id: 'domestic', icon: Home, label: t(language, 'form.domesticFiling') },
+                  { id: 'foreign', icon: Globe, label: t(language, 'form.foreignExchange') }
                 ].map(({ id, icon: Icon, label }) => (
                   <button
                     key={id}
@@ -4508,13 +4507,11 @@ function App() {
                 <p className={`text-sm ${theme.text}`}>
                   {cbcFileType === 'domestic' ? (
                     <>
-                      <strong>Domestic Filing:</strong> File submitted to your local tax authority. 
-                      Receiving country will be the same as the transmitting country.
+                      <strong>{t(language, 'form.domesticFiling')}:</strong> {t(language, 'form.domesticFilingDesc')}
                     </>
                   ) : (
                     <>
-                      <strong>Foreign Exchange:</strong> File for automatic exchange with foreign tax authorities. 
-                      You must specify the receiving country (partner jurisdiction).
+                      <strong>{t(language, 'form.foreignExchange')}:</strong> {t(language, 'form.foreignExchangeDesc')}
                     </>
                   )}
                 </p>
@@ -4525,11 +4522,11 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <BarChart3 className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>CBC Message Header</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'form.cbcMessageHeader')}</h2>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Sending Entity TIN *</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.sendingEntityTIN')} *</label>
                   <input
                     type="text"
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
@@ -4539,7 +4536,7 @@ function App() {
                   />
                 </div>
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Transmitting Country *</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.transmittingCountry')} *</label>
                   <input
                     type="text"
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
@@ -4560,11 +4557,11 @@ function App() {
                       value={cbcFormData.receivingCountry}
                       onChange={(e) => setCbcFormData({...cbcFormData, receivingCountry: e.target.value.toUpperCase()})}
                     />
-                    <p className={`text-xs ${theme.textMuted} mt-1`}>Partner jurisdiction to exchange with</p>
+                    <p className={`text-xs ${theme.textMuted} mt-1`}>{t(language, 'ui.partnerJurisdiction')}</p>
                   </div>
                 )}
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Reporting Period (Year)</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.reportingPeriod')}</label>
                   <select
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
                     value={cbcFormData.reportingPeriod}
@@ -4580,31 +4577,31 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <Building2 className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>Reporting Entity (MNE)</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'form.reportingEntity')}</h2>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>MNE Group Name</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.mneGroupName')}</label>
                   <input
                     type="text"
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
-                    placeholder="Auto-generated if empty"
+                    placeholder={t(language, 'ui.autoGeneratedIfEmpty')}
                     value={cbcFormData.mneGroupName}
                     onChange={(e) => setCbcFormData({...cbcFormData, mneGroupName: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Reporting Entity Name</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.reportingEntityName')}</label>
                   <input
                     type="text"
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
-                    placeholder="Auto-generated if empty"
+                    placeholder={t(language, 'ui.autoGeneratedIfEmpty')}
                     value={cbcFormData.reportingEntityName}
                     onChange={(e) => setCbcFormData({...cbcFormData, reportingEntityName: e.target.value})}
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Reporting Role *</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.reportingRole')} *</label>
                   <select
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
                     value={cbcFormData.reportingRole}
@@ -4622,11 +4619,11 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <Globe className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>CBC Report Configuration</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'form.cbcReportConfiguration')}</h2>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Number of Jurisdiction Reports</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.numJurisdictionReports')}</label>
                   <input
                     type="number"
                     min="1"
@@ -4635,10 +4632,10 @@ function App() {
                     value={cbcFormData.numCbcReports}
                     onChange={(e) => setCbcFormData({...cbcFormData, numCbcReports: e.target.value})}
                   />
-                  <p className={`text-xs ${theme.textMuted} mt-1`}>One report per tax jurisdiction</p>
+                  <p className={`text-xs ${theme.textMuted} mt-1`}>{t(language, 'ui.oneReportPer')}</p>
                 </div>
                 <div>
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Constituent Entities per Report</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.constEntitiesPerReport')}</label>
                   <input
                     type="number"
                     min="1"
@@ -4647,7 +4644,7 @@ function App() {
                     value={cbcFormData.constEntitiesPerReport}
                     onChange={(e) => setCbcFormData({...cbcFormData, constEntitiesPerReport: e.target.value})}
                   />
-                  <p className={`text-xs ${theme.textMuted} mt-1`}>Companies in each jurisdiction</p>
+                  <p className={`text-xs ${theme.textMuted} mt-1`}>{t(language, 'ui.companiesInEach')}</p>
                 </div>
               </div>
               <div className="mt-4">
@@ -4658,7 +4655,7 @@ function App() {
                     onChange={(e) => setCbcFormData({...cbcFormData, testMode: e.target.checked})}
                     className="w-4 h-4 rounded border-gray-300"
                   />
-                  <span className={`text-sm ${theme.text}`}>Test Mode (OECD11-13 indicators)</span>
+                  <span className={`text-sm ${theme.text}`}>{t(language, 'form.cbcTestMode')}</span>
                 </label>
               </div>
             </div>
@@ -4669,13 +4666,13 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <Save className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>Output</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'common.output')}</h2>
               </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   className={`flex-1 px-4 py-2 rounded-lg border ${theme.input}`}
-                  placeholder="Select output file location..."
+                  placeholder={t(language, 'form.selectOutputLocation')}
                   value={cbcFormData.outputPath}
                   readOnly
                 />
@@ -4698,7 +4695,7 @@ function App() {
                   className={`px-4 py-2 ${theme.buttonPrimary} font-medium rounded-lg transition-colors flex items-center gap-2`}
                 >
                   <FolderOpen className="w-4 h-4" />
-                  Browse
+                  {t(language, 'actions.browse')}
                 </button>
               </div>
             </div>
@@ -4712,12 +4709,12 @@ function App() {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-6 h-6 animate-spin" />
-                  <span>Generating CBC XML...</span>
+                  <span>{t(language, 'actions.generatingCBC')}</span>
                 </>
               ) : (
                 <>
                   <Rocket className="w-6 h-6" />
-                  <span>Generate CBC XML</span>
+                  <span>{t(language, 'actions.generateCBC')}</span>
                 </>
               )}
             </button>
@@ -4736,11 +4733,11 @@ function App() {
             {/* Data Source Toggle */}
             <div className={`${theme.card} rounded-xl border p-4 shadow-sm`}>
               <div className="flex items-center gap-4">
-                <span className={`text-sm font-medium ${theme.text}`}>Data Source:</span>
+                <span className={`text-sm font-medium ${theme.text}`}>{t(language, 'form.dataSource')}:</span>
                 <div className="flex gap-2">
                   {[
-                    { id: 'random', icon: Sparkles, label: 'Random Data' },
-                    { id: 'csv', icon: Upload, label: 'Upload CSV' }
+                    { id: 'random', icon: Sparkles, label: t(language, 'form.randomData') },
+                    { id: 'csv', icon: Upload, label: t(language, 'form.uploadCSV') }
                   ].map(({ id, icon: Icon, label }) => (
                     <button
                       key={id}
@@ -4764,7 +4761,7 @@ function App() {
               <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
                 <div className="flex items-center gap-3 mb-4">
                   <Upload className={`w-6 h-6 ${theme.accentText}`} />
-                  <h2 className={`text-lg font-semibold ${theme.text}`}>Upload CSV File</h2>
+                  <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'form.uploadCSV')}</h2>
                 </div>
                 
                 <div className="space-y-4">
@@ -4775,14 +4772,14 @@ function App() {
                         className={`w-full px-4 py-3 rounded-lg border ${theme.input} ${
                           errors.csvFilePath ? 'border-red-500' : csvFilePath && csvStatistics ? 'border-green-500' : ''
                         }`}
-                        placeholder="Select CSV file..."
+                        placeholder={t(language, 'form.selectOutputLocation')}
                         value={csvFilePath}
                         readOnly
                       />
                       {csvFilePath && (
                         <button
                           onClick={handleClearCsvFile}
-                          className={`absolute right-3 top-1/2 -translate-y-1/2 ${theme.icon} hover:text-red-500 transition-colors`}
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 ${theme.icon} hover:text-red-500`}
                         >
                           <XCircle className="w-5 h-5" />
                         </button>
@@ -4794,7 +4791,7 @@ function App() {
                       className={`px-6 py-3 ${theme.buttonSuccess} disabled:opacity-50 font-medium rounded-lg transition-colors flex items-center gap-2`}
                     >
                       {isValidatingCsv ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderOpen className="w-4 h-4" />}
-                      {isValidatingCsv ? 'Validating...' : 'Browse'}
+                      {isValidatingCsv ? t(language, 'messages.validating') : t(language, 'actions.browse')}
                     </button>
                   </div>
                   
@@ -4821,11 +4818,11 @@ function App() {
                       className={`text-sm px-3 py-1.5 ${theme.buttonSuccess} rounded-lg flex items-center gap-1`}
                     >
                       <Eye className="w-4 h-4" />
-                      Preview & Download Template
+                      {t(language, 'ui.previewDownload')}
                     </button>
                   </div>
                   <p className={`text-xs ${theme.textMuted}`}>
-                    View the required CSV format and download a template file for CRS 701 data.
+                    {t(language, 'ui.crsCsvTemplateDesc')}
                   </p>
                 </div>
               </div>
@@ -4842,7 +4839,7 @@ function App() {
                   >
                     <div className="flex items-center gap-3">
                       <Globe className="w-5 h-5 text-primary-600" />
-                      <span className={`font-semibold ${theme.text}`}>Message Header</span>
+                      <span className={`font-semibold ${theme.text}`}>{t(language, 'form.messageHeader')}</span>
                     </div>
                     {expandedSections.messageHeader ? <ChevronUp className={theme.textMuted} /> : <ChevronDown className={theme.textMuted} />}
                   </button>
@@ -4850,7 +4847,7 @@ function App() {
                   {expandedSections.messageHeader && (
                     <div className="px-6 pb-6 grid grid-cols-2 gap-4">
                       <div>
-                        <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Sending Company IN *</label>
+                        <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.sendingCompanyGIIN')} *</label>
                         <input
                           type="text"
                           className={`w-full px-4 py-2 rounded-lg border ${theme.input} ${errors.sendingCompanyIN ? 'border-red-500' : ''}`}
@@ -4871,7 +4868,7 @@ function App() {
                         </select>
                       </div>
                       <div>
-                        <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Transmitting Country *</label>
+                        <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.transmittingCountry')} *</label>
                         <input
                           type="text"
                           className={`w-full px-4 py-2 rounded-lg border ${theme.input} ${errors.transmittingCountry ? 'border-red-500' : ''}`}
@@ -4906,7 +4903,7 @@ function App() {
                   >
                     <div className="flex items-center gap-3">
                       <Database className="w-5 h-5 text-primary-600" />
-                      <span className={`font-semibold ${theme.text}`}>File Size Configuration</span>
+                      <span className={`font-semibold ${theme.text}`}>{t(language, 'form.fileSize')}</span>
                     </div>
                     {expandedSections.fileSize ? <ChevronUp className={theme.textMuted} /> : <ChevronDown className={theme.textMuted} />}
                   </button>
@@ -4948,7 +4945,7 @@ function App() {
 
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Individual Accounts</label>
+                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.individualAccounts')}</label>
                           <input
                             type="number"
                             min="0"
@@ -4959,7 +4956,7 @@ function App() {
                           />
                         </div>
                         <div>
-                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Organisation Accounts</label>
+                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.organisationAccounts')}</label>
                           <input
                             type="number"
                             min="0"
@@ -4970,7 +4967,7 @@ function App() {
                           />
                         </div>
                         <div>
-                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>Controlling Persons per Organisation</label>
+                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.controllingPersons')}</label>
                           <input
                             type="number"
                             min="0"
@@ -4990,7 +4987,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Table className="w-5 h-5 text-green-600" />
-                      <span className={`font-medium ${theme.text}`}>CSV Preview</span>
+                      <span className={`font-medium ${theme.text}`}>{t(language, 'ui.csvPreview')}</span>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -4999,14 +4996,14 @@ function App() {
                         className={`px-4 py-2 ${theme.buttonSuccess} font-medium rounded-lg transition-colors flex items-center gap-2 text-sm`}
                       >
                         {isLoadingPreview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
-                        Preview
+                        {t(language, 'actions.preview')}
                       </button>
                       <button
                         onClick={handleDownloadCsv}
                         className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 ${theme.buttonSecondary}`}
                       >
                         <Download className="w-4 h-4" />
-                        Download CSV
+                        {t(language, 'actions.downloadCSV')}
                       </button>
                     </div>
                   </div>
@@ -5018,14 +5015,14 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 border-l-primary-500`}>
               <div className="flex items-center gap-3 mb-4">
                 <Save className={`w-6 h-6 ${darkMode ? 'text-primary-400' : 'text-primary-600'}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>Output</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'common.output')}</h2>
               </div>
               
               <div className="flex gap-2 mb-4">
                 <input
                   type="text"
                   className={`flex-1 px-4 py-3 rounded-lg border ${theme.input} ${errors.outputPath ? 'border-red-500' : ''}`}
-                  placeholder="Select output location..."
+                  placeholder={t(language, 'form.selectOutputLocation')}
                   value={formData.outputPath}
                   readOnly
                 />
@@ -5036,7 +5033,7 @@ function App() {
                   }`}
                 >
                   <FolderOpen className="w-4 h-4" />
-                  Browse
+                  {t(language, 'actions.browse')}
                 </button>
               </div>
               {errors.outputPath && <p className="text-sm text-red-500 mb-4">{errors.outputPath}</p>}
@@ -5049,12 +5046,12 @@ function App() {
                 {isGenerating ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Generating... {generationProgress}</span>
+                    <span>{t(language, 'common.generating')}... {generationProgress}</span>
                   </>
                 ) : (
                   <>
                     <Rocket className="w-5 h-5" />
-                    <span>Generate CRS XML File</span>
+                    <span>{t(language, 'actions.generateCRS')}</span>
                   </>
                 )}
               </button>
@@ -5071,17 +5068,17 @@ function App() {
                 <Info className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className={`font-medium ${darkMode ? 'text-orange-300' : 'text-orange-800'}`}>
-                    {activeModule === 'cbc' ? 'Generate CBC Correction Files' : 
-                     activeModule === 'fatca' ? 'Generate FATCA Correction Files' : 'Generate CRS702 Correction Files'}
+                    {activeModule === 'cbc' ? t(language, 'corrections.generateCBC') : 
+                     activeModule === 'fatca' ? t(language, 'corrections.generateFATCA') : t(language, 'corrections.generateCRS')}
                   </p>
-                  <p className={`text-sm ${darkMode ? 'text-orange-400' : 'text-orange-700'} mt-1`}>
+                  <p className={`text-sm ${theme.textMuted}`}>
                     {activeModule === 'cbc'
-                      ? 'Upload a valid CBC XML file to generate corrections (OECD2) or deletions (OECD3).'
+                      ? t(language, 'ui.uploadCbcCorrection')
                       : activeModule === 'fatca'
-                        ? 'Upload a valid FATCA XML file to generate corrections (FATCA2) or voids (FATCA3).'
+                        ? t(language, 'ui.uploadFatcaCorrection')
                         : correctionDataMode === 'xml' 
-                          ? 'Upload a valid CRS701 (new) XML file to generate corrections (OECD2) or deletions (OECD3).'
-                          : 'Upload a CSV file with DocRefId column to specify exactly which accounts to correct or delete.'}
+                          ? t(language, 'ui.uploadCrsCorrection')
+                          : t(language, 'ui.uploadCsvCorrection')}
                   </p>
                 </div>
               </div>
@@ -5099,7 +5096,7 @@ function App() {
                   }`}
                 >
                   <FileText className="w-5 h-5" />
-                  From XML File
+                  {t(language, 'corrections.fromXmlFile')}
                 </button>
                 <button
                   onClick={() => setCorrectionDataMode('csv')}
@@ -5110,7 +5107,7 @@ function App() {
                   }`}
                 >
                   <Table className="w-5 h-5" />
-                  From CSV File
+                  {t(language, 'corrections.fromCsvFile')}
                 </button>
               </div>
             </div>
@@ -5120,7 +5117,7 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <Upload className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>Source XML File</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'corrections.sourceXmlFile')}</h2>
               </div>
               
               <div className="space-y-4">
@@ -5132,7 +5129,7 @@ function App() {
                         xmlValidation?.is_valid === false ? 'border-red-500' : 
                         xmlValidation?.can_generate_correction ? 'border-green-500' : ''
                       }`}
-                      placeholder={activeModule === 'cbc' ? 'Select CBC XML file...' : activeModule === 'fatca' ? 'Select FATCA XML file...' : 'Select CRS XML file (CRS701)...'}
+                      placeholder={activeModule === 'cbc' ? t(language, 'corrections.selectXmlFile') : activeModule === 'fatca' ? t(language, 'corrections.selectXmlFile') : t(language, 'ui.selectCrsFile')}
                       value={correctionXmlPath}
                       readOnly
                     />
@@ -5151,7 +5148,7 @@ function App() {
                     className={`px-6 py-3 ${theme.buttonPrimary} disabled:bg-gray-400 font-medium rounded-lg transition-colors flex items-center gap-2`}
                   >
                     {isValidatingXml ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderOpen className="w-4 h-4" />}
-                    {isValidatingXml ? 'Validating...' : 'Browse'}
+                    {isValidatingXml ? t(language, 'messages.validating') : t(language, 'actions.browse')}
                   </button>
                 </div>
 
@@ -5173,7 +5170,7 @@ function App() {
                           ? darkMode ? 'text-green-400' : 'text-green-700'
                           : darkMode ? 'text-red-400' : 'text-red-700'
                       }`}>
-                        {xmlValidation.can_generate_correction ? 'Valid CRS701 File' : 'Validation Failed'}
+                        {xmlValidation.can_generate_correction ? t(language, 'corrections.validFile') : t(language, 'corrections.validationFailed')}
                       </span>
                       <span className={`text-xs px-2 py-0.5 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} ${theme.textMuted}`}>
                         v{xmlValidation.version}
@@ -5228,13 +5225,13 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <Table className={`w-6 h-6 ${theme.accentText}`} />
-                <h2 className={`text-lg font-semibold ${theme.text}`}>Correction CSV File</h2>
+                <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'corrections.correctionCsvFile')}</h2>
               </div>
               
               <div className="space-y-4">
                 {/* CSV Format Info */}
                 <div className={`${theme.accentLight} border rounded-lg p-4`}>
-                  <p className={`font-medium ${theme.accentText} mb-2`}>Required CSV Format</p>
+                  <p className={`font-medium ${theme.accentText} mb-2`}>{t(language, 'corrections.requiredCsvFormat')}</p>
                   <p className={`text-sm ${theme.textMuted} mb-3`}>
                     Your CSV must include a <strong>DocRefId</strong> column with valid document reference IDs from your original CRS701 file.
                   </p>
@@ -5244,7 +5241,7 @@ function App() {
                       className="text-sm px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-1"
                     >
                       <Eye className="w-4 h-4" />
-                      View CSV Template
+                      {t(language, 'corrections.viewCsvTemplate')}
                     </button>
                     <button
                       onClick={async () => {
@@ -5257,7 +5254,7 @@ function App() {
                       className={`text-sm px-3 py-1.5 ${theme.buttonSuccess} rounded-lg flex items-center gap-1`}
                     >
                       <Download className="w-4 h-4" />
-                      Download Template
+                      {t(language, 'actions.download')} Template
                     </button>
                   </div>
                 </div>
@@ -5268,7 +5265,7 @@ function App() {
                     <input
                       type="text"
                       className={`w-full px-4 py-3 rounded-lg border ${theme.input}`}
-                      placeholder="Select correction CSV file..."
+                      placeholder={t(language, 'corrections.selectCorrectionCsv')}
                       value={correctionCsvPath}
                       readOnly
                     />
@@ -5299,7 +5296,7 @@ function App() {
                     className={`px-6 py-3 ${theme.buttonPrimary} font-medium rounded-lg transition-colors flex items-center gap-2`}
                   >
                     <FolderOpen className="w-4 h-4" />
-                    Browse
+                    {t(language, 'actions.browse')}
                   </button>
                 </div>
 
@@ -5339,7 +5336,7 @@ function App() {
               <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 ${theme.accent ? 'border-l-current' : ''}`}>
                 <div className="flex items-center gap-3 mb-4">
                   <RefreshCw className={`w-6 h-6 ${theme.accentText}`} />
-                  <h2 className={`text-lg font-semibold ${theme.text}`}>CBC Correction Options</h2>
+                  <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'corrections.cbcCorrectionOptions')}</h2>
                 </div>
                 
                 <div className="space-y-4">
@@ -5359,8 +5356,8 @@ function App() {
                       <div className="flex items-center gap-3">
                         <FileEdit className={`w-6 h-6 ${cbcCorrectionType === 'correction' ? 'text-purple-600' : theme.textMuted}`} />
                         <div className="text-left">
-                          <p className={`font-semibold ${theme.text}`}>Correction (OECD2)</p>
-                          <p className={`text-sm ${theme.textMuted}`}>Modify existing CBC report data</p>
+                          <p className={`font-semibold ${theme.text}`}>{t(language, 'corrections.correctionOECD2')}</p>
+                          <p className={`text-sm ${theme.textMuted}`}>{t(language, 'corrections.modifyExisting')}</p>
                         </div>
                       </div>
                     </button>
@@ -5375,8 +5372,8 @@ function App() {
                       <div className="flex items-center gap-3">
                         <Trash2 className={`w-6 h-6 ${cbcCorrectionType === 'deletion' ? 'text-red-600' : theme.textMuted}`} />
                         <div className="text-left">
-                          <p className={`font-semibold ${theme.text}`}>Deletion (OECD3)</p>
-                          <p className={`text-sm ${theme.textMuted}`}>Remove/void CBC report data</p>
+                          <p className={`font-semibold ${theme.text}`}>{t(language, 'corrections.deletionOECD3')}</p>
+                          <p className={`text-sm ${theme.textMuted}`}>{t(language, 'corrections.deleteExisting')}</p>
                         </div>
                       </div>
                     </button>
@@ -5390,7 +5387,7 @@ function App() {
               <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
                 <div className="flex items-center gap-3 mb-4">
                   <RefreshCw className={`w-6 h-6 ${theme.accentText}`} />
-                  <h2 className={`text-lg font-semibold ${theme.text}`}>Correction Options</h2>
+                  <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'corrections.correctionOptions')}</h2>
                 </div>
                 
                 <div className="space-y-6">
@@ -5601,14 +5598,14 @@ function App() {
               <div className={`${theme.card} rounded-xl border p-6 shadow-sm border-l-4 border-l-primary-500`}>
                 <div className="flex items-center gap-3 mb-4">
                   <Save className={`w-6 h-6 ${darkMode ? 'text-primary-400' : 'text-primary-600'}`} />
-                  <h2 className={`text-lg font-semibold ${theme.text}`}>Output</h2>
+                  <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'common.output')}</h2>
                 </div>
                 
                 <div className="flex gap-2 mb-4">
                   <input
                     type="text"
                     className={`flex-1 px-4 py-3 rounded-lg border ${theme.input}`}
-                    placeholder="Select output location..."
+                    placeholder={t(language, 'form.selectOutputLocation')}
                     value={correctionOutputPath}
                     readOnly
                   />
@@ -5619,7 +5616,7 @@ function App() {
                     }`}
                   >
                     <FolderOpen className="w-4 h-4" />
-                    Browse
+                    {t(language, 'actions.browse')}
                   </button>
                 </div>
 
@@ -5657,8 +5654,8 @@ function App() {
               <div className="flex items-center gap-3 mb-4">
                 <RefreshCw className={`w-6 h-6 ${theme.accentText}`} />
                 <div>
-                  <h2 className={`text-lg font-semibold ${theme.text}`}>Country Code Replacer</h2>
-                  <p className={`text-sm ${theme.textMuted}`}>Replace account holder country codes with your allowed partner jurisdictions</p>
+                  <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'tools.countryCodeReplacer')}</h2>
+                  <p className={`text-sm ${theme.textMuted}`}>{t(language, 'tools.replaceDescription')}</p>
                 </div>
               </div>
               
@@ -5668,11 +5665,10 @@ function App() {
                   <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className={`text-sm ${darkMode ? 'text-blue-300' : 'text-blue-800'}`}>
-                      This tool will replace all <strong>ResCountryCode</strong> values in account holder records with countries from your Partner Jurisdictions settings.
-                      Countries not in your allowed list will be mapped to allowed ones.
+                      {t(language, 'tools.replaceInfoText')}
                     </p>
                     <p className={`text-xs ${theme.accentText} mt-2`}>
-                      Current allowed countries: <strong>{settings.partnerJurisdictions?.join(', ') || 'None configured'}</strong>
+                      {t(language, 'tools.currentAllowedCountries')}: <strong>{settings.partnerJurisdictions?.join(', ') || t(language, 'tools.noneConfigured')}</strong>
                     </p>
                   </div>
                 </div>
@@ -5681,12 +5677,12 @@ function App() {
               <div className="space-y-4">
                 {/* Source XML File */}
                 <div>
-                  <label className={`block text-sm font-medium ${theme.text} mb-2`}>Source CRS XML File</label>
+                  <label className={`block text-sm font-medium ${theme.text} mb-2`}>{t(language, 'tools.sourceFile')}</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      className={`flex-1 px-4 py-3 rounded-lg border ${theme.input}`}
-                      placeholder="Select CRS XML file..."
+                      className={`w-full px-4 py-3 rounded-lg border ${theme.input}`}
+                      placeholder={t(language, 'corrections.selectXmlFile')}
                       value={countryReplacerXmlPath}
                       readOnly
                     />
@@ -5700,19 +5696,19 @@ function App() {
                       }`}
                     >
                       <FolderOpen className="w-4 h-4" />
-                      Browse
+                      {t(language, 'actions.browse')}
                     </button>
                   </div>
                 </div>
 
                 {/* Output Path */}
                 <div>
-                  <label className={`block text-sm font-medium ${theme.text} mb-2`}>Output File</label>
+                  <label className={`block text-sm font-medium ${theme.text} mb-2`}>{t(language, 'tools.outputFile')}</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      className={`flex-1 px-4 py-3 rounded-lg border ${theme.input}`}
-                      placeholder="Select output location..."
+                      className={`w-full px-4 py-3 rounded-lg border ${theme.input}`}
+                      placeholder={t(language, 'form.selectOutputLocation')}
                       value={countryReplacerOutputPath}
                       readOnly
                     />
@@ -5726,7 +5722,7 @@ function App() {
                       }`}
                     >
                       <FolderOpen className="w-4 h-4" />
-                      Browse
+                      {t(language, 'actions.browse')}
                     </button>
                   </div>
                 </div>
@@ -5737,9 +5733,9 @@ function App() {
                     <div className="flex items-center gap-3">
                       <FileText className={`w-5 h-5 ${theme.accentText}`} />
                       <div>
-                        <p className={`font-medium ${theme.text}`}>Convert to Test Mode</p>
+                        <p className={`font-medium ${theme.text}`}>{t(language, 'tools.convertToTestMode')}</p>
                         <p className={`text-xs ${theme.textMuted}`}>
-                          Changes DocTypeIndic: OECD1→OECD11, OECD2→OECD12, OECD3→OECD13
+                          {t(language, 'tools.testModeDescription')}
                         </p>
                       </div>
                     </div>
@@ -5761,12 +5757,12 @@ function App() {
                   {isReplacingCountries ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Processing File...</span>
+                      <span>{t(language, 'tools.processingFile')}</span>
                     </>
                   ) : (
                     <>
                       <RefreshCw className="w-5 h-5" />
-                      <span>Process CRS File</span>
+                      <span>{t(language, 'tools.replaceCountries')}</span>
                     </>
                   )}
                 </button>
@@ -5776,7 +5772,7 @@ function App() {
                   <div className={`${darkMode ? 'bg-green-900/30 border-green-700' : 'bg-green-50 border-green-200'} border rounded-lg p-4 mt-4`}>
                     <div className="flex items-center gap-2 mb-3">
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
-                      <span className={`font-medium ${darkMode ? 'text-green-300' : 'text-green-800'}`}>Replacement Complete</span>
+                      <span className={`font-medium ${darkMode ? 'text-green-300' : 'text-green-800'}`}>{t(language, 'tools.replacementComplete')}</span>
                     </div>
                     
                     {/* DocTypeIndic Conversion Notice */}
@@ -5829,6 +5825,7 @@ function App() {
                 )}
               </div>
             </div>
+
           </div>
         )}
 
