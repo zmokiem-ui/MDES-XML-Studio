@@ -65,7 +65,8 @@ export const translations = {
       generatingCRS: 'Generating CRS XML...',
       generatingFATCA: 'Generating FATCA XML...',
       generatingCBC: 'Generating CBC XML...',
-      processing: 'Processing...'
+      processing: 'Processing...',
+      open: 'Open'
     },
     
     // Form labels
@@ -378,6 +379,13 @@ export const translations = {
       dataSource: 'Data Source',
       randomData: 'Random Data',
       uploadCsv: 'Upload CSV'
+    },
+
+    // Footer
+    footer: {
+      moreModulesComingSoon: 'More modules coming soon',
+      nonTaxJurisdiction: 'Non-Tax Jurisdiction',
+      createdBy: 'Created by Team MDES - All Rights Reserved'
     }
   },
   
@@ -441,7 +449,8 @@ export const translations = {
       downloadCSV: 'CSV Downloaden',
       preview: 'Voorbeeld',
       close: 'Sluiten',
-      generate: 'Genereren'
+      generate: 'Genereren',
+      open: 'Openen'
     },
     
     // Form labels
@@ -754,6 +763,13 @@ export const translations = {
       dataSource: 'Gegevensbron',
       randomData: 'Willekeurige Gegevens',
       uploadCsv: 'CSV Uploaden'
+    },
+
+    // Footer
+    footer: {
+      moreModulesComingSoon: 'Meer modules binnenkort beschikbaar',
+      nonTaxJurisdiction: 'Niet-Belasting Jurisdictie',
+      createdBy: 'Gemaakt door Team MDES - Alle Rechten Voorbehouden'
     }
   },
 
@@ -814,7 +830,8 @@ export const translations = {
       generatingCRS: 'Generando XML CRS...',
       generatingFATCA: 'Generando XML FATCA...',
       generatingCBC: 'Generando XML CBC...',
-      processing: 'Procesando...'
+      processing: 'Procesando...',
+      open: 'Abrir'
     },
     
     // Form labels
@@ -1132,6 +1149,13 @@ export const translations = {
       dataSource: 'Fuente de Datos',
       randomData: 'Datos Aleatorios',
       uploadCsv: 'Subir CSV'
+    },
+
+    // Footer
+    footer: {
+      moreModulesComingSoon: 'Más módulos próximamente',
+      nonTaxJurisdiction: 'Jurisdicción No Fiscal',
+      createdBy: 'Creado por Team MDES - Todos los Derechos Reservados'
     }
   }
 };

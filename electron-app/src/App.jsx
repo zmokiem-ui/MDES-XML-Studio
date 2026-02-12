@@ -4052,7 +4052,7 @@ function App() {
                     ))}
                   </div>
                   <div className={`mt-4 py-2.5 px-3 rounded-lg ${theme.buttonPrimary} font-semibold text-center text-sm group-hover:opacity-90 transition-opacity border-2 ${theme.border}`}>
-                    Open {module.name}
+                    {t(language, 'actions.open')} {module.name}
                   </div>
                 </button>
               )
@@ -4061,11 +4061,11 @@ function App() {
 
           {/* Coming Soon */}
           <div className="mt-10 text-center">
-            <p className={`${theme.textMuted} text-sm mb-3`}>More modules coming soon</p>
+            <p className={`${theme.textMuted} text-sm mb-3`}>{t(language, 'footer.moreModulesComingSoon')}</p>
             <div className="flex justify-center gap-4">
               <div className={`${theme.card} rounded-lg border px-4 py-2 opacity-50`}>
                 <span className={`font-medium ${theme.text}`}>NTJ</span>
-                <span className={`text-xs ${theme.textMuted} ml-2`}>Non-Tax Jurisdiction</span>
+                <span className={`text-xs ${theme.textMuted} ml-2`}>{t(language, 'footer.nonTaxJurisdiction')}</span>
               </div>
             </div>
           </div>
@@ -4091,7 +4091,7 @@ function App() {
                 filter: 'drop-shadow(0 0 10px rgba(147, 51, 234, 0.5))'
               }}
             >
-              Created by Team MDES - All Rights Reserved
+              {t(language, 'footer.createdBy')}
             </p>
           </div>
         </main>
