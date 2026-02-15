@@ -1,5 +1,5 @@
 // ============================================================
-// FULL E2E REGRESSION TEST - CRS Test Data Generator
+// FULL E2E REGRESSION TEST - MDES XML Studio
 // ============================================================
 // One giant test that visibly navigates the entire app:
 // - Fills forms with real values

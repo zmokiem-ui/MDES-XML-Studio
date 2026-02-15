@@ -30,7 +30,7 @@ test.describe('E2E Regression Test - Full Application', () => {
   // ================================================================
 
   test('1.1 App launches with correct title', async () => {
-    await expect(window).toHaveTitle(/Tax Reporting Generator|CRS Test Data Generator/);
+    await expect(window).toHaveTitle(/MDES XML Studio|Tax Reporting Generator|CRS Test Data Generator/);
   });
 
   test('1.2 Home screen shows all 3 module cards', async () => {

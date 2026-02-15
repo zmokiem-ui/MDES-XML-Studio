@@ -36,7 +36,7 @@ test.describe('E2E Smoke Test', () => {
   });
 
   test('1. App launches and shows module selection', async () => {
-    await expect(window).toHaveTitle(/Tax Reporting Generator|CRS Test Data Generator/);
+    await expect(window).toHaveTitle(/MDES XML Studio|Tax Reporting Generator|CRS Test Data Generator/);
 
     // Verify module cards
     await expect(window.locator('text=Common Reporting Standard')).toBeVisible();

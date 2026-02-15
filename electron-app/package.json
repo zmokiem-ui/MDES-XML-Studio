@@ -1,7 +1,7 @@
 {
-  "name": "crs-test-data-generator",
+  "name": "mdes-xml-studio",
   "version": "1.0.0",
-  "description": "Professional CRS Test Data Generator - Electron Desktop App",
+  "description": "MDES XML Studio - Professional XML generation for CRS, FATCA, and CBC reporting",
   "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
@@ -49,8 +49,8 @@
     "react-dom": "^18.2.0"
   },
   "build": {
-    "appId": "com.crs.testdata-generator",
-    "productName": "CRS Test Data Generator",
+    "appId": "com.mdes.xml-studio",
+    "productName": "MDES XML Studio",
     "directories": {
       "output": "dist-electron"
     },
@@ -91,7 +91,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "artifactName": "CRS-Generator-Setup-${version}.exe"
+      "artifactName": "MDES-XML-Studio-Setup-${version}.exe"
     }
   }
 }

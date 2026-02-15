@@ -1975,7 +1975,7 @@ function App() {
                 <img src={mdesLogo} alt="MDES" className="h-12 rounded-lg shadow-lg" />
                 <div>
                   <h1 className={`text-2xl font-bold ${theme.headerText || theme.text}`}>{t(language, 'appTitle')}</h1>
-                  <p className={`text-sm ${theme.headerTextMuted || theme.textMuted}`}>{t(language, 'actions.generate')} compliant XML test data</p>
+                  <p className={`text-sm ${theme.headerTextMuted || theme.textMuted}`}>Professional XML generation for CRS, FATCA & CBC reporting</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">

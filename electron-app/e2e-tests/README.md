@@ -1,6 +1,6 @@
 # E2E Testing with Playwright
 
-Modern, AI-powered end-to-end testing for the CRS Test Data Generator Electron app.
+Modern, AI-powered end-to-end testing for the MDES XML Studio Electron app.
 
 ## Overview
 

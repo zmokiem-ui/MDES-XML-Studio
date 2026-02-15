@@ -11,7 +11,7 @@ export const LANGUAGES = {
 export const translations = {
   en: {
     // App
-    appTitle: 'Tax Reporting Generator',
+    appTitle: 'MDES XML Studio',
     selectModule: 'Select a Module',
     
     // Modules
@@ -394,7 +394,7 @@ export const translations = {
   
   nl: {
     // App
-    appTitle: 'Belastingrapportage Generator',
+    appTitle: 'MDES XML Studio',
     selectModule: 'Selecteer een Module',
     
     // Modules
@@ -781,7 +781,7 @@ export const translations = {
   // Spanish translations
   es: {
     // App
-    appTitle: 'Generador de Informes Fiscales',
+    appTitle: 'MDES XML Studio',
     selectModule: 'Seleccionar Módulo',
     
     // Modules
