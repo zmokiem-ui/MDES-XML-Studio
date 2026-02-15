@@ -64,15 +64,43 @@ function createWindow() {
   });
 }
 
+// --- Auto-Update Settings Persistence ---
+function getUpdateSettingsPath() {
+  const userDataPath = app.getPath('userData');
+  return path.join(userDataPath, 'update-settings.json');
+}
+
+function loadUpdateSettings() {
+  try {
+    const data = fs.readFileSync(getUpdateSettingsPath(), 'utf8');
+    return JSON.parse(data);
+  } catch {
+    return { autoUpdateEnabled: true };
+  }
+}
+
+function saveUpdateSettings(settings) {
+  fs.writeFileSync(getUpdateSettingsPath(), JSON.stringify(settings, null, 2));
+}
+
+let updaterInstance = null;
+
 app.whenReady().then(() => {
   createWindow();
 
-  // Auto-update check (production only, after 3 second delay)
+  // --- Auto-Update System ---
   if (!isDev) {
     try {
       const { autoUpdater } = require('electron-updater');
+      updaterInstance = autoUpdater;
       autoUpdater.autoDownload = false;
+      autoUpdater.autoInstallOnAppQuit = true;
       autoUpdater.logger = console;
+
+      autoUpdater.on('checking-for-update', () => {
+        console.log('Checking for updates...');
+        if (mainWindow) mainWindow.webContents.send('update-checking');
+      });
 
       autoUpdater.on('update-available', (info) => {
         console.log('Update available:', info.version);
@@ -80,8 +108,9 @@ app.whenReady().then(() => {
         autoUpdater.downloadUpdate();
       });
 
-      autoUpdater.on('update-not-available', () => {
+      autoUpdater.on('update-not-available', (info) => {
         console.log('App is up to date');
+        if (mainWindow) mainWindow.webContents.send('update-not-available', info);
       });
 
       autoUpdater.on('download-progress', (progress) => {
@@ -95,6 +124,7 @@ app.whenReady().then(() => {
 
       autoUpdater.on('error', (err) => {
         console.error('Auto-update error:', err);
+        if (mainWindow) mainWindow.webContents.send('update-error', err.message || 'Unknown error');
       });
 
       // IPC: renderer can request install
@@ -102,10 +132,40 @@ app.whenReady().then(() => {
         autoUpdater.quitAndInstall(false, true);
       });
 
-      setTimeout(() => autoUpdater.checkForUpdates(), 3000);
+      // IPC: manual check for updates
+      ipcMain.handle('check-for-updates', async () => {
+        try {
+          await autoUpdater.checkForUpdates();
+          return { success: true };
+        } catch (err) {
+          return { success: false, error: err.message };
+        }
+      });
+
+      // IPC: get/set update settings
+      ipcMain.handle('get-update-settings', () => loadUpdateSettings());
+      ipcMain.handle('set-update-settings', (event, settings) => {
+        saveUpdateSettings(settings);
+        return settings;
+      });
+
+      // IPC: get current app version
+      ipcMain.handle('get-app-version', () => app.getVersion());
+
+      // Auto-check on startup if enabled
+      const updateSettings = loadUpdateSettings();
+      if (updateSettings.autoUpdateEnabled) {
+        setTimeout(() => autoUpdater.checkForUpdates(), 3000);
+      }
     } catch (err) {
       console.log('Auto-updater not available:', err.message);
     }
+  } else {
+    // Dev mode: still register handlers so UI doesn't break
+    ipcMain.handle('check-for-updates', () => ({ success: false, error: 'Updates not available in dev mode' }));
+    ipcMain.handle('get-update-settings', () => ({ autoUpdateEnabled: true }));
+    ipcMain.handle('set-update-settings', (event, settings) => settings);
+    ipcMain.handle('get-app-version', () => '1.0.0-dev');
   }
 });
 

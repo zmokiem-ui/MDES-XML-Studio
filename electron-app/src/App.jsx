@@ -40,6 +40,15 @@ function App() {
   // Navigation within module
   const [currentPage, setCurrentPage] = useState('generator')
   
+  // Auto-update state
+  const [updateStatus, setUpdateStatus] = useState('idle') // idle, checking, available, downloading, ready, error
+  const [updateInfo, setUpdateInfo] = useState(null)
+  const [updateProgress, setUpdateProgress] = useState(0)
+  const [updateError, setUpdateError] = useState(null)
+  const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(true)
+  const [appVersion, setAppVersion] = useState('')
+  const [updateBannerDismissed, setUpdateBannerDismissed] = useState(false)
+  
   // Theme system with distinct, vibrant color schemes
   const THEMES = {
     light: {
@@ -715,6 +724,41 @@ function App() {
   useEffect(() => {
     localStorage.setItem('crs-settings', JSON.stringify(settings))
   }, [settings])
+
+  // Auto-update event listeners
+  useEffect(() => {
+    if (!window.electronAPI) return
+    
+    // Load version and update settings
+    window.electronAPI.getAppVersion().then(v => setAppVersion(v))
+    window.electronAPI.getUpdateSettings().then(s => setAutoUpdateEnabled(s.autoUpdateEnabled))
+    
+    // Listen for update events
+    window.electronAPI.onUpdateChecking(() => {
+      setUpdateStatus('checking')
+      setUpdateError(null)
+    })
+    window.electronAPI.onUpdateAvailable((info) => {
+      setUpdateStatus('downloading')
+      setUpdateInfo(info)
+      setUpdateBannerDismissed(false)
+    })
+    window.electronAPI.onUpdateNotAvailable(() => {
+      setUpdateStatus('idle')
+    })
+    window.electronAPI.onDownloadProgress((progress) => {
+      setUpdateProgress(Math.round(progress.percent || 0))
+    })
+    window.electronAPI.onUpdateDownloaded((info) => {
+      setUpdateStatus('ready')
+      setUpdateInfo(info)
+      setUpdateBannerDismissed(false)
+    })
+    window.electronAPI.onUpdateError((msg) => {
+      setUpdateStatus('error')
+      setUpdateError(msg)
+    })
+  }, [])
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
@@ -1587,12 +1631,86 @@ function App() {
     return ''
   }
 
+  // --- Auto-Update Banner (renders at top of any page) ---
+  const UpdateBanner = () => {
+    if (updateBannerDismissed) return null
+    
+    if (updateStatus === 'downloading') {
+      return (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-blue-600 text-white px-4 py-2 shadow-lg">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm font-medium">
+                Downloading update v{updateInfo?.version}... {updateProgress}%
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-48 h-2 bg-blue-400 rounded-full overflow-hidden">
+                <div className="h-full bg-white rounded-full transition-all duration-300" style={{ width: `${updateProgress}%` }} />
+              </div>
+              <button onClick={() => setUpdateBannerDismissed(true)} className="p-1 hover:bg-blue-500 rounded">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    
+    if (updateStatus === 'ready') {
+      return (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-green-600 text-white px-4 py-2 shadow-lg">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                Update v{updateInfo?.version} is ready! Restart to apply.
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => window.electronAPI?.installUpdate()}
+                className="px-4 py-1 bg-white text-green-700 rounded-lg text-sm font-semibold hover:bg-green-50 transition-colors"
+              >
+                Restart Now
+              </button>
+              <button onClick={() => setUpdateBannerDismissed(true)} className="p-1 hover:bg-green-500 rounded">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    
+    return null
+  }
+
+  // Helper: handle manual check for updates
+  const handleCheckForUpdates = async () => {
+    setUpdateStatus('checking')
+    setUpdateError(null)
+    const result = await window.electronAPI?.checkForUpdates()
+    if (result && !result.success) {
+      setUpdateStatus('error')
+      setUpdateError(result.error)
+    }
+  }
+
+  // Helper: toggle auto-update setting
+  const handleToggleAutoUpdate = async (enabled) => {
+    setAutoUpdateEnabled(enabled)
+    await window.electronAPI?.setUpdateSettings({ autoUpdateEnabled: enabled })
+  }
+
   // Home page (module selection) or Settings
   if (!activeModule) {
     // Settings page - separate return to avoid issues
     if (currentPage === 'settings') {
       return (
         <div className={`min-h-screen ${theme.bg} transition-colors duration-300`}>
+          <UpdateBanner />
           <header className={`${theme.header} border-b shadow-sm sticky top-0 z-40`}>
             <div className="max-w-7xl mx-auto px-6 py-4">
               <div className="flex items-center gap-4">
@@ -1741,6 +1859,100 @@ function App() {
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* Updates & Version */}
+            <div className={`${theme.card} rounded-xl border p-6`}>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>Updates & Version</h3>
+              <p className={`text-sm ${theme.textMuted} mb-4`}>Manage application updates and view version info</p>
+              
+              <div className="space-y-4">
+                {/* Current Version */}
+                <div className={`flex items-center justify-between p-3 rounded-lg ${theme.bg}`}>
+                  <div>
+                    <span className={`font-medium ${theme.text}`}>Current Version</span>
+                    <p className={`text-xs ${theme.textMuted} mt-0.5`}>MDES XML Studio</p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-sm font-mono font-medium ${theme.badge}`}>
+                    v{appVersion || '1.0.0'}
+                  </span>
+                </div>
+
+                {/* Auto-Update Toggle */}
+                <label className="flex items-center justify-between">
+                  <div>
+                    <span className={theme.text}>Auto-update</span>
+                    <p className={`text-xs ${theme.textMuted} mt-1`}>
+                      {autoUpdateEnabled 
+                        ? 'App will check for updates automatically on startup' 
+                        : 'Updates will only be checked manually'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleToggleAutoUpdate(!autoUpdateEnabled)}
+                    className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ml-4 ${autoUpdateEnabled ? 'bg-blue-600' : 'bg-gray-400'}`}
+                  >
+                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${autoUpdateEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                  </button>
+                </label>
+
+                {/* Check for Updates Button */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleCheckForUpdates}
+                    disabled={updateStatus === 'checking' || updateStatus === 'downloading'}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
+                      updateStatus === 'checking' || updateStatus === 'downloading'
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : theme.buttonPrimary
+                    }`}
+                  >
+                    {updateStatus === 'checking' ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Checking...</>
+                    ) : updateStatus === 'downloading' ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Downloading... {updateProgress}%</>
+                    ) : (
+                      <><RefreshCw className="w-4 h-4" /> Check for Updates</>
+                    )}
+                  </button>
+                  
+                  {/* Status Messages */}
+                  {updateStatus === 'idle' && !updateError && (
+                    <span className={`text-sm ${theme.textMuted}`}>
+                      <CheckCircle2 className="w-4 h-4 inline mr-1 text-green-500" />
+                      Up to date
+                    </span>
+                  )}
+                  {updateStatus === 'ready' && (
+                    <button
+                      onClick={() => window.electronAPI?.installUpdate()}
+                      className="px-4 py-2 rounded-lg font-medium text-sm bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 transition-all"
+                    >
+                      <Download className="w-4 h-4" />
+                      Restart & Install v{updateInfo?.version}
+                    </button>
+                  )}
+                  {updateStatus === 'error' && (
+                    <span className="text-sm text-red-500">
+                      <AlertCircle className="w-4 h-4 inline mr-1" />
+                      {updateError || 'Update check failed'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Download Progress */}
+                {updateStatus === 'downloading' && (
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className={theme.textMuted}>Downloading v{updateInfo?.version}</span>
+                      <span className={theme.text}>{updateProgress}%</span>
+                    </div>
+                    <div className={`w-full h-2 rounded-full bg-gray-200 overflow-hidden`}>
+                      <div className="h-full bg-blue-600 rounded-full transition-all duration-300" style={{ width: `${updateProgress}%` }} />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </main>
 
@@ -1965,6 +2177,7 @@ function App() {
     // Home page
     return (
       <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${getThemeClass()}`}>
+        <UpdateBanner />
         {/* Theme Background */}
         <ThemeBackground />
         {/* Simple header for module selection */}
@@ -3243,6 +3456,7 @@ function App() {
 
   return (
     <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${getThemeClass()}`}>
+      <UpdateBanner />
       {/* Theme Background */}
       <ThemeBackground />
       {/* Header */}
