@@ -1,6 +1,7 @@
 export { RecentFiles } from './RecentFiles';
 export { ProfileManager } from './ProfileManager';
 export { KeyboardShortcutsModal } from './KeyboardShortcuts';
+export { BatchProcessor } from './BatchProcessor';
 export { LanguageSelector } from './LanguageSelector';
 export { ErrorInjector } from './ErrorInjector';
 export { XMLDiff } from './XMLDiff';

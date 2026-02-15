@@ -6,6 +6,25 @@ const fs = require('fs');
 let mainWindow;
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
+// Map Python module names to bundled executable names (production only)
+const MODULE_TO_EXE = {
+  'crs_generator.cli': 'crs_cli.exe',
+  'crs_generator.cbc_cli': 'cbc_cli.exe',
+  'crs_generator.fatca_cli': 'fatca_cli.exe',
+  'crs_generator.error_injector': 'error_injector.exe',
+};
+
+/**
+ * Get the path to a bundled Python executable (production only).
+ * Returns null if not found.
+ */
+function getBundledExePath(moduleName) {
+  const exeName = MODULE_TO_EXE[moduleName];
+  if (!exeName) return null;
+  const exePath = path.join(process.resourcesPath, 'python-dist', exeName);
+  return fs.existsSync(exePath) ? exePath : null;
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -23,10 +42,13 @@ function createWindow() {
   });
 
   // Load the app
-  if (isDev) {
+  if (isDev && !process.env.E2E_TEST) {
     console.log('Running in development mode');
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
+  } else if (isDev && process.env.E2E_TEST) {
+    console.log('Running in E2E test mode (no DevTools)');
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   } else {
     console.log('Running in production mode');
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
@@ -41,7 +63,50 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+
+  // Auto-update check (production only, after 3 second delay)
+  if (!isDev) {
+    try {
+      const { autoUpdater } = require('electron-updater');
+      autoUpdater.autoDownload = false;
+      autoUpdater.logger = console;
+
+      autoUpdater.on('update-available', (info) => {
+        console.log('Update available:', info.version);
+        if (mainWindow) mainWindow.webContents.send('update-available', info);
+        autoUpdater.downloadUpdate();
+      });
+
+      autoUpdater.on('update-not-available', () => {
+        console.log('App is up to date');
+      });
+
+      autoUpdater.on('download-progress', (progress) => {
+        if (mainWindow) mainWindow.webContents.send('download-progress', progress);
+      });
+
+      autoUpdater.on('update-downloaded', (info) => {
+        console.log('Update downloaded:', info.version);
+        if (mainWindow) mainWindow.webContents.send('update-downloaded', info);
+      });
+
+      autoUpdater.on('error', (err) => {
+        console.error('Auto-update error:', err);
+      });
+
+      // IPC: renderer can request install
+      ipcMain.on('install-update', () => {
+        autoUpdater.quitAndInstall(false, true);
+      });
+
+      setTimeout(() => autoUpdater.checkForUpdates(), 3000);
+    } catch (err) {
+      console.log('Auto-updater not available:', err.message);
+    }
+  }
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -238,6 +303,9 @@ function findPythonExecutable() {
 
 /**
  * Reusable helper to run Python CLI commands and return results.
+ * In production: uses bundled PyInstaller executables from python-dist/
+ * In development: uses system Python with -m module invocation
+ *
  * @param {object} options - Configuration options
  * @param {string} options.module - Python module to run (e.g., 'crs_generator.cli')
  * @param {string[]} options.args - Arguments to pass to the module
@@ -248,18 +316,29 @@ function findPythonExecutable() {
  */
 function runPythonCommand({ module, args, event = null, parseJson = true, outputPath = null }) {
   return new Promise((resolve, reject) => {
-    const pythonPath = findPythonExecutable();
-    
-    if (!pythonPath) {
-      reject(new Error('Python not found. Please install Python 3.8 or higher.'));
-      return;
+    let exePath, spawnArgs, cwd;
+
+    // Production: use bundled PyInstaller executables
+    const bundledExe = !isDev ? getBundledExePath(module) : null;
+    if (bundledExe) {
+      exePath = bundledExe;
+      spawnArgs = args;
+      cwd = path.dirname(bundledExe);
+      console.log(`[Production] Running bundled: ${path.basename(bundledExe)} ${args.join(' ')}`);
+    } else {
+      // Development: use system Python
+      const pythonPath = findPythonExecutable();
+      if (!pythonPath) {
+        reject(new Error('Python not found. Please install Python 3.8 or higher.'));
+        return;
+      }
+      exePath = pythonPath;
+      spawnArgs = ['-m', module, ...args];
+      cwd = path.join(__dirname, '../..');
     }
 
-    const projectRoot = path.join(__dirname, '../..');
-    const fullArgs = ['-m', module, ...args];
-
-    const pythonProcess = spawn(pythonPath, fullArgs, {
-      cwd: projectRoot,
+    const pythonProcess = spawn(exePath, spawnArgs, {
+      cwd,
       env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
     });
 
@@ -817,56 +896,6 @@ ipcMain.handle('generate-cbc', async (event, formData) => {
   });
 });
 
-// Select multiple CSV/XML files for batch processing
-ipcMain.handle('select-batch-files', async (event, fileType = 'csv') => {
-  const filters = fileType === 'csv' 
-    ? [{ name: 'CSV Files', extensions: ['csv'] }, { name: 'Excel Files', extensions: ['xlsx', 'xls'] }]
-    : [{ name: 'XML Files', extensions: ['xml'] }];
-  
-  const result = await dialog.showOpenDialog(mainWindow, {
-    title: `Select ${fileType.toUpperCase()} Files for Batch Processing`,
-    filters: [...filters, { name: 'All Files', extensions: ['*'] }],
-    properties: ['openFile', 'multiSelections']
-  });
-  
-  if (result.canceled || !result.filePaths.length) return [];
-  
-  return result.filePaths.map(filePath => ({
-    path: filePath,
-    name: path.basename(filePath),
-    type: path.extname(filePath).slice(1).toLowerCase()
-  }));
-});
-
-// Read XML file content for diff comparison
-ipcMain.handle('read-xml-file', async (event, filePath) => {
-  try {
-    if (!filePath) {
-      const result = await dialog.showOpenDialog(mainWindow, {
-        title: 'Select XML File',
-        filters: [
-          { name: 'XML Files', extensions: ['xml'] },
-          { name: 'All Files', extensions: ['*'] }
-        ],
-        properties: ['openFile']
-      });
-      
-      if (result.canceled || !result.filePaths.length) return null;
-      filePath = result.filePaths[0];
-    }
-    
-    const content = fs.readFileSync(filePath, 'utf8');
-    return {
-      path: filePath,
-      name: path.basename(filePath),
-      content,
-      size: content.length
-    };
-  } catch (error) {
-    return { error: error.message };
-  }
-});
-
 // Read Excel file and convert to CSV format
 ipcMain.handle('read-excel-file', async (event, filePath) => {
   try {
@@ -956,6 +985,25 @@ ipcMain.handle('generate-cbc-correction', async (event, options) => {
 
 // ============== Error Injector IPC Handlers ==============
 
+// Select file for error injection (supports XML and CSV)
+ipcMain.handle('select-error-injector-file', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Select File to Corrupt',
+    filters: [
+      { name: 'XML & CSV Files', extensions: ['xml', 'csv'] },
+      { name: 'XML Files', extensions: ['xml'] },
+      { name: 'CSV Files', extensions: ['csv'] },
+      { name: 'All Files', extensions: ['*'] }
+    ],
+    properties: ['openFile']
+  });
+  
+  if (result.filePaths && result.filePaths.length > 0) {
+    return result.filePaths[0];
+  }
+  return null;
+});
+
 // Corrupt file with error injection
 ipcMain.handle('corrupt-file', async (event, config) => {
   const { module, fileType, corruptionLevel, preset, customOptions, inputFile } = config;
@@ -990,6 +1038,257 @@ ipcMain.handle('open-file', async (event, filePath) => {
     const { shell } = require('electron');
     await shell.openPath(filePath);
     return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// ============================================================
+// FILE MANAGER IPC HANDLERS
+// ============================================================
+
+// List directory contents
+ipcMain.handle('list-directory', async (event, dirPath) => {
+  try {
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    const items = entries.map(entry => {
+      const fullPath = path.join(dirPath, entry.name);
+      let size = 0;
+      let modified = null;
+      try {
+        const stat = fs.statSync(fullPath);
+        size = stat.size;
+        modified = stat.mtime.toISOString();
+      } catch {}
+      return {
+        name: entry.name,
+        path: fullPath,
+        isDirectory: entry.isDirectory(),
+        isFile: entry.isFile(),
+        size,
+        modified
+      };
+    });
+    // Sort: directories first, then files alphabetically
+    items.sort((a, b) => {
+      if (a.isDirectory && !b.isDirectory) return -1;
+      if (!a.isDirectory && b.isDirectory) return 1;
+      return a.name.localeCompare(b.name);
+    });
+    return { success: true, items, path: dirPath };
+  } catch (error) {
+    return { success: false, error: error.message, items: [] };
+  }
+});
+
+// Read file content
+ipcMain.handle('read-file-content', async (event, filePath) => {
+  try {
+    const stat = fs.statSync(filePath);
+    if (stat.size > 10 * 1024 * 1024) {
+      return { success: false, error: 'File too large (>10MB)' };
+    }
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const ext = path.extname(filePath).toLowerCase();
+    return {
+      success: true,
+      content,
+      fileName: path.basename(filePath),
+      filePath,
+      size: stat.size,
+      modified: stat.mtime.toISOString(),
+      extension: ext,
+      language: ext === '.xml' ? 'xml' : ext === '.json' ? 'json' : ext === '.csv' ? 'plaintext' : ext === '.js' ? 'javascript' : ext === '.py' ? 'python' : 'plaintext'
+    };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Write file content
+ipcMain.handle('write-file-content', async (event, filePath, content) => {
+  try {
+    fs.writeFileSync(filePath, content, 'utf-8');
+    const stat = fs.statSync(filePath);
+    return { success: true, size: stat.size, modified: stat.mtime.toISOString() };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Rename file
+ipcMain.handle('rename-file', async (event, oldPath, newPath) => {
+  try {
+    fs.renameSync(oldPath, newPath);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Delete file or folder
+ipcMain.handle('delete-file', async (event, filePath) => {
+  try {
+    const stat = fs.statSync(filePath);
+    if (stat.isDirectory()) {
+      fs.rmSync(filePath, { recursive: true, force: true });
+    } else {
+      fs.unlinkSync(filePath);
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Create new file
+ipcMain.handle('create-file', async (event, filePath, content = '') => {
+  try {
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(filePath, content, 'utf-8');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Create new folder
+ipcMain.handle('create-folder', async (event, dirPath) => {
+  try {
+    fs.mkdirSync(dirPath, { recursive: true });
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Select folder dialog
+ipcMain.handle('select-folder', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory'],
+    title: 'Select Folder'
+  });
+  return result.canceled ? null : result.filePaths[0];
+});
+
+// Get file info
+ipcMain.handle('get-file-info', async (event, filePath) => {
+  try {
+    const stat = fs.statSync(filePath);
+    return {
+      success: true,
+      name: path.basename(filePath),
+      path: filePath,
+      size: stat.size,
+      modified: stat.mtime.toISOString(),
+      created: stat.birthtime.toISOString(),
+      isDirectory: stat.isDirectory(),
+      extension: path.extname(filePath).toLowerCase()
+    };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Validate XML content against module schema (using Python validator)
+// NOTE: Python validator exits with code 1 when is_valid=false, so we
+// must capture stdout regardless of exit code to get the JSON result.
+ipcMain.handle('validate-xml-content', async (event, content, module = 'crs') => {
+  try {
+    // Auto-detect module from XML content
+    let detectedModule = module;
+    if (content.includes('FATCA_OECD') || content.includes('fatca:')) detectedModule = 'fatca';
+    else if (content.includes('CBC_OECD') || content.includes('CbcBody')) detectedModule = 'cbc';
+    else if (content.includes('CRS_OECD') || content.includes('crs:')) detectedModule = 'crs';
+
+    // Write content to a temp file
+    const tmpDir = path.join(app.getPath('temp'), 'crs-editor');
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+    const tmpFile = path.join(tmpDir, `validate_${Date.now()}.xml`);
+    fs.writeFileSync(tmpFile, content, 'utf-8');
+
+    let cliModule, mode;
+    if (detectedModule === 'fatca') {
+      cliModule = 'crs_generator.fatca_cli';
+      mode = 'validate-xml';
+    } else if (detectedModule === 'cbc') {
+      cliModule = 'crs_generator.cbc_cli';
+      mode = 'validate';
+    } else {
+      cliModule = 'crs_generator.cli';
+      mode = 'validate-xml';
+    }
+
+    // Spawn Python directly to capture stdout even on non-zero exit
+    // Production: use bundled exe; Development: use system Python
+    let exePath, spawnArgs, spawnCwd;
+    const bundledExe = !isDev ? getBundledExePath(cliModule) : null;
+    if (bundledExe) {
+      exePath = bundledExe;
+      spawnArgs = ['--mode', mode, '--xml-input', tmpFile, '--output', 'dummy'];
+      spawnCwd = path.dirname(bundledExe);
+    } else {
+      const pythonPath = findPythonExecutable();
+      if (!pythonPath) return { is_valid: false, errors: ['Python not found'], warnings: [] };
+      exePath = pythonPath;
+      spawnArgs = ['-m', cliModule, '--mode', mode, '--xml-input', tmpFile, '--output', 'dummy'];
+      spawnCwd = path.join(__dirname, '../..');
+    }
+
+    const result = await new Promise((resolve) => {
+      const proc = spawn(exePath, spawnArgs, {
+        cwd: spawnCwd,
+        env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+      });
+      let stdout = '';
+      let stderr = '';
+      proc.stdout.on('data', (d) => { stdout += d.toString(); });
+      proc.stderr.on('data', (d) => { stderr += d.toString(); });
+      proc.on('close', (code) => {
+        // Parse JSON from stdout regardless of exit code
+        try {
+          const jsonMatch = stdout.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            resolve(JSON.parse(jsonMatch[0]));
+          } else {
+            resolve({ is_valid: false, errors: [stderr || stdout || `Validator exited with code ${code}`], warnings: [] });
+          }
+        } catch (e) {
+          resolve({ is_valid: false, errors: [`Failed to parse validator output: ${e.message}`, stderr || stdout].filter(Boolean), warnings: [] });
+        }
+      });
+      proc.on('error', (err) => {
+        resolve({ is_valid: false, errors: [`Failed to run validator: ${err.message}`], warnings: [] });
+      });
+    });
+
+    // Clean up temp file
+    try { fs.unlinkSync(tmpFile); } catch {}
+
+    return result;
+  } catch (error) {
+    return { is_valid: false, errors: [error.message], warnings: [] };
+  }
+});
+
+// Format XML (pretty-print)
+ipcMain.handle('format-xml', async (event, content) => {
+  try {
+    // Simple XML formatter
+    let formatted = '';
+    let indent = 0;
+    const lines = content.replace(/>\s*</g, '>\n<').split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      if (trimmed.startsWith('</')) indent = Math.max(0, indent - 1);
+      formatted += '  '.repeat(indent) + trimmed + '\n';
+      if (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.startsWith('<?') && !trimmed.endsWith('/>') && !trimmed.includes('</')) {
+        indent++;
+      }
+    }
+    return { success: true, content: formatted.trim() };
   } catch (error) {
     return { success: false, error: error.message };
   }

@@ -1,0 +1,225 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<CBC_OECD xmlns="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" xmlns:iso="urn:oecd:ties:isocbctypes:v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0">
+  <MessageSpec>
+    <SendingEntityIN>123456789</SendingEntityIN>
+    <TransmittingCountry>NL</TransmittingCountry>
+    <ReceivingCountry>NL</ReceivingCountry>
+    <MessageType>CBC</MessageType>
+    <Language>EN</Language>
+    <Warning>CBC Test Data - Not for production use</Warning>
+    <Contact>Test Data Generator</Contact>
+    <MessageRefId>NL2024123456789d0c30608</MessageRefId>
+    <MessageTypeIndic>CBC401</MessageTypeIndic>
+    <ReportingPeriod>2024-12-31</ReportingPeriod>
+    <Timestamp>2026-02-15T05:55:26.836283Z</Timestamp>
+  </MessageSpec>
+  <CbcBody>
+    <ReportingEntity>
+      <Entity>
+        <ResCountryCode>NL</ResCountryCode>
+        <TIN issuedBy="NL">123456789</TIN>
+        <Name>Silva, Thompson and Davis Holdings</Name>
+        <Address>
+          <CountryCode>NL</CountryCode>
+          <AddressFix>
+            <Street>9766 Heather Crescent Suite 427</Street>
+            <BuildingIdentifier>570</BuildingIdentifier>
+            <PostCode>99202</PostCode>
+            <City>South Kimberly</City>
+          </AddressFix>
+        </Address>
+      </Entity>
+      <NameMNEGroup>Silva, Thompson and Davis Holdings Group</NameMNEGroup>
+      <ReportingRole>CBC701</ReportingRole>
+      <ReportingPeriod>
+        <StartDate>2024-01-01</StartDate>
+        <EndDate>2024-12-31</EndDate>
+      </ReportingPeriod>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789be2f49bd-d258-4505-b317-c3a90dce8ce5</stf:DocRefId>
+      </DocSpec>
+    </ReportingEntity>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL202412345678987266cf3-7575-4935-b39d-2df101df3553</stf:DocRefId>
+      </DocSpec>
+      <ResCountryCode>IE</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">8222000</Unrelated>
+          <Related currCode="USD">32507000</Related>
+          <Total currCode="USD">40729000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">9354417</ProfitOrLoss>
+        <TaxPaid currCode="USD">2529568</TaxPaid>
+        <TaxAccrued currCode="USD">2903212</TaxAccrued>
+        <Capital currCode="USD">128541000</Capital>
+        <Earnings currCode="USD">7468149</Earnings>
+        <NbEmployees>4709</NbEmployees>
+        <Assets currCode="USD">138200841</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>IE</ResCountryCode>
+          <TIN issuedBy="IE">IE452636177</TIN>
+          <Name>Mullins Group IE</Name>
+          <Address>
+            <CountryCode>IE</CountryCode>
+            <AddressFix>
+              <Street>8275 Anderson Unions</Street>
+              <BuildingIdentifier>282</BuildingIdentifier>
+              <PostCode>35956</PostCode>
+              <City>Morantown</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC801</Role>
+        <IncorpCountryCode>DE</IncorpCountryCode>
+        <BizActivities>CBC503</BizActivities>
+        <OtherEntityInfo>Additional information for entity 1</OtherEntityInfo>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>IE</ResCountryCode>
+          <TIN issuedBy="IE">IE844160542</TIN>
+          <Name>Campbell LLC IE</Name>
+          <Address>
+            <CountryCode>IE</CountryCode>
+            <AddressFix>
+              <Street>947 Mitchell Place Apt. 064</Street>
+              <BuildingIdentifier>804</BuildingIdentifier>
+              <PostCode>77270</PostCode>
+              <City>Barnesfort</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC801</Role>
+        <IncorpCountryCode>IE</IncorpCountryCode>
+        <BizActivities>CBC504</BizActivities>
+      </ConstEntities>
+    </CbcReports>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL20241234567898ca8faad-7f14-4b51-816b-efe838e70c80</stf:DocRefId>
+      </DocSpec>
+      <ResCountryCode>GB</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">90946000</Unrelated>
+          <Related currCode="USD">31079000</Related>
+          <Total currCode="USD">122025000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">25267938</ProfitOrLoss>
+        <TaxPaid currCode="USD">5132025</TaxPaid>
+        <TaxAccrued currCode="USD">5968610</TaxAccrued>
+        <Capital currCode="USD">117241000</Capital>
+        <Earnings currCode="USD">22911485</Earnings>
+        <NbEmployees>2288</NbEmployees>
+        <Assets currCode="USD">159564819</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>GB</ResCountryCode>
+          <TIN issuedBy="GB">GB261873729</TIN>
+          <Name>Bennett-Sharp GB</Name>
+          <Address>
+            <CountryCode>GB</CountryCode>
+            <AddressFix>
+              <Street>115 Rachel Village</Street>
+              <BuildingIdentifier>925</BuildingIdentifier>
+              <PostCode>69223</PostCode>
+              <City>Melissaville</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC801</Role>
+        <IncorpCountryCode>FR</IncorpCountryCode>
+        <BizActivities>CBC508</BizActivities>
+        <BizActivities>CBC506</BizActivities>
+      </ConstEntities>
+    </CbcReports>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789a4d07f4a-5312-4cf8-9e5a-9dd43385ee38</stf:DocRefId>
+      </DocSpec>
+      <ResCountryCode>CH</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">48625000</Unrelated>
+          <Related currCode="USD">22388000</Related>
+          <Total currCode="USD">71013000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">15787136</ProfitOrLoss>
+        <TaxPaid currCode="USD">2867793</TaxPaid>
+        <TaxAccrued currCode="USD">3125528</TaxAccrued>
+        <Capital currCode="USD">287812000</Capital>
+        <Earnings currCode="USD">10302712</Earnings>
+        <NbEmployees>1835</NbEmployees>
+        <Assets currCode="USD">526457393</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>CH</ResCountryCode>
+          <TIN issuedBy="CH">CH460012218</TIN>
+          <Name>Peters, Medina and Coleman CH</Name>
+          <Address>
+            <CountryCode>CH</CountryCode>
+            <AddressFix>
+              <Street>391 David Field Apt. 157</Street>
+              <BuildingIdentifier>415</BuildingIdentifier>
+              <PostCode>59138</PostCode>
+              <City>Davishaven</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>CH</IncorpCountryCode>
+        <BizActivities>CBC503</BizActivities>
+        <OtherEntityInfo>Additional information for entity 1</OtherEntityInfo>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>CH</ResCountryCode>
+          <TIN issuedBy="CH">CH416134190</TIN>
+          <Name>Mckinney, King and Martin CH</Name>
+          <Address>
+            <CountryCode>CH</CountryCode>
+            <AddressFix>
+              <Street>955 Barrett Brook Apt. 087</Street>
+              <BuildingIdentifier>551</BuildingIdentifier>
+              <PostCode>24352</PostCode>
+              <City>South Carolynfort</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC801</Role>
+        <IncorpCountryCode>US</IncorpCountryCode>
+        <BizActivities>CBC503</BizActivities>
+        <BizActivities>CBC512</BizActivities>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>CH</ResCountryCode>
+          <TIN issuedBy="CH">CH832864894</TIN>
+          <Name>Guzman Ltd CH</Name>
+          <Address>
+            <CountryCode>CH</CountryCode>
+            <AddressFix>
+              <Street>1707 Aguirre Haven Apt. 276</Street>
+              <BuildingIdentifier>810</BuildingIdentifier>
+              <PostCode>94493</PostCode>
+              <City>Evansburgh</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC801</Role>
+        <IncorpCountryCode>IE</IncorpCountryCode>
+        <BizActivities>CBC504</BizActivities>
+      </ConstEntities>
+    </CbcReports>
+  </CbcBody>
+</CBC_OECD>

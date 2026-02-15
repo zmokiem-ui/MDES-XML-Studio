@@ -1,0 +1,3080 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<crs:CRS_OECD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:crs="urn:oecd:ties:crs:v2" xmlns:ftc="urn:oecd:ties:fatca:v1" xmlns:cfc="urn:oecd:ties:commontypesfatcacrs:v2" xmlns:stf="urn:oecd:ties:crsstf:v5" xmlns:iso="urn:oecd:ties:isocrstypes:v1" xsi:schemaLocation="urn:oecd:ties:crs:v1 CrsXML_v2.0.xsd" version="2.0">
+  <crs:MessageSpec>
+    <crs:SendingCompanyIN>123456789</crs:SendingCompanyIN>
+    <crs:TransmittingCountry>NL</crs:TransmittingCountry>
+    <crs:ReceivingCountry>DE</crs:ReceivingCountry>
+    <crs:MessageType>CRS</crs:MessageType>
+    <crs:MessageRefId>NL2024123456789000000001</crs:MessageRefId>
+    <crs:MessageTypeIndic>CRS701</crs:MessageTypeIndic>
+    <crs:ReportingPeriod>2024-12-31</crs:ReportingPeriod>
+    <crs:Timestamp>2026-02-15T02:55:43.531133Z</crs:Timestamp>
+  </crs:MessageSpec>
+  <crs:CrsBody>
+    <crs:ReportingFI>
+      <crs:ResCountryCode>NL</crs:ResCountryCode>
+      <crs:IN issuedBy="NL">FI999999000</crs:IN>
+      <crs:Name>Rodriguez Capital</crs:Name>
+      <crs:Address legalAddressType="OECD301">
+        <cfc:CountryCode>NL</cfc:CountryCode>
+        <cfc:AddressFix>
+          <cfc:Street>Stone Roads</cfc:Street>
+          <cfc:BuildingIdentifier>760</cfc:BuildingIdentifier>
+          <cfc:SuiteIdentifier>Suite 240</cfc:SuiteIdentifier>
+          <cfc:FloorIdentifier>Floor 8</cfc:FloorIdentifier>
+          <cfc:DistrictName>South Cherylton</cfc:DistrictName>
+          <cfc:POB>PO Box 3286</cfc:POB>
+          <cfc:PostCode>58268</cfc:PostCode>
+          <cfc:City>Johnberg</cfc:City>
+          <cfc:CountrySubentity>Utah</cfc:CountrySubentity>
+        </cfc:AddressFix>
+        <cfc:AddressFree>Kayla Brook, Chaseborough</cfc:AddressFree>
+      </crs:Address>
+      <crs:DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789000000002</stf:DocRefId>
+      </crs:DocSpec>
+    </crs:ReportingFI>
+    <crs:ReportingGroup>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000003</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9275666117</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Tracy</crs:FirstName>
+              <crs:LastName>Roberts</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IT</cfc:CountryCode>
+              <cfc:AddressFree>Nicole Stream 883, North Andrea 49606</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1999-01-29</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="GBP">6348.24</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">798.20</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">707.74</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">260.57</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000004</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9503158640</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Ashlee</crs:FirstName>
+              <crs:LastName>Dixon</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>MK</cfc:CountryCode>
+              <cfc:AddressFree>Heather Motorway 697, Port Jamie 13845</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>2007-02-09</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="GBP">343133.71</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">13742.50</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">65615.75</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">66793.98</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000005</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC1320763136</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Bailey</crs:FirstName>
+              <crs:LastName>Miller</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>TO</cfc:CountryCode>
+              <cfc:AddressFree>Padilla Alley 409, New Sarahfort 68466</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1958-06-12</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="EUR">2009.24</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">296.24</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">112.86</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000006</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC1926780542</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="DE">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Rebecca</crs:FirstName>
+              <crs:LastName>Sanchez</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>BJ</cfc:CountryCode>
+              <cfc:AddressFree>James Orchard 169, Port Jessica 22396</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1958-04-12</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="EUR">125715.79</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">2454.86</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">13268.24</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">2615.78</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000007</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC8309500118</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Theresa</crs:FirstName>
+              <crs:LastName>Wood</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>MU</cfc:CountryCode>
+              <cfc:AddressFree>Stephen Fields 162, South Angelaside 23481</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1948-08-16</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="EUR">205057.30</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">30009.38</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">28836.07</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">21741.76</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000008</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9230117884</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:IN issuedBy="NL">554811020</crs:IN>
+            <crs:Name>Cole Capital</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>NG</cfc:CountryCode>
+              <cfc:AddressFree>Hannah Turnpike 906, Michaelview 94317</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Melissa</crs:FirstName>
+              <crs:LastName>Huang</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>NG</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Rodriguez Land</cfc:Street>
+                <cfc:BuildingIdentifier>286</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 56</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 17</cfc:FloorIdentifier>
+                <cfc:DistrictName>West Stephaniebury</cfc:DistrictName>
+                <cfc:POB>PO Box 6692</cfc:POB>
+                <cfc:PostCode>27459</cfc:PostCode>
+                <cfc:City>Lake Adriana</cfc:City>
+                <cfc:CountrySubentity>Mississippi</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="GBP">11510.62</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">168.52</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">2266.99</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">756350429</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Melissa</crs:FirstName>
+              <crs:LastName>Huang</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>NG</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Rodriguez Land</cfc:Street>
+                <cfc:BuildingIdentifier>286</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 56</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 17</cfc:FloorIdentifier>
+                <cfc:DistrictName>West Stephaniebury</cfc:DistrictName>
+                <cfc:POB>PO Box 6692</cfc:POB>
+                <cfc:PostCode>27459</cfc:PostCode>
+                <cfc:City>Lake Adriana</cfc:City>
+                <cfc:CountrySubentity>Mississippi</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000009</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC0939915528</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:IN issuedBy="BE">776205431</crs:IN>
+            <crs:Name>North Madison Savings &amp; Loan</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IR</cfc:CountryCode>
+              <cfc:AddressFree>Brandy Avenue 284, East Morgan 28166</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Thomas</crs:FirstName>
+              <crs:LastName>Ramos</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IR</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Boyd Throughway</cfc:Street>
+                <cfc:BuildingIdentifier>914</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 431</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 28</cfc:FloorIdentifier>
+                <cfc:DistrictName>Nelsonmouth</cfc:DistrictName>
+                <cfc:POB>PO Box 8838</cfc:POB>
+                <cfc:PostCode>89873</cfc:PostCode>
+                <cfc:City>North Maryfort</cfc:City>
+                <cfc:CountrySubentity>Kentucky</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="GBP">2052289.23</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">387635.19</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">50156.58</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">60257.77</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">352081.95</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">744687060</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Thomas</crs:FirstName>
+              <crs:LastName>Ramos</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IR</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Boyd Throughway</cfc:Street>
+                <cfc:BuildingIdentifier>914</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 431</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 28</cfc:FloorIdentifier>
+                <cfc:DistrictName>Nelsonmouth</cfc:DistrictName>
+                <cfc:POB>PO Box 8838</cfc:POB>
+                <cfc:PostCode>89873</cfc:PostCode>
+                <cfc:City>North Maryfort</cfc:City>
+                <cfc:CountrySubentity>Kentucky</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000010</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC1870403051</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:IN issuedBy="NL">672030854</crs:IN>
+            <crs:Name>Global Elliott Bank</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GS</cfc:CountryCode>
+              <cfc:AddressFree>Eric Lodge 958, West Jamesshire 77440</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Christopher</crs:FirstName>
+              <crs:LastName>Escobar</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GS</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Kathy Rapid</cfc:Street>
+                <cfc:BuildingIdentifier>302</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 139</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 31</cfc:FloorIdentifier>
+                <cfc:DistrictName>Armstrongbury</cfc:DistrictName>
+                <cfc:POB>PO Box 2069</cfc:POB>
+                <cfc:PostCode>44590</cfc:PostCode>
+                <cfc:City>North Richardfurt</cfc:City>
+                <cfc:CountrySubentity>Nevada</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="EUR">91730.29</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">14436.68</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">8769.21</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">6099.80</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">6239.70</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">11542.41</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">894664845</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Christopher</crs:FirstName>
+              <crs:LastName>Escobar</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GS</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Kathy Rapid</cfc:Street>
+                <cfc:BuildingIdentifier>302</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 139</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 31</cfc:FloorIdentifier>
+                <cfc:DistrictName>Armstrongbury</cfc:DistrictName>
+                <cfc:POB>PO Box 2069</cfc:POB>
+                <cfc:PostCode>44590</cfc:PostCode>
+                <cfc:City>North Richardfurt</cfc:City>
+                <cfc:CountrySubentity>Nevada</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000011</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="true" DormantAccount="false">ACC1950049699</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:IN issuedBy="IT">384161612</crs:IN>
+            <crs:Name>Coleman, Barry and Mcdaniel Financial Group</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>CY</cfc:CountryCode>
+              <cfc:AddressFree>Michele Island 146, East Danielmouth 86393</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Mariah</crs:FirstName>
+              <crs:LastName>Ellis</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>CY</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Steven Stravenue</cfc:Street>
+                <cfc:BuildingIdentifier>668</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 211</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 17</cfc:FloorIdentifier>
+                <cfc:DistrictName>New Erin</cfc:DistrictName>
+                <cfc:POB>PO Box 4720</cfc:POB>
+                <cfc:PostCode>16683</cfc:PostCode>
+                <cfc:City>Stephenborough</cfc:City>
+                <cfc:CountrySubentity>Michigan</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="EUR">0.00</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">0.00</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">0.00</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">0.00</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">255308128</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Mariah</crs:FirstName>
+              <crs:LastName>Ellis</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>CY</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Steven Stravenue</cfc:Street>
+                <cfc:BuildingIdentifier>668</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 211</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 17</cfc:FloorIdentifier>
+                <cfc:DistrictName>New Erin</cfc:DistrictName>
+                <cfc:POB>PO Box 4720</cfc:POB>
+                <cfc:PostCode>16683</cfc:PostCode>
+                <cfc:City>Stephenborough</cfc:City>
+                <cfc:CountrySubentity>Michigan</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000012</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC6375197715</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:IN issuedBy="ES">246574716</crs:IN>
+            <crs:Name>National Bank of East Joycetown</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>SA</cfc:CountryCode>
+              <cfc:AddressFree>Barron Creek 763, Amandaport 65870</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Christine</crs:FirstName>
+              <crs:LastName>Edwards</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>SA</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Myers Squares</cfc:Street>
+                <cfc:BuildingIdentifier>633</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 15</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 37</cfc:FloorIdentifier>
+                <cfc:DistrictName>South Micheleburgh</cfc:DistrictName>
+                <cfc:POB>PO Box 2589</cfc:POB>
+                <cfc:PostCode>32266</cfc:PostCode>
+                <cfc:City>Lopezhaven</cfc:City>
+                <cfc:CountrySubentity>Utah</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="GBP">13520.09</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">1749.06</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">928.79</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">220.91</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">491766764</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Christine</crs:FirstName>
+              <crs:LastName>Edwards</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>SA</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Myers Squares</cfc:Street>
+                <cfc:BuildingIdentifier>633</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 15</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 37</cfc:FloorIdentifier>
+                <cfc:DistrictName>South Micheleburgh</cfc:DistrictName>
+                <cfc:POB>PO Box 2589</cfc:POB>
+                <cfc:PostCode>32266</cfc:PostCode>
+                <cfc:City>Lopezhaven</cfc:City>
+                <cfc:CountrySubentity>Utah</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+    </crs:ReportingGroup>
+  </crs:CrsBody>
+  <crs:CrsBody>
+    <crs:ReportingFI>
+      <crs:ResCountryCode>NL</crs:ResCountryCode>
+      <crs:IN issuedBy="NL">FI999999001</crs:IN>
+      <crs:Name>Shaw-Smith Financial Group</crs:Name>
+      <crs:Address legalAddressType="OECD301">
+        <cfc:CountryCode>NL</cfc:CountryCode>
+        <cfc:AddressFix>
+          <cfc:Street>Adams Locks</cfc:Street>
+          <cfc:BuildingIdentifier>375</cfc:BuildingIdentifier>
+          <cfc:SuiteIdentifier>Suite 371</cfc:SuiteIdentifier>
+          <cfc:FloorIdentifier>Floor 17</cfc:FloorIdentifier>
+          <cfc:DistrictName>Briantown</cfc:DistrictName>
+          <cfc:POB>PO Box 5465</cfc:POB>
+          <cfc:PostCode>52951</cfc:PostCode>
+          <cfc:City>West Michelleberg</cfc:City>
+          <cfc:CountrySubentity>Maine</cfc:CountrySubentity>
+        </cfc:AddressFix>
+        <cfc:AddressFree>Schwartz Ford, Briantown</cfc:AddressFree>
+      </crs:Address>
+      <crs:DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789000000013</stf:DocRefId>
+      </crs:DocSpec>
+    </crs:ReportingFI>
+    <crs:ReportingGroup>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000014</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9715909280</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="FR">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Tim</crs:FirstName>
+              <crs:LastName>Snyder</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>SA</cfc:CountryCode>
+              <cfc:AddressFree>Laura Place 241, North Marieberg 87726</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1955-06-13</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="GBP">6743.73</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">194.74</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">765.07</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000015</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC0881351239</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>FR</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Christopher</crs:FirstName>
+              <crs:LastName>Smith</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IL</cfc:CountryCode>
+              <cfc:AddressFree>Walter Village 332, Walkerbury 57190</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1975-08-29</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="EUR">158871.92</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">31731.72</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000016</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC6573691559</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Joseph</crs:FirstName>
+              <crs:LastName>Spencer</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>BN</cfc:CountryCode>
+              <cfc:AddressFree>Stevens Lodge 946, South Curtis 39378</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1955-07-11</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="ANG">9170.90</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">1779.12</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">704.44</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">361.32</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">482.45</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000017</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC8252940808</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="FR">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Matthew</crs:FirstName>
+              <crs:LastName>Morrison</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>BQ</cfc:CountryCode>
+              <cfc:AddressFree>Cameron Crossroad 54, East Ryanchester 23784</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1983-08-19</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="EUR">3323.01</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">61.91</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">654.78</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">38.08</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">630.08</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000018</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC1873548916</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>FR</crs:ResCountryCode>
+            <crs:TIN issuedBy="FR">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>John</crs:FirstName>
+              <crs:LastName>Shields</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GM</cfc:CountryCode>
+              <cfc:AddressFree>Andrew Brooks 411, Thomasburgh 83648</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1960-07-15</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="USD">15912.23</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">1980.37</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">694.69</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000019</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC2540128513</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:IN issuedBy="BE">705306363</crs:IN>
+            <crs:Name>Lawson Financial Services</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>SC</cfc:CountryCode>
+              <cfc:AddressFree>Edwards Corner 568, Lake Gina 19467</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Julie</crs:FirstName>
+              <crs:LastName>Patton</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>SC</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Rojas Brooks</cfc:Street>
+                <cfc:BuildingIdentifier>259</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 481</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 28</cfc:FloorIdentifier>
+                <cfc:DistrictName>South Joseland</cfc:DistrictName>
+                <cfc:POB>PO Box 2148</cfc:POB>
+                <cfc:PostCode>45641</cfc:PostCode>
+                <cfc:City>Ericville</cfc:City>
+                <cfc:CountrySubentity>Wyoming</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="GBP">659737.51</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">108994.80</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">116028.28</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">86969.25</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">76109.13</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">210154881</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Julie</crs:FirstName>
+              <crs:LastName>Patton</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>SC</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Rojas Brooks</cfc:Street>
+                <cfc:BuildingIdentifier>259</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 481</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 28</cfc:FloorIdentifier>
+                <cfc:DistrictName>South Joseland</cfc:DistrictName>
+                <cfc:POB>PO Box 2148</cfc:POB>
+                <cfc:PostCode>45641</cfc:PostCode>
+                <cfc:City>Ericville</cfc:City>
+                <cfc:CountrySubentity>Wyoming</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000020</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC5307626408</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:IN issuedBy="NL">190060226</crs:IN>
+            <crs:Name>West Joshua Capital Bank</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>FM</cfc:CountryCode>
+              <cfc:AddressFree>Brian Islands 143, Lake Janeland 35376</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Wendy</crs:FirstName>
+              <crs:LastName>Smith</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>FM</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Lisa Coves</cfc:Street>
+                <cfc:BuildingIdentifier>685</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 199</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 7</cfc:FloorIdentifier>
+                <cfc:DistrictName>North Amanda</cfc:DistrictName>
+                <cfc:POB>PO Box 4808</cfc:POB>
+                <cfc:PostCode>22860</cfc:PostCode>
+                <cfc:City>Lake William</cfc:City>
+                <cfc:CountrySubentity>Alaska</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="GBP">2637969.92</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">65939.04</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">746879296</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Wendy</crs:FirstName>
+              <crs:LastName>Smith</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>FM</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Lisa Coves</cfc:Street>
+                <cfc:BuildingIdentifier>685</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 199</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 7</cfc:FloorIdentifier>
+                <cfc:DistrictName>North Amanda</cfc:DistrictName>
+                <cfc:POB>PO Box 4808</cfc:POB>
+                <cfc:PostCode>22860</cfc:PostCode>
+                <cfc:City>Lake William</cfc:City>
+                <cfc:CountrySubentity>Alaska</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000021</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC6163022532</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:IN issuedBy="ES">444898148</crs:IN>
+            <crs:Name>South Derrickfurt Capital Bank</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GA</cfc:CountryCode>
+              <cfc:AddressFree>Lori Track 36, West Justin 74894</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Madison</crs:FirstName>
+              <crs:LastName>Shaw</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GA</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Jones Springs</cfc:Street>
+                <cfc:BuildingIdentifier>503</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 282</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 16</cfc:FloorIdentifier>
+                <cfc:DistrictName>Johnathanbury</cfc:DistrictName>
+                <cfc:POB>PO Box 2054</cfc:POB>
+                <cfc:PostCode>70388</cfc:PostCode>
+                <cfc:City>South Christopher</cfc:City>
+                <cfc:CountrySubentity>Ohio</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="GBP">5967.94</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">629.55</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">730.74</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">253.81</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">1015.03</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">995.42</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">130465806</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Madison</crs:FirstName>
+              <crs:LastName>Shaw</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GA</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Jones Springs</cfc:Street>
+                <cfc:BuildingIdentifier>503</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 282</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 16</cfc:FloorIdentifier>
+                <cfc:DistrictName>Johnathanbury</cfc:DistrictName>
+                <cfc:POB>PO Box 2054</cfc:POB>
+                <cfc:PostCode>70388</cfc:PostCode>
+                <cfc:City>South Christopher</cfc:City>
+                <cfc:CountrySubentity>Ohio</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000022</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="true" DormantAccount="false">ACC1947957238</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:IN issuedBy="ES">799145494</crs:IN>
+            <crs:Name>Global Bennett Bank</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ES</cfc:CountryCode>
+              <cfc:AddressFree>Mccann Viaduct 134, Courtneyville 99040</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Sheila</crs:FirstName>
+              <crs:LastName>Singleton</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ES</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Johnson Crescent</cfc:Street>
+                <cfc:BuildingIdentifier>904</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 206</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 40</cfc:FloorIdentifier>
+                <cfc:DistrictName>Port Jeffrey</cfc:DistrictName>
+                <cfc:POB>PO Box 8447</cfc:POB>
+                <cfc:PostCode>56584</cfc:PostCode>
+                <cfc:City>Phammouth</cfc:City>
+                <cfc:CountrySubentity>Louisiana</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="EUR">0.00</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">0.00</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">0.00</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">0.00</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">385111130</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Sheila</crs:FirstName>
+              <crs:LastName>Singleton</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ES</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Johnson Crescent</cfc:Street>
+                <cfc:BuildingIdentifier>904</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 206</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 40</cfc:FloorIdentifier>
+                <cfc:DistrictName>Port Jeffrey</cfc:DistrictName>
+                <cfc:POB>PO Box 8447</cfc:POB>
+                <cfc:PostCode>56584</cfc:PostCode>
+                <cfc:City>Phammouth</cfc:City>
+                <cfc:CountrySubentity>Louisiana</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000023</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC5642266248</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:IN issuedBy="ES">874597473</crs:IN>
+            <crs:Name>Bank of North Sarah</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>DK</cfc:CountryCode>
+              <cfc:AddressFree>Bates Overpass 539, Port Erikachester 87547</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Erica</crs:FirstName>
+              <crs:LastName>Spencer</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>DK</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Stephanie Bypass</cfc:Street>
+                <cfc:BuildingIdentifier>354</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 478</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 34</cfc:FloorIdentifier>
+                <cfc:DistrictName>South Robert</cfc:DistrictName>
+                <cfc:POB>PO Box 970</cfc:POB>
+                <cfc:PostCode>10746</cfc:PostCode>
+                <cfc:City>East Nathanmouth</cfc:City>
+                <cfc:CountrySubentity>Idaho</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="GBP">13565.35</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">1806.55</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">171.95</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">461971444</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Erica</crs:FirstName>
+              <crs:LastName>Spencer</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>DK</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Stephanie Bypass</cfc:Street>
+                <cfc:BuildingIdentifier>354</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 478</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 34</cfc:FloorIdentifier>
+                <cfc:DistrictName>South Robert</cfc:DistrictName>
+                <cfc:POB>PO Box 970</cfc:POB>
+                <cfc:PostCode>10746</cfc:PostCode>
+                <cfc:City>East Nathanmouth</cfc:City>
+                <cfc:CountrySubentity>Idaho</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+    </crs:ReportingGroup>
+  </crs:CrsBody>
+  <crs:CrsBody>
+    <crs:ReportingFI>
+      <crs:ResCountryCode>NL</crs:ResCountryCode>
+      <crs:IN issuedBy="NL">FI999999002</crs:IN>
+      <crs:Name>First Lake Michaelbury Bank</crs:Name>
+      <crs:Address legalAddressType="OECD301">
+        <cfc:CountryCode>NL</cfc:CountryCode>
+        <cfc:AddressFix>
+          <cfc:Street>Steven Stravenue</cfc:Street>
+          <cfc:BuildingIdentifier>776</cfc:BuildingIdentifier>
+          <cfc:SuiteIdentifier>Suite 198</cfc:SuiteIdentifier>
+          <cfc:FloorIdentifier>Floor 6</cfc:FloorIdentifier>
+          <cfc:DistrictName>Lake Jessica</cfc:DistrictName>
+          <cfc:POB>PO Box 7643</cfc:POB>
+          <cfc:PostCode>58737</cfc:PostCode>
+          <cfc:City>East Michaelport</cfc:City>
+          <cfc:CountrySubentity>Maine</cfc:CountrySubentity>
+        </cfc:AddressFix>
+        <cfc:AddressFree>Claudia Course, Port Jennamouth</cfc:AddressFree>
+      </crs:Address>
+      <crs:DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789000000024</stf:DocRefId>
+      </crs:DocSpec>
+    </crs:ReportingFI>
+    <crs:ReportingGroup>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000025</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="true" DormantAccount="false">ACC1014911849</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Brandy</crs:FirstName>
+              <crs:LastName>Calderon</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>CN</cfc:CountryCode>
+              <cfc:AddressFree>Murphy Prairie 935, New Charlesport 18530</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1975-09-07</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="EUR">0.00</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">0.00</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000026</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9156631204</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="DE">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Timothy</crs:FirstName>
+              <crs:LastName>King</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>MO</cfc:CountryCode>
+              <cfc:AddressFree>Hanson Motorway 785, Lake Sarahfurt 05023</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>2000-12-09</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="GBP">35398.20</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">5439.79</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">3467.99</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000027</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC0289012243</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Adrienne</crs:FirstName>
+              <crs:LastName>Collins</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>HT</cfc:CountryCode>
+              <cfc:AddressFree>Pacheco Square 898, Port Austin 25186</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1992-06-05</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="ANG">361944.44</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">13881.06</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">16264.70</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">20190.69</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">24300.92</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000028</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC4516315439</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Joseph</crs:FirstName>
+              <crs:LastName>Foster</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ML</cfc:CountryCode>
+              <cfc:AddressFree>Tyler Union 713, South Donnastad 53526</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1984-09-03</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="ANG">311976.48</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">21668.38</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">36463.72</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000029</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC7823677799</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Robert</crs:FirstName>
+              <crs:LastName>Peck</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ER</cfc:CountryCode>
+              <cfc:AddressFree>Spencer Radial 646, Heatherhaven 93778</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1952-10-29</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="EUR">2815724.77</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">519302.09</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">157072.61</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000030</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC6035624332</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>FR</crs:ResCountryCode>
+            <crs:IN issuedBy="FR">953556386</crs:IN>
+            <crs:Name>Gutierrez Capital</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ET</cfc:CountryCode>
+              <cfc:AddressFree>Richard Station 917, Parkermouth 12528</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>FR</crs:ResCountryCode>
+            <crs:TIN issuedBy="FR">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Joseph</crs:FirstName>
+              <crs:LastName>Moore</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ET</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Williams Via</cfc:Street>
+                <cfc:BuildingIdentifier>764</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 140</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 43</cfc:FloorIdentifier>
+                <cfc:DistrictName>Johnland</cfc:DistrictName>
+                <cfc:POB>PO Box 5897</cfc:POB>
+                <cfc:PostCode>83190</cfc:PostCode>
+                <cfc:City>Novakport</cfc:City>
+                <cfc:CountrySubentity>Minnesota</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="USD">15449.52</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">645.32</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="USD">1390.60</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>FR</crs:ResCountryCode>
+            <crs:TIN issuedBy="FR">619939412</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Joseph</crs:FirstName>
+              <crs:LastName>Moore</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ET</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Williams Via</cfc:Street>
+                <cfc:BuildingIdentifier>764</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 140</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 43</cfc:FloorIdentifier>
+                <cfc:DistrictName>Johnland</cfc:DistrictName>
+                <cfc:POB>PO Box 5897</cfc:POB>
+                <cfc:PostCode>83190</cfc:PostCode>
+                <cfc:City>Novakport</cfc:City>
+                <cfc:CountrySubentity>Minnesota</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000031</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC6185710341</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>FR</crs:ResCountryCode>
+            <crs:IN issuedBy="FR">364774064</crs:IN>
+            <crs:Name>Port Daniel Savings &amp; Loan</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>WF</cfc:CountryCode>
+              <cfc:AddressFree>Diaz River 299, North Dannymouth 34494</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>FR</crs:ResCountryCode>
+            <crs:TIN issuedBy="FR">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Diana</crs:FirstName>
+              <crs:LastName>Barnes</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>WF</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Lisa Coves</cfc:Street>
+                <cfc:BuildingIdentifier>548</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 182</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 1</cfc:FloorIdentifier>
+                <cfc:DistrictName>West Robertville</cfc:DistrictName>
+                <cfc:POB>PO Box 1407</cfc:POB>
+                <cfc:PostCode>18884</cfc:PostCode>
+                <cfc:City>Watsonmouth</cfc:City>
+                <cfc:CountrySubentity>Nebraska</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="USD">16922.06</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">2734.16</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">768.49</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="USD">1441.09</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">1614.69</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>FR</crs:ResCountryCode>
+            <crs:TIN issuedBy="FR">561228852</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Diana</crs:FirstName>
+              <crs:LastName>Barnes</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>WF</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Lisa Coves</cfc:Street>
+                <cfc:BuildingIdentifier>548</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 182</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 1</cfc:FloorIdentifier>
+                <cfc:DistrictName>West Robertville</cfc:DistrictName>
+                <cfc:POB>PO Box 1407</cfc:POB>
+                <cfc:PostCode>18884</cfc:PostCode>
+                <cfc:City>Watsonmouth</cfc:City>
+                <cfc:CountrySubentity>Nebraska</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000032</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9935995001</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:IN issuedBy="DE">398870482</crs:IN>
+            <crs:Name>Pacific Lake Peter Bank</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>CW</cfc:CountryCode>
+              <cfc:AddressFree>Mooney Prairie 245, Brianberg 09444</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="DE">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Kimberly</crs:FirstName>
+              <crs:LastName>Levy</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>CW</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Smith Branch</cfc:Street>
+                <cfc:BuildingIdentifier>419</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 87</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 18</cfc:FloorIdentifier>
+                <cfc:DistrictName>New Donna</cfc:DistrictName>
+                <cfc:POB>PO Box 3883</cfc:POB>
+                <cfc:PostCode>15663</cfc:PostCode>
+                <cfc:City>Nguyenburgh</cfc:City>
+                <cfc:CountrySubentity>Alaska</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="EUR">1451.10</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">149.46</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">187.60</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="DE">502838221</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Kimberly</crs:FirstName>
+              <crs:LastName>Levy</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>CW</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Smith Branch</cfc:Street>
+                <cfc:BuildingIdentifier>419</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 87</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 18</cfc:FloorIdentifier>
+                <cfc:DistrictName>New Donna</cfc:DistrictName>
+                <cfc:POB>PO Box 3883</cfc:POB>
+                <cfc:PostCode>15663</cfc:PostCode>
+                <cfc:City>Nguyenburgh</cfc:City>
+                <cfc:CountrySubentity>Alaska</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000033</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC6590302910</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:IN issuedBy="NL">653635749</crs:IN>
+            <crs:Name>Christianbury Savings &amp; Loan</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IN</cfc:CountryCode>
+              <cfc:AddressFree>Sims Ville 48, Juliehaven 27971</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Douglas</crs:FirstName>
+              <crs:LastName>Bailey</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IN</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Snyder Cliff</cfc:Street>
+                <cfc:BuildingIdentifier>232</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 375</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 10</cfc:FloorIdentifier>
+                <cfc:DistrictName>North Johnhaven</cfc:DistrictName>
+                <cfc:POB>PO Box 5760</cfc:POB>
+                <cfc:PostCode>27681</cfc:PostCode>
+                <cfc:City>Crawfordfurt</cfc:City>
+                <cfc:CountrySubentity>New Hampshire</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="ANG">113264.25</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">21230.89</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">241715543</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Douglas</crs:FirstName>
+              <crs:LastName>Bailey</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IN</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Snyder Cliff</cfc:Street>
+                <cfc:BuildingIdentifier>232</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 375</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 10</cfc:FloorIdentifier>
+                <cfc:DistrictName>North Johnhaven</cfc:DistrictName>
+                <cfc:POB>PO Box 5760</cfc:POB>
+                <cfc:PostCode>27681</cfc:PostCode>
+                <cfc:City>Crawfordfurt</cfc:City>
+                <cfc:CountrySubentity>New Hampshire</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000034</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9820390307</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:IN issuedBy="BE">686645526</crs:IN>
+            <crs:Name>Richard Financial Services</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>HK</cfc:CountryCode>
+              <cfc:AddressFree>Kevin Lane 828, Kimberlytown 23784</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Tyrone</crs:FirstName>
+              <crs:LastName>Welch</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>HK</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Hall Circle</cfc:Street>
+                <cfc:BuildingIdentifier>171</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 500</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 17</cfc:FloorIdentifier>
+                <cfc:DistrictName>East James</cfc:DistrictName>
+                <cfc:POB>PO Box 6820</cfc:POB>
+                <cfc:PostCode>11410</cfc:PostCode>
+                <cfc:City>Claytonville</cfc:City>
+                <cfc:CountrySubentity>Massachusetts</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="ANG">539678.49</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">6050.77</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">7848.52</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">681479730</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Tyrone</crs:FirstName>
+              <crs:LastName>Welch</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>HK</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Hall Circle</cfc:Street>
+                <cfc:BuildingIdentifier>171</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 500</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 17</cfc:FloorIdentifier>
+                <cfc:DistrictName>East James</cfc:DistrictName>
+                <cfc:POB>PO Box 6820</cfc:POB>
+                <cfc:PostCode>11410</cfc:PostCode>
+                <cfc:City>Claytonville</cfc:City>
+                <cfc:CountrySubentity>Massachusetts</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+    </crs:ReportingGroup>
+  </crs:CrsBody>
+  <crs:CrsBody>
+    <crs:ReportingFI>
+      <crs:ResCountryCode>NL</crs:ResCountryCode>
+      <crs:IN issuedBy="NL">FI999999003</crs:IN>
+      <crs:Name>Edwards Trust Company</crs:Name>
+      <crs:Address legalAddressType="OECD301">
+        <cfc:CountryCode>NL</cfc:CountryCode>
+        <cfc:AddressFix>
+          <cfc:Street>Lucas Plaza</cfc:Street>
+          <cfc:BuildingIdentifier>711</cfc:BuildingIdentifier>
+          <cfc:SuiteIdentifier>Suite 104</cfc:SuiteIdentifier>
+          <cfc:FloorIdentifier>Floor 11</cfc:FloorIdentifier>
+          <cfc:DistrictName>Turnerton</cfc:DistrictName>
+          <cfc:POB>PO Box 7164</cfc:POB>
+          <cfc:PostCode>94435</cfc:PostCode>
+          <cfc:City>Shannonshire</cfc:City>
+          <cfc:CountrySubentity>Maryland</cfc:CountrySubentity>
+        </cfc:AddressFix>
+        <cfc:AddressFree>Maria Parkway, New Stacy</cfc:AddressFree>
+      </crs:Address>
+      <crs:DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789000000035</stf:DocRefId>
+      </crs:DocSpec>
+    </crs:ReportingFI>
+    <crs:ReportingGroup>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000036</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC8911329063</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="DE">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Cheyenne</crs:FirstName>
+              <crs:LastName>Curtis</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IS</cfc:CountryCode>
+              <cfc:AddressFree>Brown Plaza 549, Rodneyfurt 06879</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1954-01-05</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="EUR">37500.43</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">6218.21</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">596.47</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">6464.11</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000037</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC3490722187</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="DE">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Melinda</crs:FirstName>
+              <crs:LastName>Haney</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>BJ</cfc:CountryCode>
+              <cfc:AddressFree>Davis Cove 282, East Amy 61078</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1958-09-26</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="ANG">8574.35</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">1113.32</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">1697.61</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">867.21</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">646.22</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">718.47</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000038</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9532300167</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>FR</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Amanda</crs:FirstName>
+              <crs:LastName>Silva</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>DE</cfc:CountryCode>
+              <cfc:AddressFree>Mccormick Islands 58, Port Adamberg 51761</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1977-07-27</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="EUR">359.09</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">61.34</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">69.13</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000039</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC7675071315</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Jennifer</crs:FirstName>
+              <crs:LastName>Pineda</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>MS</cfc:CountryCode>
+              <cfc:AddressFree>Miller Mount 655, Fordstad 57311</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>2000-03-06</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="USD">18914.92</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">2778.20</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">1576.14</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="USD">3671.94</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000040</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC4087357729</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Lindsey</crs:FirstName>
+              <crs:LastName>Stephens</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GT</cfc:CountryCode>
+              <cfc:AddressFree>Tracy Landing 740, Jessicaside 75584</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1964-02-04</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="ANG">168109.08</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">8291.32</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000041</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC5425814873</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:IN issuedBy="BE">224026766</crs:IN>
+            <crs:Name>Burch Capital</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>TH</cfc:CountryCode>
+              <cfc:AddressFree>Brown Trace 604, Port Georgemouth 85212</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Scott</crs:FirstName>
+              <crs:LastName>Palmer</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>TH</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Gill Shores</cfc:Street>
+                <cfc:BuildingIdentifier>610</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 76</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 32</cfc:FloorIdentifier>
+                <cfc:DistrictName>Michaelchester</cfc:DistrictName>
+                <cfc:POB>PO Box 4966</cfc:POB>
+                <cfc:PostCode>96699</cfc:PostCode>
+                <cfc:City>South Jasmineside</cfc:City>
+                <cfc:CountrySubentity>South Dakota</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="USD">9064.28</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">389.86</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">1532.10</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">147.60</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">1671.69</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">562.49</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">984233149</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Scott</crs:FirstName>
+              <crs:LastName>Palmer</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>TH</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Gill Shores</cfc:Street>
+                <cfc:BuildingIdentifier>610</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 76</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 32</cfc:FloorIdentifier>
+                <cfc:DistrictName>Michaelchester</cfc:DistrictName>
+                <cfc:POB>PO Box 4966</cfc:POB>
+                <cfc:PostCode>96699</cfc:PostCode>
+                <cfc:City>South Jasmineside</cfc:City>
+                <cfc:CountrySubentity>South Dakota</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000042</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC4412866243</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:IN issuedBy="IT">233007467</crs:IN>
+            <crs:Name>Ortiz &amp; Ruiz Investment Bank</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>VE</cfc:CountryCode>
+              <cfc:AddressFree>Daniel Path 991, Suzannemouth 68964</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Ryan</crs:FirstName>
+              <crs:LastName>Morris</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>VE</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Johnny Lights</cfc:Street>
+                <cfc:BuildingIdentifier>333</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 339</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 3</cfc:FloorIdentifier>
+                <cfc:DistrictName>Lake Sarah</cfc:DistrictName>
+                <cfc:POB>PO Box 3642</cfc:POB>
+                <cfc:PostCode>80560</cfc:PostCode>
+                <cfc:City>North Amy</cfc:City>
+                <cfc:CountrySubentity>Arizona</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="USD">25603.47</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="USD">1274.61</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">3059.44</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">2637.66</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">885.55</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">565694083</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Ryan</crs:FirstName>
+              <crs:LastName>Morris</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>VE</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Johnny Lights</cfc:Street>
+                <cfc:BuildingIdentifier>333</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 339</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 3</cfc:FloorIdentifier>
+                <cfc:DistrictName>Lake Sarah</cfc:DistrictName>
+                <cfc:POB>PO Box 3642</cfc:POB>
+                <cfc:PostCode>80560</cfc:PostCode>
+                <cfc:City>North Amy</cfc:City>
+                <cfc:CountrySubentity>Arizona</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000043</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC1340426054</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:IN issuedBy="BE">612604642</crs:IN>
+            <crs:Name>New Michaelburgh Savings &amp; Loan</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ZW</cfc:CountryCode>
+              <cfc:AddressFree>Christopher Vista 910, North Matthewfurt 99127</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>John</crs:FirstName>
+              <crs:LastName>Kane</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ZW</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Orr Greens</cfc:Street>
+                <cfc:BuildingIdentifier>455</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 139</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 7</cfc:FloorIdentifier>
+                <cfc:DistrictName>Silvatown</cfc:DistrictName>
+                <cfc:POB>PO Box 45</cfc:POB>
+                <cfc:PostCode>78512</cfc:PostCode>
+                <cfc:City>Villanuevashire</cfc:City>
+                <cfc:CountrySubentity>Rhode Island</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="EUR">139332.43</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">26677.55</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">24649.35</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">11257.81</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">467995726</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>John</crs:FirstName>
+              <crs:LastName>Kane</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ZW</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Orr Greens</cfc:Street>
+                <cfc:BuildingIdentifier>455</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 139</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 7</cfc:FloorIdentifier>
+                <cfc:DistrictName>Silvatown</cfc:DistrictName>
+                <cfc:POB>PO Box 45</cfc:POB>
+                <cfc:PostCode>78512</cfc:PostCode>
+                <cfc:City>Villanuevashire</cfc:City>
+                <cfc:CountrySubentity>Rhode Island</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000044</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC1881894933</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:IN issuedBy="BE">590204687</crs:IN>
+            <crs:Name>National Bank of East Christinachester</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ZM</cfc:CountryCode>
+              <cfc:AddressFree>Schmidt Hill 13, Garymouth 00707</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Gabriel</crs:FirstName>
+              <crs:LastName>Craig</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ZM</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Brian Orchard</cfc:Street>
+                <cfc:BuildingIdentifier>659</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 335</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 40</cfc:FloorIdentifier>
+                <cfc:DistrictName>South Cherylton</cfc:DistrictName>
+                <cfc:POB>PO Box 3634</cfc:POB>
+                <cfc:PostCode>79394</cfc:PostCode>
+                <cfc:City>South Linda</cfc:City>
+                <cfc:CountrySubentity>Delaware</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="EUR">500867.54</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">96733.75</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">55480.71</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">57656.37</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">84834.47</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">92976.27</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">938679870</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Gabriel</crs:FirstName>
+              <crs:LastName>Craig</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>ZM</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Brian Orchard</cfc:Street>
+                <cfc:BuildingIdentifier>659</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 335</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 40</cfc:FloorIdentifier>
+                <cfc:DistrictName>South Cherylton</cfc:DistrictName>
+                <cfc:POB>PO Box 3634</cfc:POB>
+                <cfc:PostCode>79394</cfc:PostCode>
+                <cfc:City>South Linda</cfc:City>
+                <cfc:CountrySubentity>Delaware</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000045</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC5558433028</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:IN issuedBy="IT">286455552</crs:IN>
+            <crs:Name>Global Thompson Bank</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>MQ</cfc:CountryCode>
+              <cfc:AddressFree>Price Circle 215, Lake Amandaberg 95167</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Joseph</crs:FirstName>
+              <crs:LastName>Gomez</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>MQ</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Douglas Hollow</cfc:Street>
+                <cfc:BuildingIdentifier>150</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 288</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 44</cfc:FloorIdentifier>
+                <cfc:DistrictName>Heatherfurt</cfc:DistrictName>
+                <cfc:POB>PO Box 1221</cfc:POB>
+                <cfc:PostCode>22505</cfc:PostCode>
+                <cfc:City>Hebertland</cfc:City>
+                <cfc:CountrySubentity>Minnesota</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="GBP">753271.03</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">120063.17</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">67061.41</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">20692.10</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">133965.77</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">54915.45</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>DE</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">415223070</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Joseph</crs:FirstName>
+              <crs:LastName>Gomez</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>MQ</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Douglas Hollow</cfc:Street>
+                <cfc:BuildingIdentifier>150</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 288</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 44</cfc:FloorIdentifier>
+                <cfc:DistrictName>Heatherfurt</cfc:DistrictName>
+                <cfc:POB>PO Box 1221</cfc:POB>
+                <cfc:PostCode>22505</cfc:PostCode>
+                <cfc:City>Hebertland</cfc:City>
+                <cfc:CountrySubentity>Minnesota</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+    </crs:ReportingGroup>
+  </crs:CrsBody>
+  <crs:CrsBody>
+    <crs:ReportingFI>
+      <crs:ResCountryCode>NL</crs:ResCountryCode>
+      <crs:IN issuedBy="NL">FI999999004</crs:IN>
+      <crs:Name>Rodriguez &amp; Clark Investment Bank</crs:Name>
+      <crs:Address legalAddressType="OECD301">
+        <cfc:CountryCode>NL</cfc:CountryCode>
+        <cfc:AddressFix>
+          <cfc:Street>Anderson Island</cfc:Street>
+          <cfc:BuildingIdentifier>544</cfc:BuildingIdentifier>
+          <cfc:SuiteIdentifier>Suite 343</cfc:SuiteIdentifier>
+          <cfc:FloorIdentifier>Floor 18</cfc:FloorIdentifier>
+          <cfc:DistrictName>North Hannah</cfc:DistrictName>
+          <cfc:POB>PO Box 1144</cfc:POB>
+          <cfc:PostCode>30056</cfc:PostCode>
+          <cfc:City>Scotttown</cfc:City>
+          <cfc:CountrySubentity>Washington</cfc:CountrySubentity>
+        </cfc:AddressFix>
+        <cfc:AddressFree>Watson Heights, North Erica</cfc:AddressFree>
+      </crs:Address>
+      <crs:DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789000000046</stf:DocRefId>
+      </crs:DocSpec>
+    </crs:ReportingFI>
+    <crs:ReportingGroup>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000047</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC6479970042</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Brandi</crs:FirstName>
+              <crs:LastName>Cruz</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>VC</cfc:CountryCode>
+              <cfc:AddressFree>Nguyen Street 837, East Matthew 42397</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1985-07-16</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="USD">1173614.45</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="USD">108294.99</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">98589.90</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">130997.12</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">180305.34</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000048</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9175688488</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Kimberly</crs:FirstName>
+              <crs:LastName>Wood</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GW</cfc:CountryCode>
+              <cfc:AddressFree>Rachel Inlet 217, North Alicia 85690</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1957-03-30</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="EUR">22863.49</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">3380.64</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000049</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC1839566254</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>FR</crs:ResCountryCode>
+            <crs:TIN issuedBy="FR">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Charles</crs:FirstName>
+              <crs:LastName>Cole</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>BT</cfc:CountryCode>
+              <cfc:AddressFree>Michele Island 144, Wagnerburgh 95582</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1962-08-21</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="ANG">259518.26</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">29392.82</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000050</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC2938451958</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>BE</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Katie</crs:FirstName>
+              <crs:LastName>Jones</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>SI</cfc:CountryCode>
+              <cfc:AddressFree>Debbie Orchard 665, East James 97683</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1975-05-14</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="USD">66736.53</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="USD">10718.21</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">7030.63</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">6245.25</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000051</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC2537427613</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Robert</crs:FirstName>
+              <crs:LastName>Morris</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>FK</cfc:CountryCode>
+              <cfc:AddressFree>Davis Inlet 222, Taylorborough 59340</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>1991-10-28</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="GBP">5333769.63</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">436623.22</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000052</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC6101791421</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:IN issuedBy="DE">641551915</crs:IN>
+            <crs:Name>National Bank of Samanthashire</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>LV</cfc:CountryCode>
+              <cfc:AddressFree>Sabrina Lane 880, Ericville 62686</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="DE">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Erica</crs:FirstName>
+              <crs:LastName>Zuniga</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>LV</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Brett Freeway</cfc:Street>
+                <cfc:BuildingIdentifier>573</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 359</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 41</cfc:FloorIdentifier>
+                <cfc:DistrictName>East Christopherchester</cfc:DistrictName>
+                <cfc:POB>PO Box 9789</cfc:POB>
+                <cfc:PostCode>38309</cfc:PostCode>
+                <cfc:City>North Alyssa</cfc:City>
+                <cfc:CountrySubentity>Arizona</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="ANG">36059.43</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="ANG">6658.15</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="DE">690120616</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Erica</crs:FirstName>
+              <crs:LastName>Zuniga</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>LV</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Brett Freeway</cfc:Street>
+                <cfc:BuildingIdentifier>573</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 359</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 41</cfc:FloorIdentifier>
+                <cfc:DistrictName>East Christopherchester</cfc:DistrictName>
+                <cfc:POB>PO Box 9789</cfc:POB>
+                <cfc:PostCode>38309</cfc:PostCode>
+                <cfc:City>North Alyssa</cfc:City>
+                <cfc:CountrySubentity>Arizona</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000053</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC5558769265</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:IN issuedBy="ES">473098534</crs:IN>
+            <crs:Name>South Christopher Savings &amp; Loan</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GT</cfc:CountryCode>
+              <cfc:AddressFree>Bryan Flats 776, Jeromeport 70270</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Melanie</crs:FirstName>
+              <crs:LastName>Silva</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GT</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Cook Hollow</cfc:Street>
+                <cfc:BuildingIdentifier>212</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 318</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 26</cfc:FloorIdentifier>
+                <cfc:DistrictName>Janetview</cfc:DistrictName>
+                <cfc:POB>PO Box 194</cfc:POB>
+                <cfc:PostCode>49606</cfc:PostCode>
+                <cfc:City>Lake Sarah</cfc:City>
+                <cfc:CountrySubentity>Ohio</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="USD">7471316.68</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="USD">1290286.38</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">281745.67</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">893003451</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Melanie</crs:FirstName>
+              <crs:LastName>Silva</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>GT</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Cook Hollow</cfc:Street>
+                <cfc:BuildingIdentifier>212</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 318</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 26</cfc:FloorIdentifier>
+                <cfc:DistrictName>Janetview</cfc:DistrictName>
+                <cfc:POB>PO Box 194</cfc:POB>
+                <cfc:PostCode>49606</cfc:PostCode>
+                <cfc:City>Lake Sarah</cfc:City>
+                <cfc:CountrySubentity>Ohio</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000054</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC0257854280</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:IN issuedBy="DE">636439085</crs:IN>
+            <crs:Name>Clark Trust Company</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IS</cfc:CountryCode>
+              <cfc:AddressFree>Williams Mall 987, West Adam 52228</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="DE">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Kristin</crs:FirstName>
+              <crs:LastName>Taylor</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IS</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Fitzgerald Centers</cfc:Street>
+                <cfc:BuildingIdentifier>534</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 49</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 40</cfc:FloorIdentifier>
+                <cfc:DistrictName>Lake Jessica</cfc:DistrictName>
+                <cfc:POB>PO Box 8857</cfc:POB>
+                <cfc:PostCode>14471</cfc:PostCode>
+                <cfc:City>New Dawnton</cfc:City>
+                <cfc:CountrySubentity>West Virginia</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="USD">16959.92</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="USD">3221.06</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="DE">612246868</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Kristin</crs:FirstName>
+              <crs:LastName>Taylor</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IS</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Fitzgerald Centers</cfc:Street>
+                <cfc:BuildingIdentifier>534</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 49</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 40</cfc:FloorIdentifier>
+                <cfc:DistrictName>Lake Jessica</cfc:DistrictName>
+                <cfc:POB>PO Box 8857</cfc:POB>
+                <cfc:PostCode>14471</cfc:PostCode>
+                <cfc:City>New Dawnton</cfc:City>
+                <cfc:CountrySubentity>West Virginia</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000055</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC5462619081</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:IN issuedBy="BE">368323917</crs:IN>
+            <crs:Name>Hines Financial Services</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IL</cfc:CountryCode>
+              <cfc:AddressFree>James Port 638, North Jennifer 68772</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Tracy</crs:FirstName>
+              <crs:LastName>Decker</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IL</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Jacob Mount</cfc:Street>
+                <cfc:BuildingIdentifier>862</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 395</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 47</cfc:FloorIdentifier>
+                <cfc:DistrictName>Browntown</cfc:DistrictName>
+                <cfc:POB>PO Box 4524</cfc:POB>
+                <cfc:PostCode>42462</cfc:PostCode>
+                <cfc:City>South Martinfurt</cfc:City>
+                <cfc:CountrySubentity>Montana</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="EUR">212054.01</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">38327.91</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">30590.69</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="BE">700248296</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Tracy</crs:FirstName>
+              <crs:LastName>Decker</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IL</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Jacob Mount</cfc:Street>
+                <cfc:BuildingIdentifier>862</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 395</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 47</cfc:FloorIdentifier>
+                <cfc:DistrictName>Browntown</cfc:DistrictName>
+                <cfc:POB>PO Box 4524</cfc:POB>
+                <cfc:PostCode>42462</cfc:PostCode>
+                <cfc:City>South Martinfurt</cfc:City>
+                <cfc:CountrySubentity>Montana</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000056</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC5320547760</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:IN issuedBy="ES">173955669</crs:IN>
+            <crs:Name>Pacific Davidmouth Bank</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>CG</cfc:CountryCode>
+              <cfc:AddressFree>Paige Throughway 99, Davidtown 07330</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>James</crs:FirstName>
+              <crs:LastName>Robles</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>CG</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Archer Pass</cfc:Street>
+                <cfc:BuildingIdentifier>542</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 128</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 23</cfc:FloorIdentifier>
+                <cfc:DistrictName>Montoyaland</cfc:DistrictName>
+                <cfc:POB>PO Box 6091</cfc:POB>
+                <cfc:PostCode>97683</cfc:PostCode>
+                <cfc:City>West Penny</cfc:City>
+                <cfc:CountrySubentity>Kansas</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="GBP">2368821.11</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">66124.59</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">183760.33</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">142953.03</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">128553.29</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">65052.50</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">529280096</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>James</crs:FirstName>
+              <crs:LastName>Robles</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>CG</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Archer Pass</cfc:Street>
+                <cfc:BuildingIdentifier>542</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 128</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 23</cfc:FloorIdentifier>
+                <cfc:DistrictName>Montoyaland</cfc:DistrictName>
+                <cfc:POB>PO Box 6091</cfc:POB>
+                <cfc:PostCode>97683</cfc:PostCode>
+                <cfc:City>West Penny</cfc:City>
+                <cfc:CountrySubentity>Kansas</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+      </crs:AccountReport>
+    </crs:ReportingGroup>
+  </crs:CrsBody>
+</crs:CRS_OECD>

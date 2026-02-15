@@ -1,0 +1,148 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ns0:FATCA_OECD xmlns:ns0="urn:oecd:ties:fatca:v2" xmlns:ns2="urn:oecd:ties:stffatcatypes:v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oecd:ties:fatca:v2 FatcaXML_v2.0.xsd" version="2.0">
+  <ns0:MessageSpec>
+    <ns2:SendingCompanyIN>A1B2C3.00000.SP.350</ns2:SendingCompanyIN>
+    <ns2:TransmittingCountry>NL</ns2:TransmittingCountry>
+    <ns2:ReceivingCountry>US</ns2:ReceivingCountry>
+    <ns2:MessageType>FATCA</ns2:MessageType>
+    <ns2:MessageRefId>NL2024US770487</ns2:MessageRefId>
+    <ns2:ReportingPeriod>2024-12-31</ns2:ReportingPeriod>
+    <ns2:Timestamp>2026-02-15T02:55:23Z</ns2:Timestamp>
+  </ns0:MessageSpec>
+  <ns0:FATCA>
+    <ns0:ReportingFI>
+      <ns2:ResCountryCode>NL</ns2:ResCountryCode>
+      <ns2:TIN issuedBy="NL">KTQDFL.99999.SL.532</ns2:TIN>
+      <ns2:Name>Owensfort Capital Bank</ns2:Name>
+      <ns2:Address>
+        <ns2:CountryCode>NL</ns2:CountryCode>
+        <ns2:AddressFix>
+          <ns2:Street>StreetFormalAddress</ns2:Street>
+          <ns2:BuildingIdentifier>12 AdditionalAddress</ns2:BuildingIdentifier>
+          <ns2:City>CityFormalAddress</ns2:City>
+        </ns2:AddressFix>
+      </ns2:Address>
+      <ns0:FilerCategory>FATCA000</ns0:FilerCategory>
+      <ns0:DocSpec>
+        <ns0:DocTypeIndic>FATCA11</ns0:DocTypeIndic>
+        <ns0:DocRefId>KTQDFL9999.2024.000001</ns0:DocRefId>
+      </ns0:DocSpec>
+    </ns0:ReportingFI>
+    <ns0:ReportingGroup>
+      <ns0:AccountReport>
+        <ns0:DocSpec>
+          <ns0:DocTypeIndic>FATCA11</ns0:DocTypeIndic>
+          <ns0:DocRefId>KTQDFL9999.2024.000002</ns0:DocRefId>
+        </ns0:DocSpec>
+        <ns0:AccountNumber AcctNumberType="OECD605">8479902459</ns0:AccountNumber>
+        <ns0:AccountClosed>false</ns0:AccountClosed>
+        <ns0:AccountHolder>
+          <ns0:Individual>
+            <ns2:ResCountryCode>DE</ns2:ResCountryCode>
+            <ns2:TIN issuedBy="DE">204-96-9935</ns2:TIN>
+            <ns2:Name>
+              <ns2:FirstName>Brandon</ns2:FirstName>
+              <ns2:LastName>Jacobs</ns2:LastName>
+            </ns2:Name>
+            <ns2:Address>
+              <ns2:CountryCode>RS</ns2:CountryCode>
+              <ns2:AddressFree>David Square 33, Phillipsborough</ns2:AddressFree>
+            </ns2:Address>
+            <ns2:BirthInfo>
+              <ns2:BirthDate>1999-09-25</ns2:BirthDate>
+            </ns2:BirthInfo>
+          </ns0:Individual>
+        </ns0:AccountHolder>
+        <ns0:AccountBalance currCode="USD">3357.79</ns0:AccountBalance>
+        <ns0:Payment>
+          <ns0:Type>FATCA502</ns0:Type>
+          <ns0:PaymentAmnt currCode="USD">490.38</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>FATCA504</ns0:Type>
+          <ns0:PaymentAmnt currCode="USD">174.21</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>FATCA503</ns0:Type>
+          <ns0:PaymentAmnt currCode="USD">549.98</ns0:PaymentAmnt>
+        </ns0:Payment>
+      </ns0:AccountReport>
+      <ns0:AccountReport>
+        <ns0:DocSpec>
+          <ns0:DocTypeIndic>FATCA11</ns0:DocTypeIndic>
+          <ns0:DocRefId>KTQDFL9999.2024.000003</ns0:DocRefId>
+        </ns0:DocSpec>
+        <ns0:AccountNumber AcctNumberType="OECD605">4460967357</ns0:AccountNumber>
+        <ns0:AccountClosed>false</ns0:AccountClosed>
+        <ns0:AccountHolder>
+          <ns0:Individual>
+            <ns2:ResCountryCode>FR</ns2:ResCountryCode>
+            <ns2:TIN issuedBy="FR">259-37-6514</ns2:TIN>
+            <ns2:Name>
+              <ns2:FirstName>Joseph</ns2:FirstName>
+              <ns2:LastName>Davis</ns2:LastName>
+            </ns2:Name>
+            <ns2:Address>
+              <ns2:CountryCode>FK</ns2:CountryCode>
+              <ns2:AddressFree>Taylor Radial 100, New Bruce</ns2:AddressFree>
+            </ns2:Address>
+            <ns2:BirthInfo>
+              <ns2:BirthDate>1977-04-13</ns2:BirthDate>
+            </ns2:BirthInfo>
+          </ns0:Individual>
+        </ns0:AccountHolder>
+        <ns0:AccountBalance currCode="GBP">49077.71</ns0:AccountBalance>
+        <ns0:Payment>
+          <ns0:Type>FATCA501</ns0:Type>
+          <ns0:PaymentAmnt currCode="GBP">5638.43</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>FATCA503</ns0:Type>
+          <ns0:PaymentAmnt currCode="GBP">5874.45</ns0:PaymentAmnt>
+        </ns0:Payment>
+      </ns0:AccountReport>
+      <ns0:AccountReport>
+        <ns0:DocSpec>
+          <ns0:DocTypeIndic>FATCA11</ns0:DocTypeIndic>
+          <ns0:DocRefId>KTQDFL9999.2024.000004</ns0:DocRefId>
+        </ns0:DocSpec>
+        <ns0:AccountNumber AcctNumberType="OECD605">4026113008</ns0:AccountNumber>
+        <ns0:AccountClosed>true</ns0:AccountClosed>
+        <ns0:AccountHolder>
+          <ns0:Organisation>
+            <ns2:ResCountryCode>DE</ns2:ResCountryCode>
+            <ns2:TIN issuedBy="DE">396-20-4814</ns2:TIN>
+            <ns2:Name>North Julie Capital Bank</ns2:Name>
+            <ns2:Address>
+              <ns2:CountryCode>SH</ns2:CountryCode>
+              <ns2:AddressFree>Hall Creek 465, Brianaland</ns2:AddressFree>
+            </ns2:Address>
+          </ns0:Organisation>
+          <ns0:AcctHolderType>FATCA103</ns0:AcctHolderType>
+        </ns0:AccountHolder>
+        <ns0:AccountBalance currCode="GBP">207449.31</ns0:AccountBalance>
+        <ns0:SubstantialOwner>
+          <ns0:Individual>
+            <ns2:ResCountryCode>DE</ns2:ResCountryCode>
+            <ns2:TIN issuedBy="DE">479-55-4432</ns2:TIN>
+            <ns2:Name>
+              <ns2:FirstName>Brittney</ns2:FirstName>
+              <ns2:LastName>Watson</ns2:LastName>
+            </ns2:Name>
+            <ns2:Address>
+              <ns2:CountryCode>PN</ns2:CountryCode>
+              <ns2:AddressFree>Jensen Manor 700, North Gabriel</ns2:AddressFree>
+            </ns2:Address>
+            <ns2:BirthInfo>
+              <ns2:BirthDate>2001-09-25</ns2:BirthDate>
+            </ns2:BirthInfo>
+          </ns0:Individual>
+        </ns0:SubstantialOwner>
+        <ns0:Payment>
+          <ns0:Type>FATCA502</ns0:Type>
+          <ns0:PaymentAmnt currCode="GBP">20294.65</ns0:PaymentAmnt>
+        </ns0:Payment>
+      </ns0:AccountReport>
+    </ns0:ReportingGroup>
+  </ns0:FATCA>
+</ns0:FATCA_OECD>

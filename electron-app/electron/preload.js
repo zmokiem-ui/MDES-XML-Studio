@@ -35,12 +35,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   validateCbcCsv: (csvPath) => ipcRenderer.invoke('validate-cbc-csv', csvPath),
   generateCbcCorrection: (options) => ipcRenderer.invoke('generate-cbc-correction', options),
   
-  // Batch Processing APIs
-  selectBatchFiles: (fileType) => ipcRenderer.invoke('select-batch-files', fileType),
-  
-  // XML Diff APIs
-  readXmlFile: (filePath) => ipcRenderer.invoke('read-xml-file', filePath),
-  
   // Excel Support
   readExcelFile: (filePath) => ipcRenderer.invoke('read-excel-file', filePath),
   
@@ -51,6 +45,26 @@ contextBridge.exposeInMainWorld('electronAPI', {
   loadFormState: (module) => ipcRenderer.invoke('load-form-state', module),
   
   // Error Injector APIs
+  selectErrorInjectorFile: () => ipcRenderer.invoke('select-error-injector-file'),
   corruptFile: (config) => ipcRenderer.invoke('corrupt-file', config),
-  openFile: (filePath) => ipcRenderer.invoke('open-file', filePath)
+  openFile: (filePath) => ipcRenderer.invoke('open-file', filePath),
+  
+  // File Manager APIs
+  listDirectory: (dirPath) => ipcRenderer.invoke('list-directory', dirPath),
+  readFileContent: (filePath) => ipcRenderer.invoke('read-file-content', filePath),
+  writeFileContent: (filePath, content) => ipcRenderer.invoke('write-file-content', filePath, content),
+  renameFile: (oldPath, newPath) => ipcRenderer.invoke('rename-file', oldPath, newPath),
+  deleteFile: (filePath) => ipcRenderer.invoke('delete-file', filePath),
+  createFile: (filePath, content) => ipcRenderer.invoke('create-file', filePath, content),
+  createFolder: (dirPath) => ipcRenderer.invoke('create-folder', dirPath),
+  selectFolder: () => ipcRenderer.invoke('select-folder'),
+  getFileInfo: (filePath) => ipcRenderer.invoke('get-file-info', filePath),
+  validateXmlContent: (content, module) => ipcRenderer.invoke('validate-xml-content', content, module),
+  formatXml: (content) => ipcRenderer.invoke('format-xml', content),
+  
+  // Auto-update APIs
+  installUpdate: () => ipcRenderer.send('install-update'),
+  onUpdateAvailable: (callback) => ipcRenderer.on('update-available', (event, info) => callback(info)),
+  onDownloadProgress: (callback) => ipcRenderer.on('download-progress', (event, progress) => callback(progress)),
+  onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', (event, info) => callback(info)),
 });

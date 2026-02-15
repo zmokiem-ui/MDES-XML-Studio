@@ -1,0 +1,180 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ns0:CRS_OECD xmlns:ns0="urn:oecd:ties:crs:v2" xmlns:ns2="urn:oecd:ties:commontypesfatcacrs:v2" xmlns:ns3="urn:oecd:ties:crsstf:v5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oecd:ties:crs:v1 CrsXML_v2.0.xsd" version="2.0">
+  <ns0:MessageSpec>
+    <ns0:SendingCompanyIN>123456789</ns0:SendingCompanyIN>
+    <ns0:TransmittingCountry>NL</ns0:TransmittingCountry>
+    <ns0:ReceivingCountry>DE</ns0:ReceivingCountry>
+    <ns0:MessageType>CRS</ns0:MessageType>
+    <ns0:MessageRefId>NL2024123456789000000001</ns0:MessageRefId>
+    <ns0:MessageTypeIndic>CRS701</ns0:MessageTypeIndic>
+    <ns0:ReportingPeriod>00-00-0000</ns0:ReportingPeriod>
+    <ns0:Timestamp>00-00-0000</ns0:Timestamp>
+  </ns0:MessageSpec>
+  <ns0:CrsBody>
+    <ns0:ReportingFI>
+      <ns0:ResCountryCode>NL</ns0:ResCountryCode>
+      <ns0:IN issuedBy="NL">FI999999000</ns0:IN>
+      <ns0:Name>Rodriguez Capital</ns0:Name>
+      <ns0:Address legalAddressType="OECD301">
+        <ns2:CountryCode>NL</ns2:CountryCode>
+        <ns2:AddressFix>
+          <ns2:Street>Stone Roads</ns2:Street>
+          <ns2:BuildingIdentifier>760</ns2:BuildingIdentifier>
+          <ns2:SuiteIdentifier>Suite 240</ns2:SuiteIdentifier>
+          <ns2:FloorIdentifier>Floor 8</ns2:FloorIdentifier>
+          <ns2:DistrictName>South Cherylton</ns2:DistrictName>
+          <ns2:POB>PO Box 3286</ns2:POB>
+          <ns2:PostCode>58268</ns2:PostCode>
+          <ns2:City>Johnberg</ns2:City>
+          <ns2:CountrySubentity>Utah</ns2:CountrySubentity>
+        </ns2:AddressFix>
+        <ns2:AddressFree>Kayla Brook, Chaseborough</ns2:AddressFree>
+      </ns0:Address>
+      <ns0:DocSpec>
+        <ns3:DocTypeIndic>OECD11</ns3:DocTypeIndic>
+        <ns3:DocRefId>NL2024123456789000000002</ns3:DocRefId>
+      </ns0:DocSpec>
+    </ns0:ReportingFI>
+    <ns0:ReportingGroup>
+      <ns0:AccountReport>
+        <ns0:DocSpec>
+          <ns3:DocTypeIndic>OECD11</ns3:DocTypeIndic>
+          <ns3:DocRefId>NL2024123456789000000003</ns3:DocRefId>
+        </ns0:DocSpec>
+        <ns0:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9275666117</ns0:AccountNumber>
+        <ns0:AccountHolder>
+          <ns0:Individual>
+            <ns0:ResCountryCode>NL</ns0:ResCountryCode>
+            <ns0:TIN issuedBy="ES">1234567</ns0:TIN>
+            <ns0:Name>
+              <ns0:FirstName>Tracy</ns0:FirstName>
+              <ns0:LastName>Roberts</ns0:LastName>
+            </ns0:Name>
+            <ns0:Address>
+              <ns2:CountryCode>IT</ns2:CountryCode>
+              <ns2:AddressFree>Nicole Stream 883, North Andrea 49606</ns2:AddressFree>
+            </ns0:Address>
+            <ns0:BirthInfo>
+              <ns0:BirthDate>00-00-0000</ns0:BirthDate>
+            </ns0:BirthInfo>
+          </ns0:Individual>
+        </ns0:AccountHolder>
+        <ns0:AccountBalance currCode="GBP">6348.24</ns0:AccountBalance>
+        <ns0:Payment>
+          <ns0:Type>CRS501</ns0:Type>
+          <ns0:PaymentAmnt currCode="GBP">798.20</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>CRS502</ns0:Type>
+          <ns0:PaymentAmnt currCode="GBP">707.74</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>CRS502</ns0:Type>
+          <ns0:PaymentAmnt currCode="GBP">260.57</ns0:PaymentAmnt>
+        </ns0:Payment>
+      </ns0:AccountReport>
+      <ns0:AccountReport>
+        <ns0:DocSpec>
+          <ns3:DocTypeIndic>OECD11</ns3:DocTypeIndic>
+          <ns3:DocRefId>NL2024123456789000000004</ns3:DocRefId>
+        </ns0:DocSpec>
+        <ns0:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9503158640</ns0:AccountNumber>
+        <ns0:AccountHolder>
+          <ns0:Individual>
+            <ns0:ResCountryCode>IT</ns0:ResCountryCode>
+            <ns0:TIN issuedBy="IT">1234567</ns0:TIN>
+            <ns0:Name>
+              <ns0:FirstName>Ashlee</ns0:FirstName>
+              <ns0:LastName>Dixon</ns0:LastName>
+            </ns0:Name>
+            <ns0:Address>
+              <ns2:CountryCode>MK</ns2:CountryCode>
+              <ns2:AddressFree>Heather Motorway 697, Port Jamie 13845</ns2:AddressFree>
+            </ns0:Address>
+            <ns0:BirthInfo>
+              <ns0:BirthDate>00-00-0000</ns0:BirthDate>
+            </ns0:BirthInfo>
+          </ns0:Individual>
+        </ns0:AccountHolder>
+        <ns0:AccountBalance currCode="GBP">343133.71</ns0:AccountBalance>
+        <ns0:Payment>
+          <ns0:Type>CRS504</ns0:Type>
+          <ns0:PaymentAmnt currCode="GBP">13742.50</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>CRS501</ns0:Type>
+          <ns0:PaymentAmnt currCode="GBP">65615.75</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>CRS503</ns0:Type>
+          <ns0:PaymentAmnt currCode="GBP">66793.98</ns0:PaymentAmnt>
+        </ns0:Payment>
+      </ns0:AccountReport>
+      <ns0:AccountReport>
+        <ns0:DocSpec>
+          <ns3:DocTypeIndic>OECD11</ns3:DocTypeIndic>
+          <ns3:DocRefId>NL2024123456789000000005</ns3:DocRefId>
+        </ns0:DocSpec>
+        <ns0:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC0083651971</ns0:AccountNumber>
+        <ns0:AccountHolder>
+          <ns0:Organisation>
+            <ns0:ResCountryCode>ES</ns0:ResCountryCode>
+            <ns0:IN issuedBy="NL">771410971</ns0:IN>
+            <ns0:Name>Clark Financial Services</ns0:Name>
+            <ns0:Address>
+              <ns2:CountryCode>TO</ns2:CountryCode>
+              <ns2:AddressFree>Richard Crescent 785, Deniseview 03547</ns2:AddressFree>
+            </ns0:Address>
+          </ns0:Organisation>
+          <ns0:AcctHolderType>CRS101</ns0:AcctHolderType>
+        </ns0:AccountHolder>
+        <ns0:ControllingPerson>
+          <ns0:Individual>
+            <ns0:ResCountryCode>ES</ns0:ResCountryCode>
+            <ns0:TIN issuedBy="NL">123456789CP2</ns0:TIN>
+            <ns0:Name>
+              <ns0:FirstName>Kevin</ns0:FirstName>
+              <ns0:LastName>Khan</ns0:LastName>
+            </ns0:Name>
+            <ns0:Address>
+              <ns2:CountryCode>TO</ns2:CountryCode>
+              <ns2:AddressFix>
+                <ns2:Street>Walter Village</ns2:Street>
+                <ns2:BuildingIdentifier>244</ns2:BuildingIdentifier>
+                <ns2:SuiteIdentifier>Suite 338</ns2:SuiteIdentifier>
+                <ns2:FloorIdentifier>Floor 22</ns2:FloorIdentifier>
+                <ns2:DistrictName>Lake Gina</ns2:DistrictName>
+                <ns2:POB>PO Box 242</ns2:POB>
+                <ns2:PostCode>27487</ns2:PostCode>
+                <ns2:City>South Pamelamouth</ns2:City>
+                <ns2:CountrySubentity>Mississippi</ns2:CountrySubentity>
+              </ns2:AddressFix>
+            </ns0:Address>
+          </ns0:Individual>
+          <ns0:CtrlgPersonType>CRS801</ns0:CtrlgPersonType>
+        </ns0:ControllingPerson>
+        <ns0:AccountBalance currCode="EUR">184980.39</ns0:AccountBalance>
+        <ns0:Payment>
+          <ns0:Type>CRS504</ns0:Type>
+          <ns0:PaymentAmnt currCode="EUR">19523.12</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>CRS502</ns0:Type>
+          <ns0:PaymentAmnt currCode="EUR">3848.91</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>CRS501</ns0:Type>
+          <ns0:PaymentAmnt currCode="EUR">31771.32</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>CRS501</ns0:Type>
+          <ns0:PaymentAmnt currCode="EUR">22763.07</ns0:PaymentAmnt>
+        </ns0:Payment>
+        <ns0:Payment>
+          <ns0:Type>CRS502</ns0:Type>
+          <ns0:PaymentAmnt currCode="EUR">16041.01</ns0:PaymentAmnt>
+        </ns0:Payment>
+      </ns0:AccountReport>
+    </ns0:ReportingGroup>
+  </ns0:CrsBody>
+</ns0:CRS_OECD>

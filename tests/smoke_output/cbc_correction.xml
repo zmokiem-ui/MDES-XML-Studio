@@ -1,0 +1,202 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<CBC_OECD xmlns="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" xmlns:iso="urn:oecd:ties:isocbctypes:v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0">
+  <MessageSpec>
+    <SendingEntityIN>123456789</SendingEntityIN>
+    <TransmittingCountry>NL</TransmittingCountry>
+    <ReceivingCountry>NL</ReceivingCountry>
+    <MessageType>CBC</MessageType>
+    <Language>EN</Language>
+    <Warning>CBC Test Data - Not for production use</Warning>
+    <Contact>Test Data Generator</Contact>
+    <MessageRefId>NL2024123456789c048f01a_CORR927027</MessageRefId>
+    <CorrMessageRefId>NL2024123456789c048f01a</CorrMessageRefId>
+    <MessageTypeIndic>CBC402</MessageTypeIndic>
+    <ReportingPeriod>2024-12-31</ReportingPeriod>
+    <Timestamp>2026-02-15T01:53:54</Timestamp>
+  </MessageSpec>
+  <CbcBody>
+    <ReportingEntity>
+      <Entity>
+        <ResCountryCode>NL</ResCountryCode>
+        <TIN issuedBy="NL">123456789</TIN>
+        <Name>Griffin Ltd Holdings</Name>
+        <Address>
+          <CountryCode>NL</CountryCode>
+          <AddressFix>
+            <Street>3628 Robin Extensions</Street>
+            <BuildingIdentifier>652</BuildingIdentifier>
+            <PostCode>62009</PostCode>
+            <City>Dayburgh</City>
+          </AddressFix>
+        </Address>
+      </Entity>
+      <NameMNEGroup>Griffin Ltd Holdings Group</NameMNEGroup>
+      <ReportingRole>CBC701</ReportingRole>
+      <ReportingPeriod>
+        <StartDate>2024-01-01</StartDate>
+        <EndDate>2024-12-31</EndDate>
+      </ReportingPeriod>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD12</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789033d1635-a5c4-435e-8217-8e2ef76d482f_CORR0001</stf:DocRefId>
+        <stf:CorrDocRefId>NL2024123456789033d1635-a5c4-435e-8217-8e2ef76d482f</stf:CorrDocRefId>
+      </DocSpec>
+    </ReportingEntity>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD12</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789d566abd9-8d2c-4a9b-bb1a-0e842bbbcdce_CORR0002</stf:DocRefId>
+        <stf:CorrDocRefId>NL2024123456789d566abd9-8d2c-4a9b-bb1a-0e842bbbcdce</stf:CorrDocRefId>
+      </DocSpec>
+      <ResCountryCode>SG</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">13787000</Unrelated>
+          <Related currCode="USD">28344000</Related>
+          <Total currCode="USD">42131000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">9994503</ProfitOrLoss>
+        <TaxPaid currCode="USD">1233206</TaxPaid>
+        <TaxAccrued currCode="USD">1382812</TaxAccrued>
+        <Capital currCode="USD">300068306</Capital>
+        <Earnings currCode="USD">8231115</Earnings>
+        <NbEmployees>4830</NbEmployees>
+        <Assets currCode="USD">488340919</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>SG</ResCountryCode>
+          <TIN issuedBy="SG">SG742203826</TIN>
+          <Name>Henry-Gray SG</Name>
+          <Address>
+            <CountryCode>SG</CountryCode>
+            <AddressFix>
+              <Street>2795 Lisa Shore</Street>
+              <BuildingIdentifier>270</BuildingIdentifier>
+              <PostCode>57987</PostCode>
+              <City>Lake Jennifer</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>NL</IncorpCountryCode>
+        <BizActivities>CBC504</BizActivities>
+        <BizActivities>CBC512</BizActivities>
+        <OtherEntityInfo>Additional information for entity 1</OtherEntityInfo>
+      </ConstEntities>
+    </CbcReports>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD12</stf:DocTypeIndic>
+        <stf:DocRefId>NL20241234567892b3c350d-1287-443d-ac53-20a54c2053c8_CORR0003</stf:DocRefId>
+        <stf:CorrDocRefId>NL20241234567892b3c350d-1287-443d-ac53-20a54c2053c8</stf:CorrDocRefId>
+      </DocSpec>
+      <ResCountryCode>IE</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">48603000</Unrelated>
+          <Related currCode="USD">38475000</Related>
+          <Total currCode="USD">87078000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">10329230</ProfitOrLoss>
+        <TaxPaid currCode="USD">2192813</TaxPaid>
+        <TaxAccrued currCode="USD">2196610</TaxAccrued>
+        <Capital currCode="USD">219804157</Capital>
+        <Earnings currCode="USD">6733777</Earnings>
+        <NbEmployees>2733</NbEmployees>
+        <Assets currCode="USD">298724868</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>IE</ResCountryCode>
+          <TIN issuedBy="IE">IE522696370</TIN>
+          <Name>Calhoun, Wood and Campbell IE</Name>
+          <Address>
+            <CountryCode>IE</CountryCode>
+            <AddressFix>
+              <Street>15281 Jim Island Suite 543</Street>
+              <BuildingIdentifier>973</BuildingIdentifier>
+              <PostCode>23039</PostCode>
+              <City>Lopezfurt</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC803</Role>
+        <IncorpCountryCode>JP</IncorpCountryCode>
+        <BizActivities>CBC512</BizActivities>
+        <BizActivities>CBC503</BizActivities>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>IE</ResCountryCode>
+          <TIN issuedBy="IE">IE377505645</TIN>
+          <Name>Padilla-Davis IE</Name>
+          <Address>
+            <CountryCode>IE</CountryCode>
+            <AddressFix>
+              <Street>48328 Brown Union</Street>
+              <BuildingIdentifier>883</BuildingIdentifier>
+              <PostCode>66962</PostCode>
+              <City>Port Tiffany</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC801</Role>
+        <IncorpCountryCode>IE</IncorpCountryCode>
+        <BizActivities>CBC503</BizActivities>
+        <BizActivities>CBC511</BizActivities>
+      </ConstEntities>
+    </CbcReports>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD12</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789ee98a0d4-85a1-44cc-a690-76ffe8d46739_CORR0004</stf:DocRefId>
+        <stf:CorrDocRefId>NL2024123456789ee98a0d4-85a1-44cc-a690-76ffe8d46739</stf:CorrDocRefId>
+      </DocSpec>
+      <ResCountryCode>DE</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">76951000</Unrelated>
+          <Related currCode="USD">14773000</Related>
+          <Total currCode="USD">91724000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">18287170</ProfitOrLoss>
+        <TaxPaid currCode="USD">3989705</TaxPaid>
+        <TaxAccrued currCode="USD">5026311</TaxAccrued>
+        <Capital currCode="USD">138822578</Capital>
+        <Earnings currCode="USD">16862187</Earnings>
+        <NbEmployees>4992</NbEmployees>
+        <Assets currCode="USD">256317446</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>DE</ResCountryCode>
+          <TIN issuedBy="DE">DE878092192</TIN>
+          <Name>Smith-Campbell DE</Name>
+          <Address>
+            <CountryCode>DE</CountryCode>
+            <AddressFix>
+              <Street>609 Joseph Causeway Apt. 267</Street>
+              <BuildingIdentifier>958</BuildingIdentifier>
+              <PostCode>26600</PostCode>
+              <City>South Lynn</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>CH</IncorpCountryCode>
+        <BizActivities>CBC512</BizActivities>
+        <BizActivities>CBC504</BizActivities>
+      </ConstEntities>
+    </CbcReports>
+    <AdditionalInfo>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD12</stf:DocTypeIndic>
+        <stf:DocRefId>NL202412345678935fa406a-515f-43a5-91c4-257f70d94859_CORR0005</stf:DocRefId>
+        <stf:CorrDocRefId>NL202412345678935fa406a-515f-43a5-91c4-257f70d94859</stf:CorrDocRefId>
+      </DocSpec>
+      <OtherInfo>Additional information for SG jurisdiction</OtherInfo>
+      <ResCountryCode>SG</ResCountryCode>
+    </AdditionalInfo>
+  </CbcBody>
+</CBC_OECD>

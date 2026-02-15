@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<crs:CRS_OECD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:crs="urn:oecd:ties:crs:v2" xmlns:ftc="urn:oecd:ties:fatca:v1" xmlns:cfc="urn:oecd:ties:commontypesfatcacrs:v2" xmlns:stf="urn:oecd:ties:crsstf:v5" xmlns:iso="urn:oecd:ties:isocrstypes:v1" xsi:schemaLocation="urn:oecd:ties:crs:v1 CrsXML_v2.0.xsd" version="2.0">
+  <crs:MessageSpec>
+    <crs:SendingCompanyIN>123456789</crs:SendingCompanyIN>
+    <crs:TransmittingCountry>NL</crs:TransmittingCountry>
+    <crs:ReceivingCountry>DE</crs:ReceivingCountry>
+    <crs:MessageType>CRS</crs:MessageType>
+    <crs:MessageRefId>NL2024123456789000000001</crs:MessageRefId>
+    <crs:MessageTypeIndic>CRS701</crs:MessageTypeIndic>
+    <crs:ReportingPeriod>2024-12-31</crs:ReportingPeriod>
+    <crs:Timestamp>2026-02-15T02:55:41.778036Z</crs:Timestamp>
+  </crs:MessageSpec>
+  <crs:CrsBody>
+    <crs:ReportingFI>
+      <crs:ResCountryCode>NL</crs:ResCountryCode>
+      <crs:IN issuedBy="NL">FI999999000</crs:IN>
+      <crs:Name>Rodriguez Capital</crs:Name>
+      <crs:Address legalAddressType="OECD301">
+        <cfc:CountryCode>NL</cfc:CountryCode>
+        <cfc:AddressFix>
+          <cfc:Street>Stone Roads</cfc:Street>
+          <cfc:BuildingIdentifier>760</cfc:BuildingIdentifier>
+          <cfc:SuiteIdentifier>Suite 240</cfc:SuiteIdentifier>
+          <cfc:FloorIdentifier>Floor 8</cfc:FloorIdentifier>
+          <cfc:DistrictName>South Cherylton</cfc:DistrictName>
+          <cfc:POB>PO Box 3286</cfc:POB>
+          <cfc:PostCode>58268</cfc:PostCode>
+          <cfc:City>Johnberg</cfc:City>
+          <cfc:CountrySubentity>Utah</cfc:CountrySubentity>
+        </cfc:AddressFix>
+        <cfc:AddressFree>Kayla Brook, Chaseborough</cfc:AddressFree>
+      </crs:Address>
+      <crs:DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789000000002</stf:DocRefId>
+      </crs:DocSpec>
+    </crs:ReportingFI>
+    <crs:ReportingGroup>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000003</stf:DocRefId>
+        </crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9275666117</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:IN issuedBy="ES">134126396</crs:IN>
+            <crs:Name>Wright Trust Company</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IT</cfc:CountryCode>
+              <cfc:AddressFree>Cunningham Springs 748, South Jill 03281</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>NL</crs:ResCountryCode>
+            <crs:TIN issuedBy="ES">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Rebecca</crs:FirstName>
+              <crs:LastName>Harris</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>IT</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Elizabeth Key</cfc:Street>
+                <cfc:BuildingIdentifier>389</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 468</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 16</cfc:FloorIdentifier>
+                <cfc:DistrictName>Alexanderland</cfc:DistrictName>
+                <cfc:POB>PO Box 7669</cfc:POB>
+                <cfc:PostCode>81913</cfc:PostCode>
+                <cfc:City>Lake Sarahfurt</cfc:City>
+                <cfc:CountrySubentity>Mississippi</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="USD">128401.41</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="USD">15896.03</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="USD">1759.17</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="USD">22721.55</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="USD">7125.76</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="USD">22704.17</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+    </crs:ReportingGroup>
+  </crs:CrsBody>
+</crs:CRS_OECD>

@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { 
-  Upload, AlertTriangle, Zap, Settings, Download, FileText, 
-  Trash2, RefreshCw, CheckCircle2, XCircle, AlertCircle,
-  Sliders, FileWarning, Bug, Wrench, Target
+  Upload, AlertTriangle, Zap, Download, FileText, 
+  Trash2, RefreshCw, CheckCircle2, XCircle,
+  Sliders, FileWarning, Wrench
 } from 'lucide-react';
 
 /**
  * XML/CSV Error Injector - Corrupt files for testing purposes
- * Supports CRS, FATCA, and CBC modules with various corruption types
+ * Accepts a `module` prop ('crs', 'fatca', or 'cbc') to show module-specific presets
  */
-export function ErrorInjector({ theme, language }) {
-  const [selectedModule, setSelectedModule] = useState('crs');
+export function ErrorInjector({ theme, language, module = 'crs' }) {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [fileType, setFileType] = useState('xml'); // 'xml' or 'csv'
   const [corruptionLevel, setCorruptionLevel] = useState(3); // 1-5 scale
@@ -198,12 +197,18 @@ export function ErrorInjector({ theme, language }) {
   ];
 
   const handleFileUpload = async () => {
-    const file = await window.electronAPI.selectXmlFile();
-    if (file) {
-      setUploadedFile(file);
-      // Auto-detect file type
-      const ext = file.split('.').pop().toLowerCase();
-      setFileType(ext === 'csv' ? 'csv' : 'xml');
+    try {
+      const file = await window.electronAPI.selectErrorInjectorFile();
+      if (file) {
+        setUploadedFile(file);
+        // Auto-detect file type
+        const ext = file.split('.').pop().toLowerCase();
+        setFileType(ext === 'csv' ? 'csv' : 'xml');
+        setResult(null);
+      }
+    } catch (error) {
+      console.error('File selection error:', error);
+      setResult({ success: false, error: 'Failed to select file: ' + error.message });
     }
   };
 
@@ -211,9 +216,11 @@ export function ErrorInjector({ theme, language }) {
     setSelectedPreset(preset);
     // Initialize custom options based on preset
     const options = {};
-    preset.options.forEach(opt => {
-      options[opt] = true;
-    });
+    if (preset.options && Array.isArray(preset.options)) {
+      preset.options.forEach(opt => {
+        options[opt] = true;
+      });
+    }
     setCustomOptions(options);
   };
 
@@ -225,7 +232,7 @@ export function ErrorInjector({ theme, language }) {
 
     try {
       const corruptionConfig = {
-        module: selectedModule,
+        module,
         fileType,
         corruptionLevel,
         preset: selectedPreset?.id,
@@ -269,62 +276,29 @@ export function ErrorInjector({ theme, language }) {
     );
   };
 
-  const currentPresets = fileType === 'csv' ? CSV_CORRUPTION_OPTIONS : CORRUPTION_PRESETS[selectedModule];
+  const currentPresets = fileType === 'csv' ? CSV_CORRUPTION_OPTIONS : (CORRUPTION_PRESETS[module] || CORRUPTION_PRESETS.crs);
 
   return (
-    <div className={`min-h-screen ${theme.background}`}>
-      {/* Header */}
-      <div className={`${theme.card} border-b ${theme.border} sticky top-0 z-10`}>
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${theme.accent}`}>
-                <Bug className="w-6 h-6 text-red-500" />
-              </div>
-              <div>
-                <h1 className={`text-2xl font-bold ${theme.text}`}>Error Injector</h1>
-                <p className={`text-sm ${theme.textMuted}`}>Corrupt XML/CSV files for testing purposes</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
-              <span className={`text-sm ${theme.textMuted}`}>Testing Tool Only</span>
-            </div>
+    <div className="space-y-6">
+      {/* Info Banner */}
+      <div className={`border rounded-xl p-4 bg-red-500/5 border-red-500/20`}>
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className={`font-medium text-red-600 dark:text-red-400`}>
+              Faulty XML Generator - {module.toUpperCase()} Module
+            </p>
+            <p className={`text-sm ${theme.textMuted}`}>
+              Upload an XML or CSV file and apply corruption presets to generate intentionally faulty test files.
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Panel - Upload & Module Selection */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Module Selection */}
-            <div className={`${theme.card} rounded-xl border ${theme.border} p-6`}>
-              <h3 className={`text-lg font-semibold ${theme.text} mb-4 flex items-center gap-2`}>
-                <Target className="w-5 h-5" />
-                Target Module
-              </h3>
-              <div className="space-y-2">
-                {['crs', 'fatca', 'cbc'].map(module => (
-                  <button
-                    key={module}
-                    onClick={() => setSelectedModule(module)}
-                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-left ${
-                      selectedModule === module
-                        ? 'border-blue-500 bg-blue-500/10'
-                        : `${theme.border} ${theme.cardHover}`
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={`font-medium ${theme.text}`}>{module.toUpperCase()}</span>
-                      {selectedModule === module && <CheckCircle2 className="w-5 h-5 text-blue-500" />}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* File Upload */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Panel - Upload & Settings */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* File Upload */}
             <div className={`${theme.card} rounded-xl border ${theme.border} p-6`}>
               <h3 className={`text-lg font-semibold ${theme.text} mb-4 flex items-center gap-2`}>
                 <Upload className="w-5 h-5" />
@@ -420,8 +394,8 @@ export function ErrorInjector({ theme, language }) {
             </div>
           </div>
 
-          {/* Middle Panel - Corruption Presets */}
-          <div className="lg:col-span-2">
+        {/* Right Panel - Corruption Presets */}
+        <div className="lg:col-span-2">
             <div className={`${theme.card} rounded-xl border ${theme.border} p-6`}>
               <h3 className={`text-lg font-semibold ${theme.text} mb-4 flex items-center gap-2`}>
                 <Wrench className="w-5 h-5" />
@@ -561,7 +535,6 @@ export function ErrorInjector({ theme, language }) {
                   </div>
                 </div>
               )}
-            </div>
           </div>
         </div>
       </div>

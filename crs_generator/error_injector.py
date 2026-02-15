@@ -184,28 +184,46 @@ class ErrorInjector:
             'corruptionsApplied': self.corruptions_applied
         }
     
+    def _build_parent_map(self, root):
+        """Build a map of child -> parent for element removal"""
+        return {c: p for p in root.iter() for c in p}
+    
     def _get_namespace(self, root):
         """Extract namespace from root element"""
         match = re.match(r'\{.*\}', root.tag)
         return match.group(0) if match else ''
     
+    def _local_name(self, tag):
+        """Get local name from a namespaced tag"""
+        if '}' in tag:
+            return tag.split('}', 1)[1]
+        return tag
+    
+    def _find_all_by_local_name(self, root, local_name):
+        """Find all elements matching a local name, regardless of namespace"""
+        return [elem for elem in root.iter() if self._local_name(elem.tag) == local_name]
+    
     def _remove_required_fields(self, root, ns, options):
         """Remove required fields from XML"""
-        fields_to_remove = {
-            'docRefId': f'.//{ns}DocRefId',
-            'messageRefId': f'.//{ns}MessageRefId',
-            'tin': f'.//{ns}TIN',
-            'name': f'.//{ns}Name',
-            'address': f'.//{ns}Address'
+        parent_map = self._build_parent_map(root)
+        field_map = {
+            'docRefId': 'DocRefId',
+            'messageRefId': 'MessageRefId',
+            'tin': 'TIN',
+            'name': 'Name',
+            'address': 'Address',
+            'giin': 'GIIN',
+            'accountNumber': 'AccountNumber',
+            'filerCategory': 'FilerCategory'
         }
         
-        for field, xpath in fields_to_remove.items():
+        for field, local_name in field_map.items():
             if options.get(field, True):
-                elements = root.findall(xpath)
+                elements = self._find_all_by_local_name(root, local_name)
                 removed_count = 0
                 for elem in elements:
                     if random.random() < 0.3 * self.corruption_level:
-                        parent = root.find(f'.//{ns}*[@*]/..')
+                        parent = parent_map.get(elem)
                         if parent is not None:
                             try:
                                 parent.remove(elem)
@@ -213,7 +231,7 @@ class ErrorInjector:
                             except:
                                 pass
                 if removed_count > 0:
-                    self.corruptions_applied.append(f'Removed {removed_count} {field} elements')
+                    self.corruptions_applied.append(f'Removed {removed_count} {local_name} elements')
     
     def _corrupt_dates(self, root, ns, options):
         """Corrupt date fields"""
@@ -222,7 +240,7 @@ class ErrorInjector:
         
         for field in date_fields:
             if options.get(field.lower(), True):
-                elements = root.findall(f'.//{ns}{field}')
+                elements = self._find_all_by_local_name(root, field)
                 for elem in elements:
                     if random.random() < 0.5 * self.corruption_level:
                         elem.text = random.choice(invalid_dates)
@@ -230,12 +248,12 @@ class ErrorInjector:
     
     def _corrupt_country_codes(self, root, ns, options):
         """Corrupt country codes"""
-        country_fields = ['ResCountryCode', 'SendingCountry', 'ReceivingCountry', 'TransmittingCountry']
+        country_fields = ['ResCountryCode', 'SendingCountry', 'ReceivingCountry', 'TransmittingCountry', 'CountryCode']
         invalid_codes = ['XX', 'ZZ', '99', 'ABC', 'INVALID', '']
         
         for field in country_fields:
             if options.get(field.lower(), True):
-                elements = root.findall(f'.//{ns}{field}')
+                elements = self._find_all_by_local_name(root, field)
                 for elem in elements:
                     if random.random() < 0.4 * self.corruption_level:
                         elem.text = random.choice(invalid_codes)
@@ -243,11 +261,11 @@ class ErrorInjector:
     
     def _corrupt_amounts(self, root, ns, options):
         """Corrupt monetary amounts"""
-        amount_fields = ['AccountBalance', 'Payment']
+        amount_fields = ['AccountBalance', 'Payment', 'Amount']
         
         for field in amount_fields:
             if options.get(field.lower(), True):
-                elements = root.findall(f'.//{ns}{field}')
+                elements = self._find_all_by_local_name(root, field)
                 for elem in elements:
                     if random.random() < 0.3 * self.corruption_level:
                         corruption_type = random.choice(['negative', 'invalid', 'huge', 'text'])
@@ -263,7 +281,7 @@ class ErrorInjector:
     
     def _duplicate_docrefids(self, root, ns, options):
         """Create duplicate DocRefIds"""
-        docrefids = root.findall(f'.//{ns}DocRefId')
+        docrefids = self._find_all_by_local_name(root, 'DocRefId')
         if docrefids and len(docrefids) > 1:
             duplicate_value = docrefids[0].text
             num_to_duplicate = min(len(docrefids) - 1, self.corruption_level * 2)
@@ -275,14 +293,14 @@ class ErrorInjector:
     def _corrupt_message_types(self, root, ns, options):
         """Corrupt message type indicators"""
         if options.get('messageTypeIndic', True):
-            elements = root.findall(f'.//{ns}MessageTypeIndic')
+            elements = self._find_all_by_local_name(root, 'MessageTypeIndic')
             invalid_types = ['CRS999', 'INVALID', 'CRS000', 'FATCA999']
             for elem in elements:
                 elem.text = random.choice(invalid_types)
                 self.corruptions_applied.append(f'Corrupted MessageTypeIndic: {elem.text}')
         
         if options.get('docTypeIndic', True):
-            elements = root.findall(f'.//{ns}DocTypeIndic')
+            elements = self._find_all_by_local_name(root, 'DocTypeIndic')
             invalid_types = ['OECD99', 'INVALID', 'FATCA99', 'OECD0']
             for elem in elements:
                 elem.text = random.choice(invalid_types)
@@ -315,7 +333,7 @@ class ErrorInjector:
     
     def _corrupt_tin_formats(self, root, ns, options):
         """Corrupt TIN/GIIN formats"""
-        tin_elements = root.findall(f'.//{ns}TIN') + root.findall(f'.//{ns}IN')
+        tin_elements = self._find_all_by_local_name(root, 'TIN') + self._find_all_by_local_name(root, 'IN')
         invalid_formats = ['INVALID', '123', '99999999999999999', 'ABC-DEF-GHI', '']
         
         for elem in tin_elements:
@@ -324,18 +342,18 @@ class ErrorInjector:
                 self.corruptions_applied.append(f'Corrupted TIN format: {elem.text}')
     
     def _corrupt_giin_formats(self, root, ns, options):
-        """Corrupt GIIN formats (FATCA)"""
-        giin_elements = root.findall(f'.//{ns}GIIN')
+        """Corrupt GIIN formats (FATCA) - also targets TIN elements used as GIINs"""
+        giin_elements = self._find_all_by_local_name(root, 'GIIN') + self._find_all_by_local_name(root, 'TIN')
         invalid_formats = ['INVALID', '123456', 'ABCDEF.GHIJK.LM.NOP', '......', '']
         
         for elem in giin_elements:
             if random.random() < 0.5 * self.corruption_level:
                 elem.text = random.choice(invalid_formats)
-                self.corruptions_applied.append(f'Corrupted GIIN format: {elem.text}')
+                self.corruptions_applied.append(f'Corrupted GIIN/TIN format: {elem.text}')
     
     def _corrupt_filer_category(self, root, ns, options):
         """Corrupt FATCA filer category"""
-        elements = root.findall(f'.//{ns}FilerCategory')
+        elements = self._find_all_by_local_name(root, 'FilerCategory')
         invalid_codes = ['FATCA999', 'FATCA000', 'INVALID', 'FATCA700']
         
         for elem in elements:
@@ -344,7 +362,7 @@ class ErrorInjector:
     
     def _corrupt_account_types(self, root, ns, options):
         """Corrupt FATCA account holder types"""
-        elements = root.findall(f'.//{ns}AcctHolderType')
+        elements = self._find_all_by_local_name(root, 'AcctHolderType') + self._find_all_by_local_name(root, 'AccountHolderType')
         invalid_codes = ['FATCA999', 'FATCA000', 'INVALID']
         
         for elem in elements:
@@ -353,7 +371,7 @@ class ErrorInjector:
     
     def _corrupt_payment_types(self, root, ns, options):
         """Corrupt FATCA payment types"""
-        elements = root.findall(f'.//{ns}PaymentType')
+        elements = self._find_all_by_local_name(root, 'PaymentType') + self._find_all_by_local_name(root, 'Type')
         invalid_codes = ['FATCA999', 'FATCA500', 'INVALID']
         
         for elem in elements:
@@ -362,11 +380,12 @@ class ErrorInjector:
     
     def _create_us_indicia_errors(self, root, ns, options):
         """Create US indicia conflicts"""
+        parent_map = self._build_parent_map(root)
         # Remove SubstantialOwner when US person exists
         if options.get('missingSubstantialOwner', True):
-            substantial_owners = root.findall(f'.//{ns}SubstantialOwner')
+            substantial_owners = self._find_all_by_local_name(root, 'SubstantialOwner')
             for owner in substantial_owners[:max(1, len(substantial_owners) // 2)]:
-                parent = root.find(f'.//{ns}*[@*]/..')
+                parent = parent_map.get(owner)
                 if parent is not None:
                     try:
                         parent.remove(owner)
@@ -376,11 +395,11 @@ class ErrorInjector:
     
     def _corrupt_revenues(self, root, ns, options):
         """Corrupt CBC revenue amounts"""
-        revenue_fields = ['Revenues', 'ProfitLoss', 'TaxPaid']
+        revenue_fields = ['Revenues', 'ProfitLoss', 'TaxPaid', 'TaxAccrued', 'Capital', 'Earnings', 'NbEmployees']
         
         for field in revenue_fields:
             if options.get(field.lower(), True):
-                elements = root.findall(f'.//{ns}{field}')
+                elements = self._find_all_by_local_name(root, field)
                 for elem in elements:
                     if random.random() < 0.4:
                         corruption = random.choice(['negative', 'invalid', 'huge'])
@@ -394,7 +413,7 @@ class ErrorInjector:
     
     def _corrupt_entity_types(self, root, ns, options):
         """Corrupt CBC entity types"""
-        elements = root.findall(f'.//{ns}EntityType')
+        elements = self._find_all_by_local_name(root, 'EntityType') + self._find_all_by_local_name(root, 'BizActivities')
         invalid_types = ['INVALID', 'CBC999', 'UNKNOWN']
         
         for elem in elements:
@@ -403,10 +422,11 @@ class ErrorInjector:
     
     def _remove_cbc_reports(self, root, ns, options):
         """Remove CBC report sections"""
+        parent_map = self._build_parent_map(root)
         if options.get('cbcReports', True):
-            reports = root.findall(f'.//{ns}CbcReports')
+            reports = self._find_all_by_local_name(root, 'CbcReports')
             for report in reports[:max(1, len(reports) // 2)]:
-                parent = root.find(f'.//{ns}*[@*]/..')
+                parent = parent_map.get(report)
                 if parent is not None:
                     try:
                         parent.remove(report)
@@ -416,7 +436,7 @@ class ErrorInjector:
     
     def _corrupt_cbc_message_type(self, root, ns, options):
         """Corrupt CBC message type"""
-        elements = root.findall(f'.//{ns}MessageTypeIndic')
+        elements = self._find_all_by_local_name(root, 'MessageTypeIndic')
         invalid_types = ['CBC999', 'INVALID', 'CBC000']
         
         for elem in elements:
@@ -425,12 +445,14 @@ class ErrorInjector:
     
     def _duplicate_entities(self, root, ns, options):
         """Duplicate entity names in CBC"""
-        entities = root.findall(f'.//{ns}ConstituentEntity')
+        entities = self._find_all_by_local_name(root, 'ConstituentEntity')
         if len(entities) > 1:
-            first_name = entities[0].find(f'.//{ns}Name')
+            names_in_first = [e for e in entities[0].iter() if self._local_name(e.tag) == 'Name']
+            first_name = names_in_first[0] if names_in_first else None
             if first_name is not None:
                 for entity in entities[1:self.corruption_level + 1]:
-                    name_elem = entity.find(f'.//{ns}Name')
+                    entity_names = [e for e in entity.iter() if self._local_name(e.tag) == 'Name']
+                    name_elem = entity_names[0] if entity_names else None
                     if name_elem is not None:
                         name_elem.text = first_name.text
                 self.corruptions_applied.append('Created duplicate entity names')
@@ -468,7 +490,13 @@ def main():
     
     args = parser.parse_args()
     
-    options = json.loads(args.options) if args.options else {}
+    options = {}
+    if args.options:
+        try:
+            options = json.loads(args.options)
+        except json.JSONDecodeError:
+            # If JSON parsing fails, try to use empty options
+            options = {}
     
     injector = ErrorInjector(args.module, args.file_type, args.level)
     result = injector.corrupt_file(args.input, args.output, args.preset, options)

@@ -66,7 +66,8 @@ export const translations = {
       generatingFATCA: 'Generating FATCA XML...',
       generatingCBC: 'Generating CBC XML...',
       processing: 'Processing...',
-      open: 'Open'
+      open: 'Open',
+      downloadCSV: 'Download CSV'
     },
     
     // Form labels
@@ -144,7 +145,9 @@ export const translations = {
       showTips: 'Show tips',
       recentFiles: 'Recent files',
       partnerJurisdictions: 'Partner Jurisdictions',
-      keyboardShortcuts: 'Keyboard Shortcuts'
+      keyboardShortcuts: 'Keyboard Shortcuts',
+      appearance: 'Appearance',
+      general: 'General'
     },
     
     // History
@@ -528,7 +531,9 @@ export const translations = {
       showTips: 'Tips tonen',
       recentFiles: 'Recente bestanden',
       partnerJurisdictions: 'Partner Jurisdicties',
-      keyboardShortcuts: 'Sneltoetsen'
+      keyboardShortcuts: 'Sneltoetsen',
+      appearance: 'Uiterlijk',
+      general: 'Algemeen'
     },
     
     // History

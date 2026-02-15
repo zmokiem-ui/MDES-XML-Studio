@@ -1,16 +1,68 @@
-﻿node_modules/
+﻿# ========================
+# Python
+# ========================
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+*.spec
+entry_crs_cli.py
+entry_cbc_cli.py
+entry_fatca_cli.py
+entry_error_injector.py
+
+# ========================
+# Node / Electron
+# ========================
+node_modules/
+.vite/
+npm-debug.log
+yarn-error.log
+
+# ========================
+# Build outputs
+# ========================
 dist/
 dist-electron/
 out/
 build/
+electron-app/python-dist/
+electron-app/dist/
+electron-app/dist-electron/
 *.exe
 *.dmg
 *.AppImage
-.DS_Store
+*.blockmap
+latest.yml
+
+# ========================
+# Environment & secrets
+# ========================
 .env
-npm-debug.log
-yarn-error.log
-__pycache__/
-*.pyc
-.vite/
+.env.local
+.env.*.local
+
+# ========================
+# OS files
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# IDE
+# ========================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ========================
+# Test artifacts
+# ========================
 test_fatca_correction.xml
+temp_preview.csv
+electron-app/test-results/
+electron-app/e2e-test-results/
+electron-app/e2e-tests/output/

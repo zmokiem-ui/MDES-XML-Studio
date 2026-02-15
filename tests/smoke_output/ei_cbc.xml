@@ -1,0 +1,136 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ns0:CBC_OECD xmlns:ns0="urn:oecd:ties:cbc:v2" xmlns:ns1="urn:oecd:ties:cbcstf:v5" version="2.0">
+  <ns0:MessageSpec>
+    <ns0:SendingEntityIN>123456789</ns0:SendingEntityIN>
+    <ns0:TransmittingCountry>NL</ns0:TransmittingCountry>
+    <ns0:ReceivingCountry>NL</ns0:ReceivingCountry>
+    <ns0:MessageType>CBC</ns0:MessageType>
+    <ns0:Language>EN</ns0:Language>
+    <ns0:Warning>CBC Test Data - Not for production use</ns0:Warning>
+    <ns0:Contact>Test Data Generator</ns0:Contact>
+    <ns0:MessageTypeIndic>CBC401</ns0:MessageTypeIndic>
+    <ns0:ReportingPeriod>2024-12-31</ns0:ReportingPeriod>
+    <ns0:Timestamp>2026-02-15T04:53:53.978359Z</ns0:Timestamp>
+  </ns0:MessageSpec>
+  <ns0:CbcBody>
+    <ns0:ReportingEntity>
+      <ns0:Entity>
+        <ns0:ResCountryCode>NL</ns0:ResCountryCode>
+        </ns0:Entity>
+      <ns0:NameMNEGroup>Griffin Ltd Holdings Group</ns0:NameMNEGroup>
+      <ns0:ReportingRole>CBC701</ns0:ReportingRole>
+      <ns0:ReportingPeriod>
+        <ns0:StartDate>2024-01-01</ns0:StartDate>
+        <ns0:EndDate>2024-12-31</ns0:EndDate>
+      </ns0:ReportingPeriod>
+      <ns0:DocSpec>
+        <ns1:DocTypeIndic>OECD11</ns1:DocTypeIndic>
+        </ns0:DocSpec>
+    </ns0:ReportingEntity>
+    <ns0:CbcReports>
+      <ns0:DocSpec>
+        <ns1:DocTypeIndic>OECD11</ns1:DocTypeIndic>
+        </ns0:DocSpec>
+      <ns0:ResCountryCode>SG</ns0:ResCountryCode>
+      <ns0:Summary>
+        <ns0:Revenues>
+          <ns0:Unrelated currCode="USD">13787000</ns0:Unrelated>
+          <ns0:Related currCode="USD">28344000</ns0:Related>
+          <ns0:Total currCode="USD">42131000</ns0:Total>
+        </ns0:Revenues>
+        <ns0:ProfitOrLoss currCode="USD">9176125</ns0:ProfitOrLoss>
+        <ns0:TaxPaid currCode="USD">1318859</ns0:TaxPaid>
+        <ns0:TaxAccrued currCode="USD">1401755</ns0:TaxAccrued>
+        <ns0:Capital currCode="USD">287522000</ns0:Capital>
+        <ns0:Earnings currCode="USD">8946056</ns0:Earnings>
+        <ns0:NbEmployees>4406</ns0:NbEmployees>
+        <ns0:Assets currCode="USD">444964734</ns0:Assets>
+      </ns0:Summary>
+      <ns0:ConstEntities>
+        <ns0:ConstEntity>
+          <ns0:ResCountryCode>SG</ns0:ResCountryCode>
+          </ns0:ConstEntity>
+        <ns0:Role>CBC802</ns0:Role>
+        <ns0:IncorpCountryCode>NL</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC504</ns0:BizActivities>
+        <ns0:BizActivities>CBC512</ns0:BizActivities>
+        <ns0:OtherEntityInfo>Additional information for entity 1</ns0:OtherEntityInfo>
+      </ns0:ConstEntities>
+    </ns0:CbcReports>
+    <ns0:CbcReports>
+      <ns0:DocSpec>
+        <ns1:DocTypeIndic>OECD11</ns1:DocTypeIndic>
+        <ns1:DocRefId>NL20241234567892b3c350d-1287-443d-ac53-20a54c2053c8</ns1:DocRefId>
+      </ns0:DocSpec>
+      <ns0:ResCountryCode>IE</ns0:ResCountryCode>
+      <ns0:Summary>
+        <ns0:Revenues>
+          <ns0:Unrelated currCode="USD">48603000</ns0:Unrelated>
+          <ns0:Related currCode="USD">38475000</ns0:Related>
+          <ns0:Total currCode="USD">87078000</ns0:Total>
+        </ns0:Revenues>
+        <ns0:ProfitOrLoss currCode="USD">10673766</ns0:ProfitOrLoss>
+        <ns0:TaxPaid currCode="USD">2009075</ns0:TaxPaid>
+        <ns0:TaxAccrued currCode="USD">2439207</ns0:TaxAccrued>
+        <ns0:Capital currCode="USD">240516000</ns0:Capital>
+        <ns0:Earnings currCode="USD">6139318</ns0:Earnings>
+        <ns0:NbEmployees>2797</ns0:NbEmployees>
+        <ns0:Assets currCode="USD">326553608</ns0:Assets>
+      </ns0:Summary>
+      <ns0:ConstEntities>
+        <ns0:ConstEntity>
+          <ns0:ResCountryCode>IE</ns0:ResCountryCode>
+          </ns0:ConstEntity>
+        <ns0:Role>CBC803</ns0:Role>
+        <ns0:IncorpCountryCode>JP</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC512</ns0:BizActivities>
+        <ns0:BizActivities>CBC503</ns0:BizActivities>
+      </ns0:ConstEntities>
+      <ns0:ConstEntities>
+        <ns0:ConstEntity>
+          <ns0:ResCountryCode>IE</ns0:ResCountryCode>
+          </ns0:ConstEntity>
+        <ns0:Role>CBC801</ns0:Role>
+        <ns0:IncorpCountryCode>IE</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC503</ns0:BizActivities>
+        <ns0:BizActivities>CBC511</ns0:BizActivities>
+      </ns0:ConstEntities>
+    </ns0:CbcReports>
+    <ns0:CbcReports>
+      <ns0:DocSpec>
+        <ns1:DocTypeIndic>OECD11</ns1:DocTypeIndic>
+        </ns0:DocSpec>
+      <ns0:ResCountryCode>DE</ns0:ResCountryCode>
+      <ns0:Summary>
+        <ns0:Revenues>
+          <ns0:Unrelated currCode="USD">76951000</ns0:Unrelated>
+          <ns0:Related currCode="USD">14773000</ns0:Related>
+          <ns0:Total currCode="USD">91724000</ns0:Total>
+        </ns0:Revenues>
+        <ns0:ProfitOrLoss currCode="USD">17572969</ns0:ProfitOrLoss>
+        <ns0:TaxPaid currCode="USD">4269683</ns0:TaxPaid>
+        <ns0:TaxAccrued currCode="USD">4803107</ns0:TaxAccrued>
+        <ns0:Capital currCode="USD">137787000</ns0:Capital>
+        <ns0:Earnings currCode="USD">15844066</ns0:Earnings>
+        <ns0:NbEmployees>4565</ns0:NbEmployees>
+        <ns0:Assets currCode="USD">262288791</ns0:Assets>
+      </ns0:Summary>
+      <ns0:ConstEntities>
+        <ns0:ConstEntity>
+          <ns0:ResCountryCode>DE</ns0:ResCountryCode>
+          </ns0:ConstEntity>
+        <ns0:Role>CBC802</ns0:Role>
+        <ns0:IncorpCountryCode>CH</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC512</ns0:BizActivities>
+        <ns0:BizActivities>CBC504</ns0:BizActivities>
+      </ns0:ConstEntities>
+    </ns0:CbcReports>
+    <ns0:AdditionalInfo>
+      <ns0:DocSpec>
+        <ns1:DocTypeIndic>OECD11</ns1:DocTypeIndic>
+        </ns0:DocSpec>
+      <ns0:OtherInfo>Additional information for SG jurisdiction</ns0:OtherInfo>
+      <ns0:ResCountryCode>SG</ns0:ResCountryCode>
+    </ns0:AdditionalInfo>
+  </ns0:CbcBody>
+</ns0:CBC_OECD>

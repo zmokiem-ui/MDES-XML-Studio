@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ftc:FATCA_OECD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ftc="urn:oecd:ties:fatca:v2" xmlns:sfa="urn:oecd:ties:stffatcatypes:v2" xmlns:html="http://www.w3.org/1999/xhtml" xsi:schemaLocation="urn:oecd:ties:fatca:v2 FatcaXML_v2.0.xsd" version="2.0">
+  <ftc:MessageSpec>
+    <sfa:SendingCompanyIN>X9Y8Z7.11111.SP.350</sfa:SendingCompanyIN>
+    <sfa:TransmittingCountry>NL</sfa:TransmittingCountry>
+    <sfa:ReceivingCountry>US</sfa:ReceivingCountry>
+    <sfa:MessageType>FATCA</sfa:MessageType>
+    <sfa:MessageRefId>NL2024US770487</sfa:MessageRefId>
+    <sfa:ReportingPeriod>2024-12-31</sfa:ReportingPeriod>
+    <sfa:Timestamp>2026-02-15T02:55:24Z</sfa:Timestamp>
+  </ftc:MessageSpec>
+  <ftc:FATCA>
+    <ftc:ReportingFI>
+      <sfa:ResCountryCode>NL</sfa:ResCountryCode>
+      <sfa:TIN issuedBy="NL">KTQDFL.99999.SL.532</sfa:TIN>
+      <sfa:Name>Owensfort Capital Bank</sfa:Name>
+      <sfa:Address>
+        <sfa:CountryCode>NL</sfa:CountryCode>
+        <sfa:AddressFix>
+          <sfa:Street>StreetFormalAddress</sfa:Street>
+          <sfa:BuildingIdentifier>12 AdditionalAddress</sfa:BuildingIdentifier>
+          <sfa:City>CityFormalAddress</sfa:City>
+        </sfa:AddressFix>
+      </sfa:Address>
+      <ftc:FilerCategory>FATCA602</ftc:FilerCategory>
+      <ftc:DocSpec>
+        <ftc:DocTypeIndic>FATCA11</ftc:DocTypeIndic>
+        <ftc:DocRefId>KTQDFL9999.2024.000001</ftc:DocRefId>
+      </ftc:DocSpec>
+    </ftc:ReportingFI>
+    <ftc:ReportingGroup>
+      <ftc:AccountReport>
+        <ftc:DocSpec>
+          <ftc:DocTypeIndic>FATCA11</ftc:DocTypeIndic>
+          <ftc:DocRefId>KTQDFL9999.2024.000002</ftc:DocRefId>
+        </ftc:DocSpec>
+        <ftc:AccountNumber AcctNumberType="OECD605">8479902459</ftc:AccountNumber>
+        <ftc:AccountClosed>false</ftc:AccountClosed>
+        <ftc:AccountHolder>
+          <ftc:Individual>
+            <sfa:ResCountryCode>DE</sfa:ResCountryCode>
+            <sfa:TIN issuedBy="DE">204-96-9935</sfa:TIN>
+            <sfa:Name>
+              <sfa:FirstName>Brandon</sfa:FirstName>
+              <sfa:LastName>Jacobs</sfa:LastName>
+            </sfa:Name>
+            <sfa:Address>
+              <sfa:CountryCode>RS</sfa:CountryCode>
+              <sfa:AddressFree>David Square 33, Phillipsborough</sfa:AddressFree>
+            </sfa:Address>
+            <sfa:BirthInfo>
+              <sfa:BirthDate>1999-09-25</sfa:BirthDate>
+            </sfa:BirthInfo>
+          </ftc:Individual>
+        </ftc:AccountHolder>
+        <ftc:AccountBalance currCode="USD">3357.79</ftc:AccountBalance>
+        <ftc:Payment>
+          <ftc:Type>FATCA502</ftc:Type>
+          <ftc:PaymentAmnt currCode="USD">490.38</ftc:PaymentAmnt>
+        </ftc:Payment>
+        <ftc:Payment>
+          <ftc:Type>FATCA504</ftc:Type>
+          <ftc:PaymentAmnt currCode="USD">174.21</ftc:PaymentAmnt>
+        </ftc:Payment>
+        <ftc:Payment>
+          <ftc:Type>FATCA503</ftc:Type>
+          <ftc:PaymentAmnt currCode="USD">549.98</ftc:PaymentAmnt>
+        </ftc:Payment>
+      </ftc:AccountReport>
+    </ftc:ReportingGroup>
+  </ftc:FATCA>
+</ftc:FATCA_OECD>

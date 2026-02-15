@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<crs:CRS_OECD xmlns:cfc="urn:oecd:ties:commontypesfatcacrs:v2" xmlns:crs="urn:oecd:ties:crs:v2" xmlns:stf="urn:oecd:ties:crsstf:v5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oecd:ties:crs:v1 CrsXML_v2.0.xsd" version="2.0">
+  <crs:MessageSpec>
+    <crs:SendingCompanyIN>123456789</crs:SendingCompanyIN>
+    <crs:TransmittingCountry>NL</crs:TransmittingCountry>
+    <crs:ReceivingCountry>DE</crs:ReceivingCountry>
+    <crs:MessageType>CRS</crs:MessageType>
+    <crs:MessageRefId>NL2024123456789000000001_CORR_20260215055521_L9POFW</crs:MessageRefId>
+    <crs:MessageTypeIndic>CRS702</crs:MessageTypeIndic>
+    <crs:CorrMessageRefId>NL2024123456789000000001</crs:CorrMessageRefId>
+<crs:ReportingPeriod>2024-12-31</crs:ReportingPeriod>
+    <crs:Timestamp>2026-02-15T05:55:21Z</crs:Timestamp>
+  </crs:MessageSpec>
+  <crs:CrsBody>
+    <crs:ReportingFI>
+      <crs:ResCountryCode>NL</crs:ResCountryCode>
+      <crs:IN issuedBy="NL">FI999999000</crs:IN>
+      <crs:Name>Rodriguez Capital</crs:Name>
+      <crs:Address legalAddressType="OECD301">
+        <cfc:CountryCode>NL</cfc:CountryCode>
+        <cfc:AddressFix>
+          <cfc:Street>Stone Roads</cfc:Street>
+          <cfc:BuildingIdentifier>760</cfc:BuildingIdentifier>
+          <cfc:SuiteIdentifier>Suite 240</cfc:SuiteIdentifier>
+          <cfc:FloorIdentifier>Floor 8</cfc:FloorIdentifier>
+          <cfc:DistrictName>South Cherylton</cfc:DistrictName>
+          <cfc:POB>PO Box 3286</cfc:POB>
+          <cfc:PostCode>58268</cfc:PostCode>
+          <cfc:City>Johnberg</cfc:City>
+          <cfc:CountrySubentity>Utah</cfc:CountrySubentity>
+        </cfc:AddressFix>
+        <cfc:AddressFree>Kayla Brook, Chaseborough</cfc:AddressFree>
+      </crs:Address>
+      <crs:DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>NL2024123456789000000002</stf:DocRefId>
+      </crs:DocSpec>
+    </crs:ReportingFI>
+    <crs:ReportingGroup>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD12</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000004_ARCORR_20260215055521_3WYEJ9</stf:DocRefId>
+        <stf:CorrDocRefId>NL2024123456789000000004</stf:CorrDocRefId>
+</crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC9503158640</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Individual>
+            <crs:ResCountryCode>IT</crs:ResCountryCode>
+            <crs:TIN issuedBy="IT">1234567</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Ashlee</crs:FirstName>
+              <crs:LastName>Dixon</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>MK</cfc:CountryCode>
+              <cfc:AddressFree>Corrected: Heather Motorway 697, Port Jamie 13845</cfc:AddressFree>
+            </crs:Address>
+            <crs:BirthInfo>
+              <crs:BirthDate>2007-02-09</crs:BirthDate>
+            </crs:BirthInfo>
+          </crs:Individual>
+        </crs:AccountHolder>
+        <crs:AccountBalance currCode="GBP">333673.90</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">13742.50</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">65615.75</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS503</crs:Type>
+          <crs:PaymentAmnt currCode="GBP">66793.98</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+      <crs:AccountReport>
+        <crs:DocSpec>
+          <stf:DocTypeIndic>OECD13</stf:DocTypeIndic>
+          <stf:DocRefId>NL2024123456789000000005_ARDEL_20260215055521_H1H9UA</stf:DocRefId>
+        <stf:CorrDocRefId>NL2024123456789000000005</stf:CorrDocRefId>
+</crs:DocSpec>
+        <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC0083651971</crs:AccountNumber>
+        <crs:AccountHolder>
+          <crs:Organisation>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:IN issuedBy="NL">771410971</crs:IN>
+            <crs:Name>Clark Financial Services</crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>TO</cfc:CountryCode>
+              <cfc:AddressFree>Richard Crescent 785, Deniseview 03547</cfc:AddressFree>
+            </crs:Address>
+          </crs:Organisation>
+          <crs:AcctHolderType>CRS101</crs:AcctHolderType>
+        </crs:AccountHolder>
+        <crs:ControllingPerson>
+          <crs:Individual>
+            <crs:ResCountryCode>ES</crs:ResCountryCode>
+            <crs:TIN issuedBy="NL">123456789CP2</crs:TIN>
+            <crs:Name>
+              <crs:FirstName>Kevin</crs:FirstName>
+              <crs:LastName>Khan</crs:LastName>
+            </crs:Name>
+            <crs:Address>
+              <cfc:CountryCode>TO</cfc:CountryCode>
+              <cfc:AddressFix>
+                <cfc:Street>Walter Village</cfc:Street>
+                <cfc:BuildingIdentifier>244</cfc:BuildingIdentifier>
+                <cfc:SuiteIdentifier>Suite 338</cfc:SuiteIdentifier>
+                <cfc:FloorIdentifier>Floor 22</cfc:FloorIdentifier>
+                <cfc:DistrictName>Lake Gina</cfc:DistrictName>
+                <cfc:POB>PO Box 242</cfc:POB>
+                <cfc:PostCode>27487</cfc:PostCode>
+                <cfc:City>South Pamelamouth</cfc:City>
+                <cfc:CountrySubentity>Mississippi</cfc:CountrySubentity>
+              </cfc:AddressFix>
+            </crs:Address>
+          </crs:Individual>
+          <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
+        </crs:ControllingPerson>
+        <crs:AccountBalance currCode="EUR">184980.39</crs:AccountBalance>
+        <crs:Payment>
+          <crs:Type>CRS504</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">19523.12</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">3848.91</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">31771.32</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS501</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">22763.07</crs:PaymentAmnt>
+        </crs:Payment>
+        <crs:Payment>
+          <crs:Type>CRS502</crs:Type>
+          <crs:PaymentAmnt currCode="EUR">16041.01</crs:PaymentAmnt>
+        </crs:Payment>
+      </crs:AccountReport>
+    </crs:ReportingGroup>
+  </crs:CrsBody>
+</crs:CRS_OECD>

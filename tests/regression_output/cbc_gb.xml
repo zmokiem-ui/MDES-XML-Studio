@@ -1,0 +1,370 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<CBC_OECD xmlns="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" xmlns:iso="urn:oecd:ties:isocbctypes:v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0">
+  <MessageSpec>
+    <SendingEntityIN>123456789</SendingEntityIN>
+    <TransmittingCountry>GB</TransmittingCountry>
+    <ReceivingCountry>GB</ReceivingCountry>
+    <MessageType>CBC</MessageType>
+    <Language>EN</Language>
+    <Warning>CBC Test Data - Not for production use</Warning>
+    <Contact>Test Data Generator</Contact>
+    <MessageRefId>GB2023123456789a49a2843</MessageRefId>
+    <MessageTypeIndic>CBC401</MessageTypeIndic>
+    <ReportingPeriod>2023-12-31</ReportingPeriod>
+    <Timestamp>2026-02-15T05:55:27.345289Z</Timestamp>
+  </MessageSpec>
+  <CbcBody>
+    <ReportingEntity>
+      <Entity>
+        <ResCountryCode>GB</ResCountryCode>
+        <TIN issuedBy="GB">123456789</TIN>
+        <Name>Morris-Thomas Holdings</Name>
+        <Address>
+          <CountryCode>GB</CountryCode>
+          <AddressFix>
+            <Street>112 Nathan Prairie</Street>
+            <BuildingIdentifier>987</BuildingIdentifier>
+            <PostCode>47580</PostCode>
+            <City>New Katrina</City>
+          </AddressFix>
+        </Address>
+      </Entity>
+      <NameMNEGroup>Morris-Thomas Holdings Group</NameMNEGroup>
+      <ReportingRole>CBC701</ReportingRole>
+      <ReportingPeriod>
+        <StartDate>2023-01-01</StartDate>
+        <EndDate>2023-12-31</EndDate>
+      </ReportingPeriod>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>GB2023123456789e8ad8b14-fce0-4da3-9e54-53239ad3ef69</stf:DocRefId>
+      </DocSpec>
+    </ReportingEntity>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>GB20231234567894c773b8e-6522-492b-afdc-60e9bd2c0e75</stf:DocRefId>
+      </DocSpec>
+      <ResCountryCode>AU</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">39660000</Unrelated>
+          <Related currCode="USD">18231000</Related>
+          <Total currCode="USD">57891000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">3640872</ProfitOrLoss>
+        <TaxPaid currCode="USD">674967</TaxPaid>
+        <TaxAccrued currCode="USD">702603</TaxAccrued>
+        <Capital currCode="USD">131066000</Capital>
+        <Earnings currCode="USD">2681865</Earnings>
+        <NbEmployees>183</NbEmployees>
+        <Assets currCode="USD">152535241</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>AU</ResCountryCode>
+          <TIN issuedBy="AU">AU146541558</TIN>
+          <Name>Kline-Serrano AU</Name>
+          <Address>
+            <CountryCode>AU</CountryCode>
+            <AddressFix>
+              <Street>155 John Forest Apt. 166</Street>
+              <BuildingIdentifier>275</BuildingIdentifier>
+              <PostCode>16789</PostCode>
+              <City>Lake Tonya</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC803</Role>
+        <IncorpCountryCode>JP</IncorpCountryCode>
+        <BizActivities>CBC509</BizActivities>
+        <BizActivities>CBC503</BizActivities>
+        <OtherEntityInfo>Additional information for entity 1</OtherEntityInfo>
+      </ConstEntities>
+    </CbcReports>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>GB20231234567893893695e-3343-4769-a340-8621d24abdd9</stf:DocRefId>
+      </DocSpec>
+      <ResCountryCode>US</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">72655000</Unrelated>
+          <Related currCode="USD">4375000</Related>
+          <Total currCode="USD">77030000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">13669301</ProfitOrLoss>
+        <TaxPaid currCode="USD">3389649</TaxPaid>
+        <TaxAccrued currCode="USD">3593276</TaxAccrued>
+        <Capital currCode="USD">17409000</Capital>
+        <Earnings currCode="USD">10445223</Earnings>
+        <NbEmployees>4617</NbEmployees>
+        <Assets currCode="USD">31140401</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>US</ResCountryCode>
+          <TIN issuedBy="US">US768302063</TIN>
+          <Name>Andrews Ltd US</Name>
+          <Address>
+            <CountryCode>US</CountryCode>
+            <AddressFix>
+              <Street>220 Jasmin Roads Apt. 825</Street>
+              <BuildingIdentifier>343</BuildingIdentifier>
+              <PostCode>68747</PostCode>
+              <City>South Mitchell</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>US</IncorpCountryCode>
+        <BizActivities>CBC502</BizActivities>
+        <BizActivities>CBC501</BizActivities>
+        <OtherEntityInfo>Additional information for entity 1</OtherEntityInfo>
+      </ConstEntities>
+    </CbcReports>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>GB2023123456789e3e24414-9ac1-443e-a534-6bd5b67ee482</stf:DocRefId>
+      </DocSpec>
+      <ResCountryCode>NL</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">74359000</Unrelated>
+          <Related currCode="USD">11306000</Related>
+          <Total currCode="USD">85665000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">12010343</ProfitOrLoss>
+        <TaxPaid currCode="USD">2636209</TaxPaid>
+        <TaxAccrued currCode="USD">2768348</TaxAccrued>
+        <Capital currCode="USD">137586000</Capital>
+        <Earnings currCode="USD">11450813</Earnings>
+        <NbEmployees>3654</NbEmployees>
+        <Assets currCode="USD">367010213</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>NL</ResCountryCode>
+          <TIN issuedBy="NL">NL779116086</TIN>
+          <Name>Roth-Green NL</Name>
+          <Address>
+            <CountryCode>NL</CountryCode>
+            <AddressFix>
+              <Street>9820 Chase Rapids Suite 908</Street>
+              <BuildingIdentifier>861</BuildingIdentifier>
+              <PostCode>56449</PostCode>
+              <City>South Ryan</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC801</Role>
+        <IncorpCountryCode>NL</IncorpCountryCode>
+        <BizActivities>CBC508</BizActivities>
+        <OtherEntityInfo>Additional information for entity 1</OtherEntityInfo>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>NL</ResCountryCode>
+          <TIN issuedBy="NL">NL550887777</TIN>
+          <Name>Carter-Murray NL</Name>
+          <Address>
+            <CountryCode>NL</CountryCode>
+            <AddressFix>
+              <Street>169 Laura Glen Suite 384</Street>
+              <BuildingIdentifier>740</BuildingIdentifier>
+              <PostCode>96162</PostCode>
+              <City>Moralesstad</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC803</Role>
+        <IncorpCountryCode>SG</IncorpCountryCode>
+        <BizActivities>CBC503</BizActivities>
+        <BizActivities>CBC510</BizActivities>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>NL</ResCountryCode>
+          <TIN issuedBy="NL">NL452472451</TIN>
+          <Name>Kaiser, Robinson and Crawford NL</Name>
+          <Address>
+            <CountryCode>NL</CountryCode>
+            <AddressFix>
+              <Street>307 Lopez Parkways Suite 205</Street>
+              <BuildingIdentifier>516</BuildingIdentifier>
+              <PostCode>35515</PostCode>
+              <City>Lake Christine</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>NL</IncorpCountryCode>
+        <BizActivities>CBC503</BizActivities>
+        <OtherEntityInfo>Additional information for entity 3</OtherEntityInfo>
+      </ConstEntities>
+    </CbcReports>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>GB202312345678923966130-e5d8-4645-a163-6adc5fbdce35</stf:DocRefId>
+      </DocSpec>
+      <ResCountryCode>JP</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">53931000</Unrelated>
+          <Related currCode="USD">17771000</Related>
+          <Total currCode="USD">71702000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">20969258</ProfitOrLoss>
+        <TaxPaid currCode="USD">4212229</TaxPaid>
+        <TaxAccrued currCode="USD">5041148</TaxAccrued>
+        <Capital currCode="USD">73181000</Capital>
+        <Earnings currCode="USD">17333832</Earnings>
+        <NbEmployees>1712</NbEmployees>
+        <Assets currCode="USD">87214648</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>JP</ResCountryCode>
+          <TIN issuedBy="JP">JP957843576</TIN>
+          <Name>Ford, Sanchez and Bennett JP</Name>
+          <Address>
+            <CountryCode>JP</CountryCode>
+            <AddressFix>
+              <Street>784 Calderon Village</Street>
+              <BuildingIdentifier>395</BuildingIdentifier>
+              <PostCode>04235</PostCode>
+              <City>Wolfshire</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>JP</IncorpCountryCode>
+        <BizActivities>CBC507</BizActivities>
+        <OtherEntityInfo>Additional information for entity 1</OtherEntityInfo>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>JP</ResCountryCode>
+          <TIN issuedBy="JP">JP441910279</TIN>
+          <Name>Anderson and Sons JP</Name>
+          <Address>
+            <CountryCode>JP</CountryCode>
+            <AddressFix>
+              <Street>56474 Julie Lake</Street>
+              <BuildingIdentifier>635</BuildingIdentifier>
+              <PostCode>09622</PostCode>
+              <City>North Troy</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>JP</IncorpCountryCode>
+        <BizActivities>CBC502</BizActivities>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>JP</ResCountryCode>
+          <TIN issuedBy="JP">JP205283525</TIN>
+          <Name>Long, Cole and Roman JP</Name>
+          <Address>
+            <CountryCode>JP</CountryCode>
+            <AddressFix>
+              <Street>5536 Wright Lodge</Street>
+              <BuildingIdentifier>506</BuildingIdentifier>
+              <PostCode>62184</PostCode>
+              <City>Lindaview</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC801</Role>
+        <IncorpCountryCode>DE</IncorpCountryCode>
+        <BizActivities>CBC509</BizActivities>
+        <BizActivities>CBC505</BizActivities>
+      </ConstEntities>
+    </CbcReports>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>GB2023123456789f395bb4c-9b54-455d-b276-2d8c3b614c64</stf:DocRefId>
+      </DocSpec>
+      <ResCountryCode>IE</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="USD">68128000</Unrelated>
+          <Related currCode="USD">39184000</Related>
+          <Total currCode="USD">107312000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="USD">21443151</ProfitOrLoss>
+        <TaxPaid currCode="USD">4306901</TaxPaid>
+        <TaxAccrued currCode="USD">4494088</TaxAccrued>
+        <Capital currCode="USD">273358000</Capital>
+        <Earnings currCode="USD">15065025</Earnings>
+        <NbEmployees>4053</NbEmployees>
+        <Assets currCode="USD">724755855</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>IE</ResCountryCode>
+          <TIN issuedBy="IE">IE219228391</TIN>
+          <Name>Everett, Cox and Sanchez IE</Name>
+          <Address>
+            <CountryCode>IE</CountryCode>
+            <AddressFix>
+              <Street>3084 Gregory Fall Suite 601</Street>
+              <BuildingIdentifier>755</BuildingIdentifier>
+              <PostCode>58376</PostCode>
+              <City>Susanmouth</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC803</Role>
+        <IncorpCountryCode>IE</IncorpCountryCode>
+        <BizActivities>CBC509</BizActivities>
+        <BizActivities>CBC512</BizActivities>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>IE</ResCountryCode>
+          <TIN issuedBy="IE">IE804840693</TIN>
+          <Name>Jackson Group IE</Name>
+          <Address>
+            <CountryCode>IE</CountryCode>
+            <AddressFix>
+              <Street>50064 Flores Plaza</Street>
+              <BuildingIdentifier>729</BuildingIdentifier>
+              <PostCode>21639</PostCode>
+              <City>Port Stephaniemouth</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC803</Role>
+        <IncorpCountryCode>GB</IncorpCountryCode>
+        <BizActivities>CBC503</BizActivities>
+        <OtherEntityInfo>Additional information for entity 2</OtherEntityInfo>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>IE</ResCountryCode>
+          <TIN issuedBy="IE">IE518063848</TIN>
+          <Name>Christensen and Sons IE</Name>
+          <Address>
+            <CountryCode>IE</CountryCode>
+            <AddressFix>
+              <Street>4353 Nixon Parks Apt. 948</Street>
+              <BuildingIdentifier>390</BuildingIdentifier>
+              <PostCode>72783</PostCode>
+              <City>Welchmouth</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>IE</IncorpCountryCode>
+        <BizActivities>CBC506</BizActivities>
+        <OtherEntityInfo>Additional information for entity 3</OtherEntityInfo>
+      </ConstEntities>
+    </CbcReports>
+  </CbcBody>
+</CBC_OECD>

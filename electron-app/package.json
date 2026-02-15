@@ -8,7 +8,15 @@
     "build": "vite build",
     "electron": "electron .",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
-    "electron:build": "npm run build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --x64"
+    "electron:build": "npm run build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --x64",
+    "test:e2e": "playwright test",
+    "test:e2e:smoke": "playwright test smoke.e2e.js",
+    "test:e2e:regression": "playwright test regression.e2e.js",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:files": "playwright test file-generation.e2e.js",
+    "test:e2e:full": "playwright test full-regression.e2e.js"
   },
   "keywords": [
     "crs",
@@ -19,12 +27,14 @@
   "author": "CRS Generator Team",
   "license": "MIT",
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
     "concurrently": "^8.2.2",
     "cross-env": "^10.1.0",
     "electron": "^28.1.0",
     "electron-builder": "^24.9.1",
+    "playwright": "^1.58.2",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "vite": "^5.0.8",
@@ -32,31 +42,56 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
-    "diff": "^8.0.3",
+    "electron-updater": "^6.7.3",
     "lucide-react": "^0.303.0",
+    "monaco-editor": "^0.55.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "build": {
-    "appId": "com.crs.generator",
+    "appId": "com.crs.testdata-generator",
     "productName": "CRS Test Data Generator",
     "directories": {
       "output": "dist-electron"
     },
     "files": [
       "dist/**/*",
-      "electron/**/*",
-      "python/**/*"
+      "electron/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "python-dist/",
+        "to": "python-dist/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "zmokiem-ui",
+        "repo": "CRS-xml-generator"
+      }
     ],
     "win": {
       "target": [
-        "portable"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.ico",
       "signAndEditExecutable": false
     },
-    "portable": {
-      "artifactName": "CRS-Generator-${version}.exe"
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "artifactName": "CRS-Generator-Setup-${version}.exe"
     }
   }
 }

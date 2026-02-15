@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<CBC_OECD xmlns="urn:oecd:ties:cbc:v2" xmlns:stf="urn:oecd:ties:cbcstf:v5" xmlns:iso="urn:oecd:ties:isocbctypes:v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0">
+  <MessageSpec>
+    <SendingEntityIN>123456789</SendingEntityIN>
+    <TransmittingCountry>DE</TransmittingCountry>
+    <ReceivingCountry>DE</ReceivingCountry>
+    <MessageType>CBC</MessageType>
+    <Language>EN</Language>
+    <Warning>CBC Test Data - Not for production use</Warning>
+    <Contact>Test Data Generator</Contact>
+    <MessageRefId>DE2024123456789e116f73a</MessageRefId>
+    <MessageTypeIndic>CBC401</MessageTypeIndic>
+    <ReportingPeriod>2024-12-31</ReportingPeriod>
+    <Timestamp>2026-02-15T05:55:27.840281Z</Timestamp>
+  </MessageSpec>
+  <CbcBody>
+    <ReportingEntity>
+      <Entity>
+        <ResCountryCode>DE</ResCountryCode>
+        <TIN issuedBy="DE">123456789</TIN>
+        <Name>Jones, Wilson and Bryan Holdings</Name>
+        <Address>
+          <CountryCode>DE</CountryCode>
+          <AddressFix>
+            <Street>4630 Sara Mountain</Street>
+            <BuildingIdentifier>624</BuildingIdentifier>
+            <PostCode>75476</PostCode>
+            <City>Kathleenburgh</City>
+          </AddressFix>
+        </Address>
+      </Entity>
+      <NameMNEGroup>Jones, Wilson and Bryan Holdings Group</NameMNEGroup>
+      <ReportingRole>CBC701</ReportingRole>
+      <ReportingPeriod>
+        <StartDate>2024-01-01</StartDate>
+        <EndDate>2024-12-31</EndDate>
+      </ReportingPeriod>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>DE2024123456789b44b2d80-c168-471c-b2e6-8e7289aef4e0</stf:DocRefId>
+      </DocSpec>
+    </ReportingEntity>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>DE2024123456789ec7dba0e-398a-4c35-8208-4e543a2acfb8</stf:DocRefId>
+      </DocSpec>
+      <ResCountryCode>FR</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="EUR">45056000</Unrelated>
+          <Related currCode="EUR">2661000</Related>
+          <Total currCode="EUR">47717000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="EUR">9681377</ProfitOrLoss>
+        <TaxPaid currCode="EUR">2738022</TaxPaid>
+        <TaxAccrued currCode="EUR">2873972</TaxAccrued>
+        <Capital currCode="EUR">289334000</Capital>
+        <Earnings currCode="EUR">9022362</Earnings>
+        <NbEmployees>2834</NbEmployees>
+        <Assets currCode="EUR">801018586</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>FR</ResCountryCode>
+          <TIN issuedBy="FR">FR152851685</TIN>
+          <Name>Alvarez-Miller FR</Name>
+          <Address>
+            <CountryCode>FR</CountryCode>
+            <AddressFix>
+              <Street>33073 Ayala Islands Suite 422</Street>
+              <BuildingIdentifier>793</BuildingIdentifier>
+              <PostCode>07006</PostCode>
+              <City>New Frankland</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>FR</IncorpCountryCode>
+        <BizActivities>CBC506</BizActivities>
+        <BizActivities>CBC503</BizActivities>
+      </ConstEntities>
+    </CbcReports>
+    <AdditionalInfo>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD11</stf:DocTypeIndic>
+        <stf:DocRefId>DE20241234567897e49258e-6c21-4aa0-a874-87a11d60d12f</stf:DocRefId>
+      </DocSpec>
+      <OtherInfo>Additional information for FR jurisdiction</OtherInfo>
+      <ResCountryCode>FR</ResCountryCode>
+    </AdditionalInfo>
+  </CbcBody>
+</CBC_OECD>
