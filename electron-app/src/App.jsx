@@ -29,6 +29,10 @@ import {
 // i18n
 import { translations, t, LANGUAGES } from './i18n/translations'
 
+// Brand assets
+import mdesLogo from './assets/mdes-logo.png'
+import blyceLogo from './assets/blyce-logo.png'
+
 function App() {
   // Module selection (CRS, FATCA, future: CBC, NTJ)
   const [activeModule, setActiveModule] = useState(null) // null = module selection screen
@@ -1968,9 +1972,7 @@ function App() {
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl ${theme.gradient || theme.buttonPrimary} flex items-center justify-center shadow-lg`}>
-                  <FileCheck className="w-6 h-6 text-white" />
-                </div>
+                <img src={mdesLogo} alt="MDES" className="h-12 rounded-lg shadow-lg" />
                 <div>
                   <h1 className={`text-2xl font-bold ${theme.headerText || theme.text}`}>{t(language, 'appTitle')}</h1>
                   <p className={`text-sm ${theme.headerTextMuted || theme.textMuted}`}>{t(language, 'actions.generate')} compliant XML test data</p>
@@ -3203,7 +3205,11 @@ function App() {
           </div>
 
           {/* Footer */}
-          <div className="mt-16 text-center">
+          <div className="mt-16 flex flex-col items-center gap-4">
+            <div className="flex items-center gap-3">
+              <span className={`text-sm ${theme.textMuted}`}>Powered by</span>
+              <img src={blyceLogo} alt="BLYCE" className="h-8 rounded" />
+            </div>
             <p 
               className="text-lg font-bold bg-clip-text text-transparent animate-pulse" 
               style={{ 

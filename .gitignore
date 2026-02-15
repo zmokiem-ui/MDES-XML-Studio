@@ -28,6 +28,7 @@ dist/
 dist-electron/
 out/
 build/
+!electron-app/build/
 electron-app/python-dist/
 electron-app/dist/
 electron-app/dist-electron/
