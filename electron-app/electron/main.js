@@ -953,3 +953,44 @@ ipcMain.handle('generate-cbc-correction', async (event, options) => {
     outputPath: options.outputPath
   });
 });
+
+// ============== Error Injector IPC Handlers ==============
+
+// Corrupt file with error injection
+ipcMain.handle('corrupt-file', async (event, config) => {
+  const { module, fileType, corruptionLevel, preset, customOptions, inputFile } = config;
+  
+  // Generate output filename
+  const inputPath = inputFile;
+  const outputDir = path.dirname(inputPath);
+  const inputName = path.basename(inputPath, path.extname(inputPath));
+  const outputPath = path.join(outputDir, `${inputName}_CORRUPTED_${preset}${path.extname(inputPath)}`);
+  
+  const args = [
+    '--input', inputPath,
+    '--output', outputPath,
+    '--module', module,
+    '--file-type', fileType,
+    '--preset', preset,
+    '--level', corruptionLevel.toString(),
+    '--options', JSON.stringify(customOptions)
+  ];
+  
+  return runPythonCommand({
+    module: 'crs_generator.error_injector',
+    args,
+    event,
+    parseJson: true
+  });
+});
+
+// Open file in default application
+ipcMain.handle('open-file', async (event, filePath) => {
+  try {
+    const { shell } = require('electron');
+    await shell.openPath(filePath);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});

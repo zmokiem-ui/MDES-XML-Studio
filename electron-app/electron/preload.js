@@ -48,5 +48,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAppStats: () => ipcRenderer.invoke('get-app-stats'),
   saveAppStats: (stats) => ipcRenderer.invoke('save-app-stats', stats),
   saveFormState: (data) => ipcRenderer.invoke('save-form-state', data),
-  loadFormState: (module) => ipcRenderer.invoke('load-form-state', module)
+  loadFormState: (module) => ipcRenderer.invoke('load-form-state', module),
+  
+  // Error Injector APIs
+  corruptFile: (config) => ipcRenderer.invoke('corrupt-file', config),
+  openFile: (filePath) => ipcRenderer.invoke('open-file', filePath)
 });

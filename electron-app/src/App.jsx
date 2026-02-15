@@ -23,7 +23,7 @@ import { useThemeTransition, ThemeToggleButton } from './hooks/useThemeTransitio
 
 // Components
 import { 
-  RecentFiles, ProfileManager, KeyboardShortcutsModal, BatchProcessor, XMLDiff, Dashboard,
+  RecentFiles, ProfileManager, KeyboardShortcutsModal, BatchProcessor, XMLDiff, Dashboard, ErrorInjector,
   // New UI Components
   ToastProvider, useToast,
   FadeIn, SlideIn, PageTransition,
@@ -1312,6 +1312,7 @@ function App() {
   const [showDashboard, setShowDashboard] = useState(false)
   const [showBatchProcessor, setShowBatchProcessor] = useState(false)
   const [showXMLDiff, setShowXMLDiff] = useState(false)
+  const [showErrorInjector, setShowErrorInjector] = useState(false)
 
   // Settings - merge saved with defaults to ensure new fields get default values
   const [settings, setSettings] = useState(() => {
@@ -1592,6 +1593,7 @@ function App() {
       setShowDashboard(false)
       setShowBatchProcessor(false)
       setShowXMLDiff(false)
+      setShowErrorInjector(false)
     },
     HELP: () => setShowKeyboardShortcuts(true),
     SELECT_CRS: () => setActiveModule('crs'),
@@ -2485,6 +2487,18 @@ function App() {
                     <div className="text-left">
                       <p className={`font-semibold ${theme.text}`}>{t(language, 'diff.title')}</p>
                       <p className={`text-xs ${theme.textMuted}`}>{t(language, 'diff.title')}</p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setShowErrorInjector(true)}
+                  className={`p-4 rounded-lg border-2 border-red-500/30 bg-red-500/5 hover:bg-red-500/10 transition-all hover:scale-105 hover:shadow-md`}
+                >
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-6 h-6 text-red-500" />
+                    <div className="text-left">
+                      <p className={`font-semibold ${theme.text}`}>Error Injector</p>
+                      <p className={`text-xs ${theme.textMuted}`}>Corrupt files for testing</p>
                     </div>
                   </div>
                 </button>
@@ -6766,6 +6780,14 @@ function App() {
               <p className="text-sm">Compare two XML files side-by-side to identify differences.</p>
               <p className="text-sm mt-4">Coming soon with full diff viewer!</p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showErrorInjector && (
+        <div className="fixed inset-0 z-50" onClick={() => setShowErrorInjector(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <ErrorInjector theme={theme} language={language} />
           </div>
         </div>
       )}
