@@ -26,12 +26,17 @@ function getBundledExePath(moduleName) {
 }
 
 function createWindow() {
+  // Use .ico for Windows taskbar/title bar icon
+  const iconPath = isDev
+    ? path.join(__dirname, '..', 'build', 'icon.ico')
+    : path.join(process.resourcesPath, 'icon.ico');
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 900,
     minWidth: 1000,
     minHeight: 700,
-    icon: path.join(app.getAppPath(), 'build', 'icon.png'),
+    icon: iconPath,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
