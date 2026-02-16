@@ -43,15 +43,16 @@ jobs:
         working-directory: electron-app
         run: npx electron-builder --win --x64 --publish never
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       
-      - name: Upload installer to Release
+      - name: Upload installer to public releases repo
         uses: softprops/action-gh-release@v2
         with:
+          repository: rramratan-ai/MDES-XML-Studio-releases
           files: |
             electron-app/dist-electron/*.exe
             electron-app/dist-electron/latest.yml
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}

@@ -75,8 +75,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "zmokiem-ui",
-        "repo": "CRS-xml-generator"
+        "owner": "rramratan-ai",
+        "repo": "MDES-XML-Studio-releases"
       }
     ],
     "win": {
