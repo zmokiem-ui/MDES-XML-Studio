@@ -131,9 +131,9 @@ def build_exe(entry_script, output_name):
     exe_path = OUTPUT_DIR / f'{output_name}.exe'
     if exe_path.exists():
         size_mb = exe_path.stat().st_size / (1024 * 1024)
-        print(f'  ✅ {output_name}.exe built successfully ({size_mb:.1f} MB)')
+        print(f'  [OK] {output_name}.exe built successfully ({size_mb:.1f} MB)')
     else:
-        print(f'  ❌ {output_name}.exe was NOT created')
+        print(f'  [FAIL] {output_name}.exe was NOT created')
         sys.exit(1)
 
 
@@ -170,8 +170,8 @@ def main():
         if exe.exists():
             size = exe.stat().st_size / (1024 * 1024)
             total_size += size
-            print(f'  ✅ {name}.exe  ({size:.1f} MB)')
-    print(f'  ─────────────────────────')
+            print(f'  [OK] {name}.exe  ({size:.1f} MB)')
+    print(f'  -------------------------')
     print(f'  Total: {total_size:.1f} MB')
     print(f'  Location: {OUTPUT_DIR}')
     print(f'{"="*60}')
@@ -182,5 +182,5 @@ if __name__ == '__main__':
         main()
     except Exception as e:
         cleanup_entry_scripts()
-        print(f'\n❌ Build failed: {e}')
+        print(f'\n[FAIL] Build failed: {e}')
         sys.exit(1)
