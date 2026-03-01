@@ -858,23 +858,23 @@ function App() {
 
   const validateForm = () => {
     const newErrors = {}
-    if (!formData.sendingCompanyIN) newErrors.sendingCompanyIN = 'Required'
+    if (!formData.sendingCompanyIN) newErrors.sendingCompanyIN = t(language, 'messages.requiredField')
     if (!formData.transmittingCountry) {
-      newErrors.transmittingCountry = 'Required'
+      newErrors.transmittingCountry = t(language, 'messages.requiredField')
     } else if (!/^[A-Z]{2}$/.test(formData.transmittingCountry.toUpperCase())) {
-      newErrors.transmittingCountry = 'Must be 2-letter ISO code'
+      newErrors.transmittingCountry = t(language, 'errors.mustBe2LetterISO')
     }
     if (!formData.receivingCountry) {
-      newErrors.receivingCountry = 'Required'
+      newErrors.receivingCountry = t(language, 'messages.requiredField')
     } else if (!/^[A-Z]{2}$/.test(formData.receivingCountry.toUpperCase())) {
-      newErrors.receivingCountry = 'Must be 2-letter ISO code'
+      newErrors.receivingCountry = t(language, 'errors.mustBe2LetterISO')
     }
     if (!formData.numReportingFIs || parseInt(formData.numReportingFIs) < 1) {
-      newErrors.numReportingFIs = 'Must be at least 1'
+      newErrors.numReportingFIs = t(language, 'errors.mustBeAtLeast1')
     }
     if (parseInt(formData.numReportingFIs) >= 1) {
       formData.reportingFITINs.forEach((tin, index) => {
-        if (!tin) newErrors[`tin_${index}`] = 'Required'
+        if (!tin) newErrors[`tin_${index}`] = t(language, 'messages.requiredField')
       })
     }
     if (!formData.outputPath) newErrors.outputPath = 'Required'
@@ -903,7 +903,7 @@ function App() {
           if (result.valid) {
             setCsvStatistics(result.statistics)
             setModalType('success')
-            setModalMessage(`CSV validated! ${result.statistics.total_accounts} accounts found.`)
+            setModalMessage(t(language, 'modals.csvValidated', { count: result.statistics.total_accounts }))
             setShowModal(true)
           } else {
             setValidationErrors(result.errors)
@@ -913,7 +913,7 @@ function App() {
           }
         } catch (error) {
           setModalType('error')
-          setModalMessage(`Validation failed: ${error.message}`)
+          setModalMessage(t(language, 'modals.validationFailed', { error: error.message }))
           setShowModal(true)
           setCsvFilePath('')
         } finally {
@@ -933,12 +933,12 @@ function App() {
       const filePath = await window.electronAPI.downloadCsvTemplate(activeModule)
       if (filePath) {
         setModalType('success')
-        setModalMessage(`Template saved to: ${filePath}`)
+        setModalMessage(t(language, 'modals.templateSaved', { path: filePath }))
         setShowModal(true)
       }
     } catch (error) {
       setModalType('error')
-      setModalMessage(`Failed to download template: ${error.message}`)
+      setModalMessage(t(language, 'modals.failedToDownloadTemplate', { error: error.message }))
       setShowModal(true)
     }
   }
@@ -946,7 +946,7 @@ function App() {
   const handleGeneratePreview = async () => {
     if (!formData.sendingCompanyIN || !formData.transmittingCountry || !formData.receivingCountry || !formData.numReportingFIs) {
       setModalType('error')
-      setModalMessage('Please fill in required fields first.')
+      setModalMessage(t(language, 'errors.pleaseFillRequiredFields'))
       setShowModal(true)
       return
     }
@@ -967,7 +967,7 @@ function App() {
       updateStats({ totalPreviewsGenerated: globalStats.totalPreviewsGenerated + 1 })
     } catch (error) {
       setModalType('error')
-      setModalMessage(`Preview failed: ${error.message}`)
+      setModalMessage(t(language, 'modals.previewFailed', { error: error.message }))
       setShowModal(true)
     } finally {
       setIsLoadingPreview(false)
@@ -977,7 +977,7 @@ function App() {
   const handleDownloadCsv = async () => {
     if (!formData.sendingCompanyIN || !formData.transmittingCountry || !formData.receivingCountry || !formData.numReportingFIs) {
       setModalType('error')
-      setModalMessage('Please fill in required fields first.')
+      setModalMessage(t(language, 'errors.pleaseFillRequiredFields'))
       setShowModal(true)
       return
     }
@@ -1010,20 +1010,20 @@ function App() {
           reportingFIs: parseInt(formData.numReportingFIs)
         })
         setModalType('success')
-        setModalMessage(`CSV saved to: ${result.filePath}`)
+        setModalMessage(t(language, 'modals.csvSaved', { path: result.filePath }))
         setShowModal(true)
       }
     } catch (error) {
       setModalType('error')
-      setModalMessage(`Failed: ${error.message}`)
+      setModalMessage(t(language, 'modals.failedGeneric', { error: error.message }))
       setShowModal(true)
     }
   }
 
   const validateCsvForm = () => {
     const newErrors = {}
-    if (!csvFilePath) newErrors.csvFilePath = 'Please select a CSV file'
-    if (!formData.outputPath) newErrors.outputPath = 'Required'
+    if (!csvFilePath) newErrors.csvFilePath = t(language, 'errors.pleaseSelectCsvFile')
+    if (!formData.outputPath) newErrors.outputPath = t(language, 'messages.requiredField')
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -1055,14 +1055,14 @@ function App() {
         // Check if already a correction file (for CRS only)
         if (activeModule === 'crs' && result.is_correction_file) {
           setModalType('error')
-          setModalMessage('This is already a correction file (CRS702). Please select a new file (CRS701).')
+          setModalMessage(t(language, 'errors.alreadyCorrectionFile'))
           setShowModal(true)
           setCorrectionXmlPath('')
           setXmlValidation(null)
         }
       } catch (error) {
         setModalType('error')
-        setModalMessage(`Validation failed: ${error.message}`)
+        setModalMessage(t(language, 'modals.validationFailed', { error: error.message }))
         setShowModal(true)
         setCorrectionXmlPath('')
       } finally {
@@ -1091,7 +1091,7 @@ function App() {
     console.log('Correction Browse button clicked, module:', activeModule)
     if (!window.electronAPI) {
       console.error('electronAPI not available - are you running in Electron?')
-      alert('File browser only works in Electron app. Please run: npm run electron')
+      alert(t(language, 'errors.fileBrowserElectronOnly'))
       return
     }
     try {
@@ -1108,14 +1108,14 @@ function App() {
   const handleGenerateCorrection = async () => {
     if (!correctionXmlPath || !xmlValidation?.can_generate_correction) {
       setModalType('error')
-      setModalMessage(`Please select and validate a valid ${activeModule.toUpperCase()} XML file first.`)
+      setModalMessage(t(language, 'errors.selectValidXmlFile', { module: activeModule.toUpperCase() }))
       setShowModal(true)
       return
     }
     
     if (!correctionOutputPath) {
       setModalType('error')
-      setModalMessage('Please select an output location.')
+      setModalMessage(t(language, 'errors.pleaseSelectOutputLocation'))
       setShowModal(true)
       return
     }
@@ -1124,7 +1124,7 @@ function App() {
     if (activeModule === 'cbc') {
       if (!cbcCorrectionType) {
         setModalType('error')
-        setModalMessage('Please select correction or deletion type.')
+        setModalMessage(t(language, 'errors.pleaseSelectCorrectionType'))
         setShowModal(true)
         return
       }
@@ -1134,7 +1134,7 @@ function App() {
       
       if (totalCorrections === 0 && totalDeletions === 0 && !correctionOptions.correctFI) {
         setModalType('error')
-        setModalMessage('Please select at least one correction or deletion option.')
+        setModalMessage(t(language, 'errors.pleaseSelectCorrectionOption'))
         setShowModal(true)
         return
       }
@@ -1181,7 +1181,7 @@ function App() {
       })
       
       setModalType('success')
-      setModalMessage(`Correction file generated!\n\nCorrections: ${result.corrections_made}\nDeletions: ${result.deletions_made}${result.fi_corrected ? '\nFI Corrected: Yes' : ''}`)
+      setModalMessage(`${t(language, 'modals.correctionGenerated')}\n\n${t(language, 'modals.correctionsCount', { count: result.corrections_made })}\n${t(language, 'modals.deletionsCount', { count: result.deletions_made })}${result.fi_corrected ? '\n' + t(language, 'modals.fiCorrected') : ''}`)
       setShowModal(true)
       
       // Reset form
@@ -1189,7 +1189,7 @@ function App() {
       setCorrectionOutputPath('')
     } catch (error) {
       setModalType('error')
-      setModalMessage(`Failed to generate correction: ${error.message}`)
+      setModalMessage(t(language, 'modals.failedToGenerateCorrection', { error: error.message }))
       setShowModal(true)
     } finally {
       setIsGeneratingCorrection(false)
@@ -1200,21 +1200,21 @@ function App() {
   const handleReplaceCountryCodes = async () => {
     if (!countryReplacerXmlPath) {
       setModalType('error')
-      setModalMessage('Please select a CRS XML file first.')
+      setModalMessage(t(language, 'errors.pleaseSelectXmlFile'))
       setShowModal(true)
       return
     }
     
     if (!countryReplacerOutputPath) {
       setModalType('error')
-      setModalMessage('Please select an output location.')
+      setModalMessage(t(language, 'errors.pleaseSelectOutputLocation'))
       setShowModal(true)
       return
     }
     
     if (!settings.partnerJurisdictions || settings.partnerJurisdictions.length === 0) {
       setModalType('error')
-      setModalMessage('No partner jurisdictions configured. Go to Settings to add countries.')
+      setModalMessage(t(language, 'errors.noPartnerJurisdictions'))
       setShowModal(true)
       return
     }
@@ -1232,12 +1232,12 @@ function App() {
       
       setCountryReplacerResult(result)
       setModalType('success')
-      const testModeMsg = result.docTypeIndicConverted ? `\nDocTypeIndic converted to test mode` : ''
-      setModalMessage(`File processed successfully!\n\nOriginal countries: ${result.originalCountries.length}\nReplaced: ${result.replacedCountries.length}${testModeMsg}`)
+      const testModeMsg = result.docTypeIndicConverted ? `\n${t(language, 'modals.docTypeConverted')}` : ''
+      setModalMessage(`${t(language, 'modals.fileProcessedSuccess')}\n\n${t(language, 'modals.originalCountries', { count: result.originalCountries.length })}\n${t(language, 'modals.replacedCountries', { count: result.replacedCountries.length })}${testModeMsg}`)
       setShowModal(true)
     } catch (error) {
       setModalType('error')
-      setModalMessage(`Failed to replace country codes: ${error.message}`)
+      setModalMessage(t(language, 'modals.failedToReplaceCountryCodes', { error: error.message }))
       setShowModal(true)
     } finally {
       setIsReplacingCountries(false)
@@ -1249,13 +1249,13 @@ function App() {
     // Basic validation
     if (!fatcaFormData.transmittingCountry || !fatcaFormData.outputPath) {
       setModalType('error')
-      setModalMessage('Please fill in required fields (Transmitting Country and Output Path)')
+      setModalMessage(t(language, 'errors.pleaseFillRequiredFieldsFATCA'))
       setShowModal(true)
       return
     }
 
     setIsGenerating(true)
-    setGenerationProgress('Initializing FATCA generation...')
+    setGenerationProgress(t(language, 'progressMessages.initializingFATCA'))
 
     try {
       window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
@@ -1300,12 +1300,12 @@ function App() {
       })
       
       setModalType('success')
-      setModalMessage(`FATCA XML generated successfully!\nSize: ${result.fileSize} MB`)
+      setModalMessage(`${t(language, 'modals.fatcaGeneratedSuccess')}\n${t(language, 'modals.fileSize', { size: result.fileSize })}`)
       setShowModal(true)
     } catch (error) {
       setGenerationProgress('')
       setModalType('error')
-      setModalMessage(error.message || 'An error occurred')
+      setModalMessage(error.message || t(language, 'modals.anErrorOccurred'))
       setShowModal(true)
     } finally {
       setIsGenerating(false)
@@ -1318,28 +1318,28 @@ function App() {
     if (cbcDataMode === 'csv') {
       if (!cbcCsvPath || !cbcFormData.outputPath) {
         setModalType('error')
-        setModalMessage('Please select a CSV file and output path')
+        setModalMessage(t(language, 'errors.pleaseSelectCsvAndOutput'))
         setShowModal(true)
         return
       }
     } else {
       if (!cbcFormData.transmittingCountry || !cbcFormData.outputPath) {
         setModalType('error')
-        setModalMessage('Please fill in required fields (Transmitting Country and Output Path)')
+        setModalMessage(t(language, 'errors.pleaseFillRequiredFieldsFATCA'))
         setShowModal(true)
         return
       }
       // For foreign file type, receiving country is required
       if (cbcFileType === 'foreign' && !cbcFormData.receivingCountry) {
         setModalType('error')
-        setModalMessage('For foreign exchange files, please specify the Receiving Country')
+        setModalMessage(t(language, 'errors.specifyReceivingCountry'))
         setShowModal(true)
         return
       }
     }
 
     setIsGenerating(true)
-    setGenerationProgress('Initializing CBC generation...')
+    setGenerationProgress(t(language, 'progressMessages.initializingCBC'))
 
     try {
       window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
@@ -1384,13 +1384,13 @@ function App() {
       })
       
       setModalType('success')
-      const modeMsg = cbcDataMode === 'csv' ? 'from CSV data' : `${reportCount} jurisdiction reports with ${reportCount * entitiesPerReport} constituent entities`
-      setModalMessage(`CBC XML generated successfully!\n${modeMsg}\nSize: ${result.fileSize} MB`)
+      const modeMsg = cbcDataMode === 'csv' ? t(language, 'modals.fromCsvData') : t(language, 'modals.jurisdictionReports', { reportCount, entityCount: reportCount * entitiesPerReport })
+      setModalMessage(`${t(language, 'modals.cbcGeneratedSuccess')}\n${modeMsg}\n${t(language, 'modals.fileSize', { size: result.fileSize })}`)
       setShowModal(true)
     } catch (error) {
       setGenerationProgress('')
       setModalType('error')
-      setModalMessage(error.message || 'An error occurred')
+      setModalMessage(error.message || t(language, 'modals.anErrorOccurred'))
       setShowModal(true)
     } finally {
       setIsGenerating(false)
@@ -1405,7 +1405,7 @@ function App() {
     }
 
     setIsGenerating(true)
-    setGenerationProgress('Initializing...')
+    setGenerationProgress(t(language, 'progressMessages.initializing'))
 
     try {
       window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
@@ -1457,12 +1457,12 @@ function App() {
       })
       
       setModalType('success')
-      setModalMessage(`Generated successfully!\nSize: ${result.fileSize} MB`)
+      setModalMessage(`${t(language, 'modals.generatedSuccess')}\n${t(language, 'modals.fileSize', { size: result.fileSize })}`)
       setShowModal(true)
     } catch (error) {
       setGenerationProgress('')
       setModalType('error')
-      setModalMessage(error.message || 'An error occurred')
+      setModalMessage(error.message || t(language, 'modals.anErrorOccurred'))
       setShowModal(true)
     } finally {
       setIsGenerating(false)
@@ -1484,7 +1484,7 @@ function App() {
       icon: Globe,
       color: 'from-blue-600 to-blue-500',
       bgColor: 'bg-blue-600',
-      features: ['Individual & Organisation Accounts', 'Controlling Persons', 'Corrections & Deletions', 'CSV Import/Export']
+      features: t(language, 'moduleFeatures.crs')
     },
     fatca: {
       name: t(language, 'modules.fatca'),
@@ -1493,7 +1493,7 @@ function App() {
       icon: Landmark,
       color: 'from-green-600 to-green-500',
       bgColor: 'bg-green-600',
-      features: ['Individual & Organisation Accounts', 'Substantial Owners', 'Corrections & Deletions', 'Filer Categories']
+      features: t(language, 'moduleFeatures.fatca')
     },
     cbc: {
       name: t(language, 'modules.cbc'),
@@ -1502,7 +1502,7 @@ function App() {
       icon: BarChart3,
       color: 'from-purple-600 to-purple-500',
       bgColor: 'bg-purple-600',
-      features: ['Multiple Jurisdictions', 'Constituent Entities', 'Financial Summaries', 'Corrections & Deletions']
+      features: t(language, 'moduleFeatures.cbc')
     }
   }
 
@@ -1736,7 +1736,7 @@ function App() {
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30' 
                       : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                   }`}
-                  title={liveAnimations ? 'Click to disable live animations' : 'Click to enable live animations'}
+                  title={liveAnimations ? t(language, 'settingsMisc.animationsDisable') : t(language, 'settingsMisc.animationsEnable')}
                 >
                   <span className="text-lg">{liveAnimations ? '✨' : '🎬'}</span>
                   <span className="text-sm">{liveAnimations ? 'Live Animations ON' : 'Live Animations OFF'}</span>
@@ -1840,8 +1840,8 @@ function App() {
                     <span className={theme.text}>{t(language, 'actions.validate')} CSV {t(language, 'actions.upload')}</span>
                     <p className={`text-xs ${theme.textMuted} mt-1`}>
                       {settings.autoValidateCsv 
-                        ? 'CSV files will be validated before generating XML' 
-                        : 'Validation disabled - faulty CSVs can be used to generate test XMLs with errors'}
+                        ? t(language, 'settingsMisc.csvAutoValidateOn') 
+                        : t(language, 'settingsMisc.csvAutoValidateOff')}
                     </p>
                   </div>
                   <button
@@ -1863,29 +1863,45 @@ function App() {
 
             {/* Updates & Version */}
             <div className={`${theme.card} rounded-xl border p-6`}>
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>Updates & Version</h3>
-              <p className={`text-sm ${theme.textMuted} mb-4`}>Manage application updates and view version info</p>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'updates.title')}</h3>
+              <p className={`text-sm ${theme.textMuted} mb-4`}>{t(language, 'updates.title')}</p>
               
               <div className="space-y-4">
                 {/* Current Version */}
                 <div className={`flex items-center justify-between p-3 rounded-lg ${theme.bg}`}>
                   <div>
-                    <span className={`font-medium ${theme.text}`}>Current Version</span>
+                    <span className={`font-medium ${theme.text}`}>{t(language, 'updates.version')}</span>
                     <p className={`text-xs ${theme.textMuted} mt-0.5`}>MDES XML Studio</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-sm font-mono font-medium ${theme.badge}`}>
-                    v{appVersion || '1.0.0'}
+                    v{appVersion || '1.1.0'}
                   </span>
+                </div>
+
+                {/* What's New - Changelog */}
+                <div className={`p-4 rounded-lg border ${theme.border} ${theme.bg}`}>
+                  <h4 className={`font-medium ${theme.text} mb-2 flex items-center gap-2`}>
+                    <Sparkles className="w-4 h-4 text-yellow-500" />
+                    {t(language, 'updates.whatsNew')}
+                  </h4>
+                  <div className={`text-sm ${theme.textMuted} space-y-1.5`}>
+                    {(t(language, 'updates.changelog') || []).map((item, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <span className="text-green-500 mt-0.5">•</span>
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Auto-Update Toggle */}
                 <label className="flex items-center justify-between">
                   <div>
-                    <span className={theme.text}>Auto-update</span>
+                    <span className={theme.text}>{t(language, 'updates.autoUpdate')}</span>
                     <p className={`text-xs ${theme.textMuted} mt-1`}>
                       {autoUpdateEnabled 
-                        ? 'App will check for updates automatically on startup' 
-                        : 'Updates will only be checked manually'}
+                        ? t(language, 'settingsMisc.autoUpdateOn') 
+                        : t(language, 'settingsMisc.autoUpdateOff')}
                     </p>
                   </div>
                   <button
@@ -1908,11 +1924,11 @@ function App() {
                     }`}
                   >
                     {updateStatus === 'checking' ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" /> Checking...</>
+                      <><Loader2 className="w-4 h-4 animate-spin" /> {t(language, 'updates.checking')}</>
                     ) : updateStatus === 'downloading' ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Downloading... {updateProgress}%</>
                     ) : (
-                      <><RefreshCw className="w-4 h-4" /> Check for Updates</>
+                      <><RefreshCw className="w-4 h-4" /> {t(language, 'updates.checkForUpdates')}</>
                     )}
                   </button>
                   
@@ -1920,7 +1936,7 @@ function App() {
                   {updateStatus === 'idle' && !updateError && (
                     <span className={`text-sm ${theme.textMuted}`}>
                       <CheckCircle2 className="w-4 h-4 inline mr-1 text-green-500" />
-                      Up to date
+                      {t(language, 'updates.upToDate')}
                     </span>
                   )}
                   {updateStatus === 'ready' && (
@@ -1929,13 +1945,13 @@ function App() {
                       className="px-4 py-2 rounded-lg font-medium text-sm bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 transition-all"
                     >
                       <Download className="w-4 h-4" />
-                      Restart & Install v{updateInfo?.version}
+                      {t(language, 'updates.installAndRestart')} v{updateInfo?.version}
                     </button>
                   )}
                   {updateStatus === 'error' && (
                     <span className="text-sm text-red-500">
                       <AlertCircle className="w-4 h-4 inline mr-1" />
-                      {updateError || 'Update check failed'}
+                      {updateError || t(language, 'settingsMisc.updateCheckFailed')}
                     </span>
                   )}
                 </div>
@@ -1963,11 +1979,11 @@ function App() {
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <BarChart3 className={`w-6 h-6 ${theme.accentText}`} />
-                    <h2 className={`text-xl font-semibold ${theme.text}`}>Dashboard</h2>
+                    <h2 className={`text-xl font-semibold ${theme.text}`}>{t(language, 'dashboard.title')}</h2>
                   </div>
                   <div className="flex items-center gap-2">
                     <button 
-                      onClick={() => { if(window.confirm('Reset all statistics?')) resetStats() }}
+                      onClick={() => { if(window.confirm(t(language, 'stats.resetAllStats'))) resetStats() }}
                       className={`px-3 py-1.5 text-sm rounded-lg ${theme.buttonSecondary}`}
                     >
                       Reset Stats
@@ -3486,7 +3502,7 @@ function App() {
               {[
                 { id: 'generator', icon: Rocket, label: t(language || 'en', 'nav.generator') },
                 { id: 'corrections', icon: FileEdit, label: t(language || 'en', 'nav.correction') },
-                { id: 'faulty-xml', icon: AlertTriangle, label: 'Faulty XML' },
+                { id: 'faulty-xml', icon: AlertTriangle, label: t(language, 'settingsMisc.faultyXml') },
                 { id: 'editor', icon: Code, label: 'Editor' },
                 ...(activeModule === 'crs' ? [{ id: 'tools', icon: RefreshCw, label: t(language || 'en', 'tools.title') }] : [])
               ].map(({ id, icon: Icon, label }) => (
@@ -3784,7 +3800,7 @@ function App() {
                               const result = await window.electronAPI.validateCbcCsv(filePath)
                               if (result.valid) {
                                 setModalType('success')
-                                setModalMessage(`CBC CSV validated! ${result.statistics?.total_reports || 'Multiple'} reports found.`)
+                                setModalMessage(t(language, 'modals.cbcCsvValidated', { count: result.statistics?.total_reports || 'Multiple' }))
                                 setShowModal(true)
                               } else {
                                 setValidationErrors(result.errors || [])
@@ -3793,7 +3809,7 @@ function App() {
                               }
                             } catch (error) {
                               setModalType('error')
-                              setModalMessage(`CBC CSV validation failed: ${error.message}`)
+                              setModalMessage(t(language, 'modals.cbcCsvValidationFailed', { error: error.message }))
                               setShowModal(true)
                               setCbcCsvPath('')
                             }
@@ -4035,7 +4051,7 @@ function App() {
                     console.log('CBC Browse button clicked')
                     if (!window.electronAPI) {
                       console.error('electronAPI not available - are you running in Electron?')
-                      alert('File browser only works in Electron app. Please run: npm run electron')
+                      alert(t(language, 'errors.fileBrowserElectronOnly'))
                       return
                     }
                     try {
@@ -4907,7 +4923,7 @@ function App() {
                     <p className={`text-sm font-medium ${theme.text} mb-3`}>What to modify in corrections:</p>
                     <div className="flex flex-wrap gap-4">
                       {[
-                        { key: 'modifyBalance', label: 'Account Balance' },
+                        { key: 'modifyBalance', label: t(language, 'correctionLabels.accountBalance') },
                         { key: 'modifyAddress', label: 'Address' },
                         { key: 'modifyName', label: 'Name' }
                       ].map(({ key, label }) => (
@@ -4931,8 +4947,8 @@ function App() {
                         <p className={`font-medium ${theme.text}`}>Test Mode</p>
                         <p className={`text-sm ${theme.textMuted}`}>
                           {correctionOptions.testMode 
-                            ? 'Using OECD11/12/13 (test data indicators)' 
-                            : 'Using OECD1/2/3 (production data indicators)'}
+                            ? t(language, 'correctionLabels.usingTestIndicators') 
+                            : t(language, 'correctionLabels.usingProdIndicators')}
                         </p>
                       </div>
                       <button
@@ -5203,11 +5219,11 @@ function App() {
             {/* Stats Overview */}
             <div className="grid grid-cols-5 gap-4">
               {[
-                { label: 'XML Generated', value: globalStats.totalXmlGenerated, icon: FileText, color: 'primary' },
-                { label: 'Corrections', value: globalStats.totalCorrectionsGenerated || 0, icon: FileEdit, color: 'orange' },
-                { label: 'CSV Uploaded', value: globalStats.totalCsvUploaded, icon: Upload, color: 'green' },
-                { label: 'CSV Downloaded', value: globalStats.totalCsvDownloaded, icon: Download, color: 'blue' },
-                { label: 'Validation Errors', value: globalStats.totalValidationErrors, icon: AlertCircle, color: 'red' }
+                { label: t(language, 'stats.xmlGenerated'), value: globalStats.totalXmlGenerated, icon: FileText, color: 'primary' },
+                { label: t(language, 'corrections.title'), value: globalStats.totalCorrectionsGenerated || 0, icon: FileEdit, color: 'orange' },
+                { label: t(language, 'stats.csvUploaded'), value: globalStats.totalCsvUploaded, icon: Upload, color: 'green' },
+                { label: t(language, 'stats.csvDownloaded'), value: globalStats.totalCsvDownloaded, icon: Download, color: 'blue' },
+                { label: t(language, 'stats.validationErrors'), value: globalStats.totalValidationErrors, icon: AlertCircle, color: 'red' }
               ].map(({ label, value, icon: Icon, color }) => (
                 <div key={label} className={`${theme.card} rounded-xl border p-4 shadow-sm`}>
                   <div className="flex items-center justify-between">
@@ -5252,7 +5268,7 @@ function App() {
                 <div className="flex gap-2">
                   {fileHistory.length > 0 && (
                     <button
-                      onClick={() => { if (confirm('Clear all history?')) clearAllHistory() }}
+                      onClick={() => { if (confirm(t(language, 'stats.clearAllHistory'))) clearAllHistory() }}
                       className="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-1"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -5260,7 +5276,7 @@ function App() {
                     </button>
                   )}
                   <button
-                    onClick={() => { if (confirm('Reset all statistics?')) resetAllStats() }}
+                    onClick={() => { if (confirm(t(language, 'stats.resetAllStats'))) resetAllStats() }}
                     className={`px-3 py-1 text-xs rounded-lg transition-colors flex items-center gap-1 ${
                       darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
@@ -5338,7 +5354,7 @@ function App() {
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30' 
                       : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                   }`}
-                  title={liveAnimations ? 'Click to disable live animations' : 'Click to enable live animations'}
+                  title={liveAnimations ? t(language, 'settingsMisc.animationsDisable') : t(language, 'settingsMisc.animationsEnable')}
                 >
                   <span className="text-lg">{liveAnimations ? '✨' : '🎬'}</span>
                   <span className="text-sm">{liveAnimations ? 'Live Animations ON' : 'Live Animations OFF'}</span>
@@ -5584,9 +5600,9 @@ function App() {
 
             {/* Partner Jurisdictions Settings */}
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>Partner Jurisdictions</h3>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'jurisdictions.title')}</h3>
               <p className={`text-sm ${theme.textMuted} mb-4`}>
-                Manage which country codes are valid for your CRS reporting. Only selected countries will be used when generating test data.
+                {t(language, 'jurisdictions.description')}
               </p>
               
               {/* Search and Add */}
@@ -5602,7 +5618,7 @@ function App() {
                         setShowJurisdictionDropdown(true)
                       }}
                       onFocus={() => setShowJurisdictionDropdown(true)}
-                      placeholder="Search countries by name or code..."
+                      placeholder={t(language, 'jurisdictions.searchPlaceholder')}
                       className={`w-full pl-10 pr-4 py-2 rounded-lg border ${theme.input} ${theme.text}`}
                     />
                   </div>
@@ -5632,7 +5648,7 @@ function App() {
                         </button>
                       ))}
                     {searchCountries(jurisdictionSearch).filter(c => !settings.partnerJurisdictions?.includes(c.code)).length === 0 && (
-                      <div className={`px-4 py-2 ${theme.textMuted}`}>No countries found or all matching countries already added</div>
+                      <div className={`px-4 py-2 ${theme.textMuted}`}>{t(language, 'jurisdictions.noCountriesFound')}</div>
                     )}
                   </div>
                 )}
@@ -5642,14 +5658,31 @@ function App() {
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className={`text-sm font-medium ${theme.text}`}>
-                    Selected Countries ({settings.partnerJurisdictions?.length || 0})
+                    {t(language, 'jurisdictions.selectedCountries')} ({settings.partnerJurisdictions?.length || 0})
                   </span>
-                  <button
-                    onClick={() => setSettings(prev => ({ ...prev, partnerJurisdictions: DEFAULT_PARTNER_JURISDICTIONS }))}
-                    className={`text-sm ${theme.accentText} hover:opacity-80`}
-                  >
-                    Reset to Default
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        const allCodes = COUNTRIES.map(c => c.code)
+                        setSettings(prev => ({ ...prev, partnerJurisdictions: allCodes }))
+                      }}
+                      className={`text-xs px-2 py-1 rounded ${theme.buttonSecondary}`}
+                    >
+                      {t(language, 'jurisdictions.selectAll')}
+                    </button>
+                    <button
+                      onClick={() => setSettings(prev => ({ ...prev, partnerJurisdictions: [] }))}
+                      className={`text-xs px-2 py-1 rounded ${theme.buttonSecondary}`}
+                    >
+                      {t(language, 'jurisdictions.clearAll')}
+                    </button>
+                    <button
+                      onClick={() => setSettings(prev => ({ ...prev, partnerJurisdictions: DEFAULT_PARTNER_JURISDICTIONS }))}
+                      className={`text-xs px-2 py-1 rounded ${theme.accentText} hover:opacity-80`}
+                    >
+                      {t(language, 'jurisdictions.resetToDefault')}
+                    </button>
+                  </div>
                 </div>
                 <div className={`flex flex-wrap gap-2 max-h-48 overflow-y-auto p-3 border rounded-lg ${theme.card}`}>
                   {(settings.partnerJurisdictions || []).sort().map(code => (
@@ -5671,17 +5704,17 @@ function App() {
                     </span>
                   ))}
                   {(!settings.partnerJurisdictions || settings.partnerJurisdictions.length === 0) && (
-                    <span className={`${theme.textMuted} text-sm`}>No countries selected</span>
+                    <span className={`${theme.textMuted} text-sm`}>{t(language, 'jurisdictions.noCountriesSelected')}</span>
                   )}
                 </div>
               </div>
             </div>
 
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
-              <h3 className={`text-lg font-semibold ${theme.text} mb-6`}>About</h3>
+              <h3 className={`text-lg font-semibold ${theme.text} mb-6`}>{t(language, 'settingsMisc.about')}</h3>
               <div className={`text-sm ${theme.textMuted} space-y-2`}>
                 <p><strong>CRS Test Data Generator</strong></p>
-                <p>Version 1.0.0</p>
+                <p>Version {appVersion || '1.1.0'}</p>
                 <p>Generate compliant CRS XML test files for development and testing.</p>
               </div>
             </div>

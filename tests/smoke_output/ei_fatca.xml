@@ -7,12 +7,12 @@
     <ns2:MessageType>FATCA</ns2:MessageType>
     <ns2:MessageRefId>NL2024US770487</ns2:MessageRefId>
     <ns2:ReportingPeriod>2024-12-31</ns2:ReportingPeriod>
-    <ns2:Timestamp>2026-02-15T01:53:52Z</ns2:Timestamp>
+    <ns2:Timestamp>2026-02-27T16:07:46Z</ns2:Timestamp>
   </ns0:MessageSpec>
   <ns0:FATCA>
     <ns0:ReportingFI>
       <ns2:ResCountryCode>NL</ns2:ResCountryCode>
-      <ns2:TIN issuedBy="NL" />
+      <ns2:TIN issuedBy="NL">123456</ns2:TIN>
       <ns2:Name>Owensfort Capital Bank</ns2:Name>
       <ns2:Address>
         <ns2:CountryCode>NL</ns2:CountryCode>
@@ -39,7 +39,7 @@
         <ns0:AccountHolder>
           <ns0:Individual>
             <ns2:ResCountryCode>DE</ns2:ResCountryCode>
-            <ns2:TIN issuedBy="DE">ABCDEF.GHIJK.LM.NOP</ns2:TIN>
+            <ns2:TIN issuedBy="DE" />
             <ns2:Name>
               <ns2:FirstName>Brandon</ns2:FirstName>
               <ns2:LastName>Jacobs</ns2:LastName>
@@ -49,7 +49,7 @@
               <ns2:AddressFree>David Square 33, Phillipsborough</ns2:AddressFree>
             </ns2:Address>
             <ns2:BirthInfo>
-              <ns2:BirthDate>1999-09-25</ns2:BirthDate>
+              <ns2:BirthDate>1999-10-07</ns2:BirthDate>
             </ns2:BirthInfo>
           </ns0:Individual>
         </ns0:AccountHolder>
@@ -77,7 +77,7 @@
         <ns0:AccountHolder>
           <ns0:Individual>
             <ns2:ResCountryCode>FR</ns2:ResCountryCode>
-            <ns2:TIN issuedBy="FR">......</ns2:TIN>
+            <ns2:TIN issuedBy="FR" />
             <ns2:Name>
               <ns2:FirstName>Joseph</ns2:FirstName>
               <ns2:LastName>Davis</ns2:LastName>
@@ -87,7 +87,7 @@
               <ns2:AddressFree>Taylor Radial 100, New Bruce</ns2:AddressFree>
             </ns2:Address>
             <ns2:BirthInfo>
-              <ns2:BirthDate>1977-04-13</ns2:BirthDate>
+              <ns2:BirthDate>1977-04-25</ns2:BirthDate>
             </ns2:BirthInfo>
           </ns0:Individual>
         </ns0:AccountHolder>
@@ -111,7 +111,7 @@
         <ns0:AccountHolder>
           <ns0:Organisation>
             <ns2:ResCountryCode>DE</ns2:ResCountryCode>
-            <ns2:TIN issuedBy="DE">123456</ns2:TIN>
+            <ns2:TIN issuedBy="DE">INVALID</ns2:TIN>
             <ns2:Name>North Julie Capital Bank</ns2:Name>
             <ns2:Address>
               <ns2:CountryCode>SH</ns2:CountryCode>
@@ -124,7 +124,7 @@
         <ns0:SubstantialOwner>
           <ns0:Individual>
             <ns2:ResCountryCode>DE</ns2:ResCountryCode>
-            <ns2:TIN issuedBy="DE">123456</ns2:TIN>
+            <ns2:TIN issuedBy="DE">INVALID</ns2:TIN>
             <ns2:Name>
               <ns2:FirstName>Brittney</ns2:FirstName>
               <ns2:LastName>Watson</ns2:LastName>
@@ -134,7 +134,7 @@
               <ns2:AddressFree>Jensen Manor 700, North Gabriel</ns2:AddressFree>
             </ns2:Address>
             <ns2:BirthInfo>
-              <ns2:BirthDate>2001-09-25</ns2:BirthDate>
+              <ns2:BirthDate>2001-10-07</ns2:BirthDate>
             </ns2:BirthInfo>
           </ns0:Individual>
         </ns0:SubstantialOwner>

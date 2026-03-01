@@ -117,16 +117,23 @@ test.describe('E2E Smoke Test', () => {
   });
 
   test('6. Theme Toggle', async () => {
-    // Find the Light/Dark theme button
-    const themeBtn = window.locator('button:has-text("Light"), button:has-text("Dark")');
-    await expect(themeBtn).toBeVisible();
-    
-    const initialText = await themeBtn.textContent();
-    await themeBtn.click();
-    await window.waitForTimeout(1000);
+    // Navigate to CRS module to access the theme cycle button in the header
+    await navigateToModule(window, 'CRS');
+    await window.waitForTimeout(500);
 
-    // Verify theme text changed (Light -> Dark or vice versa)
-    const newText = await window.locator('button:has-text("Light"), button:has-text("Dark")').textContent();
+    // Find the theme toggle button in the module header
+    const themeBtn = window.locator('button[title="Click to change theme"]');
+    await themeBtn.waitFor({ timeout: 10000 });
+
+    // Get initial theme name
+    const initialText = await themeBtn.textContent();
+
+    // Click to cycle to next theme
+    await themeBtn.click();
+    await window.waitForTimeout(500);
+
+    // Verify theme text changed
+    const newText = await themeBtn.textContent();
     expect(initialText).not.toBe(newText);
   });
 

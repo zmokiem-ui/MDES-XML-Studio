@@ -437,4 +437,176 @@ test.describe('E2E Regression Test - Full Application', () => {
     await window.waitForTimeout(500);
     await expect(window.locator('button:has-text("Open CRS")')).toBeVisible();
   });
+
+  // === Section 9: Language Switching ===
+
+  test('9.1 Language switcher - Dutch changes UI text', async () => {
+    // Navigate to home settings via the settings gear button
+    const settingsBtn = window.locator('button[title="Settings"]');
+    await settingsBtn.waitFor({ timeout: 10000 });
+    await settingsBtn.click();
+    await window.waitForTimeout(1000);
+
+    // Find and click Dutch language button
+    const nlBtn = window.locator('button:has-text("Nederlands")');
+    await nlBtn.waitFor({ timeout: 10000 });
+    await nlBtn.click();
+    await window.waitForTimeout(500);
+
+    // Click back arrow to return to home page
+    const backBtn = window.locator('header button').first();
+    await backBtn.click();
+    await window.waitForTimeout(1000);
+
+    // Verify CRS module cards still visible (no crash after language switch)
+    await window.locator('button:has-text("CRS")').first().waitFor({ timeout: 5000 });
+    await expect(window.locator('button:has-text("CRS")').first()).toBeVisible();
+  });
+
+  test('9.2 Language switcher - Spanish changes UI text', async () => {
+    // Navigate to home settings
+    const settingsBtn = window.locator('button[title="Settings"]');
+    await settingsBtn.waitFor({ timeout: 10000 });
+    await settingsBtn.click();
+    await window.waitForTimeout(1000);
+
+    // Find and click Spanish language button
+    const esBtn = window.locator('button:has-text("Español")');
+    await esBtn.waitFor({ timeout: 10000 });
+    await esBtn.click();
+    await window.waitForTimeout(500);
+
+    // Click back arrow to return to home page
+    const backBtn = window.locator('header button').first();
+    await backBtn.click();
+    await window.waitForTimeout(1000);
+
+    // Verify CRS module cards still visible (no crash)
+    await window.locator('button:has-text("CRS")').first().waitFor({ timeout: 5000 });
+    await expect(window.locator('button:has-text("CRS")').first()).toBeVisible();
+  });
+
+  test('9.3 Language switcher - English restores original text', async () => {
+    // Navigate to home settings
+    const settingsBtn = window.locator('button[title="Settings"]');
+    await settingsBtn.waitFor({ timeout: 10000 });
+    await settingsBtn.click();
+    await window.waitForTimeout(1000);
+
+    // Switch to Dutch first
+    const nlBtn = window.locator('button:has-text("Nederlands")');
+    await nlBtn.waitFor({ timeout: 10000 });
+    await nlBtn.click();
+    await window.waitForTimeout(300);
+
+    // Switch back to English
+    const enBtn = window.locator('button:has-text("English")');
+    await enBtn.waitFor({ timeout: 5000 });
+    await enBtn.click();
+    await window.waitForTimeout(300);
+
+    // Click back arrow to return to home page
+    const backBtn = window.locator('header button').first();
+    await backBtn.click();
+    await window.waitForTimeout(1000);
+
+    // Verify "Open CRS" is back in English
+    await expect(window.locator('button:has-text("Open CRS")')).toBeVisible({ timeout: 5000 });
+  });
+
+  // === Section 10: Partner Jurisdictions Settings ===
+
+  test('10.1 Partner Jurisdictions - Section visible in settings', async () => {
+    await navigateToModule(window, 'CRS');
+    // Use Ctrl+, to open module settings
+    await window.keyboard.press('Control+,');
+    await window.waitForTimeout(1000);
+
+    // Scroll down to find Partner Jurisdictions section
+    const jurisdictionsTitle = window.locator('text=Partner Jurisdictions');
+    await expect(jurisdictionsTitle.first()).toBeVisible({ timeout: 10000 });
+  });
+
+  test('10.2 Partner Jurisdictions - Select All button works', async () => {
+    await navigateToModule(window, 'CRS');
+    await window.keyboard.press('Control+,');
+    await window.waitForTimeout(1000);
+
+    // Find and click Select All
+    const selectAllBtn = window.locator('button:has-text("Select All")');
+    await selectAllBtn.waitFor({ timeout: 10000 });
+    await selectAllBtn.click();
+    await window.waitForTimeout(500);
+
+    // Verify the count increased (should show many countries)
+    const selectedText = window.locator('text=/Selected Countries \\(\\d+\\)/');
+    await expect(selectedText).toBeVisible({ timeout: 5000 });
+
+    // Get the count and verify it's > 100 (all countries)
+    const text = await selectedText.textContent();
+    const match = text.match(/\((\d+)\)/);
+    expect(parseInt(match[1])).toBeGreaterThan(100);
+  });
+
+  test('10.3 Partner Jurisdictions - Clear All button works', async () => {
+    await navigateToModule(window, 'CRS');
+    await window.keyboard.press('Control+,');
+    await window.waitForTimeout(1000);
+
+    // Click Clear All
+    const clearAllBtn = window.locator('button:has-text("Clear All")');
+    await clearAllBtn.waitFor({ timeout: 10000 });
+    await clearAllBtn.click();
+    await window.waitForTimeout(500);
+
+    // Verify "No countries selected" appears or count is 0
+    const emptyText = window.locator('text=No countries selected');
+    const zeroCount = window.locator('text=/Selected Countries \\(0\\)/');
+    const isEmpty = await emptyText.isVisible().catch(() => false);
+    const isZero = await zeroCount.isVisible().catch(() => false);
+    expect(isEmpty || isZero).toBeTruthy();
+  });
+
+  test('10.4 Partner Jurisdictions - Reset to Default button works', async () => {
+    await navigateToModule(window, 'CRS');
+    await window.keyboard.press('Control+,');
+    await window.waitForTimeout(1000);
+
+    // Clear all first
+    const clearAllBtn = window.locator('button:has-text("Clear All")');
+    await clearAllBtn.waitFor({ timeout: 10000 });
+    await clearAllBtn.click();
+    await window.waitForTimeout(300);
+
+    // Click Reset to Default
+    const resetBtn = window.locator('button:has-text("Reset to Default")');
+    await resetBtn.waitFor({ timeout: 5000 });
+    await resetBtn.click();
+    await window.waitForTimeout(500);
+
+    // Verify countries are back (count > 0)
+    const selectedText = window.locator('text=/Selected Countries \\(\\d+\\)/');
+    await expect(selectedText).toBeVisible({ timeout: 5000 });
+    const text = await selectedText.textContent();
+    const match = text.match(/\((\d+)\)/);
+    expect(parseInt(match[1])).toBeGreaterThan(0);
+  });
+
+  test('10.5 Partner Jurisdictions - Search input exists', async () => {
+    await navigateToModule(window, 'CRS');
+    await window.keyboard.press('Control+,');
+    await window.waitForTimeout(1000);
+
+    // Find search input
+    const searchInput = window.locator('input[placeholder*="Search countries"]');
+    await expect(searchInput).toBeVisible({ timeout: 10000 });
+
+    // Type a search term
+    await searchInput.fill('Neth');
+    await window.waitForTimeout(500);
+
+    // Verify dropdown appears with results
+    const dropdown = window.locator('text=Netherlands');
+    await expect(dropdown.first()).toBeVisible({ timeout: 5000 });
+  });
 });

@@ -141,6 +141,25 @@ async function goToHome(window) {
   await window.waitForTimeout(1500);
 }
 
+/**
+ * Navigate to the settings page within a module
+ */
+async function navigateToSettings(window) {
+  // Settings is accessed via the gear button in the home page header
+  // First try nav button, then try title-based selector
+  try {
+    const navBtn = window.locator('nav button:has-text("settings"), nav button:has-text("Settings")');
+    await navBtn.waitFor({ timeout: 3000 });
+    await navBtn.click();
+  } catch {
+    // Fallback: use keyboard shortcut or look for settings in sidebar nav
+    const settingsLinks = window.locator('button:has-text("Settings"), a:has-text("Settings"), [data-page="settings"]');
+    await settingsLinks.first().waitFor({ timeout: 5000 });
+    await settingsLinks.first().click();
+  }
+  await window.waitForTimeout(500);
+}
+
 module.exports = {
   launchElectronApp,
   closeElectronApp,
@@ -154,5 +173,6 @@ module.exports = {
   waitForFile,
   navigateToModule,
   navigateToPage,
+  navigateToSettings,
   goToHome
 };

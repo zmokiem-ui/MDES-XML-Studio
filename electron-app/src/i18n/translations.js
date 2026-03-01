@@ -389,6 +389,135 @@ export const translations = {
       moreModulesComingSoon: 'More modules coming soon',
       nonTaxJurisdiction: 'Non-Tax Jurisdiction',
       createdBy: 'Created by Team MDES - All Rights Reserved'
+    },
+
+    // Form validation errors
+    errors: {
+      mustBe2LetterISO: 'Must be 2-letter ISO code',
+      mustBeAtLeast1: 'Must be at least 1',
+      pleaseSelectCsvFile: 'Please select a CSV file',
+      pleaseSelectXmlFile: 'Please select a CRS XML file first.',
+      pleaseSelectOutputLocation: 'Please select an output location.',
+      pleaseSelectCorrectionType: 'Please select correction or deletion type.',
+      pleaseSelectCorrectionOption: 'Please select at least one correction or deletion option.',
+      pleaseFillRequiredFields: 'Please fill in required fields first.',
+      pleaseFillRequiredFieldsFATCA: 'Please fill in required fields (Transmitting Country and Output Path)',
+      pleaseSelectCsvAndOutput: 'Please select a CSV file and output path',
+      specifyReceivingCountry: 'For foreign exchange files, please specify the Receiving Country',
+      noPartnerJurisdictions: 'No partner jurisdictions configured. Go to Settings to add countries.',
+      alreadyCorrectionFile: 'This is already a correction file (CRS702). Please select a new file (CRS701).',
+      fileBrowserElectronOnly: 'File browser only works in Electron app. Please run: npm run electron',
+      selectValidXmlFile: 'Please select and validate a valid {module} XML file first.'
+    },
+
+    // Modal/toast messages
+    modals: {
+      csvValidated: 'CSV validated! {count} accounts found.',
+      templateSaved: 'Template saved to: {path}',
+      csvSaved: 'CSV saved to: {path}',
+      correctionGenerated: 'Correction file generated!',
+      correctionsCount: 'Corrections: {count}',
+      deletionsCount: 'Deletions: {count}',
+      fiCorrected: 'FI Corrected: Yes',
+      fileProcessedSuccess: 'File processed successfully!',
+      originalCountries: 'Original countries: {count}',
+      replacedCountries: 'Replaced: {count}',
+      docTypeConverted: 'DocTypeIndic converted to test mode',
+      fatcaGeneratedSuccess: 'FATCA XML generated successfully!',
+      cbcGeneratedSuccess: 'CBC XML generated successfully!',
+      generatedSuccess: 'Generated successfully!',
+      fileSize: 'Size: {size} MB',
+      anErrorOccurred: 'An error occurred',
+      validationFailed: 'Validation failed: {error}',
+      failedToDownloadTemplate: 'Failed to download template: {error}',
+      previewFailed: 'Preview failed: {error}',
+      failedGeneric: 'Failed: {error}',
+      failedToGenerateCorrection: 'Failed to generate correction: {error}',
+      failedToReplaceCountryCodes: 'Failed to replace country codes: {error}',
+      cbcCsvValidated: 'CBC CSV validated! {count} reports found.',
+      cbcCsvValidationFailed: 'CBC CSV validation failed: {error}',
+      fromCsvData: 'from CSV data',
+      jurisdictionReports: '{reportCount} jurisdiction reports with {entityCount} constituent entities'
+    },
+
+    // Progress messages
+    progressMessages: {
+      initializingFATCA: 'Initializing FATCA generation...',
+      initializingCBC: 'Initializing CBC generation...',
+      initializing: 'Initializing...'
+    },
+
+    // Partner jurisdictions settings
+    jurisdictions: {
+      title: 'Partner Jurisdictions',
+      description: 'Manage which country codes are valid for your CRS reporting. Only selected countries will be used when generating test data.',
+      searchPlaceholder: 'Search countries by name or code...',
+      noCountriesFound: 'No countries found or all matching countries already added',
+      selectedCountries: 'Selected Countries',
+      resetToDefault: 'Reset to Default',
+      noCountriesSelected: 'No countries selected',
+      selectAll: 'Select All',
+      clearAll: 'Clear All'
+    },
+
+    // Statistics
+    stats: {
+      xmlGenerated: 'XML Generated',
+      csvUploaded: 'CSV Uploaded',
+      csvDownloaded: 'CSV Downloaded',
+      validationErrors: 'Validation Errors',
+      resetAllStats: 'Reset all statistics?',
+      clearAllHistory: 'Clear all history?'
+    },
+
+    // Module features
+    moduleFeatures: {
+      crs: ['Individual & Organisation Accounts', 'Controlling Persons', 'Corrections & Deletions', 'CSV Import/Export'],
+      fatca: ['Individual & Organisation Accounts', 'Substantial Owners', 'Corrections & Deletions', 'Filer Categories'],
+      cbc: ['Multiple Jurisdictions', 'Constituent Entities', 'Financial Summaries', 'Corrections & Deletions']
+    },
+
+    // Settings misc
+    settingsMisc: {
+      csvAutoValidateOn: 'CSV files will be validated before generating XML',
+      csvAutoValidateOff: 'Validation disabled - faulty CSVs can be used to generate test XMLs with errors',
+      autoUpdateOn: 'App will check for updates automatically on startup',
+      autoUpdateOff: 'Updates will only be checked manually',
+      updateCheckFailed: 'Update check failed',
+      animationsEnable: 'Click to enable live animations',
+      animationsDisable: 'Click to disable live animations',
+      about: 'About',
+      faultyXml: 'Faulty XML'
+    },
+
+    // Correction options
+    correctionLabels: {
+      accountBalance: 'Account Balance',
+      usingTestIndicators: 'Using OECD11/12/13 (test data indicators)',
+      usingProdIndicators: 'Using OECD1/2/3 (production data indicators)'
+    },
+
+    // Update section
+    updates: {
+      title: 'Updates & Version',
+      autoUpdate: 'Auto-Update',
+      checkForUpdates: 'Check for Updates',
+      checking: 'Checking...',
+      downloading: 'Downloading update...',
+      readyToInstall: 'Update ready to install',
+      installAndRestart: 'Install & Restart',
+      upToDate: 'Up to date',
+      version: 'Version',
+      updateAvailable: 'Update available: v{version}',
+      downloadProgress: 'Download progress: {percent}%',
+      whatsNew: "What's New in v1.1.0",
+      changelog: [
+        'Full Dutch & Spanish translations — all UI text now translates correctly',
+        'Partner Jurisdictions — Select All, Clear All, Reset to Default + search',
+        'MDES logo app icon everywhere (installer, desktop, taskbar)',
+        'Bug fixes — hardcoded strings replaced with proper translations',
+        'Extended test suite — 8 new regression tests added'
+      ]
     }
   },
   
@@ -775,6 +904,135 @@ export const translations = {
       moreModulesComingSoon: 'Meer modules binnenkort beschikbaar',
       nonTaxJurisdiction: 'Niet-Belasting Jurisdictie',
       createdBy: 'Gemaakt door Team MDES - Alle Rechten Voorbehouden'
+    },
+
+    // Form validation errors
+    errors: {
+      mustBe2LetterISO: 'Moet een 2-letterige ISO code zijn',
+      mustBeAtLeast1: 'Moet minimaal 1 zijn',
+      pleaseSelectCsvFile: 'Selecteer een CSV bestand',
+      pleaseSelectXmlFile: 'Selecteer eerst een CRS XML bestand.',
+      pleaseSelectOutputLocation: 'Selecteer een uitvoerlocatie.',
+      pleaseSelectCorrectionType: 'Selecteer correctie- of verwijderingstype.',
+      pleaseSelectCorrectionOption: 'Selecteer minimaal één correctie- of verwijderingsoptie.',
+      pleaseFillRequiredFields: 'Vul eerst de verplichte velden in.',
+      pleaseFillRequiredFieldsFATCA: 'Vul de verplichte velden in (Verzendend Land en Uitvoerpad)',
+      pleaseSelectCsvAndOutput: 'Selecteer een CSV bestand en uitvoerpad',
+      specifyReceivingCountry: 'Voor buitenlandse uitwisselingsbestanden, specificeer het Ontvangende Land',
+      noPartnerJurisdictions: 'Geen partnerjurisdicties geconfigureerd. Ga naar Instellingen om landen toe te voegen.',
+      alreadyCorrectionFile: 'Dit is al een correctiebestand (CRS702). Selecteer een nieuw bestand (CRS701).',
+      fileBrowserElectronOnly: 'Bestandsbrowser werkt alleen in Electron app. Voer uit: npm run electron',
+      selectValidXmlFile: 'Selecteer en valideer eerst een geldig {module} XML bestand.'
+    },
+
+    // Modal/toast messages
+    modals: {
+      csvValidated: 'CSV gevalideerd! {count} rekeningen gevonden.',
+      templateSaved: 'Sjabloon opgeslagen naar: {path}',
+      csvSaved: 'CSV opgeslagen naar: {path}',
+      correctionGenerated: 'Correctiebestand gegenereerd!',
+      correctionsCount: 'Correcties: {count}',
+      deletionsCount: 'Verwijderingen: {count}',
+      fiCorrected: 'FI Gecorrigeerd: Ja',
+      fileProcessedSuccess: 'Bestand succesvol verwerkt!',
+      originalCountries: 'Originele landen: {count}',
+      replacedCountries: 'Vervangen: {count}',
+      docTypeConverted: 'DocTypeIndic geconverteerd naar testmodus',
+      fatcaGeneratedSuccess: 'FATCA XML succesvol gegenereerd!',
+      cbcGeneratedSuccess: 'CBC XML succesvol gegenereerd!',
+      generatedSuccess: 'Succesvol gegenereerd!',
+      fileSize: 'Grootte: {size} MB',
+      anErrorOccurred: 'Er is een fout opgetreden',
+      validationFailed: 'Validatie mislukt: {error}',
+      failedToDownloadTemplate: 'Sjabloon downloaden mislukt: {error}',
+      previewFailed: 'Voorbeeld mislukt: {error}',
+      failedGeneric: 'Mislukt: {error}',
+      failedToGenerateCorrection: 'Correctie genereren mislukt: {error}',
+      failedToReplaceCountryCodes: 'Landcodes vervangen mislukt: {error}',
+      cbcCsvValidated: 'CBC CSV gevalideerd! {count} rapporten gevonden.',
+      cbcCsvValidationFailed: 'CBC CSV validatie mislukt: {error}',
+      fromCsvData: 'vanuit CSV gegevens',
+      jurisdictionReports: '{reportCount} jurisdictierapporten met {entityCount} samenstellende entiteiten'
+    },
+
+    // Progress messages
+    progressMessages: {
+      initializingFATCA: 'FATCA generatie initialiseren...',
+      initializingCBC: 'CBC generatie initialiseren...',
+      initializing: 'Initialiseren...'
+    },
+
+    // Partner jurisdictions settings
+    jurisdictions: {
+      title: 'Partner Jurisdicties',
+      description: 'Beheer welke landcodes geldig zijn voor uw CRS rapportage. Alleen geselecteerde landen worden gebruikt bij het genereren van testgegevens.',
+      searchPlaceholder: 'Zoek landen op naam of code...',
+      noCountriesFound: 'Geen landen gevonden of alle overeenkomende landen al toegevoegd',
+      selectedCountries: 'Geselecteerde Landen',
+      resetToDefault: 'Standaard Herstellen',
+      noCountriesSelected: 'Geen landen geselecteerd',
+      selectAll: 'Alles Selecteren',
+      clearAll: 'Alles Wissen'
+    },
+
+    // Statistics
+    stats: {
+      xmlGenerated: 'XML Gegenereerd',
+      csvUploaded: 'CSV Geüpload',
+      csvDownloaded: 'CSV Gedownload',
+      validationErrors: 'Validatiefouten',
+      resetAllStats: 'Alle statistieken resetten?',
+      clearAllHistory: 'Alle geschiedenis wissen?'
+    },
+
+    // Module features
+    moduleFeatures: {
+      crs: ['Individuele & Organisatie Rekeningen', 'Uiteindelijk Belanghebbenden', 'Correcties & Verwijderingen', 'CSV Import/Export'],
+      fatca: ['Individuele & Organisatie Rekeningen', 'Substantiële Eigenaren', 'Correcties & Verwijderingen', 'Indienercategorieën'],
+      cbc: ['Meerdere Jurisdicties', 'Samenstellende Entiteiten', 'Financiële Overzichten', 'Correcties & Verwijderingen']
+    },
+
+    // Settings misc
+    settingsMisc: {
+      csvAutoValidateOn: 'CSV bestanden worden gevalideerd voor het genereren van XML',
+      csvAutoValidateOff: 'Validatie uitgeschakeld - foutieve CSVs kunnen gebruikt worden om test XMLs met fouten te genereren',
+      autoUpdateOn: 'App controleert automatisch op updates bij het opstarten',
+      autoUpdateOff: 'Updates worden alleen handmatig gecontroleerd',
+      updateCheckFailed: 'Updatecontrole mislukt',
+      animationsEnable: 'Klik om live animaties in te schakelen',
+      animationsDisable: 'Klik om live animaties uit te schakelen',
+      about: 'Over',
+      faultyXml: 'Foutieve XML'
+    },
+
+    // Correction options
+    correctionLabels: {
+      accountBalance: 'Rekeningsaldo',
+      usingTestIndicators: 'Gebruik OECD11/12/13 (test data indicatoren)',
+      usingProdIndicators: 'Gebruik OECD1/2/3 (productie data indicatoren)'
+    },
+
+    // Update section
+    updates: {
+      title: 'Updates & Versie',
+      autoUpdate: 'Automatisch Updaten',
+      checkForUpdates: 'Controleren op Updates',
+      checking: 'Controleren...',
+      downloading: 'Update downloaden...',
+      readyToInstall: 'Update klaar om te installeren',
+      installAndRestart: 'Installeren & Herstarten',
+      upToDate: 'Up-to-date',
+      version: 'Versie',
+      updateAvailable: 'Update beschikbaar: v{version}',
+      downloadProgress: 'Downloadvoortgang: {percent}%',
+      whatsNew: 'Wat is nieuw in v1.1.0',
+      changelog: [
+        'Volledige Nederlandse & Spaanse vertalingen — alle UI-tekst wordt nu correct vertaald',
+        'Partnerjurisdicties — Alles selecteren, Alles wissen, Standaard herstellen + zoeken',
+        'MDES-logo app-icoon overal (installatie, bureaublad, taakbalk)',
+        'Bugfixes — hardgecodeerde teksten vervangen door vertalingen',
+        'Uitgebreide testsuite — 8 nieuwe regressietests toegevoegd'
+      ]
     }
   },
 
@@ -1161,6 +1419,135 @@ export const translations = {
       moreModulesComingSoon: 'Más módulos próximamente',
       nonTaxJurisdiction: 'Jurisdicción No Fiscal',
       createdBy: 'Creado por Team MDES - Todos los Derechos Reservados'
+    },
+
+    // Form validation errors
+    errors: {
+      mustBe2LetterISO: 'Debe ser un código ISO de 2 letras',
+      mustBeAtLeast1: 'Debe ser al menos 1',
+      pleaseSelectCsvFile: 'Seleccione un archivo CSV',
+      pleaseSelectXmlFile: 'Seleccione primero un archivo XML CRS.',
+      pleaseSelectOutputLocation: 'Seleccione una ubicación de salida.',
+      pleaseSelectCorrectionType: 'Seleccione tipo de corrección o eliminación.',
+      pleaseSelectCorrectionOption: 'Seleccione al menos una opción de corrección o eliminación.',
+      pleaseFillRequiredFields: 'Complete primero los campos obligatorios.',
+      pleaseFillRequiredFieldsFATCA: 'Complete los campos obligatorios (País Transmisor y Ruta de Salida)',
+      pleaseSelectCsvAndOutput: 'Seleccione un archivo CSV y ruta de salida',
+      specifyReceivingCountry: 'Para archivos de intercambio extranjero, especifique el País Receptor',
+      noPartnerJurisdictions: 'No hay jurisdicciones asociadas configuradas. Vaya a Configuración para agregar países.',
+      alreadyCorrectionFile: 'Este ya es un archivo de corrección (CRS702). Seleccione un archivo nuevo (CRS701).',
+      fileBrowserElectronOnly: 'El explorador de archivos solo funciona en la app Electron. Ejecute: npm run electron',
+      selectValidXmlFile: 'Seleccione y valide primero un archivo XML {module} válido.'
+    },
+
+    // Modal/toast messages
+    modals: {
+      csvValidated: '¡CSV validado! {count} cuentas encontradas.',
+      templateSaved: 'Plantilla guardada en: {path}',
+      csvSaved: 'CSV guardado en: {path}',
+      correctionGenerated: '¡Archivo de corrección generado!',
+      correctionsCount: 'Correcciones: {count}',
+      deletionsCount: 'Eliminaciones: {count}',
+      fiCorrected: 'IF Corregida: Sí',
+      fileProcessedSuccess: '¡Archivo procesado correctamente!',
+      originalCountries: 'Países originales: {count}',
+      replacedCountries: 'Reemplazados: {count}',
+      docTypeConverted: 'DocTypeIndic convertido a modo de prueba',
+      fatcaGeneratedSuccess: '¡XML FATCA generado correctamente!',
+      cbcGeneratedSuccess: '¡XML CBC generado correctamente!',
+      generatedSuccess: '¡Generado correctamente!',
+      fileSize: 'Tamaño: {size} MB',
+      anErrorOccurred: 'Se produjo un error',
+      validationFailed: 'Validación fallida: {error}',
+      failedToDownloadTemplate: 'Error al descargar plantilla: {error}',
+      previewFailed: 'Vista previa fallida: {error}',
+      failedGeneric: 'Error: {error}',
+      failedToGenerateCorrection: 'Error al generar corrección: {error}',
+      failedToReplaceCountryCodes: 'Error al reemplazar códigos de país: {error}',
+      cbcCsvValidated: '¡CSV CBC validado! {count} informes encontrados.',
+      cbcCsvValidationFailed: 'Validación CSV CBC fallida: {error}',
+      fromCsvData: 'desde datos CSV',
+      jurisdictionReports: '{reportCount} informes de jurisdicción con {entityCount} entidades constituyentes'
+    },
+
+    // Progress messages
+    progressMessages: {
+      initializingFATCA: 'Inicializando generación FATCA...',
+      initializingCBC: 'Inicializando generación CBC...',
+      initializing: 'Inicializando...'
+    },
+
+    // Partner jurisdictions settings
+    jurisdictions: {
+      title: 'Jurisdicciones Asociadas',
+      description: 'Administre qué códigos de país son válidos para su informe CRS. Solo los países seleccionados se usarán al generar datos de prueba.',
+      searchPlaceholder: 'Buscar países por nombre o código...',
+      noCountriesFound: 'No se encontraron países o todos los países coincidentes ya fueron agregados',
+      selectedCountries: 'Países Seleccionados',
+      resetToDefault: 'Restablecer a Predeterminado',
+      noCountriesSelected: 'Ningún país seleccionado',
+      selectAll: 'Seleccionar Todo',
+      clearAll: 'Limpiar Todo'
+    },
+
+    // Statistics
+    stats: {
+      xmlGenerated: 'XML Generados',
+      csvUploaded: 'CSV Subidos',
+      csvDownloaded: 'CSV Descargados',
+      validationErrors: 'Errores de Validación',
+      resetAllStats: '¿Restablecer todas las estadísticas?',
+      clearAllHistory: '¿Limpiar todo el historial?'
+    },
+
+    // Module features
+    moduleFeatures: {
+      crs: ['Cuentas Individuales y de Organizaciones', 'Personas Controladoras', 'Correcciones y Eliminaciones', 'Importar/Exportar CSV'],
+      fatca: ['Cuentas Individuales y de Organizaciones', 'Propietarios Sustanciales', 'Correcciones y Eliminaciones', 'Categorías de Declarante'],
+      cbc: ['Múltiples Jurisdicciones', 'Entidades Constituyentes', 'Resúmenes Financieros', 'Correcciones y Eliminaciones']
+    },
+
+    // Settings misc
+    settingsMisc: {
+      csvAutoValidateOn: 'Los archivos CSV serán validados antes de generar XML',
+      csvAutoValidateOff: 'Validación desactivada - CSVs defectuosos pueden usarse para generar XMLs de prueba con errores',
+      autoUpdateOn: 'La app verificará actualizaciones automáticamente al iniciar',
+      autoUpdateOff: 'Las actualizaciones solo se verificarán manualmente',
+      updateCheckFailed: 'Verificación de actualización fallida',
+      animationsEnable: 'Clic para activar animaciones en vivo',
+      animationsDisable: 'Clic para desactivar animaciones en vivo',
+      about: 'Acerca de',
+      faultyXml: 'XML Defectuoso'
+    },
+
+    // Correction options
+    correctionLabels: {
+      accountBalance: 'Saldo de Cuenta',
+      usingTestIndicators: 'Usando OECD11/12/13 (indicadores de datos de prueba)',
+      usingProdIndicators: 'Usando OECD1/2/3 (indicadores de datos de producción)'
+    },
+
+    // Update section
+    updates: {
+      title: 'Actualizaciones y Versión',
+      autoUpdate: 'Actualización Automática',
+      checkForUpdates: 'Buscar Actualizaciones',
+      checking: 'Verificando...',
+      downloading: 'Descargando actualización...',
+      readyToInstall: 'Actualización lista para instalar',
+      installAndRestart: 'Instalar y Reiniciar',
+      upToDate: 'Actualizado',
+      version: 'Versión',
+      updateAvailable: 'Actualización disponible: v{version}',
+      downloadProgress: 'Progreso de descarga: {percent}%',
+      whatsNew: 'Novedades en v1.1.0',
+      changelog: [
+        'Traducciones completas al neerlandés y español — todo el texto de la interfaz se traduce correctamente',
+        'Jurisdicciones asociadas — Seleccionar todo, Borrar todo, Restablecer + búsqueda',
+        'Icono de la app con logo MDES en todas partes (instalador, escritorio, barra de tareas)',
+        'Corrección de errores — textos fijos reemplazados por traducciones',
+        'Suite de pruebas ampliada — 8 nuevas pruebas de regresión añadidas'
+      ]
     }
   }
 };
@@ -1185,6 +1572,10 @@ export function t(lang, key, params = {}) {
       }
       break;
     }
+  }
+  
+  if (Array.isArray(value)) {
+    return value; // Return arrays directly (e.g., moduleFeatures)
   }
   
   if (typeof value !== 'string') {
