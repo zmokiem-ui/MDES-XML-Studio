@@ -1359,3 +1359,64 @@ ipcMain.handle('format-xml', async (event, content) => {
     return { success: false, error: error.message };
   }
 });
+
+// ============== Bug Reporting IPC Handlers ==============
+
+// Create GitHub issue
+ipcMain.handle('create-github-issue', async (event, issueData) => {
+  try {
+    const { Octokit } = require('@octokit/rest');
+    const token = process.env.GH_TOKEN;
+    
+    if (!token) {
+      throw new Error('GitHub token not configured. Please set GH_TOKEN environment variable.');
+    }
+
+    const octokit = new Octokit({ auth: token });
+    
+    const response = await octokit.rest.issues.create({
+      owner: 'zmokiem-ui',
+      repo: 'MDES-XML-Studio',
+      title: issueData.title,
+      body: issueData.body,
+      labels: issueData.labels || ['bug', 'user-reported']
+    });
+
+    return {
+      success: true,
+      html_url: response.data.html_url,
+      number: response.data.number
+    };
+  } catch (error) {
+    console.error('Failed to create GitHub issue:', error);
+    throw new Error(`Failed to create issue: ${error.message}`);
+  }
+});
+
+// Capture screenshot
+ipcMain.handle('capture-screenshot', async () => {
+  try {
+    const { desktopCapturer } = require('electron');
+    
+    const sources = await desktopCapturer.getSources({
+      types: ['window', 'screen'],
+      thumbnailSize: { width: 1920, height: 1080 }
+    });
+
+    if (sources.length === 0) {
+      throw new Error('No screen sources available');
+    }
+
+    // Get the first source (main screen)
+    const screenshot = sources[0].thumbnail.toDataURL();
+    
+    return {
+      success: true,
+      dataUrl: screenshot,
+      timestamp: Date.now()
+    };
+  } catch (error) {
+    console.error('Failed to capture screenshot:', error);
+    throw new Error(`Failed to capture screenshot: ${error.message}`);
+  }
+});

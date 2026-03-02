@@ -1,0 +1,25 @@
+Always read WORKFLOW-DOCUMENTATION.md before doing anything.
+When myway.txt has a new request, start Phase 1 immediately.
+Never pause between phases.
+Never ask for confirmation between phases.
+Run proceed.ps1 and satisfied.ps1 in your terminal automatically.
+The only time you wait for humans is when those scripts ask y/n.
+
+CRITICAL RULES:
+- Complete ALL 6 phases without stopping
+- The only human interaction points are proceed.ps1 and satisfied.ps1
+- When Phase 6 completes, run satisfied.ps1 immediately without pausing
+- Do not summarize or ask for confirmation before running satisfied.ps1
+- Just run it directly
+
+WORKFLOW TRIGGERS:
+- "New request in myway.txt" → Start Phase 1 immediately
+- "go" → Process myway.txt request through all 6 phases
+- Any other request → Handle normally
+
+AUTOMATIC BEHAVIOR:
+- Read myway.txt
+- Follow WORKFLOW-DOCUMENTATION.md exactly
+- Execute all phases sequentially without stopping
+- Run proceed.ps1 and satisfied.ps1 automatically
+- Only wait for y/n responses from those specific scripts

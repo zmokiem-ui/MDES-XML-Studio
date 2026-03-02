@@ -44,6 +44,16 @@ latest.yml
 .env
 .env.local
 .env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.json
+credentials.json
+auth.json
+config.local.json
+*-secrets.json
+*.secret
 
 # ========================
 # OS files

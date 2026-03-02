@@ -501,6 +501,37 @@ export const translations = {
       autoValidateDescription: 'Automatically validate CSV files when selected'
     },
 
+    // Bug Reporting
+    bugReport: {
+      title: 'Report a Bug',
+      button: 'Report a Bug',
+      formTitle: 'Bug Report',
+      issueTitle: 'Issue Title',
+      issueTitlePlaceholder: 'Brief description of the issue',
+      description: 'Description',
+      descriptionPlaceholder: 'Detailed description of what happened',
+      stepsToReproduce: 'Steps to Reproduce',
+      stepsPlaceholder: 'How can we reproduce this issue?',
+      expectedBehavior: 'Expected Behavior',
+      expectedPlaceholder: 'What should have happened?',
+      actualBehavior: 'Actual Behavior',
+      actualPlaceholder: 'What actually happened?',
+      email: 'Email (optional)',
+      emailPlaceholder: 'your.email@example.com',
+      screenshot: 'Add Screenshot',
+      systemInfo: 'System Information',
+      submit: 'Submit Bug Report',
+      cancel: 'Cancel',
+      submitting: 'Submitting...',
+      success: 'Bug report submitted successfully!',
+      successMessage: 'Thank you for your report. View issue: {url}',
+      error: 'Failed to submit bug report',
+      errorMessage: 'Please try again later or contact support.',
+      titleRequired: 'Title is required',
+      descriptionRequired: 'Description is required',
+      invalidEmail: 'Please enter a valid email address'
+    },
+
     // Correction options
     correctionLabels: {
       accountBalance: 'Account Balance',
@@ -1026,6 +1057,37 @@ export const translations = {
       autoValidateDescription: 'CSV-bestanden automatisch valideren wanneer geselecteerd'
     },
 
+    // Bug Reporting
+    bugReport: {
+      title: 'Rapporteer een Bug',
+      button: 'Rapporteer een Bug',
+      formTitle: 'Bugrapport',
+      issueTitle: 'Probleem Titel',
+      issueTitlePlaceholder: 'Korte beschrijving van het probleem',
+      description: 'Beschrijving',
+      descriptionPlaceholder: 'Gedetailleerde beschrijving van wat er gebeurde',
+      stepsToReproduce: 'Stappen om te Reproduceren',
+      stepsPlaceholder: 'Hoe kunnen we dit probleem reproduceren?',
+      expectedBehavior: 'Verwacht Gedrag',
+      expectedPlaceholder: 'Wat had er moeten gebeuren?',
+      actualBehavior: 'Werkelijk Gedrag',
+      actualPlaceholder: 'Wat gebeurde er eigenlijk?',
+      email: 'E-mail (optioneel)',
+      emailPlaceholder: 'jouw.email@voorbeeld.nl',
+      screenshot: 'Screenshot Toevoegen',
+      systemInfo: 'Systeeminformatie',
+      submit: 'Bugrapport Verzenden',
+      cancel: 'Annuleren',
+      submitting: 'Verzenden...',
+      success: 'Bugrapport succesvol verzonden!',
+      successMessage: 'Bedankt voor je rapport. Bekijk issue: {url}',
+      error: 'Verzenden bugrapport mislukt',
+      errorMessage: 'Probeer het later opnieuw of neem contact op met support.',
+      titleRequired: 'Titel is verplicht',
+      descriptionRequired: 'Beschrijving is verplicht',
+      invalidEmail: 'Voer een geldig e-mailadres in'
+    },
+
     // Correction options
     correctionLabels: {
       accountBalance: 'Rekeningsaldo',
@@ -1549,6 +1611,37 @@ export const translations = {
     csv: {
       autoValidate: 'Validar CSV automáticamente',
       autoValidateDescription: 'Validar archivos CSV automáticamente cuando se seleccionen'
+    },
+
+    // Bug Reporting
+    bugReport: {
+      title: 'Reportar un Error',
+      button: 'Reportar un Error',
+      formTitle: 'Reporte de Error',
+      issueTitle: 'Título del Problema',
+      issueTitlePlaceholder: 'Breve descripción del problema',
+      description: 'Descripción',
+      descriptionPlaceholder: 'Descripción detallada de lo que sucedió',
+      stepsToReproduce: 'Pasos para Reproducir',
+      stepsPlaceholder: '¿Cómo podemos reproducir este problema?',
+      expectedBehavior: 'Comportamiento Esperado',
+      expectedPlaceholder: '¿Qué debería haber sucedido?',
+      actualBehavior: 'Comportamiento Real',
+      actualPlaceholder: '¿Qué sucedió realmente?',
+      email: 'Correo electrónico (opcional)',
+      emailPlaceholder: 'tu.correo@ejemplo.com',
+      screenshot: 'Agregar Captura de Pantalla',
+      systemInfo: 'Información del Sistema',
+      submit: 'Enviar Reporte de Error',
+      cancel: 'Cancelar',
+      submitting: 'Enviando...',
+      success: '¡Reporte de error enviado exitosamente!',
+      successMessage: 'Gracias por tu reporte. Ver issue: {url}',
+      error: 'Error al enviar el reporte',
+      errorMessage: 'Por favor intenta de nuevo más tarde o contacta soporte.',
+      titleRequired: 'El título es obligatorio',
+      descriptionRequired: 'La descripción es obligatoria',
+      invalidEmail: 'Por favor ingresa un correo electrónico válido'
     },
 
     // Correction options

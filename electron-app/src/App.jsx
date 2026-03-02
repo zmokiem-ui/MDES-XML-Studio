@@ -8,7 +8,7 @@ import {
   Moon, Sun, Home, XCircle, RefreshCw, FileEdit,
   AlertTriangle, Minus, Plus, Search, Flag, ArrowLeft,
   DollarSign, Landmark, FileCheck, Keyboard,
-  Languages,
+  Languages, Camera,
   Zap, Star, Library, Code
 } from 'lucide-react'
 import { COUNTRIES, DEFAULT_PARTNER_JURISDICTIONS, getCountryName, searchCountries } from './countryData'
@@ -710,6 +710,20 @@ function App() {
     return saved ? JSON.parse(saved) : []
   })
 
+  // Bug reporting state
+  const [showBugReportForm, setShowBugReportForm] = useState(false)
+  const [bugReportData, setBugReportData] = useState({
+    title: '',
+    description: '',
+    steps: '',
+    expected: '',
+    actual: '',
+    email: ''
+  })
+  const [bugReportErrors, setBugReportErrors] = useState({})
+  const [isSubmittingBug, setIsSubmittingBug] = useState(false)
+  const [bugReportScreenshots, setBugReportScreenshots] = useState([])
+
   // Apply theme
   useEffect(() => {
     if (darkMode) {
@@ -1309,6 +1323,107 @@ function App() {
       setShowModal(true)
     } finally {
       setIsGenerating(false)
+    }
+  }
+
+  // Bug reporting handlers
+  const handleBugReportChange = (field, value) => {
+    setBugReportData(prev => ({ ...prev, [field]: value }))
+    // Clear error for this field
+    if (bugReportErrors[field]) {
+      setBugReportErrors(prev => ({ ...prev, [field]: null }))
+    }
+  }
+
+  const validateBugReport = () => {
+    const errors = {}
+    if (!bugReportData.title.trim()) {
+      errors.title = t(language, 'bugReport.titleRequired')
+    }
+    if (!bugReportData.description.trim()) {
+      errors.description = t(language, 'bugReport.descriptionRequired')
+    }
+    if (bugReportData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bugReportData.email)) {
+      errors.email = t(language, 'bugReport.invalidEmail')
+    }
+    setBugReportErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleSubmitBugReport = async () => {
+    if (!validateBugReport()) return
+
+    setIsSubmittingBug(true)
+    try {
+      // Collect system information
+      const systemInfo = {
+        appVersion: appVersion || '1.1.2',
+        platform: navigator.platform,
+        userAgent: navigator.userAgent,
+        language: language
+      }
+
+      // Create GitHub issue via IPC
+      const issueData = {
+        title: bugReportData.title,
+        body: `## Description\n${bugReportData.description}\n\n` +
+              (bugReportData.steps ? `## Steps to Reproduce\n${bugReportData.steps}\n\n` : '') +
+              (bugReportData.expected ? `## Expected Behavior\n${bugReportData.expected}\n\n` : '') +
+              (bugReportData.actual ? `## Actual Behavior\n${bugReportData.actual}\n\n` : '') +
+              (bugReportData.email ? `## Contact\n${bugReportData.email}\n\n` : '') +
+              `## System Information\n` +
+              `- App Version: ${systemInfo.appVersion}\n` +
+              `- Platform: ${systemInfo.platform}\n` +
+              `- Language: ${systemInfo.language}\n`,
+        labels: ['bug', 'user-reported']
+      }
+
+      const result = await window.electronAPI.createGitHubIssue(issueData)
+      
+      setModalType('success')
+      setModalMessage(t(language, 'bugReport.successMessage', { url: result.html_url }))
+      setShowModal(true)
+      
+      // Reset form
+      setBugReportData({
+        title: '',
+        description: '',
+        steps: '',
+        expected: '',
+        actual: '',
+        email: ''
+      })
+      setBugReportScreenshots([])
+      setShowBugReportForm(false)
+    } catch (error) {
+      setModalType('error')
+      setModalMessage(t(language, 'bugReport.errorMessage'))
+      setShowModal(true)
+    } finally {
+      setIsSubmittingBug(false)
+    }
+  }
+
+  const handleCancelBugReport = () => {
+    setBugReportData({
+      title: '',
+      description: '',
+      steps: '',
+      expected: '',
+      actual: '',
+      email: ''
+    })
+    setBugReportErrors({})
+    setBugReportScreenshots([])
+    setShowBugReportForm(false)
+  }
+
+  const handleCaptureScreenshot = async () => {
+    try {
+      const screenshot = await window.electronAPI.captureScreenshot()
+      setBugReportScreenshots(prev => [...prev, screenshot])
+    } catch (error) {
+      console.error('Failed to capture screenshot:', error)
     }
   }
 
@@ -2212,6 +2327,7 @@ function App() {
                   onClick={() => setCurrentPage('settings')}
                   className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
                   title="Settings"
+                  data-testid="nav-settings"
                 >
                   <Settings className="w-5 h-5" />
                 </button>
@@ -5708,6 +5824,175 @@ function App() {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Bug Reporting Section */}
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`} data-testid="bug-report-section">
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'bugReport.title')}</h3>
+              <p className={`text-sm ${theme.textMuted} mb-4`}>
+                Help us improve by reporting bugs or issues you encounter
+              </p>
+              
+              <button
+                onClick={() => setShowBugReportForm(true)}
+                data-testid="report-bug-button"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${theme.buttonPrimary}`}
+              >
+                <AlertCircle className="w-4 h-4" />
+                {t(language, 'bugReport.button')}
+              </button>
+
+              {/* Bug Report Form Modal */}
+              {showBugReportForm && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="bug-report-form">
+                  <div className={`${theme.card} rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto`}>
+                    <div className={`p-6 ${theme.accent} border-b`}>
+                      <h3 className="text-xl font-bold text-white">{t(language, 'bugReport.formTitle')}</h3>
+                    </div>
+                    
+                    <div className="p-6 space-y-4">
+                      {/* Title */}
+                      <div>
+                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                          {t(language, 'bugReport.issueTitle')} *
+                        </label>
+                        <input
+                          type="text"
+                          value={bugReportData.title}
+                          onChange={(e) => handleBugReportChange('title', e.target.value)}
+                          placeholder={t(language, 'bugReport.issueTitlePlaceholder')}
+                          data-testid="bug-title-input"
+                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                        />
+                        {bugReportErrors.title && (
+                          <p className="text-red-500 text-sm mt-1" data-testid="bug-title-error">{bugReportErrors.title}</p>
+                        )}
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                          {t(language, 'bugReport.description')} *
+                        </label>
+                        <textarea
+                          value={bugReportData.description}
+                          onChange={(e) => handleBugReportChange('description', e.target.value)}
+                          placeholder={t(language, 'bugReport.descriptionPlaceholder')}
+                          data-testid="bug-description-input"
+                          rows={4}
+                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                        />
+                        {bugReportErrors.description && (
+                          <p className="text-red-500 text-sm mt-1" data-testid="bug-description-error">{bugReportErrors.description}</p>
+                        )}
+                      </div>
+
+                      {/* Steps to Reproduce */}
+                      <div>
+                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                          {t(language, 'bugReport.stepsToReproduce')}
+                        </label>
+                        <textarea
+                          value={bugReportData.steps}
+                          onChange={(e) => handleBugReportChange('steps', e.target.value)}
+                          placeholder={t(language, 'bugReport.stepsPlaceholder')}
+                          data-testid="bug-steps-input"
+                          rows={3}
+                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                        />
+                      </div>
+
+                      {/* Expected Behavior */}
+                      <div>
+                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                          {t(language, 'bugReport.expectedBehavior')}
+                        </label>
+                        <textarea
+                          value={bugReportData.expected}
+                          onChange={(e) => handleBugReportChange('expected', e.target.value)}
+                          placeholder={t(language, 'bugReport.expectedPlaceholder')}
+                          data-testid="bug-expected-input"
+                          rows={2}
+                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                        />
+                      </div>
+
+                      {/* Actual Behavior */}
+                      <div>
+                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                          {t(language, 'bugReport.actualBehavior')}
+                        </label>
+                        <textarea
+                          value={bugReportData.actual}
+                          onChange={(e) => handleBugReportChange('actual', e.target.value)}
+                          placeholder={t(language, 'bugReport.actualPlaceholder')}
+                          data-testid="bug-actual-input"
+                          rows={2}
+                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                        />
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                          {t(language, 'bugReport.email')}
+                        </label>
+                        <input
+                          type="email"
+                          value={bugReportData.email}
+                          onChange={(e) => handleBugReportChange('email', e.target.value)}
+                          placeholder={t(language, 'bugReport.emailPlaceholder')}
+                          data-testid="bug-email-input"
+                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                        />
+                        {bugReportErrors.email && (
+                          <p className="text-red-500 text-sm mt-1" data-testid="bug-email-error">{bugReportErrors.email}</p>
+                        )}
+                      </div>
+
+                      {/* Screenshot Button */}
+                      <div>
+                        <button
+                          onClick={handleCaptureScreenshot}
+                          data-testid="bug-screenshot-button"
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg ${theme.buttonSecondary}`}
+                        >
+                          <Camera className="w-4 h-4" />
+                          {t(language, 'bugReport.screenshot')}
+                        </button>
+                      </div>
+
+                      {/* System Info */}
+                      <div className={`p-3 rounded-lg ${theme.cardHover}`} data-testid="bug-system-info">
+                        <p className={`text-sm font-medium ${theme.text} mb-1`}>{t(language, 'bugReport.systemInfo')}</p>
+                        <p className={`text-xs ${theme.textMuted}`}>Version: {appVersion || '1.1.2'}</p>
+                        <p className={`text-xs ${theme.textMuted}`}>Platform: {navigator.platform}</p>
+                        <p className={`text-xs ${theme.textMuted}`}>Language: {language.toUpperCase()}</p>
+                      </div>
+                    </div>
+
+                    {/* Form Actions */}
+                    <div className="px-6 pb-6 flex gap-3">
+                      <button
+                        onClick={handleCancelBugReport}
+                        data-testid="bug-cancel-button"
+                        disabled={isSubmittingBug}
+                        className={`flex-1 py-3 rounded-lg font-semibold ${theme.buttonSecondary}`}
+                      >
+                        {t(language, 'bugReport.cancel')}
+                      </button>
+                      <button
+                        onClick={handleSubmitBugReport}
+                        data-testid="bug-submit-button"
+                        disabled={isSubmittingBug}
+                        className={`flex-1 py-3 rounded-lg font-semibold ${theme.buttonSuccess}`}
+                      >
+                        {isSubmittingBug ? t(language, 'bugReport.submitting') : t(language, 'bugReport.submit')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>

@@ -1,6 +1,14 @@
-# CRS XML Data Generator
+# MDES XML Studio
 
-A high-performance CLI tool for generating valid Common Reporting Standard (CRS) XML data for testing purposes. Supports generating millions of accounts with realistic fake data, parallel processing, and structural validation.
+> **ℹ️ REPOSITORY STATUS**: Currently private. See [MAKE_REPOSITORY_PUBLIC.md](MAKE_REPOSITORY_PUBLIC.md) for instructions to make releases publicly accessible.
+
+A professional desktop application for generating valid CRS, FATCA, and CBC XML test data. Features an intuitive Electron-based UI with support for multiple reporting standards, error injection, and comprehensive validation.
+
+## 📥 Download
+
+**For end users**: Download the latest compiled executable from [GitHub Releases](https://github.com/zmokiem-ui/MDES-XML-Studio/releases)
+
+**Note**: If you cannot access releases, the repository may need to be made public. See [MAKE_REPOSITORY_PUBLIC.md](MAKE_REPOSITORY_PUBLIC.md) for details.
 
 ## 🚀 Features
 

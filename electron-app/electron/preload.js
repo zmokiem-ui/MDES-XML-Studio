@@ -74,4 +74,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onDownloadProgress: (callback) => ipcRenderer.on('download-progress', (event, progress) => callback(progress)),
   onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', (event, info) => callback(info)),
   onUpdateError: (callback) => ipcRenderer.on('update-error', (event, msg) => callback(msg)),
+  
+  // Bug Reporting APIs
+  createGitHubIssue: (issueData) => ipcRenderer.invoke('create-github-issue', issueData),
+  captureScreenshot: () => ipcRenderer.invoke('capture-screenshot'),
 });
