@@ -495,6 +495,12 @@ export const translations = {
       noFilesGenerated: 'No files generated yet'
     },
 
+    // CSV
+    csv: {
+      autoValidate: 'Auto-validate CSV',
+      autoValidateDescription: 'Automatically validate CSV files when selected'
+    },
+
     // Correction options
     correctionLabels: {
       accountBalance: 'Account Balance',
@@ -515,11 +521,12 @@ export const translations = {
       version: 'Version',
       updateAvailable: 'Update available: v{version}',
       downloadProgress: 'Download progress: {percent}%',
-      whatsNew: "What's New in v1.1.1",
+      whatsNew: "What's New in v1.1.2",
       changelog: [
-        'Fixed missing Spanish translation for "No files generated yet"',
-        'All history page text now properly translates in all languages',
-        'Test update to verify auto-updater functionality'
+        'Fixed CSV validation toggle translations in CRS/FATCA/CBC modules',
+        'Added Dutch/Spanish translations for "Auto-validate CSV" setting',
+        'Improved auto-updater to minimize reinstall disruption',
+        'Better in-place update experience for users'
       ]
     }
   },
@@ -1013,6 +1020,12 @@ export const translations = {
       noFilesGenerated: 'Nog geen bestanden gegenereerd'
     },
 
+    // CSV
+    csv: {
+      autoValidate: 'CSV automatisch valideren',
+      autoValidateDescription: 'CSV-bestanden automatisch valideren wanneer geselecteerd'
+    },
+
     // Correction options
     correctionLabels: {
       accountBalance: 'Rekeningsaldo',
@@ -1033,11 +1046,12 @@ export const translations = {
       version: 'Versie',
       updateAvailable: 'Update beschikbaar: v{version}',
       downloadProgress: 'Downloadvoortgang: {percent}%',
-      whatsNew: 'Wat is nieuw in v1.1.1',
+      whatsNew: 'Wat is nieuw in v1.1.2',
       changelog: [
-        'Ontbrekende Spaanse vertaling voor "Nog geen bestanden gegenereerd" gefixt',
-        'Alle geschiedenispagina-tekst vertaalt nu correct in alle talen',
-        'Testupdate om auto-updater functionaliteit te verifiëren'
+        'CSV validatie toggle vertalingen gefixt in CRS/FATCA/CBC modules',
+        'Nederlandse/Spaanse vertalingen toegevoegd voor "CSV automatisch valideren"',
+        'Auto-updater verbeterd om herinstallatie te minimaliseren',
+        'Betere in-place update ervaring voor gebruikers'
       ]
     }
   },
@@ -1531,6 +1545,12 @@ export const translations = {
       noFilesGenerated: 'Aún no se han generado archivos'
     },
 
+    // CSV
+    csv: {
+      autoValidate: 'Validar CSV automáticamente',
+      autoValidateDescription: 'Validar archivos CSV automáticamente cuando se seleccionen'
+    },
+
     // Correction options
     correctionLabels: {
       accountBalance: 'Saldo de Cuenta',
@@ -1551,11 +1571,12 @@ export const translations = {
       version: 'Versión',
       updateAvailable: 'Actualización disponible: v{version}',
       downloadProgress: 'Progreso de descarga: {percent}%',
-      whatsNew: 'Novedades en v1.1.1',
+      whatsNew: 'Novedades en v1.1.2',
       changelog: [
-        'Traducción española faltante para "Aún no se han generado archivos" corregida',
-        'Todo el texto de la página de historial ahora se traduce correctamente en todos los idiomas',
-        'Actualización de prueba para verificar la funcionalidad del auto-updater'
+        'Traducciones de toggle de validación CSV corregidas en módulos CRS/FATCA/CBC',
+        'Traducciones neerlandés/español añadidas para "Validar CSV automáticamente"',
+        'Auto-updater mejorado para minimizar interrupción de reinstalación',
+        'Mejor experiencia de actualización in-place para usuarios'
       ]
     }
   }

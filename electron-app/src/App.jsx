@@ -5585,8 +5585,8 @@ function App() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className={`font-medium ${theme.text}`}>Auto-validate CSV</p>
-                    <p className={`text-sm ${theme.textMuted}`}>Automatically validate CSV files when selected</p>
+                    <p className={`font-medium ${theme.text}`}>{t(language, 'csv.autoValidate')}</p>
+                    <p className={`text-sm ${theme.textMuted}`}>{t(language, 'csv.autoValidateDescription')}</p>
                   </div>
                   <button
                     onClick={() => setSettings(prev => ({ ...prev, autoValidateCsv: !prev.autoValidateCsv }))}
