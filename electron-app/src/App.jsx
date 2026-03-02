@@ -5333,7 +5333,7 @@ function App() {
                 ) : (
                   <div className="py-12 text-center">
                     <History className={`w-12 h-12 mx-auto mb-3 ${theme.textMuted} opacity-50`} />
-                    <p className={theme.textMuted}>No files generated yet</p>
+                    <p className={theme.textMuted}>{t(language, 'history.noFilesGenerated')}</p>
                   </div>
                 )}
               </div>

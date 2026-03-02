@@ -490,6 +490,11 @@ export const translations = {
       faultyXml: 'Faulty XML'
     },
 
+    // History
+    history: {
+      noFilesGenerated: 'No files generated yet'
+    },
+
     // Correction options
     correctionLabels: {
       accountBalance: 'Account Balance',
@@ -510,13 +515,11 @@ export const translations = {
       version: 'Version',
       updateAvailable: 'Update available: v{version}',
       downloadProgress: 'Download progress: {percent}%',
-      whatsNew: "What's New in v1.1.0",
+      whatsNew: "What's New in v1.1.1",
       changelog: [
-        'Full Dutch & Spanish translations — all UI text now translates correctly',
-        'Partner Jurisdictions — Select All, Clear All, Reset to Default + search',
-        'MDES logo app icon everywhere (installer, desktop, taskbar)',
-        'Bug fixes — hardcoded strings replaced with proper translations',
-        'Extended test suite — 8 new regression tests added'
+        'Fixed missing Spanish translation for "No files generated yet"',
+        'All history page text now properly translates in all languages',
+        'Test update to verify auto-updater functionality'
       ]
     }
   },
@@ -1005,6 +1008,11 @@ export const translations = {
       faultyXml: 'Foutieve XML'
     },
 
+    // History
+    history: {
+      noFilesGenerated: 'Nog geen bestanden gegenereerd'
+    },
+
     // Correction options
     correctionLabels: {
       accountBalance: 'Rekeningsaldo',
@@ -1025,13 +1033,11 @@ export const translations = {
       version: 'Versie',
       updateAvailable: 'Update beschikbaar: v{version}',
       downloadProgress: 'Downloadvoortgang: {percent}%',
-      whatsNew: 'Wat is nieuw in v1.1.0',
+      whatsNew: 'Wat is nieuw in v1.1.1',
       changelog: [
-        'Volledige Nederlandse & Spaanse vertalingen — alle UI-tekst wordt nu correct vertaald',
-        'Partnerjurisdicties — Alles selecteren, Alles wissen, Standaard herstellen + zoeken',
-        'MDES-logo app-icoon overal (installatie, bureaublad, taakbalk)',
-        'Bugfixes — hardgecodeerde teksten vervangen door vertalingen',
-        'Uitgebreide testsuite — 8 nieuwe regressietests toegevoegd'
+        'Ontbrekende Spaanse vertaling voor "Nog geen bestanden gegenereerd" gefixt',
+        'Alle geschiedenispagina-tekst vertaalt nu correct in alle talen',
+        'Testupdate om auto-updater functionaliteit te verifiëren'
       ]
     }
   },
@@ -1520,6 +1526,11 @@ export const translations = {
       faultyXml: 'XML Defectuoso'
     },
 
+    // History
+    history: {
+      noFilesGenerated: 'Aún no se han generado archivos'
+    },
+
     // Correction options
     correctionLabels: {
       accountBalance: 'Saldo de Cuenta',
@@ -1540,13 +1551,11 @@ export const translations = {
       version: 'Versión',
       updateAvailable: 'Actualización disponible: v{version}',
       downloadProgress: 'Progreso de descarga: {percent}%',
-      whatsNew: 'Novedades en v1.1.0',
+      whatsNew: 'Novedades en v1.1.1',
       changelog: [
-        'Traducciones completas al neerlandés y español — todo el texto de la interfaz se traduce correctamente',
-        'Jurisdicciones asociadas — Seleccionar todo, Borrar todo, Restablecer + búsqueda',
-        'Icono de la app con logo MDES en todas partes (instalador, escritorio, barra de tareas)',
-        'Corrección de errores — textos fijos reemplazados por traducciones',
-        'Suite de pruebas ampliada — 8 nuevas pruebas de regresión añadidas'
+        'Traducción española faltante para "Aún no se han generado archivos" corregida',
+        'Todo el texto de la página de historial ahora se traduce correctamente en todos los idiomas',
+        'Actualización de prueba para verificar la funcionalidad del auto-updater'
       ]
     }
   }

@@ -1,6 +1,6 @@
 {
   "name": "mdes-xml-studio",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "MDES XML Studio - Professional XML generation for CRS, FATCA, and CBC reporting",
   "main": "electron/main.js",
   "scripts": {
@@ -75,8 +75,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "rramratan-ai",
-        "repo": "MDES-XML-Studio-releases"
+        "owner": "zmokiem-ui",
+        "repo": "MDES-XML-Studio"
       }
     ],
     "win": {
