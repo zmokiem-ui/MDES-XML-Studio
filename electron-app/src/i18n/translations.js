@@ -552,12 +552,17 @@ export const translations = {
       version: 'Version',
       updateAvailable: 'Update available: v{version}',
       downloadProgress: 'Download progress: {percent}%',
-      whatsNew: "What's New in v1.1.2",
+      whatsNew: "What's New in v1.2.0",
       changelog: [
-        'Fixed CSV validation toggle translations in CRS/FATCA/CBC modules',
-        'Added Dutch/Spanish translations for "Auto-validate CSV" setting',
-        'Improved auto-updater to minimize reinstall disruption',
-        'Better in-place update experience for users'
+        'NEW: Bug reporting system integrated into Settings page',
+        'NEW: GitHub Issues API integration for automatic issue creation',
+        'NEW: Screenshot capture functionality for bug reports',
+        'NEW: Multi-language support for bug reporting (EN/NL/ES)',
+        'NEW: Form validation and system info auto-included in reports',
+        'Fixed application icon display on Windows (desktop, taskbar, Start menu)',
+        'Enhanced security documentation and .gitignore patterns',
+        'Added comprehensive repository visibility guides',
+        'Created automated workflow scripts for development'
       ]
     }
   },
@@ -1108,12 +1113,17 @@ export const translations = {
       version: 'Versie',
       updateAvailable: 'Update beschikbaar: v{version}',
       downloadProgress: 'Downloadvoortgang: {percent}%',
-      whatsNew: 'Wat is nieuw in v1.1.2',
+      whatsNew: 'Wat is nieuw in v1.2.0',
       changelog: [
-        'CSV validatie toggle vertalingen gefixt in CRS/FATCA/CBC modules',
-        'Nederlandse/Spaanse vertalingen toegevoegd voor "CSV automatisch valideren"',
-        'Auto-updater verbeterd om herinstallatie te minimaliseren',
-        'Betere in-place update ervaring voor gebruikers'
+        'NIEUW: Bug rapportage systeem geïntegreerd in Instellingen pagina',
+        'NIEUW: GitHub Issues API integratie voor automatische issue creatie',
+        'NIEUW: Screenshot capture functie voor bug rapporten',
+        'NIEUW: Meertalige ondersteuning voor bug rapportage (EN/NL/ES)',
+        'NIEUW: Form validatie en systeem info auto-inclusief in rapporten',
+        'Fixed applicatie icoon display op Windows (desktop, taakbalk, Start menu)',
+        'Enhanced security documentatie en .gitignore patronen',
+        'Toegevoegd repository zichtbaarheid gidsen',
+        'Aangemaakt geautomatiseerde workflow scripts voor ontwikkeling'
       ]
     }
   },
@@ -1664,12 +1674,17 @@ export const translations = {
       version: 'Versión',
       updateAvailable: 'Actualización disponible: v{version}',
       downloadProgress: 'Progreso de descarga: {percent}%',
-      whatsNew: 'Novedades en v1.1.2',
+      whatsNew: 'Novedades en v1.2.0',
       changelog: [
-        'Traducciones de toggle de validación CSV corregidas en módulos CRS/FATCA/CBC',
-        'Traducciones neerlandés/español añadidas para "Validar CSV automáticamente"',
-        'Auto-updater mejorado para minimizar interrupción de reinstalación',
-        'Mejor experiencia de actualización in-place para usuarios'
+        'NUEVO: Sistema de reporte de errores integrado en página de Configuración',
+        'NUEVO: Integración con API de GitHub Issues para creación automática de problemas',
+        'NUEVO: Función de captura de pantalla para reportes de errores',
+        'NUEVO: Soporte multiidioma para reporte de errores (EN/NL/ES)',
+        'NUEVO: Validación de formulario e información de sistema auto-incluida en reportes',
+        'Fixed: Visualización de ícono de aplicación en Windows (escritorio, barra de tareas, Menú Inicio)',
+        'Enhanced: Documentación de seguridad y patrones .gitignore',
+        'Añadido: Guías completas de visibilidad de repositorio',
+        'Creado: Scripts de workflow automatizado para desarrollo'
       ]
     }
   }
