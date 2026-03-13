@@ -1365,13 +1365,14 @@ ipcMain.handle('format-xml', async (event, content) => {
 // Create GitHub issue
 ipcMain.handle('create-github-issue', async (event, issueData) => {
   try {
-    const { Octokit } = require('@octokit/rest');
     const token = process.env.GH_TOKEN;
     
     if (!token) {
       throw new Error('GitHub token not configured. Please set GH_TOKEN environment variable.');
     }
 
+    // Use dynamic import for ES Module
+    const { Octokit } = await import('@octokit/rest');
     const octokit = new Octokit({ auth: token });
     
     const response = await octokit.rest.issues.create({

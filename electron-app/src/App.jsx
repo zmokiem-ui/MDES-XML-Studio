@@ -1396,8 +1396,9 @@ function App() {
       setBugReportScreenshots([])
       setShowBugReportForm(false)
     } catch (error) {
+      console.error('Bug report submission error:', error)
       setModalType('error')
-      setModalMessage(t(language, 'bugReport.errorMessage'))
+      setModalMessage(error.message || t(language, 'bugReport.errorMessage'))
       setShowModal(true)
     } finally {
       setIsSubmittingBug(false)
@@ -2085,9 +2086,205 @@ function App() {
                 )}
               </div>
             </div>
+
+            {/* Bug Reporting Section */}
+            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`} data-testid="bug-report-section">
+              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'bugReport.title')}</h3>
+              <p className={`text-sm ${theme.textMuted} mb-4`}>
+                Help us improve by reporting bugs or issues you encounter
+              </p>
+              
+              <button
+                onClick={() => setShowBugReportForm(true)}
+                data-testid="report-bug-button"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${theme.buttonPrimary}`}
+              >
+                <AlertCircle className="w-4 h-4" />
+                {t(language, 'bugReport.button')}
+              </button>
+            </div>
           </main>
 
           {/* Modals for Settings page - must be inside this return */}
+          {/* Bug Report Form Modal */}
+          {showBugReportForm && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="bug-report-form">
+              <div className={`${theme.card} rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto`}>
+                <div className={`p-6 ${theme.accent} border-b`}>
+                  <h3 className="text-xl font-bold text-white">{t(language, 'bugReport.formTitle')}</h3>
+                </div>
+                
+                <div className="p-6 space-y-4">
+                  {/* Title */}
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                      {t(language, 'bugReport.issueTitle')} *
+                    </label>
+                    <input
+                      type="text"
+                      value={bugReportData.title}
+                      onChange={(e) => handleBugReportChange('title', e.target.value)}
+                      placeholder={t(language, 'bugReport.issueTitlePlaceholder')}
+                      data-testid="bug-title-input"
+                      className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                    />
+                    {bugReportErrors.title && (
+                      <p className="text-red-500 text-sm mt-1" data-testid="bug-title-error">{bugReportErrors.title}</p>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                      {t(language, 'bugReport.description')} *
+                    </label>
+                    <textarea
+                      value={bugReportData.description}
+                      onChange={(e) => handleBugReportChange('description', e.target.value)}
+                      placeholder={t(language, 'bugReport.descriptionPlaceholder')}
+                      data-testid="bug-description-input"
+                      rows={4}
+                      className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                    />
+                    {bugReportErrors.description && (
+                      <p className="text-red-500 text-sm mt-1" data-testid="bug-description-error">{bugReportErrors.description}</p>
+                    )}
+                  </div>
+
+                  {/* Steps to Reproduce */}
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                      {t(language, 'bugReport.stepsToReproduce')}
+                    </label>
+                    <textarea
+                      value={bugReportData.steps}
+                      onChange={(e) => handleBugReportChange('steps', e.target.value)}
+                      placeholder={t(language, 'bugReport.stepsPlaceholder')}
+                      data-testid="bug-steps-input"
+                      rows={3}
+                      className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                    />
+                  </div>
+
+                  {/* Expected Behavior */}
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                      {t(language, 'bugReport.expectedBehavior')}
+                    </label>
+                    <textarea
+                      value={bugReportData.expected}
+                      onChange={(e) => handleBugReportChange('expected', e.target.value)}
+                      placeholder={t(language, 'bugReport.expectedPlaceholder')}
+                      data-testid="bug-expected-input"
+                      rows={2}
+                      className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                    />
+                  </div>
+
+                  {/* Actual Behavior */}
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                      {t(language, 'bugReport.actualBehavior')}
+                    </label>
+                    <textarea
+                      value={bugReportData.actual}
+                      onChange={(e) => handleBugReportChange('actual', e.target.value)}
+                      placeholder={t(language, 'bugReport.actualPlaceholder')}
+                      data-testid="bug-actual-input"
+                      rows={2}
+                      className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                      {t(language, 'bugReport.email')}
+                    </label>
+                    <input
+                      type="email"
+                      value={bugReportData.email}
+                      onChange={(e) => handleBugReportChange('email', e.target.value)}
+                      placeholder={t(language, 'bugReport.emailPlaceholder')}
+                      data-testid="bug-email-input"
+                      className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                    />
+                    {bugReportErrors.email && (
+                      <p className="text-red-500 text-sm mt-1" data-testid="bug-email-error">{bugReportErrors.email}</p>
+                    )}
+                  </div>
+
+                  {/* Screenshot Button */}
+                  <div>
+                    <button
+                      onClick={handleCaptureScreenshot}
+                      data-testid="bug-screenshot-button"
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg ${theme.buttonSecondary}`}
+                    >
+                      <Camera className="w-4 h-4" />
+                      {t(language, 'bugReport.screenshot')}
+                    </button>
+                  </div>
+
+                  {/* System Info */}
+                  <div className={`p-3 rounded-lg ${theme.cardHover}`} data-testid="bug-system-info">
+                    <p className={`text-sm font-medium ${theme.text} mb-1`}>{t(language, 'bugReport.systemInfo')}</p>
+                    <p className={`text-xs ${theme.textMuted}`}>Version: {appVersion || '1.1.2'}</p>
+                    <p className={`text-xs ${theme.textMuted}`}>Platform: {navigator.platform}</p>
+                    <p className={`text-xs ${theme.textMuted}`}>Language: {language.toUpperCase()}</p>
+                  </div>
+                </div>
+
+                {/* Form Actions */}
+                <div className="px-6 pb-6 flex gap-3">
+                  <button
+                    onClick={handleCancelBugReport}
+                    data-testid="bug-cancel-button"
+                    disabled={isSubmittingBug}
+                    className={`flex-1 py-3 rounded-lg font-semibold ${theme.buttonSecondary}`}
+                  >
+                    {t(language, 'bugReport.cancel')}
+                  </button>
+                  <button
+                    onClick={handleSubmitBugReport}
+                    data-testid="bug-submit-button"
+                    disabled={isSubmittingBug}
+                    className={`flex-1 py-3 rounded-lg font-semibold ${theme.buttonSuccess}`}
+                  >
+                    {isSubmittingBug ? t(language, 'bugReport.submitting') : t(language, 'bugReport.submit')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Success/Error Modal for Bug Reports */}
+          {showModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className={`${theme.card} rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden ${settings.animationsEnabled ? 'animate-slide-up' : ''}`}>
+                <div className={`p-6 ${modalType === 'success' ? theme.buttonSuccess : theme.buttonDanger}`}>
+                  <div className="flex items-center gap-3">
+                    {modalType === 'success' ? <CheckCircle2 className="w-8 h-8" /> : <AlertCircle className="w-8 h-8" />}
+                    <h3 className="text-xl font-bold">{modalType === 'success' ? 'Success' : 'Error'}</h3>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <p className={`${theme.text} whitespace-pre-line`}>{modalMessage}</p>
+                </div>
+                <div className="px-6 pb-6">
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className={`w-full py-3 rounded-lg font-semibold transition-colors ${
+                      modalType === 'success' ? theme.buttonSuccess : theme.buttonDanger
+                    }`}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {showDashboard && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowDashboard(false)}>
               <div className={`w-full max-w-5xl max-h-[90vh] overflow-y-auto mx-4 p-6 rounded-xl shadow-2xl ${theme.card} border ${theme.border}`} onClick={(e) => e.stopPropagation()}>
@@ -4213,7 +4410,7 @@ function App() {
           </div>
         )}
 
-        {/* CRS Generator Page */}
+        {/* CRS Module Page */}
         {currentPage === 'generator' && activeModule === 'crs' && (
           <div className={`space-y-6 ${settings.animationsEnabled ? 'animate-fade-in' : ''}`}>
             {/* Data Source Toggle */}
@@ -5998,9 +6195,9 @@ function App() {
             <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
               <h3 className={`text-lg font-semibold ${theme.text} mb-6`}>{t(language, 'settingsMisc.about')}</h3>
               <div className={`text-sm ${theme.textMuted} space-y-2`}>
-                <p><strong>CRS Test Data Generator</strong></p>
+                <p><strong>MDES XML Studio</strong></p>
                 <p>Version {appVersion || '1.1.0'}</p>
-                <p>Generate compliant CRS XML test files for development and testing.</p>
+                <p>Generate compliant CRS, FATCA, and CBC XML test files for development and testing.</p>
               </div>
             </div>
           </div>
