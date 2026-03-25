@@ -45,14 +45,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       
-      - name: Upload installer to public releases repo
+      - name: Upload installer to releases
         uses: softprops/action-gh-release@v2
         with:
-          repository: rramratan-ai/MDES-XML-Studio-releases
           files: |
             electron-app/dist-electron/*.exe
             electron-app/dist-electron/latest.yml
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
