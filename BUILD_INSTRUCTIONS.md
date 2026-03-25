@@ -1,6 +1,6 @@
-# Building CRS Generator Executable
+# Building MDES XML Studio Executable
 
-This guide explains how to build the standalone `.exe` file for the CRS Test Data Generator.
+This guide explains how to build the standalone `.exe` file for MDES XML Studio.
 
 ## Prerequisites
 

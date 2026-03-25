@@ -2,7 +2,7 @@
 
 ## 🌍 Overview
 
-CRS Generator now supports **multi-language data generation** with proper handling for non-Latin scripts (Cyrillic, Chinese, Hindi, Arabic, etc.). This solves database encoding issues where VARCHAR columns fail to store international characters.
+MDES XML Studio now supports **multi-language data generation** with proper handling for non-Latin scripts (Cyrillic, Chinese, Hindi, Arabic, etc.). This solves database encoding issues where VARCHAR columns fail to store international characters.
 
 ## ⚠️ The Problem This Solves
 

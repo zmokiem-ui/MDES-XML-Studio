@@ -2716,7 +2716,7 @@ function App() {
 
       const systemInfo = {
 
-        appVersion: appVersion || '1.1.2',
+        appVersion: appVersion || '1.3.0',
 
         platform: navigator.platform,
 
@@ -3982,7 +3982,7 @@ function App() {
 
                   <span className={`px-3 py-1 rounded-full text-sm font-mono font-medium ${theme.badge}`}>
 
-                    v{appVersion || '1.1.0'}
+                    v{appVersion || '1.3.0'}
 
                   </span>
 
@@ -4460,7 +4460,7 @@ function App() {
 
                     <p className={`text-sm font-medium ${theme.text} mb-1`}>{t(language, 'bugReport.systemInfo')}</p>
 
-                    <p className={`text-xs ${theme.textMuted}`}>Version: {appVersion || '1.1.2'}</p>
+                    <p className={`text-xs ${theme.textMuted}`}>Version: {appVersion || '1.3.0'}</p>
 
                     <p className={`text-xs ${theme.textMuted}`}>Platform: {navigator.platform}</p>
 
@@ -12435,7 +12435,7 @@ function App() {
 
                         <p className={`text-sm font-medium ${theme.text} mb-1`}>{t(language, 'bugReport.systemInfo')}</p>
 
-                        <p className={`text-xs ${theme.textMuted}`}>Version: {appVersion || '1.1.2'}</p>
+                        <p className={`text-xs ${theme.textMuted}`}>Version: {appVersion || '1.3.0'}</p>
 
                         <p className={`text-xs ${theme.textMuted}`}>Platform: {navigator.platform}</p>
 

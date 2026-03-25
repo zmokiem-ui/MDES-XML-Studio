@@ -1,12 +1,20 @@
 """
-FATCA XML Generator using validated templates with performance optimizations.
+FATCA-CRS Combined XML Generator for FC Upload.
 
-This generator:
-1. Uses FATCA template as base
-2. Generates Individual and Organisation accounts
-3. Supports Substantial Owners (similar to CRS Controlling Persons)
-4. Handles FATCA-specific fields (FilerCategory, etc.)
-5. Generates realistic data
+This generator produces XML in the FATCA-CRS combined format (FatcaCrs_v2.2)
+used by the FC upload system. This is NOT the FATCA_OECD format.
+
+Key differences from FATCA_OECD:
+- Root element: FATCA_CRS (not FATCA_OECD)
+- Namespace: urn:fatcacrs:ties:v2
+- Uses MessageHeader (not MessageSpec)
+- MessageType: FATCA-CRS
+- MessageTypeIndic: CRS701 (new) / CRS702 (correction)
+- DocTypeIndic: OECD1/OECD11 (not FATCA1/FATCA11)
+- AccountHolder uses AcctHolderTypeCRS + AcctHolderTypeFATCA
+- Uses ControllingPerson (not SubstantialOwner)
+- Payment types: CRS501-504
+- FilerCategory on ReportingFI
 """
 
 from pathlib import Path
@@ -24,16 +32,21 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 
-# FATCA-specific constants
-FATCA_DOC_TYPE_INDIC = {
-    'new': 'FATCA1',
-    'corrected': 'FATCA2',
-    'void': 'FATCA3',
-    'amended': 'FATCA4',
-    'new_test': 'FATCA11',
-    'corrected_test': 'FATCA12',
-    'void_test': 'FATCA13',
-    'amended_test': 'FATCA14'
+# FATCA-CRS combined format constants
+# DocTypeIndic uses OECD codes (same as CRS), NOT FATCA codes
+DOC_TYPE_INDIC = {
+    'new': 'OECD1',
+    'corrected': 'OECD2',
+    'void': 'OECD3',
+    'new_test': 'OECD11',
+    'corrected_test': 'OECD12',
+    'void_test': 'OECD13',
+}
+
+# MessageTypeIndic
+MESSAGE_TYPE_INDIC = {
+    'new': 'CRS701',
+    'correction': 'CRS702',
 }
 
 FATCA_FILER_CATEGORIES = [
@@ -50,6 +63,14 @@ FATCA_FILER_CATEGORIES = [
     'FATCA611',  # Territory Financial Institution
 ]
 
+# CRS AcctHolderType for organisations
+CRS_ACCT_HOLDER_TYPES = [
+    'CRS101',  # Passive NFE that is a CRS Reportable Person
+    'CRS102',  # CRS Reportable Person that is a legal person
+    'CRS103',  # Passive NFE that is a CRS Reportable Person – managed by another FI
+]
+
+# FATCA AcctHolderType for organisations
 FATCA_ACCT_HOLDER_TYPES = [
     'FATCA101',  # Owner-Documented FFI with specified U.S. owner(s)
     'FATCA102',  # Passive NFFE with substantial U.S. owner(s)
@@ -58,24 +79,42 @@ FATCA_ACCT_HOLDER_TYPES = [
     'FATCA105',  # Direct Reporting NFFE
 ]
 
-FATCA_PAYMENT_TYPES = [
-    'FATCA501',  # Dividends
-    'FATCA502',  # Interest
-    'FATCA503',  # Gross Proceeds/Redemptions
-    'FATCA504',  # Other
+# CRS Payment types (used in FATCA-CRS combined format)
+CRS_PAYMENT_TYPES = [
+    'CRS501',  # Dividends
+    'CRS502',  # Interest
+    'CRS503',  # Gross Proceeds/Redemptions
+    'CRS504',  # Other - describe in PaymentAmnt
+]
+
+# ControllingPerson types
+CONTROLLING_PERSON_TYPES = [
+    'CRS801',  # CP of legal person – ownership
+    'CRS802',  # CP of legal person – other means
+    'CRS803',  # CP of legal person – senior managing official
+    'CRS804',  # CP of legal arrangement – trust – settlor
+    'CRS805',  # CP of legal arrangement – trust – trustee
+    'CRS806',  # CP of legal arrangement – trust – protector
+    'CRS807',  # CP of legal arrangement – trust – beneficiary
+    'CRS808',  # CP of legal arrangement – trust – other
+    'CRS809',  # CP of legal arrangement – other – settlor-equivalent
+    'CRS810',  # CP of legal arrangement – other – trustee-equivalent
+    'CRS811',  # CP of legal arrangement – other – protector-equivalent
+    'CRS812',  # CP of legal arrangement – other – beneficiary-equivalent
+    'CRS813',  # CP of legal arrangement – other – other-equivalent
 ]
 
 
 @dataclass
 class FATCAGeneratorConfig:
-    """Configuration for FATCA XML generation."""
+    """Configuration for FATCA-CRS combined XML generation."""
     # Basic info
-    sending_country: str = "NL"  # Transmitting country
-    receiving_country: str = "US"  # Always US for FATCA
-    tax_year: int = 2021
-    sending_company_in: str = "000000.00000.TA.531"  # GIIN format
+    sending_country: str = "CW"  # Transmitting country
+    receiving_country: str = "CW"  # Receiving country
+    tax_year: int = 2024
+    sending_company_in: str = "20016636"  # SendingCompanyIN
     
-    # ReportingFI TINs/GIINs (one per ReportingFI)
+    # ReportingFI GIINs (one per ReportingFI)
     reporting_fi_tins: List[str] = field(default_factory=list)
     filer_category: str = "FATCA601"  # Default filer category
     
@@ -83,7 +122,7 @@ class FATCAGeneratorConfig:
     num_reporting_fis: int = 1
     individual_accounts_per_fi: int = 100
     organisation_accounts_per_fi: int = 100
-    substantial_owners_per_org: int = 1  # Similar to controlling persons
+    controlling_persons_per_org: int = 1
     
     # AccountHolder Country Selection
     account_holder_country_mode: str = "random"
@@ -92,6 +131,7 @@ class FATCAGeneratorConfig:
     
     # Realism
     closed_account_ratio: float = 0.1
+    dormant_account_ratio: float = 0.05
     currencies: List[str] = field(default_factory=lambda: ["USD", "EUR", "GBP"])
     
     # Output
@@ -103,7 +143,7 @@ class FATCAGeneratorConfig:
     seed: int = 42
     pretty_print: bool = True
     
-    # Test mode (FATCA11-14 vs FATCA1-4)
+    # Test mode (OECD11-13 vs OECD1-3)
     test_mode: bool = True
     
     def __post_init__(self):
@@ -121,11 +161,14 @@ class FATCAGeneratorConfig:
         
         # Generate default GIINs if not provided
         if not self.reporting_fi_tins:
-            self.reporting_fi_tins = [f"KTQDFL.{99999 + i:05d}.SL.{532 + i}" for i in range(self.num_reporting_fis)]
+            self.reporting_fi_tins = [
+                f"{random.Random(42 + i).randint(10000, 99999):05d}.{random.Random(42 + i).randint(10000, 99999):05d}.SL.{random.Random(42 + i).randint(100, 999)}"
+                for i in range(self.num_reporting_fis)
+            ]
         
         if len(self.reporting_fi_tins) != self.num_reporting_fis:
             raise ValueError(
-                f"Number of ReportingFI TINs ({len(self.reporting_fi_tins)}) "
+                f"Number of ReportingFI GIINs ({len(self.reporting_fi_tins)}) "
                 f"must match num_reporting_fis ({self.num_reporting_fis})"
             )
         
@@ -150,7 +193,7 @@ class FATCAGeneratorConfig:
 
 
 class FATCADataGenerator:
-    """Generates realistic random data for FATCA fields."""
+    """Generates realistic random data for FATCA-CRS fields."""
     
     def __init__(self, seed: int = 42, config: Optional[FATCAGeneratorConfig] = None):
         self.rng = random.Random(seed)
@@ -173,8 +216,8 @@ class FATCADataGenerator:
         self._cache['companies'] = [self.faker.company() for _ in range(pool_size)]
         
     def tin(self) -> str:
-        """Generate a US-style TIN (SSN format for individuals)."""
-        return f"{self.rng.randint(100, 999)}-{self.rng.randint(10, 99)}-{self.rng.randint(1000, 9999)}"
+        """Generate a TIN."""
+        return f"{self.rng.randint(100000000, 999999999)}"
     
     def giin(self) -> str:
         """Generate a GIIN (Global Intermediary Identification Number)."""
@@ -215,6 +258,12 @@ class FATCADataGenerator:
             lambda: f"{self.last_name()} Trust Company",
         ]
         return self.rng.choice(patterns)()
+
+    def warning_text(self) -> str:
+        return self.faker.sentence(nb_words=12)
+
+    def contact_text(self) -> str:
+        return f"Contactgegevens voor {self.company_name()}"
     
     def account_holder_res_country(self) -> str:
         if not self.config:
@@ -233,34 +282,41 @@ class FATCADataGenerator:
     def address_country(self) -> str:
         return self.rng.choice(self._all_countries)
     
-    def acct_holder_type(self) -> str:
+    def crs_acct_holder_type(self) -> str:
+        """Random CRS account holder type for organisations."""
+        return self.rng.choice(CRS_ACCT_HOLDER_TYPES)
+
+    def fatca_acct_holder_type(self) -> str:
         """Random FATCA account holder type for organisations."""
         return self.rng.choice(FATCA_ACCT_HOLDER_TYPES)
     
     def payment_type(self) -> str:
-        return self.rng.choice(FATCA_PAYMENT_TYPES)
+        return self.rng.choice(CRS_PAYMENT_TYPES)
+
+    def controlling_person_type(self) -> str:
+        return self.rng.choice(CONTROLLING_PERSON_TYPES)
 
 
 class FATCAGenerator:
-    """High-performance FATCA XML generator."""
+    """FATCA-CRS combined format XML generator."""
     
     def __init__(self, config: FATCAGeneratorConfig):
         self.config = config
         self.data_gen = FATCADataGenerator(config.seed, config)
         
-        # FATCA namespace map
+        # FATCA-CRS combined namespace map
         self.ns = {
-            'ftc': 'urn:oecd:ties:fatca:v2',
+            'oecd_ftc': 'urn:fatcacrs:ties:v2',
+            'sfa_ftc': 'urn:oecd:ties:fatcacrstypes:v2',
             'sfa': 'urn:oecd:ties:stffatcatypes:v2',
-            'iso': 'urn:oecd:ties:isofatcatypes:v1',
             'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
         }
         
         self.docref_counter = 0
         
     def _load_base_template(self) -> tuple[etree._ElementTree, dict]:
-        """Load the base FATCA template."""
-        template_path = Path(__file__).parent / "template FATCA" / "FATCA.Generiek.2019.Nieuw.xml"
+        """Load the base FATCA-CRS combined template."""
+        template_path = Path(__file__).parent / "template FATCA" / "FATCA-CRS.Template.Nieuw.xml"
         if not template_path.exists():
             raise FileNotFoundError(f"Base template not found: {template_path}")
         
@@ -270,7 +326,6 @@ class FATCAGenerator:
         root = tree.getroot()
         ns = dict(root.nsmap or {})
         if None in ns:
-            ns['ftc'] = ns[None]
             ns.pop(None, None)
         
         return tree, ns
@@ -278,61 +333,64 @@ class FATCAGenerator:
     def _next_docref_id(self) -> str:
         """Generate next unique DocRefId."""
         self.docref_counter += 1
-        giin_base = self.config.reporting_fi_tins[0].replace('.', '')[:10] if self.config.reporting_fi_tins else "FATCA"
-        return f"{giin_base}.{self.config.tax_year}.{self.docref_counter:06d}"
+        return (
+            f"{self.config.sending_country}"
+            f"{self.config.tax_year}"
+            f"{self.config.sending_company_in}"
+            f"{self.docref_counter:016d}"
+        )
     
     def _get_doc_type_indic(self, doc_type: str = 'new') -> str:
         """Get appropriate DocTypeIndic based on test mode."""
         if self.config.test_mode:
-            return FATCA_DOC_TYPE_INDIC.get(f'{doc_type}_test', 'FATCA11')
-        return FATCA_DOC_TYPE_INDIC.get(doc_type, 'FATCA1')
+            return DOC_TYPE_INDIC.get(f'{doc_type}_test', 'OECD11')
+        return DOC_TYPE_INDIC.get(doc_type, 'OECD1')
     
     def _create_individual_account(self, template: etree._Element, ns: dict) -> etree._Element:
-        """Create an individual account from template."""
+        """Create an individual account report."""
         account = deepcopy(template)
         
         # Update DocSpec
-        doc_spec = account.find('.//ftc:DocSpec', namespaces=ns)
+        doc_spec = account.find('.//sfa_ftc:DocSpec', namespaces=ns)
         if doc_spec is not None:
-            doc_type = doc_spec.find('ftc:DocTypeIndic', namespaces=ns)
+            doc_type = doc_spec.find('sfa_ftc:DocTypeIndic', namespaces=ns)
             if doc_type is not None:
                 doc_type.text = self._get_doc_type_indic('new')
             
-            doc_ref = doc_spec.find('ftc:DocRefId', namespaces=ns)
+            doc_ref = doc_spec.find('sfa_ftc:DocRefId', namespaces=ns)
             if doc_ref is not None:
                 doc_ref.text = self._next_docref_id()
         
-        # Update account number
-        acc_num = account.find('.//ftc:AccountNumber', namespaces=ns)
+        # Update account number with attributes
+        acc_num = account.find('.//sfa_ftc:AccountNumber', namespaces=ns)
         if acc_num is not None:
             acc_num.text = self.data_gen.account_number()
-        
-        # Update AccountClosed
-        acc_closed = account.find('.//ftc:AccountClosed', namespaces=ns)
-        if acc_closed is not None:
             is_closed = self.data_gen.rng.random() < self.config.closed_account_ratio
-            acc_closed.text = 'true' if is_closed else 'false'
+            is_dormant = self.data_gen.rng.random() < self.config.dormant_account_ratio
+            acc_num.set('ClosedAccount', 'true' if is_closed else 'false')
+            acc_num.set('DormantAccount', 'true' if is_dormant else 'false')
+            acc_num.set('UndocumentedAccount', 'false')
         
         # Get country codes
         res_country = self.data_gen.account_holder_res_country()
         address_country = self.data_gen.address_country()
         
         # Update Individual
-        individual = account.find('.//ftc:Individual', namespaces=ns)
+        individual = account.find('.//sfa_ftc:Individual', namespaces=ns)
         if individual is not None:
             # ResCountryCode
-            res_elem = individual.find('sfa:ResCountryCode', namespaces=ns)
+            res_elem = individual.find('sfa_ftc:ResCountryCode', namespaces=ns)
             if res_elem is not None:
                 res_elem.text = res_country
             
             # TIN
-            tin_elem = individual.find('sfa:TIN', namespaces=ns)
+            tin_elem = individual.find('sfa_ftc:TIN', namespaces=ns)
             if tin_elem is not None:
                 tin_elem.text = self.data_gen.tin()
                 tin_elem.set('issuedBy', res_country)
             
             # Name
-            name_elem = individual.find('sfa:Name', namespaces=ns)
+            name_elem = individual.find('sfa_ftc:Name', namespaces=ns)
             if name_elem is not None:
                 first_name = name_elem.find('sfa:FirstName', namespaces=ns)
                 last_name = name_elem.find('sfa:LastName', namespaces=ns)
@@ -342,106 +400,90 @@ class FATCAGenerator:
                     last_name.text = self.data_gen.last_name()
             
             # Address
-            address = individual.find('sfa:Address', namespaces=ns)
+            address = individual.find('sfa_ftc:Address', namespaces=ns)
             if address is not None:
                 country_code = address.find('sfa:CountryCode', namespaces=ns)
                 if country_code is not None:
                     country_code.text = address_country
                 
-                # AddressFree or AddressFix
                 addr_free = address.find('sfa:AddressFree', namespaces=ns)
                 if addr_free is not None:
                     addr_free.text = f"{self.data_gen.street()} {self.data_gen.rng.randint(1, 999)}, {self.data_gen.city()}"
-                
-                addr_fix = address.find('sfa:AddressFix', namespaces=ns)
-                if addr_fix is not None:
-                    street = addr_fix.find('sfa:Street', namespaces=ns)
-                    if street is not None:
-                        street.text = self.data_gen.street()
-                    building = addr_fix.find('sfa:BuildingIdentifier', namespaces=ns)
-                    if building is not None:
-                        building.text = str(self.data_gen.rng.randint(1, 999))
-                    city = addr_fix.find('sfa:City', namespaces=ns)
-                    if city is not None:
-                        city.text = self.data_gen.city()
-            
-            # BirthInfo
-            birth_info = individual.find('sfa:BirthInfo', namespaces=ns)
-            if birth_info is not None:
-                birth_date = birth_info.find('sfa:BirthDate', namespaces=ns)
-                if birth_date is not None:
-                    birth_date.text = self.data_gen.birth_date()
         
-        # Update balance
+        # Update balance and payments
         self._randomize_balance_and_payment(account, ns)
         
         return account
     
     def _create_organisation_account(self, template: etree._Element, ns: dict) -> etree._Element:
-        """Create an organisation account with substantial owners."""
+        """Create an organisation account with controlling persons."""
         account = deepcopy(template)
         
         # Update DocSpec
-        doc_spec = account.find('.//ftc:DocSpec', namespaces=ns)
+        doc_spec = account.find('.//sfa_ftc:DocSpec', namespaces=ns)
         if doc_spec is not None:
-            doc_type = doc_spec.find('ftc:DocTypeIndic', namespaces=ns)
+            doc_type = doc_spec.find('sfa_ftc:DocTypeIndic', namespaces=ns)
             if doc_type is not None:
                 doc_type.text = self._get_doc_type_indic('new')
             
-            doc_ref = doc_spec.find('ftc:DocRefId', namespaces=ns)
+            doc_ref = doc_spec.find('sfa_ftc:DocRefId', namespaces=ns)
             if doc_ref is not None:
                 doc_ref.text = self._next_docref_id()
         
-        # Update account number
-        acc_num = account.find('.//ftc:AccountNumber', namespaces=ns)
+        # Update account number with attributes
+        acc_num = account.find('.//sfa_ftc:AccountNumber', namespaces=ns)
         if acc_num is not None:
             acc_num.text = self.data_gen.account_number()
-        
-        # Update AccountClosed
-        acc_closed = account.find('.//ftc:AccountClosed', namespaces=ns)
-        if acc_closed is not None:
             is_closed = self.data_gen.rng.random() < self.config.closed_account_ratio
-            acc_closed.text = 'true' if is_closed else 'false'
+            is_dormant = self.data_gen.rng.random() < self.config.dormant_account_ratio
+            acc_num.set('ClosedAccount', 'true' if is_closed else 'false')
+            acc_num.set('DormantAccount', 'true' if is_dormant else 'false')
+            acc_num.set('UndocumentedAccount', 'false')
         
         res_country = self.data_gen.account_holder_res_country()
         address_country = self.data_gen.address_country()
         
-        # Find or create AccountHolder with Organisation
-        account_holder = account.find('.//ftc:AccountHolder', namespaces=ns)
+        # Find AccountHolder and update Organisation
+        account_holder = account.find('.//sfa_ftc:AccountHolder', namespaces=ns)
         if account_holder is not None:
             # Remove Individual if exists (we're creating org account)
-            individual = account_holder.find('ftc:Individual', namespaces=ns)
+            individual = account_holder.find('sfa_ftc:Individual', namespaces=ns)
             if individual is not None:
                 account_holder.remove(individual)
             
-            # Create Organisation element
-            org = account_holder.find('ftc:Organisation', namespaces=ns)
+            # Create or update Organisation
+            org = account_holder.find('sfa_ftc:Organisation', namespaces=ns)
             if org is None:
-                org = etree.SubElement(account_holder, f"{{{self.ns['ftc']}}}Organisation")
+                org = etree.SubElement(account_holder, f"{{{self.ns['sfa_ftc']}}}Organisation")
             
-            # ResCountryCode
-            res_elem = org.find('sfa:ResCountryCode', namespaces=ns)
+            # ResCountryCode (can have multiple)
+            res_elem = org.find('sfa_ftc:ResCountryCode', namespaces=ns)
             if res_elem is None:
-                res_elem = etree.SubElement(org, f"{{{self.ns['sfa']}}}ResCountryCode")
+                res_elem = etree.SubElement(org, f"{{{self.ns['sfa_ftc']}}}ResCountryCode")
             res_elem.text = res_country
             
+            # Add second ResCountryCode (US) for FATCA reporting
+            res_elem2 = etree.SubElement(org, f"{{{self.ns['sfa_ftc']}}}ResCountryCode")
+            res_elem2.text = "US"
+            
             # TIN
-            tin_elem = org.find('sfa:TIN', namespaces=ns)
+            tin_elem = org.find('sfa_ftc:TIN', namespaces=ns)
             if tin_elem is None:
-                tin_elem = etree.SubElement(org, f"{{{self.ns['sfa']}}}TIN")
+                tin_elem = etree.SubElement(org, f"{{{self.ns['sfa_ftc']}}}TIN")
             tin_elem.text = self.data_gen.tin()
-            tin_elem.set('issuedBy', res_country)
+            tin_elem.set('issuedBy', 'US')
             
             # Name
-            name_elem = org.find('sfa:Name', namespaces=ns)
+            name_elem = org.find('sfa_ftc:Name', namespaces=ns)
             if name_elem is None:
-                name_elem = etree.SubElement(org, f"{{{self.ns['sfa']}}}Name")
+                name_elem = etree.SubElement(org, f"{{{self.ns['sfa_ftc']}}}Name")
             name_elem.text = self.data_gen.company_name()
+            name_elem.set('nameType', 'OECD207')
             
             # Address
-            address = org.find('sfa:Address', namespaces=ns)
+            address = org.find('sfa_ftc:Address', namespaces=ns)
             if address is None:
-                address = etree.SubElement(org, f"{{{self.ns['sfa']}}}Address")
+                address = etree.SubElement(org, f"{{{self.ns['sfa_ftc']}}}Address")
             
             country_code = address.find('sfa:CountryCode', namespaces=ns)
             if country_code is None:
@@ -453,56 +495,75 @@ class FATCAGenerator:
                 addr_free = etree.SubElement(address, f"{{{self.ns['sfa']}}}AddressFree")
             addr_free.text = f"{self.data_gen.street()} {self.data_gen.rng.randint(1, 999)}, {self.data_gen.city()}"
             
-            # AcctHolderType (required for organisations in FATCA)
-            acct_holder_type = account_holder.find('ftc:AcctHolderType', namespaces=ns)
-            if acct_holder_type is None:
-                acct_holder_type = etree.SubElement(account_holder, f"{{{self.ns['ftc']}}}AcctHolderType")
-            acct_holder_type.text = self.data_gen.acct_holder_type()
+            # AcctHolderTypeCRS (required for org accounts in FATCA-CRS)
+            acct_type_crs = account_holder.find('sfa_ftc:AcctHolderTypeCRS', namespaces=ns)
+            if acct_type_crs is None:
+                acct_type_crs = etree.SubElement(account_holder, f"{{{self.ns['sfa_ftc']}}}AcctHolderTypeCRS")
+            acct_type_crs.text = self.data_gen.crs_acct_holder_type()
+
+            # AcctHolderTypeFATCA (required for org accounts in FATCA-CRS)
+            acct_type_fatca = account_holder.find('sfa_ftc:AcctHolderTypeFATCA', namespaces=ns)
+            if acct_type_fatca is None:
+                acct_type_fatca = etree.SubElement(account_holder, f"{{{self.ns['sfa_ftc']}}}AcctHolderTypeFATCA")
+            acct_type_fatca.text = self.data_gen.fatca_acct_holder_type()
         
-        # Add SubstantialOwners
-        self._add_substantial_owners(account, ns)
+        # Remove existing ControllingPersons and add new ones
+        existing_cps = account.findall('.//sfa_ftc:ControllingPerson', namespaces=ns)
+        for cp in existing_cps:
+            cp.getparent().remove(cp)
         
-        # Update balance
+        # Add ControllingPersons
+        self._add_controlling_persons(account, ns)
+        
+        # Update balance and payments
         self._randomize_balance_and_payment(account, ns)
         
         return account
     
-    def _add_substantial_owners(self, account: etree._Element, ns: dict):
-        """Add substantial owners to an organisation account."""
-        for _ in range(self.config.substantial_owners_per_org):
-            so = etree.SubElement(account, f"{{{self.ns['ftc']}}}SubstantialOwner")
+    def _add_controlling_persons(self, account: etree._Element, ns: dict):
+        """Add controlling persons to an organisation account."""
+        # Find AccountBalance to insert ControllingPerson before it
+        balance_elem = account.find('.//sfa_ftc:AccountBalance', namespaces=ns)
+        parent = balance_elem.getparent() if balance_elem is not None else account
+        balance_index = list(parent).index(balance_elem) if balance_elem is not None else len(list(parent))
+        
+        for i in range(self.config.controlling_persons_per_org):
+            cp = etree.Element(f"{{{self.ns['sfa_ftc']}}}ControllingPerson")
             
-            individual = etree.SubElement(so, f"{{{self.ns['ftc']}}}Individual")
+            individual = etree.SubElement(cp, f"{{{self.ns['sfa_ftc']}}}Individual")
             
             res_country = self.data_gen.account_holder_res_country()
             
             # ResCountryCode
-            res_elem = etree.SubElement(individual, f"{{{self.ns['sfa']}}}ResCountryCode")
+            res_elem = etree.SubElement(individual, f"{{{self.ns['sfa_ftc']}}}ResCountryCode")
             res_elem.text = res_country
             
             # TIN
-            tin_elem = etree.SubElement(individual, f"{{{self.ns['sfa']}}}TIN")
+            tin_elem = etree.SubElement(individual, f"{{{self.ns['sfa_ftc']}}}TIN")
             tin_elem.text = self.data_gen.tin()
             tin_elem.set('issuedBy', res_country)
             
             # Name
-            name = etree.SubElement(individual, f"{{{self.ns['sfa']}}}Name")
+            name = etree.SubElement(individual, f"{{{self.ns['sfa_ftc']}}}Name")
+            name.set('nameType', 'OECD202')
             first_name = etree.SubElement(name, f"{{{self.ns['sfa']}}}FirstName")
             first_name.text = self.data_gen.first_name()
             last_name = etree.SubElement(name, f"{{{self.ns['sfa']}}}LastName")
             last_name.text = self.data_gen.last_name()
             
             # Address
-            address = etree.SubElement(individual, f"{{{self.ns['sfa']}}}Address")
+            address = etree.SubElement(individual, f"{{{self.ns['sfa_ftc']}}}Address")
             country_code = etree.SubElement(address, f"{{{self.ns['sfa']}}}CountryCode")
             country_code.text = self.data_gen.address_country()
             addr_free = etree.SubElement(address, f"{{{self.ns['sfa']}}}AddressFree")
             addr_free.text = f"{self.data_gen.street()} {self.data_gen.rng.randint(1, 999)}, {self.data_gen.city()}"
             
-            # BirthInfo
-            birth_info = etree.SubElement(individual, f"{{{self.ns['sfa']}}}BirthInfo")
-            birth_date = etree.SubElement(birth_info, f"{{{self.ns['sfa']}}}BirthDate")
-            birth_date.text = self.data_gen.birth_date()
+            # CtrlgPersonType
+            ctrl_type = etree.SubElement(cp, f"{{{self.ns['sfa_ftc']}}}CtrlgPersonType")
+            ctrl_type.text = self.data_gen.controlling_person_type()
+            
+            # Insert before AccountBalance
+            parent.insert(balance_index + i, cp)
     
     def _randomize_balance_and_payment(self, account: etree._Element, ns: dict):
         """Randomize account balance and payments."""
@@ -510,13 +571,13 @@ class FATCAGenerator:
         balance = self.data_gen.balance()
         
         # Update balance
-        balance_elem = account.find('.//ftc:AccountBalance', namespaces=ns)
+        balance_elem = account.find('.//sfa_ftc:AccountBalance', namespaces=ns)
         if balance_elem is not None:
             balance_elem.set('currCode', currency)
             balance_elem.text = f"{balance:.2f}"
         
         # Handle payments
-        payment_nodes = account.findall('.//ftc:Payment', namespaces=ns)
+        payment_nodes = account.findall('.//sfa_ftc:Payment', namespaces=ns)
         
         # Remove existing payments
         for payment in payment_nodes:
@@ -525,22 +586,22 @@ class FATCAGenerator:
         # Add 1-3 random payments
         num_payments = self.data_gen.rng.randint(1, 3)
         
-        # Find where to insert payments (after AccountBalance)
+        # Find parent to insert payments (after AccountBalance)
         parent = balance_elem.getparent() if balance_elem is not None else account
         
         for _ in range(num_payments):
-            payment = etree.SubElement(parent, f"{{{self.ns['ftc']}}}Payment")
+            payment = etree.SubElement(parent, f"{{{self.ns['sfa_ftc']}}}Payment")
             
-            type_elem = etree.SubElement(payment, f"{{{self.ns['ftc']}}}Type")
+            type_elem = etree.SubElement(payment, f"{{{self.ns['sfa_ftc']}}}Type")
             type_elem.text = self.data_gen.payment_type()
             
-            amnt_elem = etree.SubElement(payment, f"{{{self.ns['ftc']}}}PaymentAmnt")
+            amnt_elem = etree.SubElement(payment, f"{{{self.ns['sfa_ftc']}}}PaymentAmnt")
             amnt_elem.set('currCode', currency)
             amnt_elem.text = f"{self.data_gen.payment_amount(balance):.2f}"
     
     def generate(self) -> Path:
-        """Generate the FATCA XML file."""
-        logger.info(f"Starting FATCA generation for {self.config.tax_year}")
+        """Generate the FATCA-CRS combined XML file."""
+        logger.info(f"Starting FATCA-CRS generation for {self.config.tax_year}")
         logger.info(f"  ReportingFIs: {self.config.num_reporting_fis}")
         logger.info(f"  Individual accounts/FI: {self.config.individual_accounts_per_fi}")
         logger.info(f"  Organisation accounts/FI: {self.config.organisation_accounts_per_fi}")
@@ -548,38 +609,44 @@ class FATCAGenerator:
         tree, ns = self._load_base_template()
         root = tree.getroot()
         
-        # Update MessageSpec
-        self._update_message_spec(root, ns)
+        # Update MessageHeader
+        self._update_message_header(root, ns)
         
-        # Find FATCA body
-        fatca_body = root.find('.//ftc:FATCA', namespaces=ns)
-        if fatca_body is None:
-            raise ValueError("No FATCA body found in template")
+        # Find MessageBody
+        msg_body = root.find('.//oecd_ftc:MessageBody', namespaces=ns)
+        if msg_body is None:
+            raise ValueError("No MessageBody found in template")
         
         # Update ReportingFI
-        reporting_fi = fatca_body.find('.//ftc:ReportingFI', namespaces=ns)
+        reporting_fi = msg_body.find('.//sfa_ftc:ReportingFI', namespaces=ns)
         if reporting_fi is not None:
             self._update_reporting_fi(reporting_fi, ns, 0)
         
-        # Find ReportingGroup and template account
-        reporting_group = fatca_body.find('.//ftc:ReportingGroup', namespaces=ns)
+        # Find ReportingGroup
+        reporting_group = msg_body.find('.//sfa_ftc:ReportingGroup', namespaces=ns)
         if reporting_group is None:
             raise ValueError("No ReportingGroup found in template")
         
-        # Get template account
-        template_account = reporting_group.find('.//ftc:AccountReport', namespaces=ns)
-        if template_account is None:
+        # Get both template accounts (individual and organisation)
+        template_accounts = reporting_group.findall('sfa_ftc:AccountReport', namespaces=ns)
+        
+        # Use first as individual template, second as org template
+        individual_template = template_accounts[0] if len(template_accounts) > 0 else None
+        org_template = template_accounts[1] if len(template_accounts) > 1 else individual_template
+        
+        if individual_template is None:
             raise ValueError("No AccountReport template found")
         
-        # Remove template account
-        reporting_group.remove(template_account)
+        # Remove all template accounts
+        for tmpl in template_accounts:
+            reporting_group.remove(tmpl)
         
         total_accounts = self.config.individual_accounts_per_fi + self.config.organisation_accounts_per_fi
         account_count = 0
         
         # Generate individual accounts
         for i in range(self.config.individual_accounts_per_fi):
-            account = self._create_individual_account(template_account, ns)
+            account = self._create_individual_account(individual_template, ns)
             reporting_group.append(account)
             account_count += 1
             
@@ -588,7 +655,7 @@ class FATCAGenerator:
         
         # Generate organisation accounts
         for i in range(self.config.organisation_accounts_per_fi):
-            account = self._create_organisation_account(template_account, ns)
+            account = self._create_organisation_account(org_template, ns)
             reporting_group.append(account)
             account_count += 1
             
@@ -603,100 +670,138 @@ class FATCAGenerator:
             encoding='UTF-8'
         )
         
-        logger.info(f"Generated FATCA XML: {self.config.output_path}")
+        logger.info(f"Generated FATCA-CRS XML: {self.config.output_path}")
         logger.info(f"  Total accounts: {account_count}")
         
         return self.config.output_path
     
-    def _update_message_spec(self, root: etree._Element, ns: dict):
-        """Update MessageSpec with config values."""
-        msg_spec = root.find('.//ftc:MessageSpec', namespaces=ns)
-        if msg_spec is None:
+    def _update_message_header(self, root: etree._Element, ns: dict):
+        """Update MessageHeader with config values."""
+        msg_header = root.find('.//oecd_ftc:MessageHeader', namespaces=ns)
+        if msg_header is None:
             return
         
         # SendingCompanyIN
-        sending_in = msg_spec.find('sfa:SendingCompanyIN', namespaces=ns)
+        sending_in = msg_header.find('sfa_ftc:SendingCompanyIN', namespaces=ns)
         if sending_in is not None:
             sending_in.text = self.config.sending_company_in
         
         # TransmittingCountry
-        trans_country = msg_spec.find('sfa:TransmittingCountry', namespaces=ns)
+        trans_country = msg_header.find('sfa_ftc:TransmittingCountry', namespaces=ns)
         if trans_country is not None:
             trans_country.text = self.config.sending_country
         
         # ReceivingCountry
-        recv_country = msg_spec.find('sfa:ReceivingCountry', namespaces=ns)
+        recv_country = msg_header.find('sfa_ftc:ReceivingCountry', namespaces=ns)
         if recv_country is not None:
             recv_country.text = self.config.receiving_country
         
+        # Warning
+        warning = msg_header.find('sfa_ftc:Warning', namespaces=ns)
+        if warning is not None:
+            warning.text = self.data_gen.warning_text()
+        
+        # Contact
+        contact = msg_header.find('sfa_ftc:Contact', namespaces=ns)
+        if contact is not None:
+            contact.text = self.data_gen.contact_text()
+        
         # MessageRefId
-        msg_ref = msg_spec.find('sfa:MessageRefId', namespaces=ns)
+        msg_ref = msg_header.find('sfa_ftc:MessageRefId', namespaces=ns)
         if msg_ref is not None:
-            msg_ref.text = f"{self.config.sending_country}{self.config.tax_year}{self.config.receiving_country}{self.data_gen.rng.randint(100000, 999999)}"
+            msg_ref.text = (
+                f"{self.config.sending_country}"
+                f"{self.config.tax_year}"
+                f"{self.config.sending_company_in}"
+                f"MessageHeaderMessageRefID"
+                f"{self.data_gen.rng.randint(1, 9999999999):010d}"
+            )
+        
+        # MessageTypeIndic (CRS701 for new, CRS702 for correction)
+        msg_type_indic = msg_header.find('sfa_ftc:MessageTypeIndic', namespaces=ns)
+        if msg_type_indic is not None:
+            msg_type_indic.text = MESSAGE_TYPE_INDIC['new']
         
         # ReportingPeriod
-        reporting_period = msg_spec.find('sfa:ReportingPeriod', namespaces=ns)
+        reporting_period = msg_header.find('sfa_ftc:ReportingPeriod', namespaces=ns)
         if reporting_period is not None:
             reporting_period.text = f"{self.config.tax_year}-12-31"
         
         # Timestamp
-        timestamp = msg_spec.find('sfa:Timestamp', namespaces=ns)
+        timestamp = msg_header.find('sfa_ftc:Timestamp', namespaces=ns)
         if timestamp is not None:
             timestamp.text = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
     
     def _update_reporting_fi(self, reporting_fi: etree._Element, ns: dict, fi_index: int):
         """Update ReportingFI with config values."""
         # ResCountryCode
-        res_country = reporting_fi.find('sfa:ResCountryCode', namespaces=ns)
+        res_country = reporting_fi.find('sfa_ftc:ResCountryCode', namespaces=ns)
         if res_country is not None:
             res_country.text = self.config.sending_country
         
-        # TIN (GIIN)
-        tin = reporting_fi.find('sfa:TIN', namespaces=ns)
+        # TIN (GIIN) - issuedBy is always US for FATCA GIIN
+        tin = reporting_fi.find('sfa_ftc:TIN', namespaces=ns)
         if tin is not None:
             tin.text = self.config.reporting_fi_tins[fi_index]
-            tin.set('issuedBy', self.config.sending_country)
+            tin.set('issuedBy', 'US')
         
         # Name
-        name = reporting_fi.find('sfa:Name', namespaces=ns)
+        name = reporting_fi.find('sfa_ftc:Name', namespaces=ns)
         if name is not None:
             name.text = self.data_gen.company_name()
+            name.set('nameType', 'OECD207')
         
-        # Address CountryCode
-        address = reporting_fi.find('.//sfa:Address', namespaces=ns)
+        # Address
+        address = reporting_fi.find('sfa_ftc:Address', namespaces=ns)
         if address is not None:
             country_code = address.find('sfa:CountryCode', namespaces=ns)
             if country_code is not None:
                 country_code.text = self.config.sending_country
+            
+            # Randomize address fields
+            addr_fix = address.find('sfa:AddressFix', namespaces=ns)
+            if addr_fix is not None:
+                street = addr_fix.find('sfa:Street', namespaces=ns)
+                if street is not None:
+                    street.text = self.data_gen.street()
+                building = addr_fix.find('sfa:BuildingIdentifier', namespaces=ns)
+                if building is not None:
+                    building.text = str(self.data_gen.rng.randint(1, 999))
+                city = addr_fix.find('sfa:City', namespaces=ns)
+                if city is not None:
+                    city.text = self.data_gen.city()
+                postcode = addr_fix.find('sfa:PostCode', namespaces=ns)
+                if postcode is not None:
+                    postcode.text = self.data_gen.postcode()
         
         # FilerCategory
-        filer_cat = reporting_fi.find('ftc:FilerCategory', namespaces=ns)
+        filer_cat = reporting_fi.find('sfa_ftc:FilerCategory', namespaces=ns)
         if filer_cat is not None:
             filer_cat.text = self.config.filer_category
         
         # DocSpec
-        doc_spec = reporting_fi.find('ftc:DocSpec', namespaces=ns)
+        doc_spec = reporting_fi.find('sfa_ftc:DocSpec', namespaces=ns)
         if doc_spec is not None:
-            doc_type = doc_spec.find('ftc:DocTypeIndic', namespaces=ns)
+            doc_type = doc_spec.find('sfa_ftc:DocTypeIndic', namespaces=ns)
             if doc_type is not None:
                 doc_type.text = self._get_doc_type_indic('new')
             
-            doc_ref = doc_spec.find('ftc:DocRefId', namespaces=ns)
+            doc_ref = doc_spec.find('sfa_ftc:DocRefId', namespaces=ns)
             if doc_ref is not None:
                 doc_ref.text = self._next_docref_id()
 
 
 def generate_fatca(
-    sending_country: str = "NL",
-    receiving_country: str = "US",
-    tax_year: int = 2021,
+    sending_country: str = "CW",
+    receiving_country: str = "CW",
+    tax_year: int = 2024,
     individual_accounts: int = 100,
     organisation_accounts: int = 100,
     output_path: Optional[str] = None,
     test_mode: bool = True,
     **kwargs
 ) -> Path:
-    """Convenience function to generate FATCA XML."""
+    """Convenience function to generate FATCA-CRS combined XML."""
     config = FATCAGeneratorConfig(
         sending_country=sending_country,
         receiving_country=receiving_country,
@@ -715,8 +820,8 @@ def generate_fatca(
 if __name__ == "__main__":
     # Test generation
     output = generate_fatca(
-        sending_country="NL",
-        receiving_country="US",
+        sending_country="CW",
+        receiving_country="CW",
         tax_year=2024,
         individual_accounts=10,
         organisation_accounts=5,

@@ -552,17 +552,15 @@ export const translations = {
       version: 'Version',
       updateAvailable: 'Update available: v{version}',
       downloadProgress: 'Download progress: {percent}%',
-      whatsNew: "What's New in v1.2.0",
+      whatsNew: "What's New in v1.3.0",
       changelog: [
-        'NEW: Bug reporting system integrated into Settings page',
-        'NEW: GitHub Issues API integration for automatic issue creation',
-        'NEW: Screenshot capture functionality for bug reports',
-        'NEW: Multi-language support for bug reporting (EN/NL/ES)',
-        'NEW: Form validation and system info auto-included in reports',
-        'Fixed application icon display on Windows (desktop, taskbar, Start menu)',
-        'Enhanced security documentation and .gitignore patterns',
-        'Added comprehensive repository visibility guides',
-        'Created automated workflow scripts for development'
+        'NEW: FATCA-CRS Combined format (v2.2) — full rewrite of FATCA generator for FC upload',
+        'NEW: Correct namespaces, MessageHeader, MessageTypeIndic (CRS701/CRS702)',
+        'NEW: OECD DocTypeIndic codes, CRS payment types, ControllingPerson support',
+        'NEW: AcctHolderTypeCRS + AcctHolderTypeFATCA for organisation accounts',
+        'Updated FATCA correction generator for FATCA-CRS combined format',
+        'Updated FATCA validator for FATCA-CRS combined format',
+        'Fixed FATCA XML structure to conform to FatcaCrs_v2.2 schema'
       ]
     }
   },
@@ -1113,17 +1111,15 @@ export const translations = {
       version: 'Versie',
       updateAvailable: 'Update beschikbaar: v{version}',
       downloadProgress: 'Downloadvoortgang: {percent}%',
-      whatsNew: 'Wat is nieuw in v1.2.0',
+      whatsNew: 'Wat is nieuw in v1.3.0',
       changelog: [
-        'NIEUW: Bug rapportage systeem geïntegreerd in Instellingen pagina',
-        'NIEUW: GitHub Issues API integratie voor automatische issue creatie',
-        'NIEUW: Screenshot capture functie voor bug rapporten',
-        'NIEUW: Meertalige ondersteuning voor bug rapportage (EN/NL/ES)',
-        'NIEUW: Form validatie en systeem info auto-inclusief in rapporten',
-        'Fixed applicatie icoon display op Windows (desktop, taakbalk, Start menu)',
-        'Enhanced security documentatie en .gitignore patronen',
-        'Toegevoegd repository zichtbaarheid gidsen',
-        'Aangemaakt geautomatiseerde workflow scripts voor ontwikkeling'
+        'NIEUW: FATCA-CRS Gecombineerd formaat (v2.2) — volledige herschrijving FATCA generator voor FC upload',
+        'NIEUW: Correcte namespaces, MessageHeader, MessageTypeIndic (CRS701/CRS702)',
+        'NIEUW: OECD DocTypeIndic codes, CRS betalingstypes, ControllingPerson ondersteuning',
+        'NIEUW: AcctHolderTypeCRS + AcctHolderTypeFATCA voor organisatie rekeningen',
+        'Bijgewerkt: FATCA correctie generator voor FATCA-CRS gecombineerd formaat',
+        'Bijgewerkt: FATCA validator voor FATCA-CRS gecombineerd formaat',
+        'Opgelost: FATCA XML structuur conform FatcaCrs_v2.2 schema'
       ]
     }
   },
@@ -1674,17 +1670,15 @@ export const translations = {
       version: 'Versión',
       updateAvailable: 'Actualización disponible: v{version}',
       downloadProgress: 'Progreso de descarga: {percent}%',
-      whatsNew: 'Novedades en v1.2.0',
+      whatsNew: 'Novedades en v1.3.0',
       changelog: [
-        'NUEVO: Sistema de reporte de errores integrado en página de Configuración',
-        'NUEVO: Integración con API de GitHub Issues para creación automática de problemas',
-        'NUEVO: Función de captura de pantalla para reportes de errores',
-        'NUEVO: Soporte multiidioma para reporte de errores (EN/NL/ES)',
-        'NUEVO: Validación de formulario e información de sistema auto-incluida en reportes',
-        'Fixed: Visualización de ícono de aplicación en Windows (escritorio, barra de tareas, Menú Inicio)',
-        'Enhanced: Documentación de seguridad y patrones .gitignore',
-        'Añadido: Guías completas de visibilidad de repositorio',
-        'Creado: Scripts de workflow automatizado para desarrollo'
+        'NUEVO: Formato combinado FATCA-CRS (v2.2) — reescritura completa del generador FATCA para carga FC',
+        'NUEVO: Namespaces correctos, MessageHeader, MessageTypeIndic (CRS701/CRS702)',
+        'NUEVO: Códigos OECD DocTypeIndic, tipos de pago CRS, soporte ControllingPerson',
+        'NUEVO: AcctHolderTypeCRS + AcctHolderTypeFATCA para cuentas de organización',
+        'Actualizado: Generador de corrección FATCA para formato combinado FATCA-CRS',
+        'Actualizado: Validador FATCA para formato combinado FATCA-CRS',
+        'Corregido: Estructura XML FATCA conforme al esquema FatcaCrs_v2.2'
       ]
     }
   }

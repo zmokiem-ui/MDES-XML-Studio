@@ -1,5 +1,7 @@
 # MDES XML Studio
 
+> **📖 New here?** See **[START_HERE.md](START_HERE.md)** for a guided onboarding index.
+
 > **ℹ️ REPOSITORY STATUS**: Currently private. See [MAKE_REPOSITORY_PUBLIC.md](MAKE_REPOSITORY_PUBLIC.md) for instructions to make releases publicly accessible.
 
 A professional desktop application for generating valid CRS, FATCA, and CBC XML test data. Features an intuitive Electron-based UI with support for multiple reporting standards, error injection, and comprehensive validation.

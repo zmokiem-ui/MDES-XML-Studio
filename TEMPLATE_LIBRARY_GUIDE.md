@@ -2,7 +2,7 @@
 
 ## 🎯 Overview
 
-The CRS Generator now includes a **Template Library Manager** that allows you to build your own collection of XML templates! Add, validate, and organize templates that the application will use for data generation.
+MDES XML Studio now includes a **Template Library Manager** that allows you to build your own collection of XML templates! Add, validate, and organize templates that the application will use for data generation.
 
 ## 📁 What Gets Created
 

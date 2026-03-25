@@ -1,5 +1,5 @@
 """
-Main entry point for CRS Generator application.
+Main entry point for MDES XML Studio application.
 Handles startup, update checks, template library initialization, and launches the wizard.
 """
 
@@ -14,7 +14,7 @@ from crs_generator.template_ui import TemplateManagerUI
 def show_main_menu():
     """Show main menu with options."""
     root = tk.Tk()
-    root.title("CRS Generator")
+    root.title("MDES XML Studio")
     root.geometry("500x400")
     root.resizable(False, False)
     
@@ -32,7 +32,7 @@ def show_main_menu():
     from crs_generator import __version__
     tk.Label(
         header_frame,
-        text="CRS Test Data Generator",
+        text="MDES XML Studio",
         font=("Arial", 18, "bold"),
         bg="#2c3e50",
         fg="white"
@@ -75,7 +75,7 @@ def show_main_menu():
     def launch_cli():
         root.destroy()
         print("\n" + "="*60)
-        print("CRS Generator - Command Line Interface")
+        print("MDES XML Studio - Command Line Interface")
         print("="*60)
         print("\nAvailable commands:")
         print("  python -m crs_generator.cli --help")
@@ -140,7 +140,7 @@ def show_main_menu():
     
     tk.Label(
         footer_frame,
-        text="© 2026 CRS Generator | github.com/zmokiem-ui/CRS-xml-generator",
+        text="© 2026 MDES XML Studio | github.com/zmokiem-ui/MDES-XML-Studio",
         font=("Arial", 8),
         bg="#ecf0f1",
         fg="#7f8c8d"

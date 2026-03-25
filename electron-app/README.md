@@ -1,18 +1,18 @@
-# CRS Test Data Generator - Electron App
+# MDES XML Studio - Electron App
 
-A professional desktop application for generating CRS XML test files, built with Electron, React, and Python.
+A professional desktop application for generating CRS, FATCA, and CBC XML test files, built with Electron, React, and Python.
 
 ## Architecture
 
 - **Frontend**: React + Vite + Tailwind CSS
 - **Desktop Framework**: Electron
-- **Backend**: Python (existing CRS generator logic)
+- **Backend**: Python (CRS/FATCA/CBC generator logic)
 - **Communication**: IPC between Electron main process and Python subprocess
 
 ## Prerequisites
 
 - Node.js 18+ and npm
-- Python 3.8+ (with the CRS generator dependencies installed)
+- Python 3.8+ (with the generator dependencies installed)
 
 ## Installation
 

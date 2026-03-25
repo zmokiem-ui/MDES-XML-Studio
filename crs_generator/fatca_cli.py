@@ -66,16 +66,16 @@ def generate_fatca_random_mode(args):
     account_holder_countries = parse_comma_list(args.account_holder_countries, uppercase=True)
     
     config = FATCAGeneratorConfig(
-        sending_country=args.sending_country or 'NL',
-        receiving_country=args.receiving_country or 'US',
+        sending_country=args.sending_country or 'CW',
+        receiving_country=args.receiving_country or 'CW',
         tax_year=args.tax_year or 2024,
-        sending_company_in=args.sending_company_in or '000000.00000.TA.531',
+        sending_company_in=args.sending_company_in or '20016636',
         num_reporting_fis=args.num_fis or 1,
         reporting_fi_tins=reporting_fi_tins if reporting_fi_tins else None,
         filer_category=args.filer_category or 'FATCA601',
         individual_accounts_per_fi=args.individual_accounts or 0,
         organisation_accounts_per_fi=args.organisation_accounts or 0,
-        substantial_owners_per_org=args.substantial_owners or 1,
+        controlling_persons_per_org=args.substantial_owners or 1,
         account_holder_country_mode=args.account_holder_mode or 'random',
         account_holder_countries=account_holder_countries if account_holder_countries else None,
         output_path=Path(args.output),

@@ -1,5 +1,5 @@
 """
-Startup module for CRS Generator.
+Startup module for MDES XML Studio.
 Handles update checks and displays notifications to users.
 """
 
@@ -36,7 +36,7 @@ def show_update_dialog(update_info: Dict) -> bool:
     root = tk.Tk()
     root.withdraw()  # Hide main window
     
-    message = f"""A new version of CRS Generator is available!
+    message = f"""A new version of MDES XML Studio is available!
 
 Current Version: {update_info['current_version']}
 Latest Version: {update_info['latest_version']}
@@ -81,7 +81,7 @@ def download_and_install_update(update_info: Dict) -> bool:
     
     tk.Label(
         progress_window,
-        text=f"Downloading CRS Generator v{update_info['latest_version']}...",
+        text=f"Downloading MDES XML Studio v{update_info['latest_version']}...",
         font=('Arial', 10, 'bold')
     ).pack(pady=20)
     
@@ -195,7 +195,7 @@ def show_startup_banner():
     banner = f"""
 ================================================================
                                                              
-            CRS Test Data Generator v{__version__:<10}             
+            MDES XML Studio v{__version__:<10}             
                                                              
   Generate compliant CRS, FATCA, and CBC XML test data       
                                                              

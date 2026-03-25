@@ -1,8 +1,14 @@
 """
-FATCA Correction/Deletion Generator
+FATCA-CRS Correction/Deletion Generator
 
-Generates FATCA correction (FATCA2/FATCA12) and void (FATCA3/FATCA13) files
-from existing FATCA XML files.
+Generates FATCA-CRS correction (OECD2/OECD12) and void (OECD3/OECD13) files
+from existing FATCA-CRS combined XML files.
+
+Uses the FATCA-CRS combined format (urn:fatcacrs:ties:v2) with:
+- MessageHeader (not MessageSpec)
+- MessageBody (not FATCA body)
+- OECD DocTypeIndic codes (not FATCA codes)
+- CRS702 MessageTypeIndic for corrections
 """
 
 from pathlib import Path
@@ -17,7 +23,7 @@ from faker import Faker
 
 @dataclass
 class FATCACorrectionOptions:
-    """Options for FATCA correction generation."""
+    """Options for FATCA-CRS correction generation."""
     correct_reporting_fi: bool = False
     correct_individual_accounts: int = 0
     correct_organisation_accounts: int = 0
@@ -26,7 +32,7 @@ class FATCACorrectionOptions:
     modify_balance: bool = True
     modify_address: bool = True
     modify_name: bool = False
-    test_mode: bool = True  # Use FATCA11-14 vs FATCA1-4
+    test_mode: bool = True  # Use OECD11-13 vs OECD1-3
     output_path: Optional[str] = None
 
 
@@ -42,13 +48,13 @@ class FATCACorrectionResult:
 
 
 class FATCACorrectionGenerator:
-    """Generates FATCA correction and void files."""
+    """Generates FATCA-CRS correction and void files."""
     
-    # FATCA namespaces
+    # FATCA-CRS combined namespaces
     NAMESPACES = {
-        'ftc': 'urn:oecd:ties:fatca:v2',
+        'oecd_ftc': 'urn:fatcacrs:ties:v2',
+        'sfa_ftc': 'urn:oecd:ties:fatcacrstypes:v2',
         'sfa': 'urn:oecd:ties:stffatcatypes:v2',
-        'iso': 'urn:oecd:ties:isofatcatypes:v1',
     }
     
     def __init__(self, seed: int = None):
@@ -60,7 +66,7 @@ class FATCACorrectionGenerator:
         self.docref_counter = 0
     
     def generate_correction(self, source_path: str, options: FATCACorrectionOptions) -> FATCACorrectionResult:
-        """Generate a correction file from source FATCA XML."""
+        """Generate a correction file from source FATCA-CRS XML."""
         result = FATCACorrectionResult()
         
         try:
@@ -74,21 +80,20 @@ class FATCACorrectionGenerator:
             tree = etree.parse(str(source), parser)
             root = tree.getroot()
             
-            # Build namespace map
+            # Build namespace map from document
             ns = dict(root.nsmap or {})
             if None in ns:
-                ns['ftc'] = ns[None]
                 ns.pop(None, None)
             self.ns = {**self.NAMESPACES, **ns}
             
             # Get original MessageRefId for CorrMessageRefId
             orig_msg_ref = self._get_message_ref_id(root)
             
-            # Update MessageSpec for correction
-            self._update_message_spec_for_correction(root, orig_msg_ref)
+            # Update MessageHeader for correction
+            self._update_message_header_for_correction(root, orig_msg_ref)
             
-            # Process FATCA body
-            result = self._process_fatca_body(root, options, orig_msg_ref, result)
+            # Process MessageBody
+            result = self._process_message_body(root, options, orig_msg_ref, result)
             
             # Determine output path
             if options.output_path:
@@ -116,59 +121,62 @@ class FATCACorrectionGenerator:
     
     def _get_message_ref_id(self, root: etree._Element) -> str:
         """Get MessageRefId from source file."""
-        msg_ref = root.find('.//sfa:MessageRefId', namespaces=self.ns)
+        msg_ref = root.find('.//sfa_ftc:MessageRefId', namespaces=self.ns)
         if msg_ref is not None and msg_ref.text:
             return msg_ref.text
         return ""
     
-    def _update_message_spec_for_correction(self, root: etree._Element, orig_msg_ref: str):
-        """Update MessageSpec for correction file."""
-        msg_spec = root.find('.//ftc:MessageSpec', namespaces=self.ns)
-        if msg_spec is None:
+    def _update_message_header_for_correction(self, root: etree._Element, orig_msg_ref: str):
+        """Update MessageHeader for correction file."""
+        msg_header = root.find('.//oecd_ftc:MessageHeader', namespaces=self.ns)
+        if msg_header is None:
             return
         
         # Update MessageRefId to new unique value
-        msg_ref = msg_spec.find('sfa:MessageRefId', namespaces=self.ns)
+        msg_ref = msg_header.find('sfa_ftc:MessageRefId', namespaces=self.ns)
         if msg_ref is not None:
-            # Generate new MessageRefId
-            trans_country = msg_spec.find('sfa:TransmittingCountry', namespaces=self.ns)
-            recv_country = msg_spec.find('sfa:ReceivingCountry', namespaces=self.ns)
+            trans_country = msg_header.find('sfa_ftc:TransmittingCountry', namespaces=self.ns)
+            recv_country = msg_header.find('sfa_ftc:ReceivingCountry', namespaces=self.ns)
             tc = trans_country.text if trans_country is not None else "XX"
-            rc = recv_country.text if recv_country is not None else "US"
+            rc = recv_country.text if recv_country is not None else "CW"
             msg_ref.text = f"{tc}{datetime.now().year}{rc}CORR{self.rng.randint(100000, 999999)}"
         
+        # Update MessageTypeIndic to CRS702 (correction)
+        msg_type_indic = msg_header.find('sfa_ftc:MessageTypeIndic', namespaces=self.ns)
+        if msg_type_indic is not None:
+            msg_type_indic.text = 'CRS702'
+        
         # Add CorrMessageRefId if not present
-        corr_msg_ref = msg_spec.find('sfa:CorrMessageRefId', namespaces=self.ns)
+        corr_msg_ref = msg_header.find('sfa_ftc:CorrMessageRefId', namespaces=self.ns)
         if corr_msg_ref is None and orig_msg_ref:
-            # Find position after MessageRefId
-            msg_ref_elem = msg_spec.find('sfa:MessageRefId', namespaces=self.ns)
+            msg_ref_elem = msg_header.find('sfa_ftc:MessageRefId', namespaces=self.ns)
             if msg_ref_elem is not None:
-                corr_msg_ref = etree.Element(f"{{{self.ns['sfa']}}}CorrMessageRefId")
+                corr_msg_ref = etree.Element(f"{{{self.ns['sfa_ftc']}}}CorrMessageRefId")
                 corr_msg_ref.text = orig_msg_ref
                 msg_ref_elem.addnext(corr_msg_ref)
         elif corr_msg_ref is not None:
             corr_msg_ref.text = orig_msg_ref
         
         # Update Timestamp
-        timestamp = msg_spec.find('sfa:Timestamp', namespaces=self.ns)
+        timestamp = msg_header.find('sfa_ftc:Timestamp', namespaces=self.ns)
         if timestamp is not None:
             timestamp.text = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
     
-    def _process_fatca_body(self, root: etree._Element, options: FATCACorrectionOptions, 
-                            orig_msg_ref: str, result: FATCACorrectionResult) -> FATCACorrectionResult:
-        """Process FATCA body for corrections/deletions."""
-        fatca_bodies = root.findall('.//ftc:FATCA', namespaces=self.ns)
+    def _process_message_body(self, root: etree._Element, options: FATCACorrectionOptions, 
+                              orig_msg_ref: str, result: FATCACorrectionResult) -> FATCACorrectionResult:
+        """Process MessageBody for corrections/deletions."""
+        msg_bodies = root.findall('.//oecd_ftc:MessageBody', namespaces=self.ns)
         
-        for fatca in fatca_bodies:
+        for body in msg_bodies:
             # Handle ReportingFI correction
             if options.correct_reporting_fi:
-                reporting_fi = fatca.find('ftc:ReportingFI', namespaces=self.ns)
+                reporting_fi = body.find('sfa_ftc:ReportingFI', namespaces=self.ns)
                 if reporting_fi is not None:
                     self._correct_reporting_fi(reporting_fi, orig_msg_ref, options)
                     result.fi_corrected = True
             
             # Process ReportingGroup
-            reporting_group = fatca.find('ftc:ReportingGroup', namespaces=self.ns)
+            reporting_group = body.find('sfa_ftc:ReportingGroup', namespaces=self.ns)
             if reporting_group is not None:
                 result = self._process_reporting_group(
                     reporting_group, options, orig_msg_ref, result
@@ -180,31 +188,31 @@ class FATCACorrectionGenerator:
                                options: FATCACorrectionOptions):
         """Apply corrections to ReportingFI."""
         # Update DocSpec
-        doc_spec = reporting_fi.find('ftc:DocSpec', namespaces=self.ns)
+        doc_spec = reporting_fi.find('sfa_ftc:DocSpec', namespaces=self.ns)
         if doc_spec is not None:
             self._update_doc_spec_for_correction(doc_spec, orig_msg_ref, options)
         
         # Modify address if enabled
         if options.modify_address:
-            address = reporting_fi.find('.//sfa:Address', namespaces=self.ns)
+            address = reporting_fi.find('.//sfa_ftc:Address', namespaces=self.ns)
             if address is not None:
                 self._modify_address(address)
     
     def _process_reporting_group(self, reporting_group: etree._Element, options: FATCACorrectionOptions,
                                   orig_msg_ref: str, result: FATCACorrectionResult) -> FATCACorrectionResult:
         """Process accounts in ReportingGroup."""
-        accounts = reporting_group.findall('ftc:AccountReport', namespaces=self.ns)
+        accounts = reporting_group.findall('sfa_ftc:AccountReport', namespaces=self.ns)
         
         # Separate individual and organisation accounts
         individual_accounts = []
         organisation_accounts = []
         
         for account in accounts:
-            account_holder = account.find('ftc:AccountHolder', namespaces=self.ns)
+            account_holder = account.find('sfa_ftc:AccountHolder', namespaces=self.ns)
             if account_holder is not None:
-                if account_holder.find('ftc:Individual', namespaces=self.ns) is not None:
+                if account_holder.find('sfa_ftc:Individual', namespaces=self.ns) is not None:
                     individual_accounts.append(account)
-                elif account_holder.find('ftc:Organisation', namespaces=self.ns) is not None:
+                elif account_holder.find('sfa_ftc:Organisation', namespaces=self.ns) is not None:
                     organisation_accounts.append(account)
         
         # Track which accounts to keep (only corrected/deleted ones for correction file)
@@ -255,25 +263,25 @@ class FATCACorrectionGenerator:
                          options: FATCACorrectionOptions):
         """Apply corrections to an account."""
         # Update DocSpec for correction
-        doc_spec = account.find('ftc:DocSpec', namespaces=self.ns)
+        doc_spec = account.find('sfa_ftc:DocSpec', namespaces=self.ns)
         if doc_spec is not None:
             self._update_doc_spec_for_correction(doc_spec, orig_msg_ref, options)
         
         # Modify balance if enabled
         if options.modify_balance:
-            balance = account.find('ftc:AccountBalance', namespaces=self.ns)
+            balance = account.find('sfa_ftc:AccountBalance', namespaces=self.ns)
             if balance is not None:
                 self._modify_balance(balance)
         
         # Modify account holder
-        account_holder = account.find('ftc:AccountHolder', namespaces=self.ns)
+        account_holder = account.find('sfa_ftc:AccountHolder', namespaces=self.ns)
         if account_holder is not None:
-            individual = account_holder.find('ftc:Individual', namespaces=self.ns)
-            organisation = account_holder.find('ftc:Organisation', namespaces=self.ns)
+            individual = account_holder.find('sfa_ftc:Individual', namespaces=self.ns)
+            organisation = account_holder.find('sfa_ftc:Organisation', namespaces=self.ns)
             
             if individual is not None:
                 if options.modify_address:
-                    address = individual.find('sfa:Address', namespaces=self.ns)
+                    address = individual.find('sfa_ftc:Address', namespaces=self.ns)
                     if address is not None:
                         self._modify_address(address)
                 if options.modify_name:
@@ -281,7 +289,7 @@ class FATCACorrectionGenerator:
             
             if organisation is not None:
                 if options.modify_address:
-                    address = organisation.find('sfa:Address', namespaces=self.ns)
+                    address = organisation.find('sfa_ftc:Address', namespaces=self.ns)
                     if address is not None:
                         self._modify_address(address)
                 if options.modify_name:
@@ -290,94 +298,63 @@ class FATCACorrectionGenerator:
     def _void_account(self, account: etree._Element, orig_msg_ref: str,
                       options: FATCACorrectionOptions):
         """Mark account as void (deleted)."""
-        doc_spec = account.find('ftc:DocSpec', namespaces=self.ns)
+        doc_spec = account.find('sfa_ftc:DocSpec', namespaces=self.ns)
         if doc_spec is not None:
             self._update_doc_spec_for_void(doc_spec, orig_msg_ref, options)
     
     def _update_doc_spec_for_correction(self, doc_spec: etree._Element, orig_msg_ref: str,
                                          options: FATCACorrectionOptions):
-        """Update DocSpec for correction."""
+        """Update DocSpec for correction (OECD2/OECD12)."""
         # Get original DocRefId
-        doc_ref = doc_spec.find('ftc:DocRefId', namespaces=self.ns)
+        doc_ref = doc_spec.find('sfa_ftc:DocRefId', namespaces=self.ns)
         orig_doc_ref = doc_ref.text if doc_ref is not None else ""
         
-        # Update DocTypeIndic
-        doc_type = doc_spec.find('ftc:DocTypeIndic', namespaces=self.ns)
+        # Update DocTypeIndic to correction
+        doc_type = doc_spec.find('sfa_ftc:DocTypeIndic', namespaces=self.ns)
         if doc_type is not None:
-            doc_type.text = 'FATCA12' if options.test_mode else 'FATCA2'
+            doc_type.text = 'OECD12' if options.test_mode else 'OECD2'
         
         # Generate new DocRefId
         if doc_ref is not None:
             self.docref_counter += 1
             doc_ref.text = f"{orig_doc_ref}_CORR{self.docref_counter:04d}"
         
-        # Add CorrMessageRefId
-        corr_msg_ref = doc_spec.find('ftc:CorrMessageRefId', namespaces=self.ns)
-        if corr_msg_ref is None and orig_msg_ref:
-            corr_msg_ref = etree.Element(f"{{{self.ns['ftc']}}}CorrMessageRefId")
-            corr_msg_ref.text = orig_msg_ref
-            doc_type_elem = doc_spec.find('ftc:DocTypeIndic', namespaces=self.ns)
-            if doc_type_elem is not None:
-                doc_type_elem.addnext(etree.Element(f"{{{self.ns['ftc']}}}DocRefId"))
-                # Actually insert after DocRefId
-                doc_ref_elem = doc_spec.find('ftc:DocRefId', namespaces=self.ns)
-                if doc_ref_elem is not None:
-                    doc_ref_elem.addnext(corr_msg_ref)
-        elif corr_msg_ref is not None:
-            corr_msg_ref.text = orig_msg_ref
-        
         # Add CorrDocRefId
-        corr_doc_ref = doc_spec.find('ftc:CorrDocRefId', namespaces=self.ns)
+        corr_doc_ref = doc_spec.find('sfa_ftc:CorrDocRefId', namespaces=self.ns)
         if corr_doc_ref is None and orig_doc_ref:
-            corr_doc_ref = etree.Element(f"{{{self.ns['ftc']}}}CorrDocRefId")
+            corr_doc_ref = etree.Element(f"{{{self.ns['sfa_ftc']}}}CorrDocRefId")
             corr_doc_ref.text = orig_doc_ref
-            # Insert after CorrMessageRefId or DocRefId
-            insert_after = doc_spec.find('ftc:CorrMessageRefId', namespaces=self.ns)
-            if insert_after is None:
-                insert_after = doc_spec.find('ftc:DocRefId', namespaces=self.ns)
-            if insert_after is not None:
-                insert_after.addnext(corr_doc_ref)
+            doc_ref_elem = doc_spec.find('sfa_ftc:DocRefId', namespaces=self.ns)
+            if doc_ref_elem is not None:
+                doc_ref_elem.addnext(corr_doc_ref)
         elif corr_doc_ref is not None:
             corr_doc_ref.text = orig_doc_ref
     
     def _update_doc_spec_for_void(self, doc_spec: etree._Element, orig_msg_ref: str,
                                    options: FATCACorrectionOptions):
-        """Update DocSpec for void (deletion)."""
+        """Update DocSpec for void/deletion (OECD3/OECD13)."""
         # Get original DocRefId
-        doc_ref = doc_spec.find('ftc:DocRefId', namespaces=self.ns)
+        doc_ref = doc_spec.find('sfa_ftc:DocRefId', namespaces=self.ns)
         orig_doc_ref = doc_ref.text if doc_ref is not None else ""
         
         # Update DocTypeIndic to void
-        doc_type = doc_spec.find('ftc:DocTypeIndic', namespaces=self.ns)
+        doc_type = doc_spec.find('sfa_ftc:DocTypeIndic', namespaces=self.ns)
         if doc_type is not None:
-            doc_type.text = 'FATCA13' if options.test_mode else 'FATCA3'
+            doc_type.text = 'OECD13' if options.test_mode else 'OECD3'
         
         # Generate new DocRefId
         if doc_ref is not None:
             self.docref_counter += 1
             doc_ref.text = f"{orig_doc_ref}_VOID{self.docref_counter:04d}"
         
-        # Add CorrMessageRefId
-        corr_msg_ref = doc_spec.find('ftc:CorrMessageRefId', namespaces=self.ns)
-        if corr_msg_ref is None and orig_msg_ref:
-            corr_msg_ref = etree.Element(f"{{{self.ns['ftc']}}}CorrMessageRefId")
-            corr_msg_ref.text = orig_msg_ref
-            doc_ref_elem = doc_spec.find('ftc:DocRefId', namespaces=self.ns)
-            if doc_ref_elem is not None:
-                doc_ref_elem.addnext(corr_msg_ref)
-        elif corr_msg_ref is not None:
-            corr_msg_ref.text = orig_msg_ref
-        
         # Add CorrDocRefId
-        corr_doc_ref = doc_spec.find('ftc:CorrDocRefId', namespaces=self.ns)
+        corr_doc_ref = doc_spec.find('sfa_ftc:CorrDocRefId', namespaces=self.ns)
         if corr_doc_ref is None and orig_doc_ref:
-            corr_doc_ref = etree.Element(f"{{{self.ns['ftc']}}}CorrDocRefId")
+            corr_doc_ref = etree.Element(f"{{{self.ns['sfa_ftc']}}}CorrDocRefId")
             corr_doc_ref.text = orig_doc_ref
-            insert_after = doc_spec.find('ftc:CorrMessageRefId', namespaces=self.ns)
-            if insert_after is None:
-                insert_after = doc_spec.find('ftc:DocRefId', namespaces=self.ns)
-            if insert_after is not None:
-                insert_after.addnext(corr_doc_ref)
+            doc_ref_elem = doc_spec.find('sfa_ftc:DocRefId', namespaces=self.ns)
+            if doc_ref_elem is not None:
+                doc_ref_elem.addnext(corr_doc_ref)
         elif corr_doc_ref is not None:
             corr_doc_ref.text = orig_doc_ref
     
@@ -415,7 +392,7 @@ class FATCACorrectionGenerator:
     
     def _modify_individual_name(self, individual: etree._Element):
         """Modify individual name."""
-        name = individual.find('sfa:Name', namespaces=self.ns)
+        name = individual.find('sfa_ftc:Name', namespaces=self.ns)
         if name is not None:
             first_name = name.find('sfa:FirstName', namespaces=self.ns)
             if first_name is not None:
@@ -427,6 +404,6 @@ class FATCACorrectionGenerator:
     
     def _modify_organisation_name(self, organisation: etree._Element):
         """Modify organisation name."""
-        name = organisation.find('sfa:Name', namespaces=self.ns)
+        name = organisation.find('sfa_ftc:Name', namespaces=self.ns)
         if name is not None:
             name.text = self.faker.company()

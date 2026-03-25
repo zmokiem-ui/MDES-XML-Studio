@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oecd_ftc:FATCA_CRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xmlns:oecd_ftc="urn:fatcacrs:ties:v2"
+                    xmlns:sfa_ftc="urn:oecd:ties:fatcacrstypes:v2"
+                    xmlns:sfa="urn:oecd:ties:stffatcatypes:v2"
+                    version="2.2"
+                    xsi:schemaLocation="urn:fatcacrs:ties:v1 FatcaCrs_v2.2.xsd">
+	<oecd_ftc:MessageHeader>
+		<sfa_ftc:SendingCompanyIN>SENDINGCOMPANYIN</sfa_ftc:SendingCompanyIN>
+		<sfa_ftc:TransmittingCountry>TRANSMITTINGCOUNTRY</sfa_ftc:TransmittingCountry>
+		<sfa_ftc:ReceivingCountry>RECEIVINGCOUNTRY</sfa_ftc:ReceivingCountry>
+		<sfa_ftc:MessageType>FATCA-CRS</sfa_ftc:MessageType>
+		<sfa_ftc:Warning>WARNINGTEXT</sfa_ftc:Warning>
+		<sfa_ftc:Contact>CONTACTTEXT</sfa_ftc:Contact>
+		<sfa_ftc:MessageRefId>MESSAGEREFID</sfa_ftc:MessageRefId>
+		<sfa_ftc:MessageTypeIndic>CRS701</sfa_ftc:MessageTypeIndic>
+		<sfa_ftc:ReportingPeriod>TAXYEAR-12-31</sfa_ftc:ReportingPeriod>
+		<sfa_ftc:Timestamp>TIMESTAMP</sfa_ftc:Timestamp>
+	</oecd_ftc:MessageHeader>
+	<oecd_ftc:MessageBody>
+		<sfa_ftc:ReportingFI>
+			<sfa_ftc:ResCountryCode>TRANSMITTINGCOUNTRY</sfa_ftc:ResCountryCode>
+			<sfa_ftc:TIN issuedBy="US">REPORTINGFIGIIN</sfa_ftc:TIN>
+			<sfa_ftc:Name nameType="OECD207">REPORTINGFINAME</sfa_ftc:Name>
+			<sfa_ftc:Address legalAddressType="OECD301">
+				<sfa:CountryCode>TRANSMITTINGCOUNTRY</sfa:CountryCode>
+				<sfa:AddressFix>
+					<sfa:Street>AddressAddressFixStreet. abc</sfa:Street>
+					<sfa:BuildingIdentifier>AddressAddressFixBuildingIdentifier. abc</sfa:BuildingIdentifier>
+					<sfa:SuiteIdentifier>AddressAddressFixSuiteIdentifier. abc</sfa:SuiteIdentifier>
+					<sfa:FloorIdentifier>AddressAddressFixFloorIdentifier. abc</sfa:FloorIdentifier>
+					<sfa:DistrictName>AddressAddressFixDistrictName. abc</sfa:DistrictName>
+					<sfa:POB>AddressAddressFixPOB. abc</sfa:POB>
+					<sfa:PostCode>AddressAddressFixPostcode. abc</sfa:PostCode>
+					<sfa:City>AddressAddressFixCity. abc</sfa:City>
+					<sfa:CountrySubentity>AddressAddressFixCountrySubentity. abc</sfa:CountrySubentity>
+				</sfa:AddressFix>
+				<sfa:AddressFree>AddresAddressFixAddressfree. abc</sfa:AddressFree>
+			</sfa_ftc:Address>
+			<sfa_ftc:FilerCategory>FATCA601</sfa_ftc:FilerCategory>
+			<sfa_ftc:DocSpec>
+				<sfa_ftc:DocTypeIndic>RFIDOCTYPEINDIC</sfa_ftc:DocTypeIndic>
+				<sfa_ftc:DocRefId>RFIDOCREFID</sfa_ftc:DocRefId>
+			</sfa_ftc:DocSpec>
+		</sfa_ftc:ReportingFI>
+		<sfa_ftc:ReportingGroup>
+			<sfa_ftc:AccountReport>
+				<sfa_ftc:DocSpec>
+					<sfa_ftc:DocTypeIndic>AR1DOCTYPEINDIC</sfa_ftc:DocTypeIndic>
+					<sfa_ftc:DocRefId>AR1DOCREFID</sfa_ftc:DocRefId>
+				</sfa_ftc:DocSpec>
+				<sfa_ftc:AccountNumber AccNumberType="OECD604" UndocumentedAccount="false" ClosedAccount="false" DormantAccount="false">ACCOUNTNUMBER</sfa_ftc:AccountNumber>
+				<sfa_ftc:AccountHolder>
+					<sfa_ftc:Individual>
+						<sfa_ftc:ResCountryCode>NL</sfa_ftc:ResCountryCode>
+						<sfa_ftc:TIN issuedBy="NL">123456789</sfa_ftc:TIN>
+						<sfa_ftc:Name nameType="OECD202">
+							<sfa:FirstName>FIRSTNAME</sfa:FirstName>
+							<sfa:LastName>LASTNAME</sfa:LastName>
+						</sfa_ftc:Name>
+						<sfa_ftc:Address>
+							<sfa:CountryCode>NL</sfa:CountryCode>
+							<sfa:AddressFree>STREET BUILDING, CITY POSTCODE</sfa:AddressFree>
+						</sfa_ftc:Address>
+					</sfa_ftc:Individual>
+				</sfa_ftc:AccountHolder>
+				<sfa_ftc:AccountBalance currCode="USD">50000000</sfa_ftc:AccountBalance>
+				<sfa_ftc:Payment>
+					<sfa_ftc:Type>CRS501</sfa_ftc:Type>
+					<sfa_ftc:PaymentAmnt currCode="USD">5000.00</sfa_ftc:PaymentAmnt>
+				</sfa_ftc:Payment>
+			</sfa_ftc:AccountReport>
+			<sfa_ftc:AccountReport>
+				<sfa_ftc:DocSpec>
+					<sfa_ftc:DocTypeIndic>AR2DOCTYPEINDIC</sfa_ftc:DocTypeIndic>
+					<sfa_ftc:DocRefId>AR2DOCREFID</sfa_ftc:DocRefId>
+				</sfa_ftc:DocSpec>
+				<sfa_ftc:AccountNumber AccNumberType="OECD604" UndocumentedAccount="false" ClosedAccount="false" DormantAccount="false">ACCOUNTNUMBER</sfa_ftc:AccountNumber>
+				<sfa_ftc:AccountHolder>
+					<sfa_ftc:Organisation>
+						<sfa_ftc:ResCountryCode>NL</sfa_ftc:ResCountryCode>
+						<sfa_ftc:TIN issuedBy="US">123456789</sfa_ftc:TIN>
+						<sfa_ftc:Name nameType="OECD207">ORGNAME</sfa_ftc:Name>
+						<sfa_ftc:Address>
+							<sfa:CountryCode>NL</sfa:CountryCode>
+							<sfa:AddressFree>STREET BUILDING, CITY POSTCODE</sfa:AddressFree>
+						</sfa_ftc:Address>
+					</sfa_ftc:Organisation>
+					<sfa_ftc:AcctHolderTypeCRS>CRS101</sfa_ftc:AcctHolderTypeCRS>
+					<sfa_ftc:AcctHolderTypeFATCA>FATCA103</sfa_ftc:AcctHolderTypeFATCA>
+				</sfa_ftc:AccountHolder>
+				<sfa_ftc:ControllingPerson>
+					<sfa_ftc:Individual>
+						<sfa_ftc:ResCountryCode>NL</sfa_ftc:ResCountryCode>
+						<sfa_ftc:TIN issuedBy="NL">123456789</sfa_ftc:TIN>
+						<sfa_ftc:Name nameType="OECD202">
+							<sfa:FirstName>CP_FIRSTNAME</sfa:FirstName>
+							<sfa:LastName>CP_LASTNAME</sfa:LastName>
+						</sfa_ftc:Name>
+						<sfa_ftc:Address>
+							<sfa:CountryCode>NL</sfa:CountryCode>
+							<sfa:AddressFree>CP_STREET CP_BUILDING, CP_CITY</sfa:AddressFree>
+						</sfa_ftc:Address>
+					</sfa_ftc:Individual>
+					<sfa_ftc:CtrlgPersonType>CRS801</sfa_ftc:CtrlgPersonType>
+				</sfa_ftc:ControllingPerson>
+				<sfa_ftc:AccountBalance currCode="USD">50000000</sfa_ftc:AccountBalance>
+				<sfa_ftc:Payment>
+					<sfa_ftc:Type>CRS501</sfa_ftc:Type>
+					<sfa_ftc:PaymentAmnt currCode="USD">5000.00</sfa_ftc:PaymentAmnt>
+				</sfa_ftc:Payment>
+			</sfa_ftc:AccountReport>
+		</sfa_ftc:ReportingGroup>
+	</oecd_ftc:MessageBody>
+</oecd_ftc:FATCA_CRS>

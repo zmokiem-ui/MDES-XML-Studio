@@ -306,7 +306,7 @@ Include in README or user manual:
 ```markdown
 ## Template Library System
 
-CRS Generator includes a powerful template library system:
+MDES XML Studio includes a powerful template library system:
 
 1. **First Run**: Template folders created automatically in Documents
 2. **Add Templates**: Use Template Manager or copy files directly

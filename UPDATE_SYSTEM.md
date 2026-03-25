@@ -2,7 +2,7 @@
 
 ## Overview
 
-The CRS Generator now includes an automatic update system that checks GitHub releases for new versions and allows users to update with a single click.
+MDES XML Studio includes an automatic update system that checks GitHub releases for new versions and allows users to update with a single click.
 
 ## How It Works
 
