@@ -372,7 +372,7 @@ Assert-XmlContains "$OutputDir\crs_basic.xml" "AccountReport>" "CRS has AccountR
 Assert-XmlContains "$OutputDir\crs_basic.xml" "DocRefId>" "CRS has DocRefId"
 
 Write-TestHeader "7.2 FATCA XML Structure"
-Assert-XmlContains "$OutputDir\fatca_basic.xml" "MessageSpec>" "FATCA has MessageSpec"
+Assert-XmlContains "$OutputDir\fatca_basic.xml" "MessageHeader>" "FATCA has MessageHeader"
 Assert-XmlContains "$OutputDir\fatca_basic.xml" "ReportingFI>" "FATCA has ReportingFI"
 Assert-XmlContains "$OutputDir\fatca_basic.xml" "AccountReport>" "FATCA has AccountReport"
 Assert-XmlContains "$OutputDir\fatca_basic.xml" "DocRefId>" "FATCA has DocRefId"

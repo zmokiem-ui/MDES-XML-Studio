@@ -1,72 +1,74 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<ftc:FATCA_OECD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ftc="urn:oecd:ties:fatca:v2" xmlns:sfa="urn:oecd:ties:stffatcatypes:v2" xmlns:html="http://www.w3.org/1999/xhtml" xsi:schemaLocation="urn:oecd:ties:fatca:v2 FatcaXML_v2.0.xsd" version="2.0">
-  <ftc:MessageSpec>
-    <sfa:SendingCompanyIN>A1B2C3.00000.SP.350</sfa:SendingCompanyIN>
-    <sfa:TransmittingCountry>NL</sfa:TransmittingCountry>
-    <sfa:ReceivingCountry>US</sfa:ReceivingCountry>
-    <sfa:MessageType>FATCA</sfa:MessageType>
-    <sfa:MessageRefId>NL2024US770487</sfa:MessageRefId>
-    <sfa:ReportingPeriod>2024-12-31</sfa:ReportingPeriod>
-    <sfa:Timestamp>2026-02-15T02:55:24Z</sfa:Timestamp>
-  </ftc:MessageSpec>
-  <ftc:FATCA>
-    <ftc:ReportingFI>
-      <sfa:ResCountryCode>NL</sfa:ResCountryCode>
-      <sfa:TIN issuedBy="NL">KTQDFL.99999.SL.532</sfa:TIN>
-      <sfa:Name>Owensfort Capital Bank</sfa:Name>
-      <sfa:Address>
+<oecd_ftc:FATCA_CRS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:oecd_ftc="urn:fatcacrs:ties:v2" xmlns:sfa_ftc="urn:oecd:ties:fatcacrstypes:v2" xmlns:sfa="urn:oecd:ties:stffatcatypes:v2" version="2.2" xsi:schemaLocation="urn:fatcacrs:ties:v1 FatcaCrs_v2.2.xsd">
+  <oecd_ftc:MessageHeader>
+    <sfa_ftc:SendingCompanyIN>A1B2C3.00000.SP.350</sfa_ftc:SendingCompanyIN>
+    <sfa_ftc:TransmittingCountry>NL</sfa_ftc:TransmittingCountry>
+    <sfa_ftc:ReceivingCountry>US</sfa_ftc:ReceivingCountry>
+    <sfa_ftc:MessageType>FATCA-CRS</sfa_ftc:MessageType>
+    <sfa_ftc:Warning>Education front fast standard myself condition ground adult foot player other ground.</sfa_ftc:Warning>
+    <sfa_ftc:Contact>Contactgegevens voor Rodriguez Trust Company</sfa_ftc:Contact>
+    <sfa_ftc:MessageRefId>NL2024A1B2C3.00000.SP.350MessageHeaderMessageRefID8697354962</sfa_ftc:MessageRefId>
+    <sfa_ftc:MessageTypeIndic>CRS701</sfa_ftc:MessageTypeIndic>
+    <sfa_ftc:ReportingPeriod>2024-12-31</sfa_ftc:ReportingPeriod>
+    <sfa_ftc:Timestamp>2026-03-30T00:16:08Z</sfa_ftc:Timestamp>
+  </oecd_ftc:MessageHeader>
+  <oecd_ftc:MessageBody>
+    <sfa_ftc:ReportingFI>
+      <sfa_ftc:ResCountryCode>NL</sfa_ftc:ResCountryCode>
+      <sfa_ftc:TIN issuedBy="US">93810.93810.SL.754</sfa_ftc:TIN>
+      <sfa_ftc:Name nameType="OECD207">Bank of Christophermouth</sfa_ftc:Name>
+      <sfa_ftc:Address legalAddressType="OECD301">
         <sfa:CountryCode>NL</sfa:CountryCode>
         <sfa:AddressFix>
-          <sfa:Street>StreetFormalAddress</sfa:Street>
-          <sfa:BuildingIdentifier>12 AdditionalAddress</sfa:BuildingIdentifier>
-          <sfa:City>CityFormalAddress</sfa:City>
+          <sfa:Street>Tammy Shore</sfa:Street>
+          <sfa:BuildingIdentifier>143</sfa:BuildingIdentifier>
+          <sfa:SuiteIdentifier>AddressAddressFixSuiteIdentifier. abc</sfa:SuiteIdentifier>
+          <sfa:FloorIdentifier>AddressAddressFixFloorIdentifier. abc</sfa:FloorIdentifier>
+          <sfa:DistrictName>AddressAddressFixDistrictName. abc</sfa:DistrictName>
+          <sfa:POB>AddressAddressFixPOB. abc</sfa:POB>
+          <sfa:PostCode>73697</sfa:PostCode>
+          <sfa:City>Michaelfurt</sfa:City>
+          <sfa:CountrySubentity>AddressAddressFixCountrySubentity. abc</sfa:CountrySubentity>
         </sfa:AddressFix>
-      </sfa:Address>
-      <ftc:FilerCategory>FATCA601</ftc:FilerCategory>
-      <ftc:DocSpec>
-        <ftc:DocTypeIndic>FATCA11</ftc:DocTypeIndic>
-        <ftc:DocRefId>KTQDFL9999.2024.000001</ftc:DocRefId>
-      </ftc:DocSpec>
-    </ftc:ReportingFI>
-    <ftc:ReportingGroup>
-      <ftc:AccountReport>
-        <ftc:DocSpec>
-          <ftc:DocTypeIndic>FATCA11</ftc:DocTypeIndic>
-          <ftc:DocRefId>KTQDFL9999.2024.000002</ftc:DocRefId>
-        </ftc:DocSpec>
-        <ftc:AccountNumber AcctNumberType="OECD605">8479902459</ftc:AccountNumber>
-        <ftc:AccountClosed>false</ftc:AccountClosed>
-        <ftc:AccountHolder>
-          <ftc:Individual>
-            <sfa:ResCountryCode>DE</sfa:ResCountryCode>
-            <sfa:TIN issuedBy="DE">204-96-9935</sfa:TIN>
-            <sfa:Name>
-              <sfa:FirstName>Brandon</sfa:FirstName>
-              <sfa:LastName>Jacobs</sfa:LastName>
-            </sfa:Name>
-            <sfa:Address>
-              <sfa:CountryCode>RS</sfa:CountryCode>
-              <sfa:AddressFree>David Square 33, Phillipsborough</sfa:AddressFree>
-            </sfa:Address>
-            <sfa:BirthInfo>
-              <sfa:BirthDate>1999-09-25</sfa:BirthDate>
-            </sfa:BirthInfo>
-          </ftc:Individual>
-        </ftc:AccountHolder>
-        <ftc:AccountBalance currCode="USD">3357.79</ftc:AccountBalance>
-        <ftc:Payment>
-          <ftc:Type>FATCA502</ftc:Type>
-          <ftc:PaymentAmnt currCode="USD">490.38</ftc:PaymentAmnt>
-        </ftc:Payment>
-        <ftc:Payment>
-          <ftc:Type>FATCA504</ftc:Type>
-          <ftc:PaymentAmnt currCode="USD">174.21</ftc:PaymentAmnt>
-        </ftc:Payment>
-        <ftc:Payment>
-          <ftc:Type>FATCA503</ftc:Type>
-          <ftc:PaymentAmnt currCode="USD">549.98</ftc:PaymentAmnt>
-        </ftc:Payment>
-      </ftc:AccountReport>
-    </ftc:ReportingGroup>
-  </ftc:FATCA>
-</ftc:FATCA_OECD>
+        <sfa:AddressFree>AddresAddressFixAddressfree. abc</sfa:AddressFree>
+      </sfa_ftc:Address>
+      <sfa_ftc:FilerCategory>FATCA601</sfa_ftc:FilerCategory>
+      <sfa_ftc:DocSpec>
+        <sfa_ftc:DocTypeIndic>OECD11</sfa_ftc:DocTypeIndic>
+        <sfa_ftc:DocRefId>NL2024A1B2C3.00000.SP.3500000000000000001</sfa_ftc:DocRefId>
+      </sfa_ftc:DocSpec>
+    </sfa_ftc:ReportingFI>
+    <sfa_ftc:ReportingGroup>
+      <sfa_ftc:AccountReport>
+        <sfa_ftc:DocSpec>
+          <sfa_ftc:DocTypeIndic>OECD11</sfa_ftc:DocTypeIndic>
+          <sfa_ftc:DocRefId>NL2024A1B2C3.00000.SP.3500000000000000002</sfa_ftc:DocRefId>
+        </sfa_ftc:DocSpec>
+        <sfa_ftc:AccountNumber AccNumberType="OECD604" UndocumentedAccount="false" ClosedAccount="false" DormantAccount="true">9963334018</sfa_ftc:AccountNumber>
+        <sfa_ftc:AccountHolder>
+          <sfa_ftc:Individual>
+            <sfa_ftc:ResCountryCode>DE</sfa_ftc:ResCountryCode>
+            <sfa_ftc:TIN issuedBy="DE">642621108</sfa_ftc:TIN>
+            <sfa_ftc:Name nameType="OECD202">
+              <sfa:FirstName>Julie</sfa:FirstName>
+              <sfa:LastName>Garrison</sfa:LastName>
+            </sfa_ftc:Name>
+            <sfa_ftc:Address>
+              <sfa:CountryCode>DM</sfa:CountryCode>
+              <sfa:AddressFree>Johnny Lights 204, Mclaughlinbury</sfa:AddressFree>
+            </sfa_ftc:Address>
+          </sfa_ftc:Individual>
+        </sfa_ftc:AccountHolder>
+        <sfa_ftc:AccountBalance currCode="GBP">264995.82</sfa_ftc:AccountBalance>
+        <sfa_ftc:Payment>
+          <sfa_ftc:Type>CRS503</sfa_ftc:Type>
+          <sfa_ftc:PaymentAmnt currCode="GBP">43404.14</sfa_ftc:PaymentAmnt>
+        </sfa_ftc:Payment>
+        <sfa_ftc:Payment>
+          <sfa_ftc:Type>CRS501</sfa_ftc:Type>
+          <sfa_ftc:PaymentAmnt currCode="GBP">40855.31</sfa_ftc:PaymentAmnt>
+        </sfa_ftc:Payment>
+      </sfa_ftc:AccountReport>
+    </sfa_ftc:ReportingGroup>
+  </oecd_ftc:MessageBody>
+</oecd_ftc:FATCA_CRS>

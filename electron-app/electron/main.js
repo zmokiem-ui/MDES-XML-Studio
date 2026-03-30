@@ -1266,7 +1266,7 @@ ipcMain.handle('validate-xml-content', async (event, content, module = 'crs') =>
   try {
     // Auto-detect module from XML content
     let detectedModule = module;
-    if (content.includes('FATCA_OECD') || content.includes('fatca:')) detectedModule = 'fatca';
+    if (content.includes('FATCA_OECD') || content.includes('FATCA_CRS') || content.includes('fatca:') || content.includes('oecd_ftc:')) detectedModule = 'fatca';
     else if (content.includes('CBC_OECD') || content.includes('CbcBody')) detectedModule = 'cbc';
     else if (content.includes('CRS_OECD') || content.includes('crs:')) detectedModule = 'crs';
 

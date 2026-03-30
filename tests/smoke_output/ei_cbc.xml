@@ -10,14 +10,14 @@
     <ns0:Contact>Test Data Generator</ns0:Contact>
     <ns0:MessageTypeIndic>CBC401</ns0:MessageTypeIndic>
     <ns0:ReportingPeriod>2024-12-31</ns0:ReportingPeriod>
-    <ns0:Timestamp>2026-02-27T19:07:48.012037Z</ns0:Timestamp>
+    <ns0:Timestamp>2026-03-30T03:12:16.044612Z</ns0:Timestamp>
   </ns0:MessageSpec>
   <ns0:CbcBody>
     <ns0:ReportingEntity>
       <ns0:Entity>
         <ns0:ResCountryCode>NL</ns0:ResCountryCode>
         </ns0:Entity>
-      <ns0:NameMNEGroup>Butler, Joseph and Gray Holdings Group</ns0:NameMNEGroup>
+      <ns0:NameMNEGroup>Rosario and Sons Holdings Group</ns0:NameMNEGroup>
       <ns0:ReportingRole>CBC701</ns0:ReportingRole>
       <ns0:ReportingPeriod>
         <ns0:StartDate>2024-01-01</ns0:StartDate>
@@ -31,80 +31,104 @@
       <ns0:DocSpec>
         <ns1:DocTypeIndic>OECD11</ns1:DocTypeIndic>
         </ns0:DocSpec>
-      <ns0:ResCountryCode>IE</ns0:ResCountryCode>
+      <ns0:ResCountryCode>SG</ns0:ResCountryCode>
       <ns0:Summary>
         <ns0:Revenues>
-          <ns0:Unrelated currCode="USD">84686000</ns0:Unrelated>
-          <ns0:Related currCode="USD">41662000</ns0:Related>
-          <ns0:Total currCode="USD">126348000</ns0:Total>
+          <ns0:Unrelated currCode="EUR">7784000</ns0:Unrelated>
+          <ns0:Related currCode="EUR">15399000</ns0:Related>
+          <ns0:Total currCode="EUR">23183000</ns0:Total>
         </ns0:Revenues>
-        <ns0:ProfitOrLoss currCode="USD">28042963</ns0:ProfitOrLoss>
-        <ns0:TaxPaid currCode="USD">7049756</ns0:TaxPaid>
-        <ns0:TaxAccrued currCode="USD">7886224</ns0:TaxAccrued>
-        <ns0:Capital currCode="USD">205364000</ns0:Capital>
-        <ns0:Earnings currCode="USD">27196608</ns0:Earnings>
-        <ns0:NbEmployees>1331</ns0:NbEmployees>
-        <ns0:Assets currCode="USD">416844912</ns0:Assets>
+        <ns0:ProfitOrLoss currCode="EUR">3959161</ns0:ProfitOrLoss>
+        <ns0:TaxPaid currCode="EUR">1181363</ns0:TaxPaid>
+        <ns0:TaxAccrued currCode="EUR">1258513</ns0:TaxAccrued>
+        <ns0:Capital currCode="EUR">57358000</ns0:Capital>
+        <ns0:Earnings currCode="EUR">2790153</ns0:Earnings>
+        <ns0:NbEmployees>4328</ns0:NbEmployees>
+        <ns0:Assets currCode="EUR">59254456</ns0:Assets>
       </ns0:Summary>
       <ns0:ConstEntities>
         <ns0:ConstEntity>
-          <ns0:ResCountryCode>IE</ns0:ResCountryCode>
-          <ns0:TIN issuedBy="IE">IE887316231</ns0:TIN>
+          <ns0:ResCountryCode>SG</ns0:ResCountryCode>
           </ns0:ConstEntity>
         <ns0:Role>CBC802</ns0:Role>
-        <ns0:IncorpCountryCode>NL</ns0:IncorpCountryCode>
-        <ns0:BizActivities>CBC502</ns0:BizActivities>
-        <ns0:BizActivities>CBC504</ns0:BizActivities>
+        <ns0:IncorpCountryCode>US</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC508</ns0:BizActivities>
+        <ns0:OtherEntityInfo>Additional information for entity 1</ns0:OtherEntityInfo>
       </ns0:ConstEntities>
       <ns0:ConstEntities>
         <ns0:ConstEntity>
-          <ns0:ResCountryCode>IE</ns0:ResCountryCode>
+          <ns0:ResCountryCode>SG</ns0:ResCountryCode>
           </ns0:ConstEntity>
-        <ns0:Role>CBC803</ns0:Role>
-        <ns0:IncorpCountryCode>IE</ns0:IncorpCountryCode>
-        <ns0:BizActivities>CBC511</ns0:BizActivities>
-        <ns0:BizActivities>CBC503</ns0:BizActivities>
+        <ns0:Role>CBC802</ns0:Role>
+        <ns0:IncorpCountryCode>SG</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC510</ns0:BizActivities>
         <ns0:OtherEntityInfo>Additional information for entity 2</ns0:OtherEntityInfo>
       </ns0:ConstEntities>
       <ns0:ConstEntities>
         <ns0:ConstEntity>
-          <ns0:ResCountryCode>IE</ns0:ResCountryCode>
-          </ns0:ConstEntity>
+          <ns0:ResCountryCode>SG</ns0:ResCountryCode>
+          <ns0:Address>
+            <ns0:CountryCode>SG</ns0:CountryCode>
+            <ns0:AddressFix>
+              <ns0:Street>4986 Dominguez Flat</ns0:Street>
+              <ns0:BuildingIdentifier>230</ns0:BuildingIdentifier>
+              <ns0:PostCode>47691</ns0:PostCode>
+              <ns0:City>Hernandezton</ns0:City>
+            </ns0:AddressFix>
+          </ns0:Address>
+        </ns0:ConstEntity>
         <ns0:Role>CBC802</ns0:Role>
-        <ns0:IncorpCountryCode>IE</ns0:IncorpCountryCode>
-        <ns0:BizActivities>CBC510</ns0:BizActivities>
+        <ns0:IncorpCountryCode>FR</ns0:IncorpCountryCode>
         <ns0:BizActivities>CBC505</ns0:BizActivities>
-        <ns0:OtherEntityInfo>Additional information for entity 3</ns0:OtherEntityInfo>
       </ns0:ConstEntities>
     </ns0:CbcReports>
     <ns0:CbcReports>
       <ns0:DocSpec>
         <ns1:DocTypeIndic>OECD11</ns1:DocTypeIndic>
         </ns0:DocSpec>
-      <ns0:ResCountryCode>JP</ns0:ResCountryCode>
+      <ns0:ResCountryCode>GB</ns0:ResCountryCode>
       <ns0:Summary>
         <ns0:Revenues>
-          <ns0:Unrelated currCode="USD">28231000</ns0:Unrelated>
-          <ns0:Related currCode="USD">5363000</ns0:Related>
-          <ns0:Total currCode="USD">33594000</ns0:Total>
+          <ns0:Unrelated currCode="EUR">83032000</ns0:Unrelated>
+          <ns0:Related currCode="EUR">4136000</ns0:Related>
+          <ns0:Total currCode="EUR">87168000</ns0:Total>
         </ns0:Revenues>
-        <ns0:ProfitOrLoss currCode="USD">3290363</ns0:ProfitOrLoss>
-        <ns0:TaxPaid currCode="USD">1071291</ns0:TaxPaid>
-        <ns0:TaxAccrued currCode="USD">1111236</ns0:TaxAccrued>
-        <ns0:Capital currCode="USD">62732000</ns0:Capital>
-        <ns0:Earnings currCode="USD">2130909</ns0:Earnings>
-        <ns0:NbEmployees>1695</ns0:NbEmployees>
-        <ns0:Assets currCode="USD">107775511</ns0:Assets>
+        <ns0:ProfitOrLoss currCode="EUR">24647397</ns0:ProfitOrLoss>
+        <ns0:TaxPaid currCode="EUR">5991488</ns0:TaxPaid>
+        <ns0:TaxAccrued currCode="EUR">7008880</ns0:TaxAccrued>
+        <ns0:Capital currCode="EUR">255003000</ns0:Capital>
+        <ns0:Earnings currCode="EUR">12877059</ns0:Earnings>
+        <ns0:NbEmployees>999</ns0:NbEmployees>
+        <ns0:Assets currCode="EUR">668114245</ns0:Assets>
       </ns0:Summary>
       <ns0:ConstEntities>
         <ns0:ConstEntity>
-          <ns0:ResCountryCode>JP</ns0:ResCountryCode>
+          <ns0:ResCountryCode>GB</ns0:ResCountryCode>
           </ns0:ConstEntity>
-        <ns0:Role>CBC802</ns0:Role>
-        <ns0:IncorpCountryCode>US</ns0:IncorpCountryCode>
-        <ns0:BizActivities>CBC502</ns0:BizActivities>
-        <ns0:BizActivities>CBC507</ns0:BizActivities>
+        <ns0:Role>CBC801</ns0:Role>
+        <ns0:IncorpCountryCode>GB</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC508</ns0:BizActivities>
+        <ns0:BizActivities>CBC506</ns0:BizActivities>
         <ns0:OtherEntityInfo>Additional information for entity 1</ns0:OtherEntityInfo>
+      </ns0:ConstEntities>
+      <ns0:ConstEntities>
+        <ns0:ConstEntity>
+          <ns0:ResCountryCode>GB</ns0:ResCountryCode>
+          </ns0:ConstEntity>
+        <ns0:Role>CBC801</ns0:Role>
+        <ns0:IncorpCountryCode>GB</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC507</ns0:BizActivities>
+        <ns0:BizActivities>CBC502</ns0:BizActivities>
+      </ns0:ConstEntities>
+      <ns0:ConstEntities>
+        <ns0:ConstEntity>
+          <ns0:ResCountryCode>GB</ns0:ResCountryCode>
+          </ns0:ConstEntity>
+        <ns0:Role>CBC803</ns0:Role>
+        <ns0:IncorpCountryCode>GB</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC503</ns0:BizActivities>
+        <ns0:BizActivities>CBC505</ns0:BizActivities>
+        <ns0:OtherEntityInfo>Additional information for entity 3</ns0:OtherEntityInfo>
       </ns0:ConstEntities>
     </ns0:CbcReports>
     <ns0:CbcReports>
@@ -114,35 +138,52 @@
       <ns0:ResCountryCode>FR</ns0:ResCountryCode>
       <ns0:Summary>
         <ns0:Revenues>
-          <ns0:Unrelated currCode="USD">78275000</ns0:Unrelated>
-          <ns0:Related currCode="USD">9439000</ns0:Related>
-          <ns0:Total currCode="USD">87714000</ns0:Total>
+          <ns0:Unrelated currCode="EUR">61335000</ns0:Unrelated>
+          <ns0:Related currCode="EUR">15574000</ns0:Related>
+          <ns0:Total currCode="EUR">76909000</ns0:Total>
         </ns0:Revenues>
-        <ns0:ProfitOrLoss currCode="USD">14445727</ns0:ProfitOrLoss>
-        <ns0:TaxPaid currCode="USD">1811780</ns0:TaxPaid>
-        <ns0:TaxAccrued currCode="USD">2245539</ns0:TaxAccrued>
-        <ns0:Capital currCode="USD">62844000</ns0:Capital>
-        <ns0:Earnings currCode="USD">14173666</ns0:Earnings>
-        <ns0:NbEmployees>4027</ns0:NbEmployees>
-        <ns0:Assets currCode="USD">158886619</ns0:Assets>
+        <ns0:ProfitOrLoss currCode="EUR">9323251</ns0:ProfitOrLoss>
+        <ns0:TaxPaid currCode="EUR">2479675</ns0:TaxPaid>
+        <ns0:TaxAccrued currCode="EUR">2909386</ns0:TaxAccrued>
+        <ns0:Capital currCode="EUR">228341000</ns0:Capital>
+        <ns0:Earnings currCode="EUR">7864142</ns0:Earnings>
+        <ns0:NbEmployees>2086</ns0:NbEmployees>
+        <ns0:Assets currCode="EUR">664567446</ns0:Assets>
       </ns0:Summary>
       <ns0:ConstEntities>
         <ns0:ConstEntity>
           <ns0:ResCountryCode>FR</ns0:ResCountryCode>
           </ns0:ConstEntity>
         <ns0:Role>CBC801</ns0:Role>
-        <ns0:IncorpCountryCode>FR</ns0:IncorpCountryCode>
-        <ns0:BizActivities>CBC507</ns0:BizActivities>
+        <ns0:IncorpCountryCode>US</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC501</ns0:BizActivities>
       </ns0:ConstEntities>
       <ns0:ConstEntities>
         <ns0:ConstEntity>
           <ns0:ResCountryCode>FR</ns0:ResCountryCode>
           </ns0:ConstEntity>
         <ns0:Role>CBC801</ns0:Role>
-        <ns0:IncorpCountryCode>AU</ns0:IncorpCountryCode>
-        <ns0:BizActivities>CBC503</ns0:BizActivities>
+        <ns0:IncorpCountryCode>JP</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC507</ns0:BizActivities>
         <ns0:OtherEntityInfo>Additional information for entity 2</ns0:OtherEntityInfo>
       </ns0:ConstEntities>
+      <ns0:ConstEntities>
+        <ns0:ConstEntity>
+          <ns0:ResCountryCode>FR</ns0:ResCountryCode>
+          </ns0:ConstEntity>
+        <ns0:Role>CBC802</ns0:Role>
+        <ns0:IncorpCountryCode>FR</ns0:IncorpCountryCode>
+        <ns0:BizActivities>CBC502</ns0:BizActivities>
+        <ns0:BizActivities>CBC501</ns0:BizActivities>
+        <ns0:OtherEntityInfo>Additional information for entity 3</ns0:OtherEntityInfo>
+      </ns0:ConstEntities>
     </ns0:CbcReports>
+    <ns0:AdditionalInfo>
+      <ns0:DocSpec>
+        <ns1:DocTypeIndic>OECD11</ns1:DocTypeIndic>
+        </ns0:DocSpec>
+      <ns0:OtherInfo>Additional information for SG jurisdiction</ns0:OtherInfo>
+      <ns0:ResCountryCode>SG</ns0:ResCountryCode>
+    </ns0:AdditionalInfo>
   </ns0:CbcBody>
 </ns0:CBC_OECD>

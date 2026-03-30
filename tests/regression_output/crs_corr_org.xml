@@ -5,11 +5,11 @@
     <crs:TransmittingCountry>NL</crs:TransmittingCountry>
     <crs:ReceivingCountry>DE</crs:ReceivingCountry>
     <crs:MessageType>CRS</crs:MessageType>
-    <crs:MessageRefId>NL2024123456789000000001_CORR_20260215055521_C16C8I</crs:MessageRefId>
+    <crs:MessageRefId>NL2024123456789000000001_CORR_20260330031605_W6NIQ0</crs:MessageRefId>
     <crs:MessageTypeIndic>CRS702</crs:MessageTypeIndic>
     <crs:CorrMessageRefId>NL2024123456789000000001</crs:CorrMessageRefId>
 <crs:ReportingPeriod>2024-12-31</crs:ReportingPeriod>
-    <crs:Timestamp>2026-02-15T05:55:21Z</crs:Timestamp>
+    <crs:Timestamp>2026-03-30T03:16:05Z</crs:Timestamp>
   </crs:MessageSpec>
   <crs:CrsBody>
     <crs:ReportingFI>
@@ -40,7 +40,7 @@
       <crs:AccountReport>
         <crs:DocSpec>
           <stf:DocTypeIndic>OECD12</stf:DocTypeIndic>
-          <stf:DocRefId>NL2024123456789000000005_ARCORR_20260215055521_RIFQZB</stf:DocRefId>
+          <stf:DocRefId>NL2024123456789000000005_ARCORR_20260330031605_2MIYWZ</stf:DocRefId>
         <stf:CorrDocRefId>NL2024123456789000000005</stf:CorrDocRefId>
 </crs:DocSpec>
         <crs:AccountNumber AcctNumberType="OECD605" ClosedAccount="false" DormantAccount="false">ACC0083651971</crs:AccountNumber>
@@ -81,7 +81,7 @@
           </crs:Individual>
           <crs:CtrlgPersonType>CRS801</crs:CtrlgPersonType>
         </crs:ControllingPerson>
-        <crs:AccountBalance currCode="EUR">232773.93</crs:AccountBalance>
+        <crs:AccountBalance currCode="EUR">170001.87</crs:AccountBalance>
         <crs:Payment>
           <crs:Type>CRS504</crs:Type>
           <crs:PaymentAmnt currCode="EUR">19523.12</crs:PaymentAmnt>

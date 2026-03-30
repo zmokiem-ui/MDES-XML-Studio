@@ -1,106 +1,105 @@
 <?xml version='1.0' encoding='utf-8'?>
-<ns0:FATCA_OECD xmlns:ns0="urn:oecd:ties:fatca:v2" xmlns:ns2="urn:oecd:ties:stffatcatypes:v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oecd:ties:fatca:v2 FatcaXML_v2.0.xsd" version="2.0">
-  <ns0:MessageSpec>
+<ns0:FATCA_CRS xmlns:ns0="urn:fatcacrs:ties:v2" xmlns:ns2="urn:oecd:ties:fatcacrstypes:v2" xmlns:ns3="urn:oecd:ties:stffatcatypes:v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.2" xsi:schemaLocation="urn:fatcacrs:ties:v1 FatcaCrs_v2.2.xsd">
+  <ns0:MessageHeader>
     <ns2:SendingCompanyIN>A1B2C3.00000.SP.350</ns2:SendingCompanyIN>
     <ns2:TransmittingCountry>NL</ns2:TransmittingCountry>
     <ns2:ReceivingCountry>US</ns2:ReceivingCountry>
-    <ns2:MessageType>FATCA</ns2:MessageType>
+    <ns2:MessageType>FATCA-CRS</ns2:MessageType>
+    <ns2:Warning>Education front fast standard myself condition ground adult foot player other ground.</ns2:Warning>
+    <ns2:Contact>Contactgegevens voor Rodriguez Trust Company</ns2:Contact>
+    <ns2:MessageTypeIndic>CRS701</ns2:MessageTypeIndic>
     <ns2:ReportingPeriod>2024-12-31</ns2:ReportingPeriod>
-    <ns2:Timestamp>2026-02-15T02:55:23Z</ns2:Timestamp>
-  </ns0:MessageSpec>
-  <ns0:FATCA>
-    <ns0:ReportingFI>
+    <ns2:Timestamp>2026-03-30T00:16:07Z</ns2:Timestamp>
+  </ns0:MessageHeader>
+  <ns0:MessageBody>
+    <ns2:ReportingFI>
       <ns2:ResCountryCode>NL</ns2:ResCountryCode>
-      <ns2:Address>
-        <ns2:CountryCode>NL</ns2:CountryCode>
-        <ns2:AddressFix>
-          <ns2:Street>StreetFormalAddress</ns2:Street>
-          <ns2:BuildingIdentifier>12 AdditionalAddress</ns2:BuildingIdentifier>
-          <ns2:City>CityFormalAddress</ns2:City>
-        </ns2:AddressFix>
-      </ns2:Address>
-      <ns0:DocSpec>
-        <ns0:DocTypeIndic>FATCA11</ns0:DocTypeIndic>
-        </ns0:DocSpec>
-    </ns0:ReportingFI>
-    <ns0:ReportingGroup>
-      <ns0:AccountReport>
-        <ns0:DocSpec>
-          <ns0:DocTypeIndic>FATCA11</ns0:DocTypeIndic>
-          </ns0:DocSpec>
-        <ns0:AccountNumber AcctNumberType="OECD605">8479902459</ns0:AccountNumber>
-        <ns0:AccountClosed>false</ns0:AccountClosed>
-        <ns0:AccountHolder>
-          <ns0:Individual>
+      <ns2:DocSpec>
+        <ns2:DocTypeIndic>OECD11</ns2:DocTypeIndic>
+        </ns2:DocSpec>
+    </ns2:ReportingFI>
+    <ns2:ReportingGroup>
+      <ns2:AccountReport>
+        <ns2:DocSpec>
+          <ns2:DocTypeIndic>OECD11</ns2:DocTypeIndic>
+          <ns2:DocRefId>NL2024A1B2C3.00000.SP.3500000000000000002</ns2:DocRefId>
+        </ns2:DocSpec>
+        <ns2:AccountHolder>
+          <ns2:Individual>
             <ns2:ResCountryCode>DE</ns2:ResCountryCode>
-            <ns2:BirthInfo>
-              <ns2:BirthDate>1999-09-25</ns2:BirthDate>
-            </ns2:BirthInfo>
-          </ns0:Individual>
-        </ns0:AccountHolder>
-        <ns0:AccountBalance currCode="USD">3357.79</ns0:AccountBalance>
-        <ns0:Payment>
-          <ns0:Type>FATCA502</ns0:Type>
-          <ns0:PaymentAmnt currCode="USD">490.38</ns0:PaymentAmnt>
-        </ns0:Payment>
-        <ns0:Payment>
-          <ns0:Type>FATCA504</ns0:Type>
-          <ns0:PaymentAmnt currCode="USD">174.21</ns0:PaymentAmnt>
-        </ns0:Payment>
-        <ns0:Payment>
-          <ns0:Type>FATCA503</ns0:Type>
-          <ns0:PaymentAmnt currCode="USD">549.98</ns0:PaymentAmnt>
-        </ns0:Payment>
-      </ns0:AccountReport>
-      <ns0:AccountReport>
-        <ns0:DocSpec>
-          <ns0:DocTypeIndic>FATCA11</ns0:DocTypeIndic>
-          </ns0:DocSpec>
-        <ns0:AccountClosed>false</ns0:AccountClosed>
-        <ns0:AccountHolder>
-          <ns0:Individual>
+            <ns2:Name nameType="OECD202">
+              <ns3:FirstName>Julie</ns3:FirstName>
+              <ns3:LastName>Garrison</ns3:LastName>
+            </ns2:Name>
+            </ns2:Individual>
+        </ns2:AccountHolder>
+        <ns2:AccountBalance currCode="GBP">264995.82</ns2:AccountBalance>
+        <ns2:Payment>
+          <ns2:Type>CRS503</ns2:Type>
+          <ns2:PaymentAmnt currCode="GBP">43404.14</ns2:PaymentAmnt>
+        </ns2:Payment>
+        <ns2:Payment>
+          <ns2:Type>CRS501</ns2:Type>
+          <ns2:PaymentAmnt currCode="GBP">40855.31</ns2:PaymentAmnt>
+        </ns2:Payment>
+      </ns2:AccountReport>
+      <ns2:AccountReport>
+        <ns2:DocSpec>
+          <ns2:DocTypeIndic>OECD11</ns2:DocTypeIndic>
+          </ns2:DocSpec>
+        <ns2:AccountHolder>
+          <ns2:Individual>
             <ns2:ResCountryCode>FR</ns2:ResCountryCode>
-            <ns2:BirthInfo>
-              <ns2:BirthDate>1977-04-13</ns2:BirthDate>
-            </ns2:BirthInfo>
-          </ns0:Individual>
-        </ns0:AccountHolder>
-        <ns0:AccountBalance currCode="GBP">49077.71</ns0:AccountBalance>
-        <ns0:Payment>
-          <ns0:Type>FATCA501</ns0:Type>
-          <ns0:PaymentAmnt currCode="GBP">5638.43</ns0:PaymentAmnt>
-        </ns0:Payment>
-        <ns0:Payment>
-          <ns0:Type>FATCA503</ns0:Type>
-          <ns0:PaymentAmnt currCode="GBP">5874.45</ns0:PaymentAmnt>
-        </ns0:Payment>
-      </ns0:AccountReport>
-      <ns0:AccountReport>
-        <ns0:DocSpec>
-          <ns0:DocTypeIndic>FATCA11</ns0:DocTypeIndic>
-          <ns0:DocRefId>KTQDFL9999.2024.000004</ns0:DocRefId>
-        </ns0:DocSpec>
-        <ns0:AccountClosed>true</ns0:AccountClosed>
-        <ns0:AccountHolder>
-          <ns0:Organisation>
-            <ns2:ResCountryCode>DE</ns2:ResCountryCode>
-            </ns0:Organisation>
-          <ns0:AcctHolderType>FATCA103</ns0:AcctHolderType>
-        </ns0:AccountHolder>
-        <ns0:AccountBalance currCode="GBP">207449.31</ns0:AccountBalance>
-        <ns0:SubstantialOwner>
-          <ns0:Individual>
-            <ns2:ResCountryCode>DE</ns2:ResCountryCode>
-            <ns2:BirthInfo>
-              <ns2:BirthDate>2001-09-25</ns2:BirthDate>
-            </ns2:BirthInfo>
-          </ns0:Individual>
-        </ns0:SubstantialOwner>
-        <ns0:Payment>
-          <ns0:Type>FATCA502</ns0:Type>
-          <ns0:PaymentAmnt currCode="GBP">20294.65</ns0:PaymentAmnt>
-        </ns0:Payment>
-      </ns0:AccountReport>
-    </ns0:ReportingGroup>
-  </ns0:FATCA>
-</ns0:FATCA_OECD>
+            </ns2:Individual>
+        </ns2:AccountHolder>
+        <ns2:AccountBalance currCode="GBP">49077.71</ns2:AccountBalance>
+        <ns2:Payment>
+          <ns2:Type>CRS501</ns2:Type>
+          <ns2:PaymentAmnt currCode="GBP">5638.43</ns2:PaymentAmnt>
+        </ns2:Payment>
+        <ns2:Payment>
+          <ns2:Type>CRS503</ns2:Type>
+          <ns2:PaymentAmnt currCode="GBP">5874.45</ns2:PaymentAmnt>
+        </ns2:Payment>
+      </ns2:AccountReport>
+      <ns2:AccountReport>
+        <ns2:DocSpec>
+          <ns2:DocTypeIndic>OECD11</ns2:DocTypeIndic>
+          </ns2:DocSpec>
+        <ns2:AccountHolder>
+          <ns2:Organisation>
+            <ns2:ResCountryCode>FR</ns2:ResCountryCode>
+            <ns2:Name nameType="OECD207">North Julie Capital Bank</ns2:Name>
+            <ns2:ResCountryCode>US</ns2:ResCountryCode>
+          </ns2:Organisation>
+          <ns2:AcctHolderTypeCRS>CRS102</ns2:AcctHolderTypeCRS>
+          <ns2:AcctHolderTypeFATCA>FATCA102</ns2:AcctHolderTypeFATCA>
+        </ns2:AccountHolder>
+        <ns2:ControllingPerson>
+          <ns2:Individual>
+            <ns2:ResCountryCode>FR</ns2:ResCountryCode>
+            <ns2:TIN issuedBy="FR">481469012</ns2:TIN>
+            <ns2:Name nameType="OECD202">
+              <ns3:FirstName>Susan</ns3:FirstName>
+              <ns3:LastName>Hester</ns3:LastName>
+            </ns2:Name>
+            </ns2:Individual>
+          <ns2:CtrlgPersonType>CRS811</ns2:CtrlgPersonType>
+        </ns2:ControllingPerson>
+        <ns2:AccountBalance currCode="USD">105311.94</ns2:AccountBalance>
+        <ns2:Payment>
+          <ns2:Type>CRS502</ns2:Type>
+          <ns2:PaymentAmnt currCode="USD">4322.68</ns2:PaymentAmnt>
+        </ns2:Payment>
+        <ns2:Payment>
+          <ns2:Type>CRS504</ns2:Type>
+          <ns2:PaymentAmnt currCode="USD">6454.58</ns2:PaymentAmnt>
+        </ns2:Payment>
+        <ns2:Payment>
+          <ns2:Type>CRS502</ns2:Type>
+          <ns2:PaymentAmnt currCode="USD">14751.75</ns2:PaymentAmnt>
+        </ns2:Payment>
+      </ns2:AccountReport>
+    </ns2:ReportingGroup>
+  </ns0:MessageBody>
+</ns0:FATCA_CRS>

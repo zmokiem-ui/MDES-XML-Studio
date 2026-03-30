@@ -8,7 +8,7 @@
     <ns0:MessageRefId>NL2024123456789000000001</ns0:MessageRefId>
     <ns0:MessageTypeIndic>CRS701</ns0:MessageTypeIndic>
     <ns0:ReportingPeriod>2024-12-31</ns0:ReportingPeriod>
-    <ns0:Timestamp>2026-02-15T02:55:17.314306Z</ns0:Timestamp>
+    <ns0:Timestamp>2026-03-30T00:15:59.881637Z</ns0:Timestamp>
   </ns0:MessageSpec>
   <ns0:CrsBody>
     <ns0:ReportingFI>
@@ -55,19 +55,18 @@
               <ns2:AddressFree>Nicole Stream 883, North Andrea 49606</ns2:AddressFree>
             </ns0:Address>
             <ns0:BirthInfo>
-              <ns0:BirthDate>1999-01-29</ns0:BirthDate>
+              <ns0:BirthDate>1999-03-13</ns0:BirthDate>
             </ns0:BirthInfo>
           </ns0:Individual>
         </ns0:AccountHolder>
-        <ns0:AccountBalance currCode="GBP">6348.24</ns0:AccountBalance>
-        <ns0:Payment>
-          <ns0:Type>CRS501</ns0:Type>
+        <ns0:AccountBalance currCode="GBP">INVALID_AMOUNT</ns0:AccountBalance>
+        <ns0:Payment>999999999999999.99<ns0:Type>CRS501</ns0:Type>
           <ns0:PaymentAmnt currCode="GBP">798.20</ns0:PaymentAmnt>
         </ns0:Payment>
         <ns0:Payment>INVALID_AMOUNT<ns0:Type>CRS502</ns0:Type>
           <ns0:PaymentAmnt currCode="GBP">707.74</ns0:PaymentAmnt>
         </ns0:Payment>
-        <ns0:Payment>-999999.99<ns0:Type>CRS502</ns0:Type>
+        <ns0:Payment>INVALID_AMOUNT<ns0:Type>CRS502</ns0:Type>
           <ns0:PaymentAmnt currCode="GBP">260.57</ns0:PaymentAmnt>
         </ns0:Payment>
       </ns0:AccountReport>
@@ -90,19 +89,18 @@
               <ns2:AddressFree>Heather Motorway 697, Port Jamie 13845</ns2:AddressFree>
             </ns0:Address>
             <ns0:BirthInfo>
-              <ns0:BirthDate>2007-02-09</ns0:BirthDate>
+              <ns0:BirthDate>2007-03-24</ns0:BirthDate>
             </ns0:BirthInfo>
           </ns0:Individual>
         </ns0:AccountHolder>
-        <ns0:AccountBalance currCode="GBP">999999999999999.99</ns0:AccountBalance>
-        <ns0:Payment>
-          <ns0:Type>CRS504</ns0:Type>
+        <ns0:AccountBalance currCode="GBP">INVALID_AMOUNT</ns0:AccountBalance>
+        <ns0:Payment>NOT_A_NUMBER<ns0:Type>CRS504</ns0:Type>
           <ns0:PaymentAmnt currCode="GBP">13742.50</ns0:PaymentAmnt>
         </ns0:Payment>
-        <ns0:Payment>999999999999999.99<ns0:Type>CRS501</ns0:Type>
+        <ns0:Payment>NOT_A_NUMBER<ns0:Type>CRS501</ns0:Type>
           <ns0:PaymentAmnt currCode="GBP">65615.75</ns0:PaymentAmnt>
         </ns0:Payment>
-        <ns0:Payment>-999999.99<ns0:Type>CRS503</ns0:Type>
+        <ns0:Payment>NOT_A_NUMBER<ns0:Type>CRS503</ns0:Type>
           <ns0:PaymentAmnt currCode="GBP">66793.98</ns0:PaymentAmnt>
         </ns0:Payment>
       </ns0:AccountReport>
@@ -149,14 +147,14 @@
           </ns0:Individual>
           <ns0:CtrlgPersonType>CRS801</ns0:CtrlgPersonType>
         </ns0:ControllingPerson>
-        <ns0:AccountBalance currCode="EUR">-999999.99</ns0:AccountBalance>
-        <ns0:Payment>INVALID_AMOUNT<ns0:Type>CRS504</ns0:Type>
+        <ns0:AccountBalance currCode="EUR">NOT_A_NUMBER</ns0:AccountBalance>
+        <ns0:Payment>-999999.99<ns0:Type>CRS504</ns0:Type>
           <ns0:PaymentAmnt currCode="EUR">19523.12</ns0:PaymentAmnt>
         </ns0:Payment>
-        <ns0:Payment>999999999999999.99<ns0:Type>CRS502</ns0:Type>
+        <ns0:Payment>NOT_A_NUMBER<ns0:Type>CRS502</ns0:Type>
           <ns0:PaymentAmnt currCode="EUR">3848.91</ns0:PaymentAmnt>
         </ns0:Payment>
-        <ns0:Payment>NOT_A_NUMBER<ns0:Type>CRS501</ns0:Type>
+        <ns0:Payment>999999999999999.99<ns0:Type>CRS501</ns0:Type>
           <ns0:PaymentAmnt currCode="EUR">31771.32</ns0:PaymentAmnt>
         </ns0:Payment>
         <ns0:Payment>INVALID_AMOUNT<ns0:Type>CRS501</ns0:Type>

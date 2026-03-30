@@ -7,8 +7,8 @@
     <ns0:MessageType>CRS</ns0:MessageType>
     <ns0:MessageRefId>NL2024123456789000000001</ns0:MessageRefId>
     <ns0:MessageTypeIndic>CRS701</ns0:MessageTypeIndic>
-    <ns0:ReportingPeriod>00-00-0000</ns0:ReportingPeriod>
-    <ns0:Timestamp>00-00-0000</ns0:Timestamp>
+    <ns0:ReportingPeriod>INVALID</ns0:ReportingPeriod>
+    <ns0:Timestamp>2024/13/32</ns0:Timestamp>
   </ns0:MessageSpec>
   <ns0:CrsBody>
     <ns0:ReportingFI>
@@ -55,7 +55,7 @@
               <ns2:AddressFree>Nicole Stream 883, North Andrea 49606</ns2:AddressFree>
             </ns0:Address>
             <ns0:BirthInfo>
-              <ns0:BirthDate>00-00-0000</ns0:BirthDate>
+              <ns0:BirthDate>INVALID</ns0:BirthDate>
             </ns0:BirthInfo>
           </ns0:Individual>
         </ns0:AccountHolder>
@@ -92,7 +92,7 @@
               <ns2:AddressFree>Heather Motorway 697, Port Jamie 13845</ns2:AddressFree>
             </ns0:Address>
             <ns0:BirthInfo>
-              <ns0:BirthDate>00-00-0000</ns0:BirthDate>
+              <ns0:BirthDate>INVALID</ns0:BirthDate>
             </ns0:BirthInfo>
           </ns0:Individual>
         </ns0:AccountHolder>

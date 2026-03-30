@@ -8,29 +8,29 @@
     <Language>EN</Language>
     <Warning>CBC Test Data - Not for production use</Warning>
     <Contact>Test Data Generator</Contact>
-    <MessageRefId>NL2024123456789f0c960a5_CORR324827</MessageRefId>
-    <CorrMessageRefId>NL2024123456789f0c960a5</CorrMessageRefId>
+    <MessageRefId>NL2024123456789f7261df6_CORR449236</MessageRefId>
+    <CorrMessageRefId>NL2024123456789f7261df6</CorrMessageRefId>
     <MessageTypeIndic>CBC402</MessageTypeIndic>
     <ReportingPeriod>2024-12-31</ReportingPeriod>
-    <Timestamp>2026-02-27T16:07:49</Timestamp>
+    <Timestamp>2026-03-30T00:12:18</Timestamp>
   </MessageSpec>
   <CbcBody>
     <ReportingEntity>
       <Entity>
         <ResCountryCode>NL</ResCountryCode>
         <TIN issuedBy="NL">123456789</TIN>
-        <Name>Butler, Joseph and Gray Holdings</Name>
+        <Name>Rosario and Sons Holdings</Name>
         <Address>
           <CountryCode>NL</CountryCode>
           <AddressFix>
-            <Street>720 Jason Ville</Street>
-            <BuildingIdentifier>380</BuildingIdentifier>
-            <PostCode>69434</PostCode>
-            <City>Lake Krystalville</City>
+            <Street>569 Moore Ranch</Street>
+            <BuildingIdentifier>318</BuildingIdentifier>
+            <PostCode>08638</PostCode>
+            <City>Cassandraburgh</City>
           </AddressFix>
         </Address>
       </Entity>
-      <NameMNEGroup>Butler, Joseph and Gray Holdings Group</NameMNEGroup>
+      <NameMNEGroup>Rosario and Sons Holdings Group</NameMNEGroup>
       <ReportingRole>CBC701</ReportingRole>
       <ReportingPeriod>
         <StartDate>2024-01-01</StartDate>
@@ -38,90 +38,171 @@
       </ReportingPeriod>
       <DocSpec>
         <stf:DocTypeIndic>OECD13</stf:DocTypeIndic>
-        <stf:DocRefId>NL20241234567899f761446-df9b-4c5a-b32e-a6eedb215fd3_VOID0001</stf:DocRefId>
-        <stf:CorrDocRefId>NL20241234567899f761446-df9b-4c5a-b32e-a6eedb215fd3</stf:CorrDocRefId>
+        <stf:DocRefId>NL20241234567899a5379e7-8522-42cf-a14c-ba3cc6746f7e_VOID0001</stf:DocRefId>
+        <stf:CorrDocRefId>NL20241234567899a5379e7-8522-42cf-a14c-ba3cc6746f7e</stf:CorrDocRefId>
       </DocSpec>
     </ReportingEntity>
     <CbcReports>
       <DocSpec>
         <stf:DocTypeIndic>OECD13</stf:DocTypeIndic>
-        <stf:DocRefId>NL20241234567896e108033-e39c-4a4b-b5d2-b324fc927ccf_VOID0002</stf:DocRefId>
-        <stf:CorrDocRefId>NL20241234567896e108033-e39c-4a4b-b5d2-b324fc927ccf</stf:CorrDocRefId>
+        <stf:DocRefId>NL202412345678909ab22cc-da5d-4feb-9430-d39557c38f28_VOID0002</stf:DocRefId>
+        <stf:CorrDocRefId>NL202412345678909ab22cc-da5d-4feb-9430-d39557c38f28</stf:CorrDocRefId>
       </DocSpec>
-      <ResCountryCode>IE</ResCountryCode>
+      <ResCountryCode>SG</ResCountryCode>
       <Summary>
         <Revenues>
-          <Unrelated currCode="USD">84686000</Unrelated>
-          <Related currCode="USD">41662000</Related>
-          <Total currCode="USD">126348000</Total>
+          <Unrelated currCode="EUR">7784000</Unrelated>
+          <Related currCode="EUR">15399000</Related>
+          <Total currCode="EUR">23183000</Total>
         </Revenues>
-        <ProfitOrLoss currCode="USD">28042963</ProfitOrLoss>
-        <TaxPaid currCode="USD">7049756</TaxPaid>
-        <TaxAccrued currCode="USD">7886224</TaxAccrued>
-        <Capital currCode="USD">205364000</Capital>
-        <Earnings currCode="USD">27196608</Earnings>
-        <NbEmployees>1331</NbEmployees>
-        <Assets currCode="USD">416844912</Assets>
+        <ProfitOrLoss currCode="EUR">3959161</ProfitOrLoss>
+        <TaxPaid currCode="EUR">1181363</TaxPaid>
+        <TaxAccrued currCode="EUR">1258513</TaxAccrued>
+        <Capital currCode="EUR">57358000</Capital>
+        <Earnings currCode="EUR">2790153</Earnings>
+        <NbEmployees>4328</NbEmployees>
+        <Assets currCode="EUR">59254456</Assets>
       </Summary>
       <ConstEntities>
         <ConstEntity>
-          <ResCountryCode>IE</ResCountryCode>
-          <TIN issuedBy="IE">IE887316231</TIN>
-          <Name>Le-Warren IE</Name>
+          <ResCountryCode>SG</ResCountryCode>
+          <TIN issuedBy="SG">SG238823565</TIN>
+          <Name>Davis Ltd SG</Name>
           <Address>
-            <CountryCode>IE</CountryCode>
+            <CountryCode>SG</CountryCode>
             <AddressFix>
-              <Street>98793 Cameron Avenue Suite 458</Street>
-              <BuildingIdentifier>205</BuildingIdentifier>
-              <PostCode>95987</PostCode>
-              <City>Callahanmouth</City>
+              <Street>8091 Guy Fields</Street>
+              <BuildingIdentifier>853</BuildingIdentifier>
+              <PostCode>33355</PostCode>
+              <City>Lamshire</City>
             </AddressFix>
           </Address>
         </ConstEntity>
         <Role>CBC802</Role>
-        <IncorpCountryCode>NL</IncorpCountryCode>
-        <BizActivities>CBC502</BizActivities>
-        <BizActivities>CBC504</BizActivities>
+        <IncorpCountryCode>US</IncorpCountryCode>
+        <BizActivities>CBC508</BizActivities>
+        <OtherEntityInfo>Additional information for entity 1</OtherEntityInfo>
       </ConstEntities>
       <ConstEntities>
         <ConstEntity>
-          <ResCountryCode>IE</ResCountryCode>
-          <TIN issuedBy="IE">IE718876921</TIN>
-          <Name>Bird, Wolf and Robinson IE</Name>
+          <ResCountryCode>SG</ResCountryCode>
+          <TIN issuedBy="SG">SG111591041</TIN>
+          <Name>Pierce Group SG</Name>
           <Address>
-            <CountryCode>IE</CountryCode>
+            <CountryCode>SG</CountryCode>
             <AddressFix>
-              <Street>49857 Cruz Via</Street>
-              <BuildingIdentifier>779</BuildingIdentifier>
-              <PostCode>31066</PostCode>
-              <City>Port Roystad</City>
+              <Street>3434 Cassandra Dam Apt. 783</Street>
+              <BuildingIdentifier>122</BuildingIdentifier>
+              <PostCode>10643</PostCode>
+              <City>Melissahaven</City>
             </AddressFix>
           </Address>
         </ConstEntity>
-        <Role>CBC803</Role>
-        <IncorpCountryCode>IE</IncorpCountryCode>
-        <BizActivities>CBC511</BizActivities>
-        <BizActivities>CBC503</BizActivities>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>SG</IncorpCountryCode>
+        <BizActivities>CBC510</BizActivities>
         <OtherEntityInfo>Additional information for entity 2</OtherEntityInfo>
       </ConstEntities>
       <ConstEntities>
         <ConstEntity>
-          <ResCountryCode>IE</ResCountryCode>
-          <TIN issuedBy="IE">IE831434079</TIN>
-          <Name>White PLC IE</Name>
+          <ResCountryCode>SG</ResCountryCode>
+          <TIN issuedBy="SG">SG573752933</TIN>
+          <Name>Anderson, Alexander and Butler SG</Name>
           <Address>
-            <CountryCode>IE</CountryCode>
+            <CountryCode>SG</CountryCode>
             <AddressFix>
-              <Street>50509 Jean Hills</Street>
-              <BuildingIdentifier>939</BuildingIdentifier>
-              <PostCode>00855</PostCode>
-              <City>Ashleystad</City>
+              <Street>4986 Dominguez Flat</Street>
+              <BuildingIdentifier>230</BuildingIdentifier>
+              <PostCode>47691</PostCode>
+              <City>Hernandezton</City>
             </AddressFix>
           </Address>
         </ConstEntity>
         <Role>CBC802</Role>
-        <IncorpCountryCode>IE</IncorpCountryCode>
-        <BizActivities>CBC510</BizActivities>
+        <IncorpCountryCode>FR</IncorpCountryCode>
+        <BizActivities>CBC505</BizActivities>
+      </ConstEntities>
+    </CbcReports>
+    <CbcReports>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD13</stf:DocTypeIndic>
+        <stf:DocRefId>NL20241234567890f98e2b1-b872-4290-adf5-b1dde8609080_VOID0003</stf:DocRefId>
+        <stf:CorrDocRefId>NL20241234567890f98e2b1-b872-4290-adf5-b1dde8609080</stf:CorrDocRefId>
+      </DocSpec>
+      <ResCountryCode>GB</ResCountryCode>
+      <Summary>
+        <Revenues>
+          <Unrelated currCode="EUR">83032000</Unrelated>
+          <Related currCode="EUR">4136000</Related>
+          <Total currCode="EUR">87168000</Total>
+        </Revenues>
+        <ProfitOrLoss currCode="EUR">24647397</ProfitOrLoss>
+        <TaxPaid currCode="EUR">5991488</TaxPaid>
+        <TaxAccrued currCode="EUR">7008880</TaxAccrued>
+        <Capital currCode="EUR">255003000</Capital>
+        <Earnings currCode="EUR">12877059</Earnings>
+        <NbEmployees>999</NbEmployees>
+        <Assets currCode="EUR">668114245</Assets>
+      </Summary>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>GB</ResCountryCode>
+          <TIN issuedBy="GB">GB799068145</TIN>
+          <Name>Williams LLC GB</Name>
+          <Address>
+            <CountryCode>GB</CountryCode>
+            <AddressFix>
+              <Street>588 Stewart Rapids Apt. 115</Street>
+              <BuildingIdentifier>41</BuildingIdentifier>
+              <PostCode>65265</PostCode>
+              <City>Port Henry</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC801</Role>
+        <IncorpCountryCode>GB</IncorpCountryCode>
+        <BizActivities>CBC508</BizActivities>
+        <BizActivities>CBC506</BizActivities>
+        <OtherEntityInfo>Additional information for entity 1</OtherEntityInfo>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>GB</ResCountryCode>
+          <TIN issuedBy="GB">GB396316206</TIN>
+          <Name>Harvey, Werner and Smith GB</Name>
+          <Address>
+            <CountryCode>GB</CountryCode>
+            <AddressFix>
+              <Street>9969 Bryant Corner Suite 943</Street>
+              <BuildingIdentifier>206</BuildingIdentifier>
+              <PostCode>30651</PostCode>
+              <City>Allenbury</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC801</Role>
+        <IncorpCountryCode>GB</IncorpCountryCode>
+        <BizActivities>CBC507</BizActivities>
+        <BizActivities>CBC502</BizActivities>
+      </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>GB</ResCountryCode>
+          <TIN issuedBy="GB">GB134726195</TIN>
+          <Name>Black-Harris GB</Name>
+          <Address>
+            <CountryCode>GB</CountryCode>
+            <AddressFix>
+              <Street>353 Rachel Meadows</Street>
+              <BuildingIdentifier>237</BuildingIdentifier>
+              <PostCode>15448</PostCode>
+              <City>Robertsland</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC803</Role>
+        <IncorpCountryCode>GB</IncorpCountryCode>
+        <BizActivities>CBC503</BizActivities>
         <BizActivities>CBC505</BizActivities>
         <OtherEntityInfo>Additional information for entity 3</OtherEntityInfo>
       </ConstEntities>
@@ -129,106 +210,93 @@
     <CbcReports>
       <DocSpec>
         <stf:DocTypeIndic>OECD13</stf:DocTypeIndic>
-        <stf:DocRefId>NL202412345678953ef06bc-049d-48bc-8014-e80c68f011b7_VOID0003</stf:DocRefId>
-        <stf:CorrDocRefId>NL202412345678953ef06bc-049d-48bc-8014-e80c68f011b7</stf:CorrDocRefId>
-      </DocSpec>
-      <ResCountryCode>JP</ResCountryCode>
-      <Summary>
-        <Revenues>
-          <Unrelated currCode="USD">28231000</Unrelated>
-          <Related currCode="USD">5363000</Related>
-          <Total currCode="USD">33594000</Total>
-        </Revenues>
-        <ProfitOrLoss currCode="USD">3290363</ProfitOrLoss>
-        <TaxPaid currCode="USD">1071291</TaxPaid>
-        <TaxAccrued currCode="USD">1111236</TaxAccrued>
-        <Capital currCode="USD">62732000</Capital>
-        <Earnings currCode="USD">2130909</Earnings>
-        <NbEmployees>1695</NbEmployees>
-        <Assets currCode="USD">107775511</Assets>
-      </Summary>
-      <ConstEntities>
-        <ConstEntity>
-          <ResCountryCode>JP</ResCountryCode>
-          <TIN issuedBy="JP">JP713029902</TIN>
-          <Name>Murray, Perez and Maldonado JP</Name>
-          <Address>
-            <CountryCode>JP</CountryCode>
-            <AddressFix>
-              <Street>4335 Santiago Harbors</Street>
-              <BuildingIdentifier>663</BuildingIdentifier>
-              <PostCode>95562</PostCode>
-              <City>East Crystalside</City>
-            </AddressFix>
-          </Address>
-        </ConstEntity>
-        <Role>CBC802</Role>
-        <IncorpCountryCode>US</IncorpCountryCode>
-        <BizActivities>CBC502</BizActivities>
-        <BizActivities>CBC507</BizActivities>
-        <OtherEntityInfo>Additional information for entity 1</OtherEntityInfo>
-      </ConstEntities>
-    </CbcReports>
-    <CbcReports>
-      <DocSpec>
-        <stf:DocTypeIndic>OECD13</stf:DocTypeIndic>
-        <stf:DocRefId>NL20241234567891f8c93f4-7152-4e04-8828-c95c443426a7_VOID0004</stf:DocRefId>
-        <stf:CorrDocRefId>NL20241234567891f8c93f4-7152-4e04-8828-c95c443426a7</stf:CorrDocRefId>
+        <stf:DocRefId>NL2024123456789e5469ef4-801c-43b6-8248-400929e0d0c3_VOID0004</stf:DocRefId>
+        <stf:CorrDocRefId>NL2024123456789e5469ef4-801c-43b6-8248-400929e0d0c3</stf:CorrDocRefId>
       </DocSpec>
       <ResCountryCode>FR</ResCountryCode>
       <Summary>
         <Revenues>
-          <Unrelated currCode="USD">78275000</Unrelated>
-          <Related currCode="USD">9439000</Related>
-          <Total currCode="USD">87714000</Total>
+          <Unrelated currCode="EUR">61335000</Unrelated>
+          <Related currCode="EUR">15574000</Related>
+          <Total currCode="EUR">76909000</Total>
         </Revenues>
-        <ProfitOrLoss currCode="USD">14445727</ProfitOrLoss>
-        <TaxPaid currCode="USD">1811780</TaxPaid>
-        <TaxAccrued currCode="USD">2245539</TaxAccrued>
-        <Capital currCode="USD">62844000</Capital>
-        <Earnings currCode="USD">14173666</Earnings>
-        <NbEmployees>4027</NbEmployees>
-        <Assets currCode="USD">158886619</Assets>
+        <ProfitOrLoss currCode="EUR">9323251</ProfitOrLoss>
+        <TaxPaid currCode="EUR">2479675</TaxPaid>
+        <TaxAccrued currCode="EUR">2909386</TaxAccrued>
+        <Capital currCode="EUR">228341000</Capital>
+        <Earnings currCode="EUR">7864142</Earnings>
+        <NbEmployees>2086</NbEmployees>
+        <Assets currCode="EUR">664567446</Assets>
       </Summary>
       <ConstEntities>
         <ConstEntity>
           <ResCountryCode>FR</ResCountryCode>
-          <TIN issuedBy="FR">FR757323271</TIN>
-          <Name>Luna-Williams FR</Name>
+          <TIN issuedBy="FR">FR372880711</TIN>
+          <Name>Lawrence-Smith FR</Name>
           <Address>
             <CountryCode>FR</CountryCode>
             <AddressFix>
-              <Street>1972 Golden Shoals Apt. 181</Street>
-              <BuildingIdentifier>128</BuildingIdentifier>
-              <PostCode>28631</PostCode>
-              <City>East Lisa</City>
+              <Street>422 Dalton Stream</Street>
+              <BuildingIdentifier>941</BuildingIdentifier>
+              <PostCode>99445</PostCode>
+              <City>Danielleside</City>
             </AddressFix>
           </Address>
         </ConstEntity>
         <Role>CBC801</Role>
-        <IncorpCountryCode>FR</IncorpCountryCode>
-        <BizActivities>CBC507</BizActivities>
+        <IncorpCountryCode>US</IncorpCountryCode>
+        <BizActivities>CBC501</BizActivities>
       </ConstEntities>
       <ConstEntities>
         <ConstEntity>
           <ResCountryCode>FR</ResCountryCode>
-          <TIN issuedBy="FR">FR465955039</TIN>
-          <Name>Kaiser-Lozano FR</Name>
+          <TIN issuedBy="FR">FR688290515</TIN>
+          <Name>Lewis, Castillo and Bowen FR</Name>
           <Address>
             <CountryCode>FR</CountryCode>
             <AddressFix>
-              <Street>370 Parker Spring Apt. 702</Street>
-              <BuildingIdentifier>925</BuildingIdentifier>
-              <PostCode>79215</PostCode>
-              <City>South Thomasview</City>
+              <Street>42517 Williamson Estates</Street>
+              <BuildingIdentifier>738</BuildingIdentifier>
+              <PostCode>42805</PostCode>
+              <City>Wigginston</City>
             </AddressFix>
           </Address>
         </ConstEntity>
         <Role>CBC801</Role>
-        <IncorpCountryCode>AU</IncorpCountryCode>
-        <BizActivities>CBC503</BizActivities>
+        <IncorpCountryCode>JP</IncorpCountryCode>
+        <BizActivities>CBC507</BizActivities>
         <OtherEntityInfo>Additional information for entity 2</OtherEntityInfo>
       </ConstEntities>
+      <ConstEntities>
+        <ConstEntity>
+          <ResCountryCode>FR</ResCountryCode>
+          <TIN issuedBy="FR">FR148890161</TIN>
+          <Name>Trevino-Brown FR</Name>
+          <Address>
+            <CountryCode>FR</CountryCode>
+            <AddressFix>
+              <Street>256 Clark Land</Street>
+              <BuildingIdentifier>160</BuildingIdentifier>
+              <PostCode>89367</PostCode>
+              <City>Joshuahaven</City>
+            </AddressFix>
+          </Address>
+        </ConstEntity>
+        <Role>CBC802</Role>
+        <IncorpCountryCode>FR</IncorpCountryCode>
+        <BizActivities>CBC502</BizActivities>
+        <BizActivities>CBC501</BizActivities>
+        <OtherEntityInfo>Additional information for entity 3</OtherEntityInfo>
+      </ConstEntities>
     </CbcReports>
+    <AdditionalInfo>
+      <DocSpec>
+        <stf:DocTypeIndic>OECD13</stf:DocTypeIndic>
+        <stf:DocRefId>NL20241234567892d5a7490-d9c3-439c-98f8-8c010443e146_VOID0005</stf:DocRefId>
+        <stf:CorrDocRefId>NL20241234567892d5a7490-d9c3-439c-98f8-8c010443e146</stf:CorrDocRefId>
+      </DocSpec>
+      <OtherInfo>Additional information for SG jurisdiction</OtherInfo>
+      <ResCountryCode>SG</ResCountryCode>
+    </AdditionalInfo>
   </CbcBody>
 </CBC_OECD>

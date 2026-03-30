@@ -92,10 +92,10 @@ export const translations = {
       transmittingCountry: 'Transmitting Country',
       reportingPeriod: 'Reporting Period (Year)',
       accountConfiguration: 'Account Configuration',
-      substantialOwners: 'Substantial Owners per Org',
+      substantialOwners: 'Controlling Persons per Org',
       filerCategory: 'Filer Category',
       testModeLabel: 'Test Mode',
-      fatcaTestMode: 'Test Mode (FATCA11-14 indicators)',
+      fatcaTestMode: 'Test Mode (OECD11-13 indicators)',
       cbcTestMode: 'Test Mode (OECD11-13 indicators)',
       crsTestMode: 'Test Mode',
       reportingEntity: 'Reporting Entity (MNE)',
@@ -473,7 +473,7 @@ export const translations = {
     // Module features
     moduleFeatures: {
       crs: ['Individual & Organisation Accounts', 'Controlling Persons', 'Corrections & Deletions', 'CSV Import/Export'],
-      fatca: ['Individual & Organisation Accounts', 'Substantial Owners', 'Corrections & Deletions', 'Filer Categories'],
+      fatca: ['Individual & Organisation Accounts', 'Controlling Persons', 'Corrections & Deletions', 'Filer Categories'],
       cbc: ['Multiple Jurisdictions', 'Constituent Entities', 'Financial Summaries', 'Corrections & Deletions']
     },
 
@@ -651,10 +651,10 @@ export const translations = {
       transmittingCountry: 'Verzendend Land',
       reportingPeriod: 'Rapportageperiode (Jaar)',
       accountConfiguration: 'Rekeningconfiguratie',
-      substantialOwners: 'Substantiële Eigenaren per Org',
+      substantialOwners: 'Uiteindelijk Belanghebbenden per Org',
       filerCategory: 'Indienercategorie',
       testModeLabel: 'Testmodus',
-      fatcaTestMode: 'Testmodus (FATCA11-14 indicatoren)',
+      fatcaTestMode: 'Testmodus (OECD11-13 indicatoren)',
       cbcTestMode: 'Testmodus (OECD11-13 indicatoren)',
       crsTestMode: 'Testmodus',
       reportingEntity: 'Rapporterende Entiteit (MNE)',
@@ -1032,7 +1032,7 @@ export const translations = {
     // Module features
     moduleFeatures: {
       crs: ['Individuele & Organisatie Rekeningen', 'Uiteindelijk Belanghebbenden', 'Correcties & Verwijderingen', 'CSV Import/Export'],
-      fatca: ['Individuele & Organisatie Rekeningen', 'Substantiële Eigenaren', 'Correcties & Verwijderingen', 'Indienercategorieën'],
+      fatca: ['Individuele & Organisatie Rekeningen', 'Uiteindelijk Belanghebbenden', 'Correcties & Verwijderingen', 'Indienercategorieën'],
       cbc: ['Meerdere Jurisdicties', 'Samenstellende Entiteiten', 'Financiële Overzichten', 'Correcties & Verwijderingen']
     },
 
@@ -1207,10 +1207,10 @@ export const translations = {
       transmittingCountry: 'País Transmisor',
       reportingPeriod: 'Período de Reporte (Año)',
       accountConfiguration: 'Configuración de Cuentas',
-      substantialOwners: 'Propietarios Sustanciales por Org',
+      substantialOwners: 'Personas Controladoras por Org',
       filerCategory: 'Categoría de Declarante',
       testModeLabel: 'Modo de Prueba',
-      fatcaTestMode: 'Modo de Prueba (indicadores FATCA11-14)',
+      fatcaTestMode: 'Modo de Prueba (indicadores OECD11-13)',
       cbcTestMode: 'Modo de Prueba (indicadores OECD11-13)',
       crsTestMode: 'Modo de Prueba',
       reportingEntity: 'Entidad Informante (MNE)',
@@ -1591,7 +1591,7 @@ export const translations = {
     // Module features
     moduleFeatures: {
       crs: ['Cuentas Individuales y de Organizaciones', 'Personas Controladoras', 'Correcciones y Eliminaciones', 'Importar/Exportar CSV'],
-      fatca: ['Cuentas Individuales y de Organizaciones', 'Propietarios Sustanciales', 'Correcciones y Eliminaciones', 'Categorías de Declarante'],
+      fatca: ['Cuentas Individuales y de Organizaciones', 'Personas Controladoras', 'Correcciones y Eliminaciones', 'Categorías de Declarante'],
       cbc: ['Múltiples Jurisdicciones', 'Entidades Constituyentes', 'Resúmenes Financieros', 'Correcciones y Eliminaciones']
     },
 
