@@ -1,4 +1,6 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
+
+Menu.setApplicationMenu(null);
 const path = require('path');
 const { spawn, execSync } = require('child_process');
 const fs = require('fs');
