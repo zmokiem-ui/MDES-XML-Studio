@@ -380,9 +380,10 @@ function findPythonExecutable() {
  * @param {object} [options.event] - IPC event for progress updates (optional)
  * @param {boolean} [options.parseJson=true] - Whether to parse output as JSON
  * @param {string} [options.outputPath] - Path to output file for file stats
+ * @param {boolean} [options.allowNonZeroJson=false] - Resolve JSON output even when the CLI exits non-zero
  * @returns {Promise<object>} - Parsed result or raw output
  */
-function runPythonCommand({ module, args, event = null, parseJson = true, outputPath = null }) {
+function runPythonCommand({ module, args, event = null, parseJson = true, outputPath = null, allowNonZeroJson = false }) {
   return new Promise((resolve, reject) => {
     let exePath, spawnArgs, cwd;
 
@@ -424,20 +425,28 @@ function runPythonCommand({ module, args, event = null, parseJson = true, output
       stderr += data.toString();
     });
 
+    const parseJsonOutput = () => {
+      // Find JSON in output (skip any print statements before it)
+      const jsonMatch = stdout.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const result = JSON.parse(jsonMatch[0]);
+        // Add file stats if outputPath provided
+        if (outputPath && fs.existsSync(outputPath)) {
+          const fileStats = fs.statSync(outputPath);
+          result.filePath = outputPath;
+          result.fileSize = (fileStats.size / (1024 * 1024)).toFixed(2);
+        }
+        return result;
+      }
+      return null;
+    };
+
     pythonProcess.on('close', (code) => {
       if (code === 0) {
         if (parseJson) {
           try {
-            // Find JSON in output (skip any print statements before it)
-            const jsonMatch = stdout.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-              const result = JSON.parse(jsonMatch[0]);
-              // Add file stats if outputPath provided
-              if (outputPath && fs.existsSync(outputPath)) {
-                const fileStats = fs.statSync(outputPath);
-                result.filePath = outputPath;
-                result.fileSize = (fileStats.size / (1024 * 1024)).toFixed(2);
-              }
+            const result = parseJsonOutput();
+            if (result) {
               resolve(result);
             } else {
               // No JSON found, return success with output
@@ -461,7 +470,19 @@ function runPythonCommand({ module, args, event = null, parseJson = true, output
           }
         }
       } else {
-        reject(new Error(stderr || `Command failed with exit code ${code}`));
+        if (parseJson && allowNonZeroJson) {
+          try {
+            const result = parseJsonOutput();
+            if (result) {
+              resolve(result);
+              return;
+            }
+          } catch (e) {
+            reject(new Error(`Failed to parse output: ${e.message}. Output: ${stdout}`));
+            return;
+          }
+        }
+        reject(new Error(stderr || stdout || `Command failed with exit code ${code}`));
       }
     });
 
@@ -475,7 +496,8 @@ function runPythonCommand({ module, args, event = null, parseJson = true, output
 ipcMain.handle('validate-csv', async (event, csvPath) => {
   return runPythonCommand({
     module: 'crs_generator.cli',
-    args: ['--mode', 'validate', '--csv-input', csvPath, '--output', 'dummy.xml']
+    args: ['--mode', 'validate', '--csv-input', csvPath, '--output', 'dummy.xml'],
+    allowNonZeroJson: true
   });
 });
 
@@ -555,7 +577,8 @@ ipcMain.handle('select-xml-file', async () => {
 ipcMain.handle('validate-xml', async (event, xmlPath) => {
   return runPythonCommand({
     module: 'crs_generator.cli',
-    args: ['--mode', 'validate-xml', '--xml-input', xmlPath, '--output', 'dummy']
+    args: ['--mode', 'validate-xml', '--xml-input', xmlPath, '--output', 'dummy'],
+    allowNonZeroJson: true
   });
 });
 
@@ -715,7 +738,8 @@ ipcMain.handle('generate-fatca', async (event, formData) => {
 ipcMain.handle('validate-fatca-xml', async (event, xmlPath) => {
   return runPythonCommand({
     module: 'crs_generator.fatca_cli',
-    args: ['--mode', 'validate-xml', '--xml-input', xmlPath, '--output', 'dummy']
+    args: ['--mode', 'validate-xml', '--xml-input', xmlPath, '--output', 'dummy'],
+    allowNonZeroJson: true
   });
 });
 

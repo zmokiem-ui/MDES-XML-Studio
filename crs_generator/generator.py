@@ -560,6 +560,12 @@ class CRSGenerator:
         controlling_persons = account.findall('.//crs:ControllingPerson', namespaces=ns)
         if controlling_persons:
             if self.config.controlling_persons_per_org == 0:
+                # CRS101 is the passive NFE type and requires ControllingPerson.
+                # If the caller asks for no controlling persons, emit a non-CP
+                # organisation type instead of generating a self-invalid CRS701.
+                acct_holder_type = account.find('.//crs:AcctHolderType', namespaces=ns)
+                if acct_holder_type is not None and acct_holder_type.text == 'CRS101':
+                    acct_holder_type.text = 'CRS103'
                 # Remove all controlling persons
                 for cp in controlling_persons:
                     cp.getparent().remove(cp)
