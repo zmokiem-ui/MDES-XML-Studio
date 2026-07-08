@@ -74,41 +74,48 @@ def check_mdes_rules(
     msg_type_indic = _first_text(root, "MessageTypeIndic") or ""
     doctypes = [d for d in _all_texts(root, "DocTypeIndic")]
 
-    # --- 98017: no SQL-comment substrings anywhere in the file ---
+    # The MessageRefId/DocRefId format and MessageTypeIndic<->DocTypeIndic rules
+    # are Dutch CRS/FC conventions; the IRS FATCA_OECD format has its own
+    # identifier conventions, so those checks only apply to the CRS family.
+    is_crs_family = message_type in ("CRS", "FATCA_CRS")
+
+    # --- 98017: no SQL-comment substrings anywhere in the file (universal) ---
     xml_text = etree.tostring(root, encoding="unicode")
     if "--" in xml_text or "/*" in xml_text:
         findings.append(Finding("98017", "error",
             "File contains '--' or '/*', which MDES rejects outright."))
 
     # --- 80026 / 80017 / 80025: SendingCompanyIN + MessageRefId format ---
-    if sending_company is not None and not sending_company:
-        findings.append(Finding("80026", "error", "SendingCompanyIN is empty."))
-    if message_ref:
-        if " " in message_ref:
-            findings.append(Finding("80025", "error",
-                "MessageRefId contains a space."))
-        if sending_company and tax_year:
-            valid_prefixes = {
-                f"{transmitting}{tax_year}{sending_company}",
-                f"{transmitting}{int(tax_year) - 1 if tax_year.isdigit() else tax_year}{sending_company}",
-            }
-            if not any(message_ref.startswith(p) for p in valid_prefixes):
-                findings.append(Finding("80017", "error",
-                    "MessageRefId must start with TransmittingCountry + TaxYear "
-                    "+ SendingCompanyIN."))
+    if is_crs_family:
+        if sending_company is not None and not sending_company:
+            findings.append(Finding("80026", "error", "SendingCompanyIN is empty."))
+        if message_ref:
+            if " " in message_ref:
+                findings.append(Finding("80025", "error",
+                    "MessageRefId contains a space."))
+            if sending_company and tax_year:
+                valid_prefixes = {
+                    f"{transmitting}{tax_year}{sending_company}",
+                    f"{transmitting}{int(tax_year) - 1 if tax_year.isdigit() else tax_year}{sending_company}",
+                }
+                if not any(message_ref.startswith(p) for p in valid_prefixes):
+                    findings.append(Finding("80017", "error",
+                        "MessageRefId must start with TransmittingCountry + TaxYear "
+                        "+ SendingCompanyIN."))
 
     # --- 80001: DocRefId prefix rules ---
-    for tag in ("DocRefId", "CorrDocRefId"):
-        for ref in _all_texts(root, tag):
-            if not ref:
-                continue
-            if message_ref and ref[:6] != message_ref[:6]:
-                findings.append(Finding("80001", "warning",
-                    f"{tag} '{ref}' first 6 chars differ from MessageRefId."))
-            if transmitting and not ref.startswith(transmitting):
-                findings.append(Finding("80001", "warning",
-                    f"{tag} '{ref}' does not start with TransmittingCountry "
-                    f"'{transmitting}'."))
+    if is_crs_family:
+        for tag in ("DocRefId", "CorrDocRefId"):
+            for ref in _all_texts(root, tag):
+                if not ref:
+                    continue
+                if message_ref and ref[:6] != message_ref[:6]:
+                    findings.append(Finding("80001", "warning",
+                        f"{tag} '{ref}' first 6 chars differ from MessageRefId."))
+                if transmitting and not ref.startswith(transmitting):
+                    findings.append(Finding("80001", "warning",
+                        f"{tag} '{ref}' does not start with TransmittingCountry "
+                        f"'{transmitting}'."))
 
     # --- 80000: duplicate DocRefId in the same file ---
     docrefs = [r for r in _all_texts(root, "DocRefId") if r]
@@ -127,22 +134,23 @@ def check_mdes_rules(
             "Test DocTypeIndic (OECD10-13) in a production environment; use OECD0-3."))
 
     # --- 80010: MessageTypeIndic <-> DocTypeIndic compatibility (CRS/FC) ---
-    account_doctypes = [d for d in doctypes]
-    if msg_type_indic == "CRS701" and any(d in _CORR_DOCTYPES for d in account_doctypes):
-        findings.append(Finding("80010", "error",
-            "CRS701 (new) message contains a correction/deletion DocTypeIndic."))
-    if msg_type_indic == "CRS702" and any(d in _NEW_DOCTYPES for d in account_doctypes):
-        findings.append(Finding("80010", "error",
-            "CRS702 (correction) message contains a 'new' DocTypeIndic."))
+    if is_crs_family:
+        account_doctypes = [d for d in doctypes]
+        if msg_type_indic == "CRS701" and any(d in _CORR_DOCTYPES for d in account_doctypes):
+            findings.append(Finding("80010", "error",
+                "CRS701 (new) message contains a correction/deletion DocTypeIndic."))
+        if msg_type_indic == "CRS702" and any(d in _NEW_DOCTYPES for d in account_doctypes):
+            findings.append(Finding("80010", "error",
+                "CRS702 (correction) message contains a 'new' DocTypeIndic."))
 
-    # --- 80007: CorrMessageRefId presence for CRS701/702 ---
-    has_corr_msg_ref = _first_text(root, "CorrMessageRefId") is not None
-    if msg_type_indic == "CRS701" and has_corr_msg_ref:
-        findings.append(Finding("80007", "error",
-            "CorrMessageRefId present on a CRS701 (new) message."))
-    if msg_type_indic == "CRS702" and not has_corr_msg_ref:
-        findings.append(Finding("80007", "error",
-            "CRS702 (correction) message is missing CorrMessageRefId."))
+        # --- 80007: CorrMessageRefId presence for CRS701/702 ---
+        has_corr_msg_ref = _first_text(root, "CorrMessageRefId") is not None
+        if msg_type_indic == "CRS701" and has_corr_msg_ref:
+            findings.append(Finding("80007", "error",
+                "CorrMessageRefId present on a CRS701 (new) message."))
+        if msg_type_indic == "CRS702" and not has_corr_msg_ref:
+            findings.append(Finding("80007", "error",
+                "CRS702 (correction) message is missing CorrMessageRefId."))
 
     # --- 60014: BirthDate must be a real date, year >= 1900, before today ---
     today = date.today()

@@ -103,6 +103,19 @@ def test_fatca_crs_correction_is_xsd_valid(tmp_path):
     assert_mdes_clean(out)
 
 
+# --- Pure IRS FATCA (FATCA_OECD) variant ------------------------------------
+
+def test_fatca_oecd_variant_is_xsd_valid(tmp_path):
+    out = tmp_path / "irs_fatca.xml"
+    run_cli("crs_generator.fatca_cli", "--mode", "random", "--variant", "fatca-oecd",
+            "--sending-country", "NL", "--receiving-country", "US", "--tax-year", "2024",
+            "--sending-company-in", "S519K4.00000.LE.840", "--num-fis", "1",
+            "--individual-accounts", "2", "--organisation-accounts", "1", "--output", str(out))
+    r = assert_valid(out)
+    assert r.message_type == "FATCA_OECD"
+    assert_mdes_clean(out)
+
+
 # --- CBC --------------------------------------------------------------------
 
 def test_cbc_new_is_xsd_valid(tmp_path):

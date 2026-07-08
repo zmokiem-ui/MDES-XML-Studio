@@ -60,9 +60,13 @@ def generate_fatca_correction_mode(args):
 
 
 def generate_fatca_random_mode(args):
-    """Generate random FATCA XML data"""
+    """Generate random FATCA XML data (FATCA-CRS combined or pure IRS FATCA_OECD)."""
+    variant = getattr(args, 'variant', None) or 'fatca-crs'
+    if variant == 'fatca-oecd':
+        return _generate_irs_fatca_mode(args)
+
     from .fatca_generator import FATCAGeneratorConfig, FATCAGenerator
-    
+
     reporting_fi_tins = parse_comma_list(args.reporting_fi_tins)
     account_holder_countries = parse_comma_list(args.account_holder_countries, uppercase=True)
     
@@ -84,9 +88,45 @@ def generate_fatca_random_mode(args):
     )
     
     generator = FATCAGenerator(config)
-    
+
     try:
         output_path = generator.generate()
+        print(f"Generated FATCA XML: {output_path}")
+        sys.exit(0)
+    except Exception as e:
+        print(f"Error: {str(e)}", file=sys.stderr)
+        sys.exit(1)
+
+
+def _generate_irs_fatca_mode(args):
+    """Generate pure IRS FATCA (FATCA_OECD, FatcaXML v2.0.1) XML data."""
+    from .fatca_irs_generator import (
+        FATCAGeneratorConfig as IRSConfig,
+        FATCAGenerator as IRSGenerator,
+    )
+
+    reporting_fi_tins = parse_comma_list(args.reporting_fi_tins)
+    account_holder_countries = parse_comma_list(args.account_holder_countries, uppercase=True)
+
+    config = IRSConfig(
+        sending_country=args.sending_country or 'NL',
+        receiving_country=args.receiving_country or 'US',
+        tax_year=args.tax_year or 2024,
+        sending_company_in=args.sending_company_in or '000000.00000.TA.531',
+        num_reporting_fis=args.num_fis or 1,
+        reporting_fi_tins=reporting_fi_tins if reporting_fi_tins else None,
+        filer_category=args.filer_category or 'FATCA601',
+        individual_accounts_per_fi=args.individual_accounts or 0,
+        organisation_accounts_per_fi=args.organisation_accounts or 0,
+        substantial_owners_per_org=args.substantial_owners or 1,
+        account_holder_country_mode=args.account_holder_mode or 'random',
+        account_holder_countries=account_holder_countries if account_holder_countries else None,
+        output_path=Path(args.output),
+        test_mode=args.test_mode,
+    )
+
+    try:
+        output_path = IRSGenerator(config).generate()
         print(f"Generated FATCA XML: {output_path}")
         sys.exit(0)
     except Exception as e:
@@ -100,6 +140,9 @@ def main():
     # Mode selection
     parser.add_argument('--mode', choices=['random', 'validate-xml', 'correction'], default='random',
                         help='Generation mode: random, validate-xml, or correction')
+    parser.add_argument('--variant', choices=['fatca-crs', 'fatca-oecd'], default='fatca-crs',
+                        help='FATCA format: fatca-crs (FATCA-CRS combined, FC upload) or '
+                             'fatca-oecd (pure IRS FATCA_OECD v2.0.1)')
     
     # Random mode arguments
     parser.add_argument('--sending-country', help='Transmitting country code')
