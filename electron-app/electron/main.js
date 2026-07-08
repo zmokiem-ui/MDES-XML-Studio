@@ -700,6 +700,7 @@ ipcMain.handle('download-correction-csv-template', async () => {
 ipcMain.handle('generate-fatca', async (event, formData) => {
   const args = [
     '--mode', 'random',
+    '--variant', formData.variant === 'fatca-oecd' ? 'fatca-oecd' : 'fatca-crs',
     '--sending-country', formData.transmittingCountry || 'NL',
     '--receiving-country', formData.receivingCountry || 'US',
     '--tax-year', formData.reportingPeriod || new Date().getFullYear().toString(),

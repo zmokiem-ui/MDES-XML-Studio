@@ -1132,6 +1132,8 @@ function App() {
 
   const [fatcaFormData, setFatcaFormData] = useState({
 
+    variant: 'fatca-crs',  // 'fatca-crs' (FC combined) or 'fatca-oecd' (IRS)
+
     sendingCompanyIN: '',  // GIIN format
 
     transmittingCountry: '',
@@ -7729,6 +7731,28 @@ function App() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
+
+                <div className="col-span-2">
+
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>FATCA format</label>
+
+                  <select
+
+                    className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+
+                    value={fatcaFormData.variant}
+
+                    onChange={(e) => setFatcaFormData({...fatcaFormData, variant: e.target.value})}
+
+                  >
+
+                    <option value="fatca-crs">FATCA-CRS Combined (FC upload, v2.2)</option>
+
+                    <option value="fatca-oecd">IRS FATCA (FATCA_OECD, v2.0.1)</option>
+
+                  </select>
+
+                </div>
 
                 <div>
 
