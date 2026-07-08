@@ -1,80 +1,59 @@
 # MDES XML Studio
 
-> **📖 New here?** See **[START_HERE.md](START_HERE.md)** for a guided onboarding index.
+A desktop application for generating valid **CRS**, **FATCA**, and **CbC** AEOI test XML
+that testers upload into MDES (the Be Informed–based AEOI case-management system). It
+pairs a Python generation/validation backend (`crs_generator`) with an Electron/React UI.
 
-> **ℹ️ REPOSITORY STATUS**: Currently private. See [MAKE_REPOSITORY_PUBLIC.md](MAKE_REPOSITORY_PUBLIC.md) for instructions to make releases publicly accessible.
+## Reporting standards
 
-A professional desktop application for generating valid CRS, FATCA, and CBC XML test data. Features an intuitive Electron-based UI with support for multiple reporting standards, error injection, and comprehensive validation.
+| Module | Schema | Notes |
+| --- | --- | --- |
+| CRS | `CrsXML_v2.0` | new + corrections |
+| FATCA-CRS Combined | `FatcaCrs_v2.2` | default FATCA flow (FC upload) |
+| IRS FATCA (`FATCA_OECD`) | `FatcaXML_v2.0.1` | second FATCA flow; MDES hard-checks `@version="2.0.1"` |
+| CbC | `CbcXML_v2.0` | new + corrections/deletions |
 
-## 📥 Download
+All generated output is validated against the official XSDs bundled under
+`crs_generator/schemas/`, and business rules mirror the MDES validation XSLTs
+(see `crs_generator/mdes_rules.py`).
 
-**For end users**: Download the latest compiled executable from [GitHub Releases](https://github.com/zmokiem-ui/MDES-XML-Studio/releases)
+## Download (end users)
 
-**Note**: If you cannot access releases, the repository may need to be made public. See [MAKE_REPOSITORY_PUBLIC.md](MAKE_REPOSITORY_PUBLIC.md) for details.
+Grab the latest installer from [GitHub Releases](https://github.com/zmokiem-ui/MDES-XML-Studio/releases).
+The app auto-updates from new releases.
 
-## 🚀 Features
+## Quick start (developers)
 
--   **Scalable:** optimized for speed using multiprocessing and streaming XML writing.
--   **Realistic Data:** Uses `Faker` to generate plausible names, addresses, and TINs.
--   **Valid Structure:** output adheres to CRS XML schema constraints.
--   **Configurable:** Wizard interface to set country codes, file size, tax year, and more.
--   **Smart Validation:** Auto-corrects common mistakes (like invalid country codes) and warn about test data usage.
-
-## 🛠️ Setup Instructions
-
-If you are new to this project, follow these steps to get started.
-
-### 1. Prerequisites
--   Python 3.8 or higher installed.
-
-### 2. Create a Virtual Environment
-It's recommended to use a virtual environment to manage dependencies.
-
-**Windows (PowerShell):**
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-**Mac/Linux:**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Install Dependencies
-Run this command to install the required packages (`lxml`, `Faker`, `tqdm`, etc.):
+Prerequisites: **Python 3.11+** and **Node.js 22+**.
 
 ```bash
-pip install -r requirements.txt
+# Python backend (editable install + test deps)
+pip install -e .[test]
+pytest tests/unit
+
+# Electron app
+cd electron-app
+npm install
+npm run electron:dev
 ```
 
-## 🏃‍♂️ How to Run (Easy Method)
+The four CLIs the UI drives are also runnable directly, e.g.:
 
-Simply double-click **`start_generator.bat`** in the project folder.
+```bash
+python -m crs_generator.cli   --mode random --sending-country NL --receiving-country DE \
+                              --tax-year 2024 --mytin 12345678 --num-fis 1 \
+                              --individual-accounts 5 --organisation-accounts 2 \
+                              --controlling-persons 1 --output out/crs.xml
+python -m crs_generator.fatca_cli --mode random --variant fatca-oecd ... --output out/fatca.xml
+python -m crs_generator.cbc_cli   generate --country NL --year 2024 --tin 999888777 ...
+```
 
-This script will automatically:
-1.  Check if Python is installed.
-2.  Set up the virtual environment.
-3.  Install all required dependencies.
-4.  Launch the wizard.
+Add `--production` (CRS/FATCA) or `--production` (CbC) to emit production DocTypeIndic
+(OECD1/FATCA1) instead of the test-env default (OECD11/FATCA11).
 
-## 💻 Manual Run Method
+## Documentation
 
-If you prefer using the command line:
-
-1.  **Activate Environment:**
-    ```powershell
-    .\.venv\Scripts\Activate.ps1
-    ```
-
-2.  **Run Wizard:**
-    ```bash
-    python -m crs_generator.wizard
-    ```
-
-The generated XML file will be saved in the `out/` directory.
-
-## ⚠️ Notes
--   **Validation:** The generator prevents using invalid ISO codes like "UK" (auto-converted to "GB").
--   **Performance:** For extremely large files (1M+ accounts), disable "Pretty Printing" in the advanced options to save disk space and time.
+- **[docs/DEVELOPING.md](docs/DEVELOPING.md)** — project layout, running, tests, building the backend, CI.
+- **[docs/RELEASING.md](docs/RELEASING.md)** — versioning, the tag-driven release pipeline, and auto-updates.
+- **[AGENTS.md](AGENTS.md)** — working conventions for AI/dev agents.
+- **[SECURITY.md](SECURITY.md)** — security policy and ignored-file patterns.

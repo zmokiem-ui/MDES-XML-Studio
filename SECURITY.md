@@ -16,7 +16,8 @@ After security audit, the repository can safely be made public because:
 - Community contributions and issue reporting
 - Increased project visibility
 
-See `MAKE_REPOSITORY_PUBLIC.md` for instructions.
+Change visibility from the repository's **Settings → General → Danger Zone → Change
+visibility** on GitHub.
 
 ## Making the Repository Private
 
