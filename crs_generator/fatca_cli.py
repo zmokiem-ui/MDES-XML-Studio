@@ -34,7 +34,16 @@ def validate_fatca_xml_mode(args):
 def generate_fatca_correction_mode(args):
     """Generate FATCA correction file from source XML"""
     from .fatca_correction_generator import FATCACorrectionGenerator, FATCACorrectionOptions
-    
+
+    # The correction generator only understands FATCA-CRS Combined (v2.2). Refuse
+    # fatca-oecd rather than silently emitting a wrong-schema (FatcaXML v2.0.1) correction.
+    variant = getattr(args, 'variant', None) or 'fatca-crs'
+    if variant == 'fatca-oecd':
+        error_exit(
+            'Corrections are not supported yet for the IRS FATCA (FATCA_OECD v2.0.1) '
+            'variant. Only FATCA-CRS Combined corrections are available.'
+        )
+
     if not args.xml_input:
         error_exit('No XML file specified. Use --xml-input')
     if not args.output:

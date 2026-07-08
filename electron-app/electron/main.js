@@ -503,15 +503,11 @@ ipcMain.handle('validate-csv', async (event, csvPath) => {
 
 // Validate CBC CSV file
 ipcMain.handle('validate-cbc-csv', async (event, csvPath) => {
-  try {
-    return await runPythonCommand({
-      module: 'crs_generator.cbc_cli',
-      args: ['--mode', 'validate', '--csv-input', csvPath, '--output', 'dummy.xml']
-    });
-  } catch (e) {
-    // If no JSON output, assume valid (basic check passed)
-    return { valid: true, statistics: { total_reports: 'Unknown' } };
-  }
+  return runPythonCommand({
+    module: 'crs_generator.cbc_cli',
+    args: ['validate-csv', '--csv-input', csvPath],
+    allowNonZeroJson: true
+  });
 });
 
 // Download CSV template
@@ -748,6 +744,7 @@ ipcMain.handle('validate-fatca-xml', async (event, xmlPath) => {
 ipcMain.handle('generate-fatca-correction', async (event, options) => {
   const args = [
     '--mode', 'correction',
+    '--variant', options.variant === 'fatca-oecd' ? 'fatca-oecd' : 'fatca-crs',
     '--xml-input', options.xmlPath,
     '--output', options.outputPath,
     '--correct-individual', options.correctIndividual.toString(),
@@ -905,52 +902,10 @@ ipcMain.handle('replace-crs-country-codes', async (event, options) => {
 
 // Validate CBC XML file
 ipcMain.handle('validate-cbc-xml', async (event, xmlPath) => {
-  return new Promise((resolve, reject) => {
-    try {
-      const content = fs.readFileSync(xmlPath, 'utf8');
-      
-      // Check if it's a CBC file
-      const isCBC = content.includes('CBC_OECD') || content.includes('urn:oecd:ties:cbc:v');
-      
-      if (!isCBC) {
-        resolve({
-          is_valid: false,
-          can_generate_correction: false,
-          errors: ['Not a valid CBC XML file. Expected CBC_OECD root element.'],
-          doc_count: 0
-        });
-        return;
-      }
-      
-      // Extract DocRefIds
-      const docRefIdMatches = content.match(/<stf:DocRefId>([^<]+)<\/stf:DocRefId>/g) || [];
-      const docRefIds = docRefIdMatches.map(m => m.replace(/<\/?stf:DocRefId>/g, ''));
-      
-      // Check MessageTypeIndic
-      const messageTypeMatch = content.match(/<MessageTypeIndic>([^<]+)<\/MessageTypeIndic>/);
-      const messageType = messageTypeMatch ? messageTypeMatch[1] : 'Unknown';
-      
-      // Check for existing corrections (OECD2/OECD3)
-      const hasCorrections = content.includes('OECD2') || content.includes('OECD3') || 
-                            content.includes('OECD12') || content.includes('OECD13');
-      
-      resolve({
-        is_valid: true,
-        can_generate_correction: docRefIds.length > 0,
-        message_type: messageType,
-        has_corrections: hasCorrections,
-        doc_count: docRefIds.length,
-        doc_ref_ids: docRefIds.slice(0, 10), // First 10 for preview
-        errors: []
-      });
-    } catch (error) {
-      resolve({
-        is_valid: false,
-        can_generate_correction: false,
-        errors: [error.message],
-        doc_count: 0
-      });
-    }
+  return runPythonCommand({
+    module: 'crs_generator.cbc_cli',
+    args: ['validate-xml', '--xml-input', xmlPath],
+    allowNonZeroJson: true
   });
 });
 
@@ -1301,16 +1256,16 @@ ipcMain.handle('validate-xml-content', async (event, content, module = 'crs') =>
     const tmpFile = path.join(tmpDir, `validate_${Date.now()}.xml`);
     fs.writeFileSync(tmpFile, content, 'utf-8');
 
-    let cliModule, mode;
+    let cliModule, validatorArgs;
     if (detectedModule === 'fatca') {
       cliModule = 'crs_generator.fatca_cli';
-      mode = 'validate-xml';
+      validatorArgs = ['--mode', 'validate-xml', '--xml-input', tmpFile, '--output', 'dummy'];
     } else if (detectedModule === 'cbc') {
       cliModule = 'crs_generator.cbc_cli';
-      mode = 'validate';
+      validatorArgs = ['validate-xml', '--xml-input', tmpFile];
     } else {
       cliModule = 'crs_generator.cli';
-      mode = 'validate-xml';
+      validatorArgs = ['--mode', 'validate-xml', '--xml-input', tmpFile, '--output', 'dummy'];
     }
 
     // Spawn Python directly to capture stdout even on non-zero exit
@@ -1319,13 +1274,13 @@ ipcMain.handle('validate-xml-content', async (event, content, module = 'crs') =>
     const bundledExe = !isDev ? getBundledExePath(cliModule) : null;
     if (bundledExe) {
       exePath = bundledExe;
-      spawnArgs = ['--mode', mode, '--xml-input', tmpFile, '--output', 'dummy'];
+      spawnArgs = validatorArgs;
       spawnCwd = path.dirname(bundledExe);
     } else {
       const pythonPath = findPythonExecutable();
       if (!pythonPath) return { is_valid: false, errors: ['Python not found'], warnings: [] };
       exePath = pythonPath;
-      spawnArgs = ['-m', cliModule, '--mode', mode, '--xml-input', tmpFile, '--output', 'dummy'];
+      spawnArgs = ['-m', cliModule, ...validatorArgs];
       spawnCwd = path.join(__dirname, '../..');
     }
 
