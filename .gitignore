@@ -70,6 +70,12 @@ Thumbs.db
 *.sublime-workspace
 
 # ========================
+# Generated test outputs
+# ========================
+tests/smoke_output/
+tests/regression_output/
+
+# ========================
 # Test artifacts
 # ========================
 test_fatca_correction.xml
