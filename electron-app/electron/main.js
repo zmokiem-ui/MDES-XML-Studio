@@ -8,6 +8,46 @@ const fs = require('fs');
 let mainWindow;
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
+// --- Filesystem access control ------------------------------------------
+// Renderer-facing FS handlers (write/rename/delete/create) must not be able
+// to touch arbitrary paths. Confine them to the app workspace (the user's own
+// profile plus our scratch/config areas) and any directory the user explicitly
+// picked through a native dialog. A native dialog IS the grant.
+const _grantedRoots = new Set();
+let _workspaceSeeded = false;
+
+function grantPath(p) {
+  if (!p) return;
+  try { _grantedRoots.add(path.resolve(p)); } catch {}
+}
+
+function ensureWorkspaceSeeded() {
+  if (_workspaceSeeded) return;
+  _workspaceSeeded = true;  // app.getPath is only valid after 'ready'; handlers run post-ready.
+  for (const key of ['home', 'documents', 'downloads', 'desktop', 'temp', 'userData']) {
+    try { grantPath(app.getPath(key)); } catch {}
+  }
+}
+
+function _isInside(root, target) {
+  const rel = path.relative(root, target);
+  return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+}
+
+// Resolve + verify a renderer-supplied path is inside an allowed root.
+// Throws (caught by each handler's try/catch -> {success:false,error}) otherwise.
+function assertPathAllowed(target, label = 'path') {
+  ensureWorkspaceSeeded();
+  if (!target || typeof target !== 'string') {
+    throw new Error(`Access denied: missing ${label}`);
+  }
+  const resolved = path.resolve(target);
+  for (const root of _grantedRoots) {
+    if (_isInside(root, resolved)) return resolved;
+  }
+  throw new Error(`Access denied: ${label} is outside the allowed workspace`);
+}
+
 // Map Python module names to bundled executable names (production only)
 const MODULE_TO_EXE = {
   'crs_generator.cli': 'crs_cli.exe',
@@ -202,7 +242,8 @@ ipcMain.handle('select-output-file', async (event, module = 'crs') => {
       { name: 'All Files', extensions: ['*'] }
     ]
   });
-  
+
+  if (result.filePath) grantPath(path.dirname(result.filePath));
   return result.filePath;
 });
 
@@ -216,21 +257,19 @@ ipcMain.handle('select-csv-file', async () => {
     ],
     properties: ['openFile']
   });
-  
-  return result.filePaths[0] || null;
-});
 
-// Download CSV template
-ipcMain.handle('get-csv-template-path', async () => {
-  const templatePath = path.join(__dirname, '../../templates/crs_data_template.csv');
-  return templatePath;
+  const picked = result.filePaths[0] || null;
+  if (picked) grantPath(path.dirname(picked));
+  return picked;
 });
 
 // Generate CSV preview
 ipcMain.handle('generate-csv-preview', async (event, formData) => {
-  const projectRoot = path.join(__dirname, '../..');
-  const tempCsvPath = path.join(projectRoot, 'temp_preview.csv');
-  
+  // Write the scratch CSV to the OS temp dir — the project root is inside the
+  // read-only asar bundle in a packaged build, so writing there would fail.
+  const tempCsvPath = path.join(app.getPath('temp'), 'crs-preview', 'temp_preview.csv');
+  fs.mkdirSync(path.dirname(tempCsvPath), { recursive: true });
+
   return runPythonCommand({
     module: 'crs_generator.cli',
     args: [
@@ -567,6 +606,7 @@ ipcMain.handle('select-xml-file', async () => {
   });
   
   if (result.filePaths && result.filePaths.length > 0) {
+    grantPath(path.dirname(result.filePaths[0]));
     return result.filePaths[0];
   }
   return null;
@@ -641,7 +681,8 @@ ipcMain.handle('select-correction-csv', async () => {
   }
 
   const filePath = result.filePaths[0];
-  
+  grantPath(path.dirname(filePath));
+
   try {
     const content = fs.readFileSync(filePath, 'utf-8');
     const lines = content.split('\n').filter(l => l.trim());
@@ -1050,6 +1091,7 @@ ipcMain.handle('select-error-injector-file', async () => {
   });
   
   if (result.filePaths && result.filePaths.length > 0) {
+    grantPath(path.dirname(result.filePaths[0]));
     return result.filePaths[0];
   }
   return null;
@@ -1159,6 +1201,7 @@ ipcMain.handle('read-file-content', async (event, filePath) => {
 // Write file content
 ipcMain.handle('write-file-content', async (event, filePath, content) => {
   try {
+    assertPathAllowed(filePath, 'file path');
     fs.writeFileSync(filePath, content, 'utf-8');
     const stat = fs.statSync(filePath);
     return { success: true, size: stat.size, modified: stat.mtime.toISOString() };
@@ -1170,6 +1213,8 @@ ipcMain.handle('write-file-content', async (event, filePath, content) => {
 // Rename file
 ipcMain.handle('rename-file', async (event, oldPath, newPath) => {
   try {
+    assertPathAllowed(oldPath, 'source path');
+    assertPathAllowed(newPath, 'destination path');
     fs.renameSync(oldPath, newPath);
     return { success: true };
   } catch (error) {
@@ -1180,6 +1225,7 @@ ipcMain.handle('rename-file', async (event, oldPath, newPath) => {
 // Delete file or folder
 ipcMain.handle('delete-file', async (event, filePath) => {
   try {
+    assertPathAllowed(filePath, 'file path');
     const stat = fs.statSync(filePath);
     if (stat.isDirectory()) {
       fs.rmSync(filePath, { recursive: true, force: true });
@@ -1195,6 +1241,7 @@ ipcMain.handle('delete-file', async (event, filePath) => {
 // Create new file
 ipcMain.handle('create-file', async (event, filePath, content = '') => {
   try {
+    assertPathAllowed(filePath, 'file path');
     const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(filePath, content, 'utf-8');
@@ -1207,6 +1254,7 @@ ipcMain.handle('create-file', async (event, filePath, content = '') => {
 // Create new folder
 ipcMain.handle('create-folder', async (event, dirPath) => {
   try {
+    assertPathAllowed(dirPath, 'folder path');
     fs.mkdirSync(dirPath, { recursive: true });
     return { success: true };
   } catch (error) {
@@ -1220,7 +1268,10 @@ ipcMain.handle('select-folder', async () => {
     properties: ['openDirectory'],
     title: 'Select Folder'
   });
-  return result.canceled ? null : result.filePaths[0];
+  if (result.canceled) return null;
+  const folder = result.filePaths[0];
+  grantPath(folder);  // user explicitly opened this folder -> grant the whole tree
+  return folder;
 });
 
 // Get file info

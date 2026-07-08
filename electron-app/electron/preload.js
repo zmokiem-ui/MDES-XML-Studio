@@ -17,7 +17,6 @@ function subscribeNoData(channel, callback) {
 contextBridge.exposeInMainWorld('electronAPI', {
   selectOutputFile: (module) => ipcRenderer.invoke('select-output-file', module),
   selectCsvFile: () => ipcRenderer.invoke('select-csv-file'),
-  getCsvTemplatePath: () => ipcRenderer.invoke('get-csv-template-path'),
   generateCsvPreview: (formData) => ipcRenderer.invoke('generate-csv-preview', formData),
   saveCsvPreview: (formData) => ipcRenderer.invoke('save-csv-preview', formData),
   generateCRS: (formData) => ipcRenderer.invoke('generate-crs', formData),
