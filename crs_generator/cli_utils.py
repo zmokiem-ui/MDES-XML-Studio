@@ -185,6 +185,21 @@ def apply_xsd_verdict(base_result: Dict[str, Any], xml_path: str) -> Dict[str, A
     base_result['errors'] = [
         f"line {e['line']}: {e['message']}" for e in result.errors
     ]
+
+    # Layer MDES business-rule findings (beyond XSD) as advisory warnings so the
+    # app can predict portal acceptance. These never change the schema verdict.
+    try:
+        from . import mdes_rules
+        mdes_findings = mdes_rules.check_file(xml_path, result.message_type)
+        base_result['mdes_findings'] = [
+            {'code': f.code, 'severity': f.severity, 'message': f.message}
+            for f in mdes_findings
+        ]
+        warnings.extend(f.as_text() for f in mdes_findings)
+    except Exception as exc:
+        base_result['mdes_findings'] = []
+        warnings.append(f"[MDES] business-rule check skipped: {exc}")
+
     base_result['warnings'] = warnings
     return base_result
 

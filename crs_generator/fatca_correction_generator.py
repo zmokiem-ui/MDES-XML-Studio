@@ -178,12 +178,16 @@ class FATCACorrectionGenerator:
         msg_bodies = root.findall('.//oecd_ftc:MessageBody', namespaces=self.ns)
         
         for body in msg_bodies:
-            # Handle ReportingFI correction
-            if options.correct_reporting_fi:
-                reporting_fi = body.find('sfa_ftc:ReportingFI', namespaces=self.ns)
-                if reporting_fi is not None:
+            # Handle ReportingFI: correct it if requested, otherwise resend it.
+            reporting_fi = body.find('sfa_ftc:ReportingFI', namespaces=self.ns)
+            if reporting_fi is not None:
+                if options.correct_reporting_fi:
                     self._correct_reporting_fi(reporting_fi, orig_msg_ref, options)
                     result.fi_corrected = True
+                else:
+                    # A CRS702 must not carry a 'new' DocTypeIndic (MDES 80010);
+                    # the FI under a corrected account is resent as OECD0/OECD10.
+                    self._resend_reporting_fi(reporting_fi, options)
             
             # Process ReportingGroup
             reporting_group = body.find('sfa_ftc:ReportingGroup', namespaces=self.ns)
@@ -305,6 +309,29 @@ class FATCACorrectionGenerator:
                 if options.modify_name:
                     self._modify_organisation_name(organisation)
     
+    def _resend_reporting_fi(self, reporting_fi: etree._Element,
+                             options: FATCACorrectionOptions):
+        """Mark the ReportingFI as a resend (OECD0/OECD10).
+
+        In a CRS702 correction the FI itself is not changed but must accompany
+        the corrected accounts; it is resent with a resend DocTypeIndic, a fresh
+        unique DocRefId, and no CorrDocRefId (MDES rules 80008/80010/80026).
+        """
+        doc_spec = reporting_fi.find('sfa_ftc:DocSpec', namespaces=self.ns)
+        if doc_spec is None:
+            return
+        doc_type = doc_spec.find('sfa_ftc:DocTypeIndic', namespaces=self.ns)
+        if doc_type is not None:
+            doc_type.text = 'OECD10' if options.test_mode else 'OECD0'
+        # Resend must not carry a CorrDocRefId.
+        corr = doc_spec.find('sfa_ftc:CorrDocRefId', namespaces=self.ns)
+        if corr is not None:
+            doc_spec.remove(corr)
+        doc_ref = doc_spec.find('sfa_ftc:DocRefId', namespaces=self.ns)
+        if doc_ref is not None and doc_ref.text:
+            self.docref_counter += 1
+            doc_ref.text = f"{doc_ref.text}_RESEND{self.docref_counter:04d}"
+
     def _void_account(self, account: etree._Element, orig_msg_ref: str,
                       options: FATCACorrectionOptions):
         """Mark account as void (deleted)."""

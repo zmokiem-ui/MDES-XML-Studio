@@ -230,13 +230,17 @@ class CRSCorrectionGenerator:
             if not body_data:
                 continue
                 
-            # Process ReportingFI if requested
-            if options.correct_reporting_fi:
-                reporting_fi = self._find_element(body, 'ReportingFI')
-                if reporting_fi is not None:
+            # Process ReportingFI: correct it if requested, otherwise resend it.
+            reporting_fi = self._find_element(body, 'ReportingFI')
+            if reporting_fi is not None:
+                if options.correct_reporting_fi:
                     self._correct_reporting_fi(reporting_fi, body_data.get('reporting_fi', {}), options)
                     result.fi_corrected = True
-            
+                else:
+                    # A CRS702 must not carry a 'new' DocTypeIndic (MDES 80010);
+                    # resend the FI (OECD0/OECD10) alongside the corrected accounts.
+                    self._resend_reporting_fi(reporting_fi)
+
             # Find accounts in this body
             reporting_group = self._find_element(body, 'ReportingGroup')
             if reporting_group is not None:
@@ -453,6 +457,27 @@ class CRSCorrectionGenerator:
                 if address_free is not None and address_free.text:
                     address_free.text = address_free.text + ' - Updated'
     
+    def _resend_reporting_fi(self, reporting_fi: ET.Element):
+        """Resend the ReportingFI (OECD0/OECD10).
+
+        In a CRS702 the FI itself is unchanged but must accompany the corrected
+        accounts; it is resent with a resend DocTypeIndic, a fresh unique
+        DocRefId, and no CorrDocRefId (MDES rules 80008/80010/80026).
+        """
+        ns = self.namespaces
+        doc_spec = reporting_fi.find('{%s}DocSpec' % ns['crs'])
+        if doc_spec is None:
+            return
+        doc_type = doc_spec.find('{%s}DocTypeIndic' % ns['stf'])
+        if doc_type is not None:
+            doc_type.text = self._get_doc_type_indic('resend')
+        corr_ref = doc_spec.find('{%s}CorrDocRefId' % ns['stf'])
+        if corr_ref is not None:
+            doc_spec.remove(corr_ref)
+        doc_ref = doc_spec.find('{%s}DocRefId' % ns['stf'])
+        if doc_ref is not None and doc_ref.text:
+            doc_ref.text = self._generate_new_ref_id(doc_ref.text, 'RFIRESEND')
+
     def _correct_account(self, account: ET.Element, acct_data: Dict, options: CorrectionOptions):
         """Apply corrections to an AccountReport"""
         ns = self.namespaces

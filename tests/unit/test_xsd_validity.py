@@ -17,8 +17,15 @@ import pytest
 from lxml import etree
 
 from crs_generator import xsd_validator as xv
+from crs_generator import mdes_rules as mr
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def assert_mdes_clean(path):
+    findings = mr.check_file(path)
+    errors = [f for f in findings if f.severity == "error"]
+    assert not errors, "MDES rule errors:\n" + "\n".join(e.as_text() for e in errors)
 
 
 def run_cli(*args: str) -> subprocess.CompletedProcess:
@@ -65,6 +72,8 @@ def test_crs_correction_is_xsd_valid(tmp_path):
     run_cli("crs_generator.cli", "--mode", "correction", "--xml-input", str(src),
             "--output", str(out), "--correct-individual", "1", "--modify-balance", "--test-mode")
     assert_valid(out)
+    # A CRS702 must resend the FI as OECD10, not leave it OECD11 (MDES 80010).
+    assert_mdes_clean(out)
 
 
 # --- FATCA-CRS combined (the regression that started this) ------------------
@@ -91,6 +100,7 @@ def test_fatca_crs_correction_is_xsd_valid(tmp_path):
     run_cli("crs_generator.fatca_cli", "--mode", "correction", "--xml-input", str(src),
             "--output", str(out), "--correct-individual", "1", "--modify-balance", "--test-mode")
     assert_valid(out)
+    assert_mdes_clean(out)
 
 
 # --- CBC --------------------------------------------------------------------
