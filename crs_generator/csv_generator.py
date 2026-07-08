@@ -67,8 +67,8 @@ class CRSXMLFromCSV:
             nsmap=nsmap
         )
         
-        root.set('{%s}schemaLocation' % self.NAMESPACES['xsi'], 
-                 'urn:oecd:ties:crs:v1 CrsXML_v2.0.xsd')
+        root.set('{%s}schemaLocation' % self.NAMESPACES['xsi'],
+                 '%s CrsXML_v2.0.xsd' % self.NAMESPACES['crs'])
         root.set('version', '2.0')
         
         return root

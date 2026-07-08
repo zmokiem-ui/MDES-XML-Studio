@@ -132,14 +132,20 @@ class FATCACorrectionGenerator:
         if msg_header is None:
             return
         
-        # Update MessageRefId to new unique value
+        # Update MessageRefId to a new unique value. MDES rule 80017 requires it
+        # to start with TransmittingCountry + TaxYear + SendingCompanyIN (not the
+        # receiving country / current year, as before).
         msg_ref = msg_header.find('sfa_ftc:MessageRefId', namespaces=self.ns)
         if msg_ref is not None:
             trans_country = msg_header.find('sfa_ftc:TransmittingCountry', namespaces=self.ns)
-            recv_country = msg_header.find('sfa_ftc:ReceivingCountry', namespaces=self.ns)
+            sending_in = msg_header.find('sfa_ftc:SendingCompanyIN', namespaces=self.ns)
+            reporting_period = msg_header.find('sfa_ftc:ReportingPeriod', namespaces=self.ns)
             tc = trans_country.text if trans_country is not None else "XX"
-            rc = recv_country.text if recv_country is not None else "CW"
-            msg_ref.text = f"{tc}{datetime.now().year}{rc}CORR{self.rng.randint(100000, 999999)}"
+            sin = sending_in.text if sending_in is not None else ""
+            tax_year = (reporting_period.text[:4]
+                        if reporting_period is not None and reporting_period.text
+                        else str(datetime.now().year))
+            msg_ref.text = f"{tc}{tax_year}{sin}CORR{self.rng.randint(100000, 999999)}"
         
         # Update MessageTypeIndic to CRS702 (correction)
         msg_type_indic = msg_header.find('sfa_ftc:MessageTypeIndic', namespaces=self.ns)
