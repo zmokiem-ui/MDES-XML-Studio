@@ -10,7 +10,6 @@ Main areas:
 - Automated tests
 
 ## Working Style
-- Read `.windsurf/current-request.md` before making changes.
 - Continue the active task instead of restarting analysis.
 - Keep responses compact and action-oriented.
 - Prefer small, targeted changes over broad refactors.
@@ -35,18 +34,7 @@ Main areas:
 ## Communication Rules
 - State the next concrete step before large changes.
 - Summarize progress briefly.
-- If interrupted, rely on `.windsurf/current-request.md` for continuity.
 - Avoid repeating long plans unless the task changed.
-
-## Continuity Rules
-- Treat `.windsurf/current-request.md` as the source of truth for the active task.
-- When the task evolves, update:
-  - Goal
-  - Relevant files
-  - Constraints
-  - Progress
-  - Next step
-- On any resume or continuation turn, reread `.windsurf/current-request.md` before continuing.
 
 ## Pause Behavior
 When pausing after a chunk of work, end with:

@@ -93,7 +93,6 @@ The following file patterns are excluded from git via `.gitignore`:
 ### Development
 - `node_modules/`, `.venv/`, `venv/`
 - `.vscode/`, `.idea/`
-- `windsurf/` (workflow files)
 
 ## Security Best Practices
 

@@ -70,11 +70,6 @@ Thumbs.db
 *.sublime-workspace
 
 # ========================
-# Windsurf workflow
-# ========================
-windsurf/
-
-# ========================
 # Test artifacts
 # ========================
 test_fatca_correction.xml
