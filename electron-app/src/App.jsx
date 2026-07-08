@@ -1502,15 +1502,17 @@ function App() {
 
     // Listen for update events
 
-    window.electronAPI.onUpdateChecking(() => {
+    const unsubscribeUpdateEvents = [
+
+      window.electronAPI.onUpdateChecking(() => {
 
       setUpdateStatus('checking')
 
       setUpdateError(null)
 
-    })
+      }),
 
-    window.electronAPI.onUpdateAvailable((info) => {
+      window.electronAPI.onUpdateAvailable((info) => {
 
       setUpdateStatus('downloading')
 
@@ -1518,21 +1520,21 @@ function App() {
 
       setUpdateBannerDismissed(false)
 
-    })
+      }),
 
-    window.electronAPI.onUpdateNotAvailable(() => {
+      window.electronAPI.onUpdateNotAvailable(() => {
 
       setUpdateStatus('idle')
 
-    })
+      }),
 
-    window.electronAPI.onDownloadProgress((progress) => {
+      window.electronAPI.onDownloadProgress((progress) => {
 
       setUpdateProgress(Math.round(progress.percent || 0))
 
-    })
+      }),
 
-    window.electronAPI.onUpdateDownloaded((info) => {
+      window.electronAPI.onUpdateDownloaded((info) => {
 
       setUpdateStatus('ready')
 
@@ -1540,15 +1542,23 @@ function App() {
 
       setUpdateBannerDismissed(false)
 
-    })
+      }),
 
-    window.electronAPI.onUpdateError((msg) => {
+      window.electronAPI.onUpdateError((msg) => {
 
       setUpdateStatus('error')
 
       setUpdateError(msg)
 
-    })
+      })
+
+    ].filter(Boolean)
+
+    return () => {
+
+      unsubscribeUpdateEvents.forEach((unsubscribe) => unsubscribe())
+
+    }
 
   }, [])
 
@@ -2548,9 +2558,11 @@ function App() {
 
 
 
+    let unsubscribeGenerationProgress
+
     try {
 
-      window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
+      unsubscribeGenerationProgress = window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
 
 
 
@@ -2649,6 +2661,8 @@ function App() {
       setShowModal(true)
 
     } finally {
+
+      if (unsubscribeGenerationProgress) unsubscribeGenerationProgress()
 
       setIsGenerating(false)
 
@@ -2920,9 +2934,11 @@ function App() {
 
 
 
+    let unsubscribeGenerationProgress
+
     try {
 
-      window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
+      unsubscribeGenerationProgress = window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
 
 
 
@@ -3024,6 +3040,8 @@ function App() {
 
     } finally {
 
+      if (unsubscribeGenerationProgress) unsubscribeGenerationProgress()
+
       setIsGenerating(false)
 
     }
@@ -3052,9 +3070,11 @@ function App() {
 
 
 
+    let unsubscribeGenerationProgress
+
     try {
 
-      window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
+      unsubscribeGenerationProgress = window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
 
 
 
@@ -3167,6 +3187,8 @@ function App() {
       setShowModal(true)
 
     } finally {
+
+      if (unsubscribeGenerationProgress) unsubscribeGenerationProgress()
 
       setIsGenerating(false)
 

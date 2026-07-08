@@ -1,5 +1,17 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+function subscribe(channel, callback) {
+  const listener = (event, data) => callback(data);
+  ipcRenderer.on(channel, listener);
+  return () => ipcRenderer.removeListener(channel, listener);
+}
+
+function subscribeNoData(channel, callback) {
+  const listener = () => callback();
+  ipcRenderer.on(channel, listener);
+  return () => ipcRenderer.removeListener(channel, listener);
+}
+
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -10,9 +22,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveCsvPreview: (formData) => ipcRenderer.invoke('save-csv-preview', formData),
   generateCRS: (formData) => ipcRenderer.invoke('generate-crs', formData),
   openFileLocation: (filePath) => ipcRenderer.invoke('open-file-location', filePath),
-  onGenerationProgress: (callback) => {
-    ipcRenderer.on('generation-progress', (event, data) => callback(data));
-  },
+  onGenerationProgress: (callback) => subscribe('generation-progress', callback),
   validateCsv: (csvPath) => ipcRenderer.invoke('validate-csv', csvPath),
   downloadCsvTemplate: (module) => ipcRenderer.invoke('download-csv-template', module),
   // Correction mode APIs
@@ -68,12 +78,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getUpdateSettings: () => ipcRenderer.invoke('get-update-settings'),
   setUpdateSettings: (settings) => ipcRenderer.invoke('set-update-settings', settings),
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
-  onUpdateChecking: (callback) => ipcRenderer.on('update-checking', () => callback()),
-  onUpdateAvailable: (callback) => ipcRenderer.on('update-available', (event, info) => callback(info)),
-  onUpdateNotAvailable: (callback) => ipcRenderer.on('update-not-available', (event, info) => callback(info)),
-  onDownloadProgress: (callback) => ipcRenderer.on('download-progress', (event, progress) => callback(progress)),
-  onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', (event, info) => callback(info)),
-  onUpdateError: (callback) => ipcRenderer.on('update-error', (event, msg) => callback(msg)),
+  onUpdateChecking: (callback) => subscribeNoData('update-checking', callback),
+  onUpdateAvailable: (callback) => subscribe('update-available', callback),
+  onUpdateNotAvailable: (callback) => subscribe('update-not-available', callback),
+  onDownloadProgress: (callback) => subscribe('download-progress', callback),
+  onUpdateDownloaded: (callback) => subscribe('update-downloaded', callback),
+  onUpdateError: (callback) => subscribe('update-error', callback),
   
   // Bug Reporting APIs
   createGitHubIssue: (issueData) => ipcRenderer.invoke('create-github-issue', issueData),
