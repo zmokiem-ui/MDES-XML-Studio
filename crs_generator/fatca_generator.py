@@ -23,7 +23,7 @@ from lxml import etree
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from faker import Faker
 import logging
 from .reportable_jurisdictions import get_reportable_jurisdictions, get_all_country_codes
@@ -779,7 +779,7 @@ class FATCAGenerator:
         # Timestamp
         timestamp = msg_header.find('sfa_ftc:Timestamp', namespaces=ns)
         if timestamp is not None:
-            timestamp.text = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+            timestamp.text = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     
     def _update_reporting_fi(self, reporting_fi: etree._Element, ns: dict, fi_index: int):
         """Update ReportingFI with config values."""

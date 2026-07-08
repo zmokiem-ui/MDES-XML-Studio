@@ -18,7 +18,7 @@ from lxml import etree
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict
 import random
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from faker import Faker
 import logging
 import uuid
@@ -123,7 +123,10 @@ class CBCGeneratorConfig:
     
     # Test mode
     test_mode: bool = True  # Use OECD11 instead of OECD1
-    
+
+    # Determinism
+    seed: int = 42
+
     def __post_init__(self):
         if not self.jurisdiction_countries:
             # Default to some major jurisdictions
@@ -135,6 +138,10 @@ class CBCGenerator:
     
     def __init__(self, config: CBCGeneratorConfig):
         self.config = config
+        # Seed the module RNG and Faker so output is reproducible for a given
+        # seed (the CBC generator uses the module-global `random`).
+        random.seed(config.seed)
+        Faker.seed(config.seed)
         self.faker = Faker()
         self.doc_ref_counter = 0
         
@@ -416,7 +423,7 @@ class CBCGenerator:
         self._create_element(message_spec, "MessageRefId", self._generate_message_ref_id())
         self._create_element(message_spec, "MessageTypeIndic", CBC_MESSAGE_TYPE_INDIC['new'])
         self._create_element(message_spec, "ReportingPeriod", f"{self.config.tax_year}-12-31")
-        self._create_element(message_spec, "Timestamp", datetime.utcnow().isoformat() + "Z")
+        self._create_element(message_spec, "Timestamp", datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))
         
         logger.info(f"  MessageSpec created for {self.config.transmitting_country} -> {self.config.receiving_country}")
         

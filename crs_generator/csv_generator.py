@@ -5,7 +5,7 @@ Generates CRS XML files from parsed CSV data
 
 from pathlib import Path
 from lxml import etree
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 import uuid
 
@@ -105,7 +105,7 @@ class CRSXMLFromCSV:
         
         etree.SubElement(msg_spec, '{%s}MessageTypeIndic' % crs).text = 'CRS701'
         etree.SubElement(msg_spec, '{%s}ReportingPeriod' % crs).text = f"{data.message_spec.tax_year}-12-31"
-        etree.SubElement(msg_spec, '{%s}Timestamp' % crs).text = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        etree.SubElement(msg_spec, '{%s}Timestamp' % crs).text = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     
     def _add_crs_body(self, root: etree._Element, data: CRSDataFromCSV) -> None:
         """Add CrsBody element with all ReportingFIs and accounts"""

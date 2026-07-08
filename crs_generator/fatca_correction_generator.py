@@ -17,7 +17,7 @@ from lxml import etree
 from dataclasses import dataclass, field
 from typing import Optional, List
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from faker import Faker
 
 
@@ -170,7 +170,7 @@ class FATCACorrectionGenerator:
         # Update Timestamp
         timestamp = msg_header.find('sfa_ftc:Timestamp', namespaces=self.ns)
         if timestamp is not None:
-            timestamp.text = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+            timestamp.text = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     
     def _process_message_body(self, root: etree._Element, options: FATCACorrectionOptions, 
                               orig_msg_ref: str, result: FATCACorrectionResult) -> FATCACorrectionResult:

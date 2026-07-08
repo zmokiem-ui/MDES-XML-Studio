@@ -10,7 +10,7 @@ from lxml import etree
 from dataclasses import dataclass
 from typing import Optional, List
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from faker import Faker
 import csv
 
@@ -185,7 +185,7 @@ class CBCCorrectionGenerator:
         # Update Timestamp
         for elem in msg_spec.iter():
             if elem.tag.endswith('Timestamp'):
-                elem.text = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+                elem.text = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
                 break
         
         # Add CorrMessageRefId if not present

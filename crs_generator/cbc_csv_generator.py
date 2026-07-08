@@ -6,7 +6,7 @@ from pathlib import Path
 from lxml import etree
 from typing import Optional
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 from .cbc_csv_parser import CBCCSVParser, CBCDataFromCSV, CBCCSVValidationError
@@ -124,7 +124,7 @@ class CBCCSVGenerator:
         self._create_element(msg_spec, "MessageRefId", self._generate_message_ref_id(data))
         self._create_element(msg_spec, "MessageTypeIndic", "CBC401")  # New data
         self._create_element(msg_spec, "ReportingPeriod", f"{data.message_spec.tax_year}-12-31")
-        self._create_element(msg_spec, "Timestamp", datetime.utcnow().isoformat() + "Z")
+        self._create_element(msg_spec, "Timestamp", datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))
     
     def _add_cbc_body(self, root: etree._Element, data: CBCDataFromCSV) -> None:
         """Add CbcBody element"""

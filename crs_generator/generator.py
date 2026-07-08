@@ -15,7 +15,7 @@ from lxml import etree
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from faker import Faker
 import logging
 from multiprocessing import Pool, cpu_count
@@ -601,7 +601,7 @@ class CRSGenerator:
             'crs:TransmittingCountry': self.config.sending_country,
             'crs:ReceivingCountry': self.config.receiving_country,
             'crs:ReportingPeriod': f"{self.config.tax_year}-12-31",
-            'crs:Timestamp': datetime.now().isoformat() + "Z",
+            'crs:Timestamp': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
         
         for tag, value in updates.items():
@@ -1007,7 +1007,10 @@ def _generate_chunk_worker(chunk_data: dict) -> Path:
     
     # Create a mini generator for this worker
     worker_gen = CRSGenerator(config)
-    worker_gen.docref_counter = worker_id * 100000  # Offset to avoid ID collisions
+    # Give each worker a disjoint 10-million-wide DocRefId range. The counter is
+    # rendered as 9 digits, so up to ~99 workers x 10M IDs stay collision-free
+    # (the previous 100k stride collided once any worker emitted >100k IDs).
+    worker_gen.docref_counter = worker_id * 10_000_000  # Offset to avoid ID collisions
     
     # Create root for this chunk
     root = etree.Element(

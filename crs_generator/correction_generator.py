@@ -6,7 +6,7 @@ Generates CRS702 correction files from validated CRS701 new files.
 import xml.etree.ElementTree as ET
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 import random
 import string
 import uuid
@@ -334,7 +334,7 @@ class CRSCorrectionGenerator:
         # Update Timestamp
         timestamp = self._find_element(msg_spec, 'Timestamp')
         if timestamp is not None:
-            timestamp.text = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+            timestamp.text = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     
     def _process_crs_body(self, body: ET.Element, body_data: Dict, 
                           options: CorrectionOptions, result: CorrectionResult):
@@ -586,7 +586,7 @@ class CRSCorrectionGenerator:
     
     def _generate_new_ref_id(self, original: str, suffix: str) -> str:
         """Generate a new unique reference ID based on original"""
-        timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
         random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
         
         # Keep some of the original for traceability, but ensure uniqueness
