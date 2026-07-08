@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crs-testdata-generator"
+version = "2.0.0"
+description = "Generate CRS / FATCA / CbC AEOI test XML for MDES intake validation"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+
+# Runtime dependencies. Ranges pinned with upper bounds so a surprise major
+# release can't silently break the generators or the PyInstaller build.
+dependencies = [
+    "lxml>=4.9,<6",
+    "Faker>=30,<40",
+    "tqdm>=4.66,<5",
+    "multiprocess>=0.70.14,<0.71",
+    "psutil>=5.9,<7",
+    "orjson>=3.9,<4",
+]
+
+[project.optional-dependencies]
+# `pip install -e .[test]` for the unit/XSD-validity suites.
+test = [
+    "pytest>=8,<10",
+]
+# `pip install -e .[build]` to produce the bundled CLI executables.
+build = [
+    "pyinstaller>=6,<7",
+]
+
+[project.scripts]
+crs-gen = "crs_generator.cli:main"
+fatca-gen = "crs_generator.fatca_cli:main"
+cbc-gen = "crs_generator.cbc_cli:main"
+crs-error-injector = "crs_generator.error_injector:main"
+
+[tool.setuptools.packages.find]
+include = ["crs_generator*"]
+exclude = ["tests*", "electron-app*"]
+
+[tool.setuptools.package-data]
+# Schemas + templates are loaded at runtime by xsd_validator and the generators.
+"crs_generator" = [
+    "schemas/**/*.xsd",
+    "schemas/**/*.xml",
+    "templates/**/*",
+    "template CBC/**/*.xml",
+    "template FATCA/**/*.xml",
+    "template corrections/**/*.xml",
+]
+
+# Pytest configuration lives in pytest.ini (testpaths = tests/unit).

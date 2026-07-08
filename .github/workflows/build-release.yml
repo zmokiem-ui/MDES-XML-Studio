@@ -17,11 +17,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-build.txt
       
       - name: Install Python dependencies
         run: |
-          pip install pyinstaller
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          pip install pytest -r requirements.txt -r requirements-build.txt
+
+      - name: Run Python unit tests
+        run: python -m pytest tests/unit -q
       
       - name: Build Python backend
         run: python build_python_backend.py
@@ -29,7 +36,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: electron-app/package-lock.json
       
       - name: Install Node dependencies
         working-directory: electron-app
@@ -38,18 +47,25 @@ jobs:
       - name: Build Vite frontend
         working-directory: electron-app
         run: npm run build
-      
+
+      - name: Playwright smoke test
+        working-directory: electron-app
+        run: npm run test:e2e:smoke
+
       - name: Build Electron installer
         working-directory: electron-app
         run: npx electron-builder --win --x64 --publish never
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-      
+
       - name: Upload installer to releases
         uses: softprops/action-gh-release@v2
         with:
+          # *.blockmap ships alongside latest.yml so electron-updater can do
+          # differential downloads; without it every update is a full re-download.
           files: |
             electron-app/dist-electron/*.exe
+            electron-app/dist-electron/*.blockmap
             electron-app/dist-electron/latest.yml
           draft: false
           prerelease: false

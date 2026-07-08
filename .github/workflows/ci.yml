@@ -1,0 +1,77 @@
+name: CI
+
+# Fast feedback on every push and PR: Python unit tests, a Vite production
+# build, and a Playwright smoke run of the Electron app. The release pipeline
+# (build-release.yml) still owns PyInstaller + electron-builder packaging.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements.txt
+
+      - name: Install package + test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[test]
+
+      - name: Run unit tests
+        run: python -m pytest tests/unit -q
+
+  frontend-e2e:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The Electron app (running unpackaged in E2E) spawns system Python for
+      # generation/validation, so the backend deps must be importable.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            requirements.txt
+
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: electron-app/package-lock.json
+
+      - name: Install Node dependencies
+        working-directory: electron-app
+        run: npm ci
+
+      - name: Build Vite frontend
+        working-directory: electron-app
+        run: npm run build
+
+      - name: Playwright smoke test
+        working-directory: electron-app
+        run: npm run test:e2e:smoke
