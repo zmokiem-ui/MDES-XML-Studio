@@ -37,6 +37,22 @@ function Assert-FileExists($path, $testName) {
     }
 }
 
+function Assert-XsdValid($path, $testName) {
+    $out = python -m crs_generator.xsd_validator $path 2>&1 | Out-String
+    if ($out -match '"valid":\s*true') {
+        Write-Host "  PASS: $testName (XSD valid)" -ForegroundColor Green
+        $script:pass++
+        $script:results += [PSCustomObject]@{Test=$testName; Status="PASS"; Details="XSD valid"}
+        return $true
+    } else {
+        $err = if ($out -match '"message":\s*"([^"]+)"') { $Matches[1] } else { $out.Substring(0, [Math]::Min(200, $out.Length)) }
+        Write-Host "  FAIL: $testName - $err" -ForegroundColor Red
+        $script:fail++
+        $script:results += [PSCustomObject]@{Test=$testName; Status="FAIL"; Details=$err}
+        return $false
+    }
+}
+
 function Assert-JsonSuccess($output, $testName) {
     if ($output -match '"success":\s*true') {
         Write-Host "  PASS: $testName" -ForegroundColor Green
@@ -72,6 +88,7 @@ New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 Write-TestHeader "1. CRS Generation (Random)"
 $out = python -m crs_generator.cli --mode random --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs_new.xml" 2>&1 | Out-String
 Assert-FileExists "$OutputDir\crs_new.xml" "CRS random XML generation"
+Assert-XsdValid "$OutputDir\crs_new.xml" "CRS XSD validity"
 
 Write-TestHeader "1b. CRS Validation"
 $out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_new.xml" --output dummy 2>&1 | Out-String
@@ -81,6 +98,7 @@ Write-TestHeader "1c. CRS Correction"
 $out = python -m crs_generator.cli --mode correction --xml-input "$OutputDir\crs_new.xml" --output "$OutputDir\crs_correction.xml" --correct-individual 1 --modify-balance --test-mode 2>&1 | Out-String
 Assert-JsonSuccess $out "CRS correction generation"
 Assert-FileExists "$OutputDir\crs_correction.xml" "CRS correction file created"
+Assert-XsdValid "$OutputDir\crs_correction.xml" "CRS correction XSD validity"
 
 # ============================================================
 # 2. FATCA MODULE
@@ -88,6 +106,7 @@ Assert-FileExists "$OutputDir\crs_correction.xml" "CRS correction file created"
 Write-TestHeader "2. FATCA Generation (Random)"
 $out = python -m crs_generator.fatca_cli --mode random --sending-country NL --receiving-country US --tax-year 2024 --sending-company-in "A1B2C3.00000.SP.350" --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --output "$OutputDir\fatca_new.xml" 2>&1 | Out-String
 Assert-FileExists "$OutputDir\fatca_new.xml" "FATCA random XML generation"
+Assert-XsdValid "$OutputDir\fatca_new.xml" "FATCA XSD validity"
 
 Write-TestHeader "2b. FATCA Validation"
 $out = python -m crs_generator.fatca_cli --mode validate-xml --xml-input "$OutputDir\fatca_new.xml" --output dummy 2>&1 | Out-String
@@ -97,6 +116,7 @@ Write-TestHeader "2c. FATCA Correction"
 $out = python -m crs_generator.fatca_cli --mode correction --xml-input "$OutputDir\fatca_new.xml" --output "$OutputDir\fatca_correction.xml" --correct-individual 1 --modify-balance --test-mode 2>&1 | Out-String
 Assert-JsonSuccess $out "FATCA correction generation"
 Assert-FileExists "$OutputDir\fatca_correction.xml" "FATCA correction file created"
+Assert-XsdValid "$OutputDir\fatca_correction.xml" "FATCA correction XSD validity"
 
 # ============================================================
 # 3. CBC MODULE
@@ -104,14 +124,17 @@ Assert-FileExists "$OutputDir\fatca_correction.xml" "FATCA correction file creat
 Write-TestHeader "3. CBC Generation"
 $out = python -m crs_generator.cbc_cli generate --country NL --year 2024 --reports 3 --output "$OutputDir\cbc_new.xml" 2>&1 | Out-String
 Assert-FileExists "$OutputDir\cbc_new.xml" "CBC XML generation"
+Assert-XsdValid "$OutputDir\cbc_new.xml" "CBC XSD validity"
 
 Write-TestHeader "3b. CBC Correction"
 $out = python -m crs_generator.cbc_cli correct --source "$OutputDir\cbc_new.xml" --output "$OutputDir\cbc_correction.xml" --type correction 2>&1 | Out-String
 Assert-FileExists "$OutputDir\cbc_correction.xml" "CBC correction file created"
+Assert-XsdValid "$OutputDir\cbc_correction.xml" "CBC correction XSD validity"
 
 Write-TestHeader "3c. CBC Deletion"
 $out = python -m crs_generator.cbc_cli correct --source "$OutputDir\cbc_new.xml" --output "$OutputDir\cbc_deletion.xml" --type deletion 2>&1 | Out-String
 Assert-FileExists "$OutputDir\cbc_deletion.xml" "CBC deletion file created"
+Assert-XsdValid "$OutputDir\cbc_deletion.xml" "CBC deletion XSD validity"
 
 # ============================================================
 # 4. ERROR INJECTOR - One preset per module
