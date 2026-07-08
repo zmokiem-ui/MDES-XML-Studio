@@ -153,6 +153,42 @@ def format_validation_result(result, module_type: str = 'crs') -> Dict[str, Any]
     return base_result
 
 
+def apply_xsd_verdict(base_result: Dict[str, Any], xml_path: str) -> Dict[str, Any]:
+    """Make real XSD validation the authoritative verdict for a validate result.
+
+    The hand-rolled validators (xml_validator / fatca_validator) are
+    element-order-blind and occasionally reject schema-valid output, so their
+    findings are demoted to advisory warnings while the XSD result decides
+    ``is_valid``. Metadata already extracted by the hand-rolled validator
+    (counts, message ref id, etc.) is preserved.
+    """
+    from . import xsd_validator as xv
+
+    try:
+        result = xv.validate_file(xml_path)
+    except Exception as exc:  # unknown root, parse error, missing schema
+        base_result['xsd_valid'] = False
+        base_result['is_valid'] = False
+        base_result['errors'] = [f'XSD validation error: {exc}'] + list(
+            base_result.get('errors', []))
+        return base_result
+
+    # Demote prior (hand-rolled) errors to warnings; the schema decides validity.
+    prior_errors = list(base_result.get('errors', []))
+    warnings = list(base_result.get('warnings', []))
+    warnings.extend(f'[business-rule] {e}' for e in prior_errors)
+
+    base_result['xsd_valid'] = result.valid
+    base_result['xsd_message_type'] = result.message_type
+    base_result['schema_version'] = result.version
+    base_result['is_valid'] = result.valid
+    base_result['errors'] = [
+        f"line {e['line']}: {e['message']}" for e in result.errors
+    ]
+    base_result['warnings'] = warnings
+    return base_result
+
+
 def format_correction_result(result) -> Dict[str, Any]:
     """Format correction generation result into a standard dictionary."""
     if result.success:

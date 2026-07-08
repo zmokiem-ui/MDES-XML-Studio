@@ -27,7 +27,8 @@ def validate_fatca_xml_mode(args):
     
     validator = FATCAXMLValidator()
     result = validator.validate_file(args.xml_input)
-    return format_validation_result(result, 'fatca')
+    from .cli_utils import apply_xsd_verdict
+    return apply_xsd_verdict(format_validation_result(result, 'fatca'), args.xml_input)
 
 
 def generate_fatca_correction_mode(args):

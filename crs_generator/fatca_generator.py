@@ -462,9 +462,13 @@ class FATCAGenerator:
                 res_elem = etree.SubElement(org, f"{{{self.ns['sfa_ftc']}}}ResCountryCode")
             res_elem.text = res_country
             
-            # Add second ResCountryCode (US) for FATCA reporting
-            res_elem2 = etree.SubElement(org, f"{{{self.ns['sfa_ftc']}}}ResCountryCode")
+            # Add second ResCountryCode (US) for FATCA reporting. It must sit
+            # directly after the first ResCountryCode: the schema sequence
+            # requires every ResCountryCode before TIN/Name/Address, so append
+            # via addnext() rather than SubElement (which lands after Address).
+            res_elem2 = etree.Element(f"{{{self.ns['sfa_ftc']}}}ResCountryCode")
             res_elem2.text = "US"
+            res_elem.addnext(res_elem2)
             
             # TIN
             tin_elem = org.find('sfa_ftc:TIN', namespaces=ns)

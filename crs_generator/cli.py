@@ -28,7 +28,8 @@ def validate_xml_mode(args):
     
     validator = CRSXMLValidator()
     result = validator.validate_file(args.xml_input)
-    return format_validation_result(result, 'crs')
+    from .cli_utils import apply_xsd_verdict
+    return apply_xsd_verdict(format_validation_result(result, 'crs'), args.xml_input)
 
 
 def generate_correction_mode(args):

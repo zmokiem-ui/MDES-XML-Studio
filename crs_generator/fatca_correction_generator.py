@@ -146,14 +146,18 @@ class FATCACorrectionGenerator:
         if msg_type_indic is not None:
             msg_type_indic.text = 'CRS702'
         
-        # Add CorrMessageRefId if not present
+        # Add CorrMessageRefId if not present. Per FatcaCrsTypes_v2.2 the header
+        # order is MessageRefId -> MessageTypeIndic -> CorrMessageRefId, so the
+        # element must be inserted directly after MessageTypeIndic; inserting it
+        # after MessageRefId (as before) produced schema-invalid output.
         corr_msg_ref = msg_header.find('sfa_ftc:CorrMessageRefId', namespaces=self.ns)
         if corr_msg_ref is None and orig_msg_ref:
-            msg_ref_elem = msg_header.find('sfa_ftc:MessageRefId', namespaces=self.ns)
-            if msg_ref_elem is not None:
+            anchor = msg_type_indic if msg_type_indic is not None else \
+                msg_header.find('sfa_ftc:MessageRefId', namespaces=self.ns)
+            if anchor is not None:
                 corr_msg_ref = etree.Element(f"{{{self.ns['sfa_ftc']}}}CorrMessageRefId")
                 corr_msg_ref.text = orig_msg_ref
-                msg_ref_elem.addnext(corr_msg_ref)
+                anchor.addnext(corr_msg_ref)
         elif corr_msg_ref is not None:
             corr_msg_ref.text = orig_msg_ref
         

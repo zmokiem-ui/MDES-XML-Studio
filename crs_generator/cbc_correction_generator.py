@@ -197,15 +197,26 @@ class CBCCorrectionGenerator:
                 break
         
         if not corr_msg_ref_exists:
-            # Find MessageRefId element to insert after
+            # Insert after MessageTypeIndic. CbcXML_v2.0 orders the header
+            # MessageRefId -> MessageTypeIndic -> CorrMessageRefId; inserting
+            # after MessageRefId (as before) produced schema-invalid output.
+            # (Anchor on MessageTypeIndic, not MessageRefId: endswith
+            # 'MessageRefId' also matches 'CorrMessageRefId'.)
+            anchor = None
             for elem in msg_spec.iter():
-                if elem.tag.endswith('MessageRefId'):
-                    # Create CorrMessageRefId with same namespace
-                    ns = elem.tag.split('}')[0] + '}' if '}' in elem.tag else ''
-                    corr_elem = etree.Element(f"{ns}CorrMessageRefId")
-                    corr_elem.text = orig_msg_ref
-                    elem.addnext(corr_elem)
+                if elem.tag.endswith('MessageTypeIndic'):
+                    anchor = elem
                     break
+            if anchor is None:
+                for elem in msg_spec.iter():
+                    if elem.tag.endswith('}MessageRefId') or elem.tag == 'MessageRefId':
+                        anchor = elem
+                        break
+            if anchor is not None:
+                ns = anchor.tag.split('}')[0] + '}' if '}' in anchor.tag else ''
+                corr_elem = etree.Element(f"{ns}CorrMessageRefId")
+                corr_elem.text = orig_msg_ref
+                anchor.addnext(corr_elem)
     
     def _process_cbc_body(self, root: etree._Element, correction_type: str,
                           test_mode: bool, orig_msg_ref: str,

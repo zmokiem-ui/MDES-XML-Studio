@@ -2,6 +2,7 @@
 
 from crs_generator.generator import CRSGenerator, GeneratorConfig
 from crs_generator.xml_validator import CRSXMLValidator
+from crs_generator import xsd_validator as xv
 
 
 def test_organisation_without_controlling_persons_is_valid_non_crs101(tmp_path):
@@ -30,3 +31,7 @@ def test_organisation_without_controlling_persons_is_valid_non_crs101(tmp_path):
 
     validation = CRSXMLValidator().validate_file(str(generated_path))
     assert validation.is_valid, validation.errors
+
+    # And it must pass real XSD validation, not just the hand-rolled checker.
+    xsd_result = xv.validate_file(generated_path)
+    assert xsd_result.valid, xsd_result.errors
