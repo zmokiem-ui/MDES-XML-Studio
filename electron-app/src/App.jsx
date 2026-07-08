@@ -1122,7 +1122,9 @@ function App() {
 
     accountHolderCountries: '',
 
-    outputPath: ''
+    outputPath: '',
+
+    testMode: true  // OECD11 (test) by default; uncheck for OECD1 (production)
 
   })
 
@@ -9351,6 +9353,28 @@ function App() {
                     </div>
 
                   )}
+
+                  <div className="mt-4">
+
+                    <label className="flex items-center gap-2 cursor-pointer">
+
+                      <input
+
+                        type="checkbox"
+
+                        checked={formData.testMode}
+
+                        onChange={(e) => setFormData({...formData, testMode: e.target.checked})}
+
+                        className="w-4 h-4 rounded border-gray-300"
+
+                      />
+
+                      <span className={`text-sm ${theme.text}`}>Test mode (OECD11/12/13) — uncheck for production DocTypeIndic (OECD1/2/3)</span>
+
+                    </label>
+
+                  </div>
 
                 </div>
 

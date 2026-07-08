@@ -314,6 +314,9 @@ ipcMain.handle('generate-crs', async (event, formData) => {
     }
   }
 
+  // Test env uses OECD11 (default); production uses OECD1 (MDES 50010/50011).
+  if (formData.testMode === false) args.push('--production');
+
   const result = await runPythonCommand({
     module: 'crs_generator.cli',
     args,
@@ -321,7 +324,7 @@ ipcMain.handle('generate-crs', async (event, formData) => {
     parseJson: false,
     outputPath: formData.outputPath
   });
-  
+
   result.message = 'CRS file generated successfully!';
   return result;
 });
@@ -594,7 +597,7 @@ ipcMain.handle('generate-correction', async (event, options) => {
   if (options.modifyBalance) args.push('--modify-balance');
   if (options.modifyAddress) args.push('--modify-address');
   if (options.modifyName) args.push('--modify-name');
-  if (options.testMode) args.push('--test-mode');
+  if (options.testMode === false) args.push('--production');
 
   const result = await runPythonCommand({
     module: 'crs_generator.cli',
@@ -720,7 +723,7 @@ ipcMain.handle('generate-fatca', async (event, formData) => {
     }
   }
 
-  if (formData.testMode) args.push('--test-mode');
+  if (formData.testMode === false) args.push('--production');
 
   return runPythonCommand({
     module: 'crs_generator.fatca_cli',
@@ -757,7 +760,7 @@ ipcMain.handle('generate-fatca-correction', async (event, options) => {
   if (options.modifyBalance) args.push('--modify-balance');
   if (options.modifyAddress) args.push('--modify-address');
   if (options.modifyName) args.push('--modify-name');
-  if (options.testMode) args.push('--test-mode');
+  if (options.testMode === false) args.push('--production');
 
   return runPythonCommand({
     module: 'crs_generator.fatca_cli',

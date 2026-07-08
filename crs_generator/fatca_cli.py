@@ -177,12 +177,20 @@ def main():
     parser.add_argument('--correct-organisation', type=int, default=0, help='Number of organisation accounts to correct')
     parser.add_argument('--delete-individual', type=int, default=0, help='Number of individual accounts to delete')
     parser.add_argument('--delete-organisation', type=int, default=0, help='Number of organisation accounts to delete')
-    parser.add_argument('--modify-balance', action='store_true', default=True, help='Modify account balances')
-    parser.add_argument('--modify-address', action='store_true', default=True, help='Modify addresses')
-    parser.add_argument('--modify-name', action='store_true', default=False, help='Modify names')
-    parser.add_argument('--test-mode', action='store_true', default=True, help='Use test data indicators (FATCA11-14)')
-    
+    parser.add_argument('--modify-balance', action=argparse.BooleanOptionalAction, default=True, help='Modify account balances (use --no-modify-balance to disable)')
+    parser.add_argument('--modify-address', action=argparse.BooleanOptionalAction, default=True, help='Modify addresses (use --no-modify-address to disable)')
+    parser.add_argument('--modify-name', action=argparse.BooleanOptionalAction, default=False, help='Modify names')
+    # Test vs production DocTypeIndic (MDES 50010/50011). Default is test env
+    # (FATCA11-14); pass --production for FATCA1-4. --test-mode is a deprecated
+    # no-op alias kept for backward compatibility (test is default).
+    parser.add_argument('--production', action='store_true', default=False,
+                        help='Use production DocTypeIndic (FATCA1-4) instead of test (FATCA11-14)')
+    parser.add_argument('--test-mode', action='store_true', default=False,
+                        help='(Deprecated) Test data indicators are the default; this flag is a no-op')
+
     args = parser.parse_args()
+    # Resolve the single source of truth used throughout the CLI.
+    args.test_mode = not args.production
     
     if args.mode == 'validate-xml':
         result = validate_fatca_xml_mode(args)

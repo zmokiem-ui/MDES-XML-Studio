@@ -167,12 +167,20 @@ def main():
     parser.add_argument('--correct-organisation', type=int, default=0, help='Number of organisation accounts to correct')
     parser.add_argument('--delete-individual', type=int, default=0, help='Number of individual accounts to delete')
     parser.add_argument('--delete-organisation', type=int, default=0, help='Number of organisation accounts to delete')
-    parser.add_argument('--modify-balance', action='store_true', default=True, help='Modify account balances')
-    parser.add_argument('--modify-address', action='store_true', default=True, help='Modify addresses')
-    parser.add_argument('--modify-name', action='store_true', default=False, help='Modify names')
-    parser.add_argument('--test-mode', action='store_true', default=True, help='Use test data indicators (OECD11/12/13) instead of production (OECD1/2/3)')
-    
+    parser.add_argument('--modify-balance', action=argparse.BooleanOptionalAction, default=True, help='Modify account balances (use --no-modify-balance to disable)')
+    parser.add_argument('--modify-address', action=argparse.BooleanOptionalAction, default=True, help='Modify addresses (use --no-modify-address to disable)')
+    parser.add_argument('--modify-name', action=argparse.BooleanOptionalAction, default=False, help='Modify names')
+    # Test vs production DocTypeIndic (MDES 50010/50011). Default is test env
+    # (OECD11/12/13); pass --production for OECD1/2/3. --test-mode is a
+    # deprecated no-op alias kept for backward compatibility (test is default).
+    parser.add_argument('--production', action='store_true', default=False,
+                        help='Use production DocTypeIndic (OECD1/2/3) instead of test (OECD11/12/13)')
+    parser.add_argument('--test-mode', action='store_true', default=False,
+                        help='(Deprecated) Test data indicators are the default; this flag is a no-op')
+
     args = parser.parse_args()
+    # Resolve the single source of truth used throughout the CLI.
+    args.test_mode = not args.production
     
     if args.mode == 'validate':
         result = validate_csv_mode(args)
@@ -320,6 +328,7 @@ def generate_random_mode(args):
             account_holder_country_mode=args.account_holder_mode,
             account_holder_countries=account_holder_countries,
             output_path=Path(args.output),
+            test_mode=args.test_mode,
             show_progress=True,
             progress_every=500,
             pretty_print=True

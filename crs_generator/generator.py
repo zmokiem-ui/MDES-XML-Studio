@@ -50,6 +50,10 @@ class GeneratorConfig:
     account_holder_countries: List[str] = field(default_factory=list)  # Used for "single" or "multiple" modes
     account_holder_country_weights: Dict[str, float] = field(default_factory=dict)  # Optional weighted distribution
     
+    # Test vs production DocTypeIndic (MDES rules 50010/50011): test env expects
+    # OECD10-13, production expects OECD0-3. Default test to match the local env.
+    test_mode: bool = True
+
     # Realism
     closed_account_ratio: float = 0.1
     currencies: List[str] = field(default_factory=lambda: ["EUR", "USD", "GBP", "ANG"])
@@ -237,7 +241,11 @@ class CRSGenerator:
         
         # ID counter for unique DocRefIds
         self.docref_counter = 0
-        
+
+    def _doc_type_indic(self) -> str:
+        """New-data DocTypeIndic: OECD11 in test env, OECD1 in production (MDES 50010/50011)."""
+        return 'OECD11' if self.config.test_mode else 'OECD1'
+
     def _load_base_template(self) -> tuple[etree._ElementTree, dict]:
         """Load the base CRS template."""
         template_path = Path(__file__).parent / "templates" / "CRS.Generic.2021.Domestic.xml"
@@ -276,9 +284,9 @@ class CRSGenerator:
                                                            'ADDRESSADDRESS', 'ABC', 'DOCTYPEINDIC']):
             return
         
-        # DocTypeIndic should always be OECD11
+        # DocTypeIndic follows the test/production mode
         if 'DOCTYPEINDIC' in text:
-            elem.text = 'OECD11'
+            elem.text = self._doc_type_indic()
             return
         
         # Special case for TIN - only replace if it's a placeholder
@@ -406,10 +414,10 @@ class CRSGenerator:
         if acc_num is not None:
             acc_num.set('ClosedAccount', 'true' if is_closed else 'false')
         
-        # Update DocTypeIndic to OECD11
+        # Update DocTypeIndic per test/production mode
         doc_type = account.find('.//stf:DocTypeIndic', namespaces=ns)
         if doc_type is not None:
-            doc_type.text = 'OECD11'
+            doc_type.text = self._doc_type_indic()
         
         # Apply AccountHolder country rules BEFORE randomizing text
         res_country = self.data_gen.account_holder_res_country()
@@ -474,10 +482,10 @@ class CRSGenerator:
         if acc_num is not None:
             acc_num.set('ClosedAccount', 'true' if is_closed else 'false')
 
-        # Update DocTypeIndic to OECD11
+        # Update DocTypeIndic per test/production mode
         doc_type = account.find('.//stf:DocTypeIndic', namespaces=ns)
         if doc_type is not None:
-            doc_type.text = 'OECD11'
+            doc_type.text = self._doc_type_indic()
         
         # Apply AccountHolder country rules BEFORE randomizing text
         res_country = self.data_gen.account_holder_res_country()
@@ -693,7 +701,7 @@ class CRSGenerator:
         if doc_spec is not None:
             doctype = doc_spec.find('stf:DocTypeIndic', namespaces=ns)
             if doctype is not None:
-                doctype.text = 'OECD11'
+                doctype.text = self._doc_type_indic()
             
             docref = doc_spec.find('stf:DocRefId', namespaces=ns)
             if docref is not None:
