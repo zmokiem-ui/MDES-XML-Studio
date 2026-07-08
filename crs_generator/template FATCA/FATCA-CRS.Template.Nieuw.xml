@@ -4,7 +4,7 @@
                     xmlns:sfa_ftc="urn:oecd:ties:fatcacrstypes:v2"
                     xmlns:sfa="urn:oecd:ties:stffatcatypes:v2"
                     version="2.2"
-                    xsi:schemaLocation="urn:fatcacrs:ties:v1 FatcaCrs_v2.2.xsd">
+                    xsi:schemaLocation="urn:fatcacrs:ties:v2 FatcaCrs_v2.2.xsd">
 	<oecd_ftc:MessageHeader>
 		<sfa_ftc:SendingCompanyIN>SENDINGCOMPANYIN</sfa_ftc:SendingCompanyIN>
 		<sfa_ftc:TransmittingCountry>TRANSMITTINGCOUNTRY</sfa_ftc:TransmittingCountry>
@@ -25,17 +25,11 @@
 			<sfa_ftc:Address legalAddressType="OECD301">
 				<sfa:CountryCode>TRANSMITTINGCOUNTRY</sfa:CountryCode>
 				<sfa:AddressFix>
-					<sfa:Street>AddressAddressFixStreet. abc</sfa:Street>
-					<sfa:BuildingIdentifier>AddressAddressFixBuildingIdentifier. abc</sfa:BuildingIdentifier>
-					<sfa:SuiteIdentifier>AddressAddressFixSuiteIdentifier. abc</sfa:SuiteIdentifier>
-					<sfa:FloorIdentifier>AddressAddressFixFloorIdentifier. abc</sfa:FloorIdentifier>
-					<sfa:DistrictName>AddressAddressFixDistrictName. abc</sfa:DistrictName>
-					<sfa:POB>AddressAddressFixPOB. abc</sfa:POB>
-					<sfa:PostCode>AddressAddressFixPostcode. abc</sfa:PostCode>
-					<sfa:City>AddressAddressFixCity. abc</sfa:City>
-					<sfa:CountrySubentity>AddressAddressFixCountrySubentity. abc</sfa:CountrySubentity>
+					<sfa:Street>Street</sfa:Street>
+					<sfa:BuildingIdentifier>1</sfa:BuildingIdentifier>
+					<sfa:PostCode>0000</sfa:PostCode>
+					<sfa:City>City</sfa:City>
 				</sfa:AddressFix>
-				<sfa:AddressFree>AddresAddressFixAddressfree. abc</sfa:AddressFree>
 			</sfa_ftc:Address>
 			<sfa_ftc:FilerCategory>FATCA601</sfa_ftc:FilerCategory>
 			<sfa_ftc:DocSpec>

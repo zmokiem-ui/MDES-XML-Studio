@@ -114,6 +114,40 @@ def test_cbc_correction_is_xsd_valid(tmp_path, ctype):
     assert_valid(out)
 
 
+# --- FATCA-CRS business-rule content checks ---------------------------------
+
+def test_fatca_no_placeholder_leakage_and_birthdate(tmp_path):
+    out = tmp_path / "fatca.xml"
+    run_cli("crs_generator.fatca_cli", "--mode", "random", "--sending-country", "NL",
+            "--receiving-country", "US", "--tax-year", "2024",
+            "--sending-company-in", "A1B2C3.00000.SP.350", "--num-fis", "1",
+            "--individual-accounts", "2", "--organisation-accounts", "1", "--output", str(out))
+    xml = out.read_text(encoding="utf-8")
+    # Template placeholder remnants must not leak into output.
+    assert "FixSuite" not in xml and ". abc" not in xml
+    # MDES rejects any file containing '--' or '/*' (rule 98017).
+    assert "--" not in xml and "/*" not in xml
+    # BirthDate is emitted for individuals and controlling persons (rule 60014).
+    assert "<sfa_ftc:BirthDate>" in xml
+    # schemaLocation namespace hint matches the document namespace.
+    assert "urn:fatcacrs:ties:v1" not in xml
+
+
+def test_fatca_zero_accounts_is_refused(tmp_path):
+    """A 'new' message with zero accounts must fail loudly, not emit invalid XML."""
+    out = tmp_path / "empty.xml"
+    env = dict(os.environ, PYTHONPATH=str(REPO_ROOT))
+    proc = subprocess.run(
+        [sys.executable, "-m", "crs_generator.fatca_cli", "--mode", "random",
+         "--sending-country", "NL", "--receiving-country", "US", "--tax-year", "2024",
+         "--sending-company-in", "A1B2C3.00000.SP.350", "--num-fis", "1",
+         "--individual-accounts", "0", "--organisation-accounts", "0", "--output", str(out)],
+        cwd=str(REPO_ROOT), capture_output=True, text=True, env=env,
+    )
+    assert proc.returncode != 0
+    assert not out.exists()
+
+
 # --- Negative control: prove the validator is NOT order-blind ---------------
 
 def test_validator_rejects_reordered_elements(tmp_path):
