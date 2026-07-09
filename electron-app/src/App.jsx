@@ -46,6 +46,7 @@ import { ModuleSelectHeader } from './components/layout/ModuleSelectHeader'
 import { MainHeader } from './components/layout/MainHeader'
 import { ModuleSelectGrid } from './components/layout/ModuleSelectGrid'
 import { ThemeBackground } from './components/layout/ThemeBackground'
+import { UpdateBanner } from './components/layout/UpdateBanner'
 import { ThemePicker } from './components/settings/ThemePicker'
 import { LanguagePicker } from './components/settings/LanguagePicker'
 
@@ -3300,115 +3301,6 @@ function App() {
 
 
 
-  // --- Auto-Update Banner (renders at top of any page) ---
-
-  const UpdateBanner = () => {
-
-    if (updateBannerDismissed) return null
-
-    
-
-    if (updateStatus === 'downloading') {
-
-      return (
-
-        <div className="fixed top-0 left-0 right-0 z-50 bg-blue-600 text-white px-4 py-2 shadow-lg">
-
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-
-            <div className="flex items-center gap-3">
-
-              <Loader2 className="w-4 h-4 animate-spin" />
-
-              <span className="text-sm font-medium">
-
-                Downloading update v{updateInfo?.version}... {updateProgress}%
-
-              </span>
-
-            </div>
-
-            <div className="flex items-center gap-3">
-
-              <div className="w-48 h-2 bg-blue-400 rounded-full overflow-hidden">
-
-                <div className="h-full bg-white rounded-full transition-all duration-300" style={{ width: `${updateProgress}%` }} />
-
-              </div>
-
-              <button onClick={() => setUpdateBannerDismissed(true)} className="p-1 hover:bg-blue-500 rounded">
-
-                <X className="w-4 h-4" />
-
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )
-
-    }
-
-    
-
-    if (updateStatus === 'ready') {
-
-      return (
-
-        <div className="fixed top-0 left-0 right-0 z-50 bg-green-600 text-white px-4 py-2 shadow-lg">
-
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-
-            <div className="flex items-center gap-3">
-
-              <CheckCircle2 className="w-4 h-4" />
-
-              <span className="text-sm font-medium">
-
-                Update v{updateInfo?.version} is ready! Restart to apply.
-
-              </span>
-
-            </div>
-
-            <div className="flex items-center gap-2">
-
-              <button
-
-                onClick={() => window.electronAPI?.installUpdate()}
-
-                className="px-4 py-1 bg-white text-green-700 rounded-lg text-sm font-semibold hover:bg-green-50 transition-colors"
-
-              >
-
-                Restart Now
-
-              </button>
-
-              <button onClick={() => setUpdateBannerDismissed(true)} className="p-1 hover:bg-green-500 rounded">
-
-                <X className="w-4 h-4" />
-
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )
-
-    }
-
-    
-
-    return null
-
-  }
 
 
 
@@ -3458,7 +3350,7 @@ function App() {
 
         <div className={`min-h-screen ${theme.bg} transition-colors duration-300`}>
 
-          <UpdateBanner />
+          <UpdateBanner updateStatus={updateStatus} updateInfo={updateInfo} updateProgress={updateProgress} dismissed={updateBannerDismissed} onDismiss={() => setUpdateBannerDismissed(true)} />
 
           <header className={`${theme.header} border-b shadow-sm sticky top-0 z-40`}>
 
@@ -4744,7 +4636,7 @@ function App() {
 
       <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${getThemeClass()}`}>
 
-        <UpdateBanner />
+        <UpdateBanner updateStatus={updateStatus} updateInfo={updateInfo} updateProgress={updateProgress} dismissed={updateBannerDismissed} onDismiss={() => setUpdateBannerDismissed(true)} />
 
         {/* Theme Background */}
 
@@ -7101,7 +6993,7 @@ function App() {
 
     <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${getThemeClass()}`}>
 
-      <UpdateBanner />
+      <UpdateBanner updateStatus={updateStatus} updateInfo={updateInfo} updateProgress={updateProgress} dismissed={updateBannerDismissed} onDismiss={() => setUpdateBannerDismissed(true)} />
 
       {/* Theme Background */}
 
