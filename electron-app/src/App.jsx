@@ -41,6 +41,7 @@ import { useThemeTransition, ThemeToggleButton } from './hooks/useThemeTransitio
 // Components
 
 import { FileManager } from './components/FileManager'
+import { Footer } from './components/layout/Footer'
 
 import { 
 
@@ -63,8 +64,6 @@ import { translations, t, LANGUAGES } from './i18n/translations'
 // Brand assets
 
 import mdesLogo from './assets/mdes-logo.png'
-
-import blyceLogo from './assets/blyce-logo.png'
 
 
 
@@ -7522,59 +7521,7 @@ function App() {
 
           {/* Footer */}
 
-          <div className="mt-16 flex flex-col items-center gap-4">
-
-            <div className="flex items-center gap-3">
-
-              <span className={`text-sm ${theme.textMuted}`}>Powered by</span>
-
-              <img src={blyceLogo} alt="BLYCE" className="h-8 rounded" />
-
-            </div>
-
-            <p 
-
-              className="text-lg font-bold bg-clip-text text-transparent animate-pulse" 
-
-              style={{ 
-
-                animationDuration: '3s',
-
-                backgroundImage: selectedTheme === 'ocean' ? 'linear-gradient(to right, #06b6d4, #0284c7, #0369a1)' :
-
-                                 selectedTheme === 'forest' ? 'linear-gradient(to right, #10b981, #059669, #047857)' :
-
-                                 selectedTheme === 'sunset' ? 'linear-gradient(to right, #fb923c, #f97316, #ea580c)' :
-
-                                 selectedTheme === 'lavender' ? 'linear-gradient(to right, #a78bfa, #c084fc, #e879f9)' :
-
-                                 selectedTheme === 'midnight' ? 'linear-gradient(to right, #8b5cf6, #7c3aed, #6d28d9)' :
-
-                                 selectedTheme === 'spaceGalaxy' ? 'linear-gradient(to right, #00d9ff, #7b2cbf, #ff006e)' :
-
-                                 selectedTheme === 'cyberpunkNeon' ? 'linear-gradient(to right, #ff006e, #00f0ff, #b400ff)' :
-
-                                 selectedTheme === 'organicForest' ? 'linear-gradient(to right, #4a7c39, #2d5016, #65a30d)' :
-
-                                 selectedTheme === 'oceanUnderwater' ? 'linear-gradient(to right, #06b6d4, #0891b2, #0e7490)' :
-
-                                 selectedTheme === 'steampunkVictorian' ? 'linear-gradient(to right, #d4af37, #b87333, #8b4513)' :
-
-                                 selectedTheme === 'dark' ? 'linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899)' :
-
-                                 'linear-gradient(to right, #2563eb, #7c3aed, #db2777)',
-
-                filter: 'drop-shadow(0 0 10px rgba(147, 51, 234, 0.5))'
-
-              }}
-
-            >
-
-              {t(language, 'footer.createdBy')}
-
-            </p>
-
-          </div>
+          <Footer theme={theme} selectedTheme={selectedTheme} language={language} />
 
         </main>
 
