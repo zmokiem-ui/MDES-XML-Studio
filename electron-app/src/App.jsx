@@ -42,6 +42,7 @@ import { useThemeTransition, ThemeToggleButton } from './hooks/useThemeTransitio
 
 import { FileManager } from './components/FileManager'
 import { Footer } from './components/layout/Footer'
+import { ModuleSelectHeader } from './components/layout/ModuleSelectHeader'
 
 import { 
 
@@ -5045,77 +5046,17 @@ function App() {
 
         {/* Simple header for module selection */}
 
-        <header className={`${theme.header} border-b shadow-sm`}>
-
-          <div className="max-w-7xl mx-auto px-6 py-4">
-
-            <div className="flex items-center justify-between">
-
-              <div className="flex items-center gap-4">
-
-                <img src={mdesLogo} alt="MDES" className="h-12 rounded-lg shadow-lg" />
-
-                <div>
-
-                  <h1 className={`text-2xl font-bold ${theme.headerText || theme.text}`}>{t(language, 'appTitle')}</h1>
-
-                  <p className={`text-sm ${theme.headerTextMuted || theme.textMuted}`}>Professional XML generation for CRS, FATCA & CBC reporting</p>
-
-                </div>
-
-              </div>
-
-              <div className="flex items-center gap-2">
-
-                <button
-
-                  onClick={() => setCurrentPage('settings')}
-
-                  className={`p-2 rounded-lg transition-all ${theme.buttonSecondary}`}
-
-                  title="Settings"
-
-                  data-testid="nav-settings"
-
-                >
-
-                  <Settings className="w-5 h-5" />
-
-                </button>
-
-                <button
-
-                  onClick={() => {
-
-                    const themeKeys = Object.keys(THEMES)
-
-                    const currentIndex = themeKeys.indexOf(selectedTheme)
-
-                    const nextIndex = (currentIndex + 1) % themeKeys.length
-
-                    setSelectedTheme(themeKeys[nextIndex])
-
-                  }}
-
-                  className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${theme.buttonSecondary}`}
-
-                  title="Click to change theme"
-
-                >
-
-                  <span>{theme.emoji}</span>
-
-                  <span className="text-sm font-medium hidden sm:inline">{theme.name}</span>
-
-                </button>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </header>
+        <ModuleSelectHeader
+          theme={theme}
+          language={language}
+          onOpenSettings={() => setCurrentPage('settings')}
+          onCycleTheme={() => {
+            const themeKeys = Object.keys(THEMES)
+            const currentIndex = themeKeys.indexOf(selectedTheme)
+            const nextIndex = (currentIndex + 1) % themeKeys.length
+            setSelectedTheme(themeKeys[nextIndex])
+          }}
+        />
 
 
 
