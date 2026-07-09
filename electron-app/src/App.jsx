@@ -45,6 +45,8 @@ import { Footer } from './components/layout/Footer'
 import { ModuleSelectHeader } from './components/layout/ModuleSelectHeader'
 import { MainHeader } from './components/layout/MainHeader'
 import { ModuleSelectGrid } from './components/layout/ModuleSelectGrid'
+import { ThemePicker } from './components/settings/ThemePicker'
+import { LanguagePicker } from './components/settings/LanguagePicker'
 
 import { 
 
@@ -3746,37 +3748,7 @@ function App() {
 
               </div>
 
-              <div className="grid grid-cols-4 gap-3">
-
-                {Object.entries(THEMES).map(([key, themeObj]) => (
-
-                  <button
-
-                    key={key}
-
-                    onClick={() => setSelectedTheme(key)}
-
-                    className={`p-3 rounded-xl border-2 transition-all ${
-
-                      selectedTheme === key 
-
-                        ? `${themeObj.buttonPrimary} shadow-lg` 
-
-                        : `${theme.border} ${theme.cardHover}`
-
-                    }`}
-
-                  >
-
-                    <span className="text-2xl">{themeObj.emoji}</span>
-
-                    <p className={`text-xs mt-1 ${theme.text}`}>{themeObj.name}</p>
-
-                  </button>
-
-                ))}
-
-              </div>
+              <ThemePicker theme={theme} selectedTheme={selectedTheme} themes={THEMES} onSelect={setSelectedTheme} />
 
             </div>
 
@@ -3848,49 +3820,7 @@ function App() {
 
               <p className={`text-sm ${theme.textMuted} mb-4`}>{t(language, 'common.select')} {t(language, 'settings.language').toLowerCase()}</p>
 
-              <div className="grid grid-cols-3 gap-3">
-
-                {Object.entries(LANGUAGES).map(([code, lang]) => (
-
-                  <button
-
-                    key={code}
-
-                    onClick={() => setLanguage(code)}
-
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 ${
-
-                      language === code
-
-                        ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/30'
-
-                        : `${theme.border} hover:border-gray-400`
-
-                    }`}
-
-                  >
-
-                    <span className="text-2xl">{lang.flag}</span>
-
-                    <div className="text-left">
-
-                      <p className={`font-medium ${theme.text}`}>{lang.nativeName}</p>
-
-                      <p className={`text-xs ${theme.textMuted}`}>{lang.name}</p>
-
-                    </div>
-
-                    {language === code && (
-
-                      <CheckCircle2 className="w-5 h-5 text-blue-500 ml-auto" />
-
-                    )}
-
-                  </button>
-
-                ))}
-
-              </div>
+              <LanguagePicker theme={theme} language={language} onSelect={setLanguage} />
 
             </div>
 
