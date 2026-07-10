@@ -45,6 +45,7 @@ import { Footer } from './components/layout/Footer'
 import { ModuleSelectHeader } from './components/layout/ModuleSelectHeader'
 import { MainHeader } from './components/layout/MainHeader'
 import { ModuleSelectGrid } from './components/layout/ModuleSelectGrid'
+import { AppContext } from './context/AppContext'
 import { ThemeBackground } from './components/layout/ThemeBackground'
 import { UpdateBanner } from './components/layout/UpdateBanner'
 import { ThemePicker } from './components/settings/ThemePicker'
@@ -3214,7 +3215,11 @@ function App() {
 
   const theme = THEMES[selectedTheme] || THEMES.light
 
-
+  // Shared shell state for extracted pages/components (see context/AppContext.jsx)
+  const appContextValue = {
+    theme, THEMES, selectedTheme, setSelectedTheme, darkMode,
+    language, setLanguage, settings, setSettings,
+  }
 
   // Module configuration
 
@@ -3347,6 +3352,8 @@ function App() {
     if (currentPage === 'settings') {
 
       return (
+
+        <AppContext.Provider value={appContextValue}>
 
         <div className={`min-h-screen ${theme.bg} transition-colors duration-300`}>
 
@@ -4624,6 +4631,8 @@ function App() {
 
         </div>
 
+        </AppContext.Provider>
+
       )
 
     }
@@ -4633,6 +4642,8 @@ function App() {
     // Home page
 
     return (
+
+      <AppContext.Provider value={appContextValue}>
 
       <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${getThemeClass()}`}>
 
@@ -6975,6 +6986,8 @@ function App() {
 
       </div>
 
+      </AppContext.Provider>
+
     )
 
   }
@@ -6990,6 +7003,8 @@ function App() {
 
 
   return (
+
+    <AppContext.Provider value={appContextValue}>
 
     <div className={`min-h-screen ${theme.bg} transition-colors duration-300 ${getThemeClass()}`}>
 
@@ -12542,6 +12557,8 @@ function App() {
 
 
     </div>
+
+    </AppContext.Provider>
 
   )
 
