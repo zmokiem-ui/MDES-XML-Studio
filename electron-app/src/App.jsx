@@ -46,6 +46,7 @@ import { ModuleSelectHeader } from './components/layout/ModuleSelectHeader'
 import { MainHeader } from './components/layout/MainHeader'
 import { ModuleSelectGrid } from './components/layout/ModuleSelectGrid'
 import { AppContext } from './context/AppContext'
+import { useUpdater } from './hooks/ipc/useUpdater'
 import { ThemeBackground } from './components/layout/ThemeBackground'
 import { UpdateBanner } from './components/layout/UpdateBanner'
 import { ThemePicker } from './components/settings/ThemePicker'
@@ -89,21 +90,14 @@ function App() {
 
   
 
-  // Auto-update state
+  // Auto-update state + IPC wiring (hooks/ipc/useUpdater)
 
-  const [updateStatus, setUpdateStatus] = useState('idle') // idle, checking, available, downloading, ready, error
-
-  const [updateInfo, setUpdateInfo] = useState(null)
-
-  const [updateProgress, setUpdateProgress] = useState(0)
-
-  const [updateError, setUpdateError] = useState(null)
-
-  const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(true)
-
-  const [appVersion, setAppVersion] = useState('')
-
-  const [updateBannerDismissed, setUpdateBannerDismissed] = useState(false)
+  const {
+    updateStatus, updateInfo, updateProgress, updateError,
+    autoUpdateEnabled, appVersion,
+    updateBannerDismissed, setUpdateBannerDismissed,
+    handleCheckForUpdates, handleToggleAutoUpdate,
+  } = useUpdater()
 
   
 
@@ -1488,86 +1482,6 @@ function App() {
     localStorage.setItem('crs-settings', JSON.stringify(settings))
 
   }, [settings])
-
-
-
-  // Auto-update event listeners
-
-  useEffect(() => {
-
-    if (!window.electronAPI) return
-
-    
-
-    // Load version and update settings
-
-    window.electronAPI.getAppVersion().then(v => setAppVersion(v))
-
-    window.electronAPI.getUpdateSettings().then(s => setAutoUpdateEnabled(s.autoUpdateEnabled))
-
-    
-
-    // Listen for update events
-
-    const unsubscribeUpdateEvents = [
-
-      window.electronAPI.onUpdateChecking(() => {
-
-      setUpdateStatus('checking')
-
-      setUpdateError(null)
-
-      }),
-
-      window.electronAPI.onUpdateAvailable((info) => {
-
-      setUpdateStatus('downloading')
-
-      setUpdateInfo(info)
-
-      setUpdateBannerDismissed(false)
-
-      }),
-
-      window.electronAPI.onUpdateNotAvailable(() => {
-
-      setUpdateStatus('idle')
-
-      }),
-
-      window.electronAPI.onDownloadProgress((progress) => {
-
-      setUpdateProgress(Math.round(progress.percent || 0))
-
-      }),
-
-      window.electronAPI.onUpdateDownloaded((info) => {
-
-      setUpdateStatus('ready')
-
-      setUpdateInfo(info)
-
-      setUpdateBannerDismissed(false)
-
-      }),
-
-      window.electronAPI.onUpdateError((msg) => {
-
-      setUpdateStatus('error')
-
-      setUpdateError(msg)
-
-      })
-
-    ].filter(Boolean)
-
-    return () => {
-
-      unsubscribeUpdateEvents.forEach((unsubscribe) => unsubscribe())
-
-    }
-
-  }, [])
 
 
 
@@ -3309,37 +3223,6 @@ function App() {
 
 
 
-  // Helper: handle manual check for updates
-
-  const handleCheckForUpdates = async () => {
-
-    setUpdateStatus('checking')
-
-    setUpdateError(null)
-
-    const result = await window.electronAPI?.checkForUpdates()
-
-    if (result && !result.success) {
-
-      setUpdateStatus('error')
-
-      setUpdateError(result.error)
-
-    }
-
-  }
-
-
-
-  // Helper: toggle auto-update setting
-
-  const handleToggleAutoUpdate = async (enabled) => {
-
-    setAutoUpdateEnabled(enabled)
-
-    await window.electronAPI?.setUpdateSettings({ autoUpdateEnabled: enabled })
-
-  }
 
 
 
