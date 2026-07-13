@@ -585,7 +585,8 @@ class CRSGenerator:
                 # Remove extras or add more
                 for cp in controlling_persons[1:]:
                     parent.remove(cp)
-                
+
+                insert_at = parent.index(first_cp) + 1
                 for _ in range(self.config.controlling_persons_per_org - 1):
                     new_cp = deepcopy(first_cp)
                     # Regenerate TIN for controlling person
@@ -594,7 +595,11 @@ class CRSGenerator:
                         cp_tin.text = self.data_gen.tin()
                     for elem in new_cp.iter():
                         self._randomize_element_text(elem)
-                    parent.append(new_cp)
+                    # ControllingPerson precedes AccountBalance/Payment in the
+                    # CRS schema. Appending clones to AccountReport makes files
+                    # with more than one controlling person XSD-invalid.
+                    parent.insert(insert_at, new_cp)
+                    insert_at += 1
         
         return account
     

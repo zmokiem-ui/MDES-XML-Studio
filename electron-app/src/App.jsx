@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 
-import { 
+import {
 
-  Globe, FileText, Database, Map, Save, Rocket, 
+  Globe, FileText, Database, Map, Save, Rocket,
 
-  ChevronDown, ChevronUp, Building2, Users, User, 
+  ChevronDown, ChevronUp, Building2, Users, User,
 
   CheckCircle2, AlertCircle, Loader2, FolderOpen,
 
@@ -24,13 +24,13 @@ import {
 
 } from 'lucide-react'
 
-import { COUNTRIES, DEFAULT_PARTNER_JURISDICTIONS, getCountryName, searchCountries } from './countryData'
+import { DEFAULT_PARTNER_JURISDICTIONS } from './countryData'
 
 
 
 // Hooks
 
-import { useLocalStorage, useRecentFiles, useProfiles, useAppSettings, useGenerationHistory } from './hooks/useLocalStorage'
+import { useLocalStorage } from './hooks/useLocalStorage'
 
 import { useKeyboardShortcuts, SHORTCUTS } from './hooks/useKeyboardShortcuts'
 
@@ -48,12 +48,15 @@ import { ModuleSelectGrid } from './components/layout/ModuleSelectGrid'
 import { AppContext } from './context/AppContext'
 import { useUpdater } from './hooks/ipc/useUpdater'
 import { useBugReport } from './hooks/ipc/useBugReport'
+import { useFormState } from './hooks/ipc/useFormState'
+import { useGeneration } from './hooks/ipc/useGeneration'
 import { ThemeBackground } from './components/layout/ThemeBackground'
 import { UpdateBanner } from './components/layout/UpdateBanner'
 import { ThemePicker } from './components/settings/ThemePicker'
 import { LanguagePicker } from './components/settings/LanguagePicker'
+import { PartnerJurisdictionsSettings } from './components/settings/PartnerJurisdictionsSettings'
 
-import { 
+import {
 
   ErrorInjector,
 
@@ -83,13 +86,13 @@ function App() {
 
   const [activeModule, setActiveModule] = useState(null) // null = module selection screen
 
-  
+
 
   // Navigation within module
 
   const [currentPage, setCurrentPage] = useState('generator')
 
-  
+
 
   // Auto-update state + IPC wiring (hooks/ipc/useUpdater)
 
@@ -100,7 +103,7 @@ function App() {
     handleCheckForUpdates, handleToggleAutoUpdate,
   } = useUpdater()
 
-  
+
 
   // Theme system with distinct, vibrant color schemes
 
@@ -1018,17 +1021,9 @@ function App() {
 
 
 
-  // New feature hooks
-
-  const { recentFiles, addRecentFile, removeRecentFile, clearRecentFiles } = useRecentFiles(10)
-
-  const { profiles, saveProfile, deleteProfile, getProfile } = useProfiles()
-
-  const { history: generationHistory, stats: generationStats, addToHistory: addToGenHistory, clearHistory: clearGenHistory } = useGenerationHistory()
-
   const [language, setLanguage] = useLocalStorage('app-language', 'en')
 
-  
+
 
   // New UI state
 
@@ -1068,15 +1063,15 @@ function App() {
 
       // This ensures users get the new 7-country default
 
-      const shouldResetJurisdictions = !parsed.partnerJurisdictions || 
+      const shouldResetJurisdictions = !parsed.partnerJurisdictions ||
 
-        parsed.partnerJurisdictions.length === 0 || 
+        parsed.partnerJurisdictions.length === 0 ||
 
         parsed.partnerJurisdictions.length > 20
 
-      const jurisdictions = shouldResetJurisdictions 
+      const jurisdictions = shouldResetJurisdictions
 
-        ? defaults.partnerJurisdictions 
+        ? defaults.partnerJurisdictions
 
         : parsed.partnerJurisdictions
 
@@ -1088,85 +1083,20 @@ function App() {
 
   })
 
-  
-
-  // Partner jurisdictions search state
-
-  const [jurisdictionSearch, setJurisdictionSearch] = useState('')
-
-  const [showJurisdictionDropdown, setShowJurisdictionDropdown] = useState(false)
 
 
-
-  // Form state (CRS)
-
-  const [formData, setFormData] = useState({
-
-    sendingCompanyIN: '',
-
-    transmittingCountry: '',
-
-    receivingCountry: '',
-
-    reportingPeriod: new Date().getFullYear().toString(),
-
-    numReportingFIs: '',
-
-    reportingFITINs: [],
-
-    individualAccounts: '',
-
-    organisationAccounts: '',
-
-    controllingPersons: '',
-
-    accountHolderMode: 'random',
-
-    accountHolderCountries: '',
-
-    outputPath: '',
-
-    testMode: true  // OECD11 (test) by default; uncheck for OECD1 (production)
-
-  })
-
-
-
-  // FATCA Form state
-
-  const [fatcaFormData, setFatcaFormData] = useState({
-
-    variant: 'fatca-crs',  // 'fatca-crs' (FC combined) or 'fatca-oecd' (IRS)
-
-    sendingCompanyIN: '',  // GIIN format
-
-    transmittingCountry: '',
-
-    receivingCountry: 'US',  // Default to US for FATCA
-
-    reportingPeriod: new Date().getFullYear().toString(),
-
-    numReportingFIs: '1',
-
-    reportingFITINs: [],
-
-    filerCategory: 'FATCA601',
-
-    individualAccounts: '',
-
-    organisationAccounts: '',
-
-    substantialOwners: '1',
-
-    accountHolderMode: 'random',
-
-    accountHolderCountries: '',
-
-    outputPath: '',
-
-    testMode: true
-
-  })
+  // Per-module form state + CRS form helpers (hooks/ipc/useFormState)
+  const {
+    formData, setFormData,
+    fatcaFormData, setFatcaFormData,
+    cbcFormData, setCbcFormData,
+    cbcDataMode, setCbcDataMode,
+    cbcCsvPath, setCbcCsvPath,
+    cbcFileType, setCbcFileType,
+    expandedSections, errors, setErrors,
+    toggleSection, handleInputChange, handleNumFIsChange, handleTINChange,
+    validateForm,
+  } = useFormState(language)
 
 
 
@@ -1200,50 +1130,6 @@ function App() {
 
 
 
-  // CBC Form state
-
-  const [cbcFormData, setCbcFormData] = useState({
-
-    sendingEntityIN: '',
-
-    transmittingCountry: '',
-
-    receivingCountry: '',
-
-    reportingPeriod: new Date().getFullYear().toString(),
-
-    mneGroupName: '',
-
-    reportingEntityName: '',
-
-    reportingRole: 'CBC701',
-
-    numCbcReports: '3',
-
-    constEntitiesPerReport: '2',
-
-    jurisdictionCountries: '',
-
-    outputPath: '',
-
-    testMode: true,
-
-    mode: 'random',
-
-    csvPath: ''
-
-  })
-
-  
-
-  const [cbcDataMode, setCbcDataMode] = useState('random') // 'random' or 'csv'
-
-  const [cbcCsvPath, setCbcCsvPath] = useState('')
-
-  const [cbcFileType, setCbcFileType] = useState('domestic') // 'domestic' or 'foreign'
-
-
-
   // CBC Reporting Roles
 
   const cbcReportingRoles = [
@@ -1258,22 +1144,6 @@ function App() {
 
 
 
-  const [expandedSections, setExpandedSections] = useState({
-
-    messageHeader: true,
-
-    fileSize: true,
-
-    accountHolder: false,
-
-    output: true
-
-  })
-
-
-
-  const [errors, setErrors] = useState({})
-
   const [isGenerating, setIsGenerating] = useState(false)
 
   const [generationProgress, setGenerationProgress] = useState('')
@@ -1284,7 +1154,7 @@ function App() {
 
   const [modalMessage, setModalMessage] = useState('')
 
-  
+
 
   // CSV mode state
 
@@ -1306,7 +1176,7 @@ function App() {
 
   const [validationErrors, setValidationErrors] = useState([])
 
-  
+
 
   // Correction mode state
 
@@ -1344,13 +1214,13 @@ function App() {
 
   const [showXmlErrorsModal, setShowXmlErrorsModal] = useState(false)
 
-  
+
 
   // CBC Correction state
 
   const [cbcCorrectionType, setCbcCorrectionType] = useState('correction') // 'correction' or 'deletion'
 
-  
+
 
   // CRS Tools - Country Code Replacer state
 
@@ -1364,7 +1234,7 @@ function App() {
 
   const [convertToTestMode, setConvertToTestMode] = useState(true) // Convert production to test by default
 
-  
+
 
   // Correction CSV mode state
 
@@ -1376,13 +1246,13 @@ function App() {
 
   const [showCorrectionCsvPreview, setShowCorrectionCsvPreview] = useState(false)
 
-  
+
 
   // CRS701 CSV template preview modal state
 
   const [showCrs701CsvPreview, setShowCrs701CsvPreview] = useState(false)
 
-  
+
 
   // Global statistics and history
 
@@ -1416,7 +1286,7 @@ function App() {
 
   })
 
-  
+
 
   const [fileHistory, setFileHistory] = useState(() => {
 
@@ -1477,28 +1347,6 @@ function App() {
     localStorage.setItem('crs-settings', JSON.stringify(settings))
 
   }, [settings])
-
-
-
-  const toggleSection = (section) => {
-
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
-
-  }
-
-
-
-  const handleInputChange = (field, value) => {
-
-    setFormData(prev => ({ ...prev, [field]: value }))
-
-    if (errors[field]) {
-
-      setErrors(prev => ({ ...prev, [field]: null }))
-
-    }
-
-  }
 
 
 
@@ -1636,94 +1484,6 @@ function App() {
 
 
 
-  const handleNumFIsChange = (value) => {
-
-    const num = parseInt(value) || 0
-
-    if (num < 1 && value !== '') return
-
-    handleInputChange('numReportingFIs', value)
-
-    if (num >= 1) {
-
-      const tins = Array(num).fill('')
-
-      setFormData(prev => ({ ...prev, reportingFITINs: tins }))
-
-    } else {
-
-      setFormData(prev => ({ ...prev, reportingFITINs: [] }))
-
-    }
-
-  }
-
-
-
-  const handleTINChange = (index, value) => {
-
-    const newTINs = [...formData.reportingFITINs]
-
-    newTINs[index] = value
-
-    setFormData(prev => ({ ...prev, reportingFITINs: newTINs }))
-
-  }
-
-
-
-  const validateForm = () => {
-
-    const newErrors = {}
-
-    if (!formData.sendingCompanyIN) newErrors.sendingCompanyIN = t(language, 'messages.requiredField')
-
-    if (!formData.transmittingCountry) {
-
-      newErrors.transmittingCountry = t(language, 'messages.requiredField')
-
-    } else if (!/^[A-Z]{2}$/.test(formData.transmittingCountry.toUpperCase())) {
-
-      newErrors.transmittingCountry = t(language, 'errors.mustBe2LetterISO')
-
-    }
-
-    if (!formData.receivingCountry) {
-
-      newErrors.receivingCountry = t(language, 'messages.requiredField')
-
-    } else if (!/^[A-Z]{2}$/.test(formData.receivingCountry.toUpperCase())) {
-
-      newErrors.receivingCountry = t(language, 'errors.mustBe2LetterISO')
-
-    }
-
-    if (!formData.numReportingFIs || parseInt(formData.numReportingFIs) < 1) {
-
-      newErrors.numReportingFIs = t(language, 'errors.mustBeAtLeast1')
-
-    }
-
-    if (parseInt(formData.numReportingFIs) >= 1) {
-
-      formData.reportingFITINs.forEach((tin, index) => {
-
-        if (!tin) newErrors[`tin_${index}`] = t(language, 'messages.requiredField')
-
-      })
-
-    }
-
-    if (!formData.outputPath) newErrors.outputPath = 'Required'
-
-    setErrors(newErrors)
-
-    return Object.keys(newErrors).length === 0
-
-  }
-
-
-
   const handleSelectOutputFile = async () => {
 
     const filePath = await window.electronAPI.selectOutputFile(activeModule)
@@ -1744,7 +1504,7 @@ function App() {
 
       setErrors(prev => ({ ...prev, csvFilePath: null }))
 
-      
+
 
       if (settings.autoValidateCsv) {
 
@@ -1752,13 +1512,13 @@ function App() {
 
         setCsvStatistics(null)
 
-        
+
 
         try {
 
           const result = await window.electronAPI.validateCsv(filePath)
 
-          
+
 
           if (result.valid) {
 
@@ -2030,7 +1790,7 @@ function App() {
 
       setIsValidatingXml(true)
 
-      
+
 
       try {
 
@@ -2054,7 +1814,7 @@ function App() {
 
         setXmlValidation(result)
 
-        
+
 
         if (!result.is_valid) {
 
@@ -2062,7 +1822,7 @@ function App() {
 
         }
 
-        
+
 
         // Check if already a correction file (for CRS only)
 
@@ -2184,7 +1944,7 @@ function App() {
 
     }
 
-    
+
 
     if (!correctionOutputPath) {
 
@@ -2198,7 +1958,7 @@ function App() {
 
     }
 
-    
+
 
     // CBC uses simpler correction options (just type)
 
@@ -2222,7 +1982,7 @@ function App() {
 
       const totalDeletions = correctionOptions.deleteIndividual + correctionOptions.deleteOrganisation
 
-      
+
 
       if (totalCorrections === 0 && totalDeletions === 0 && !correctionOptions.correctFI) {
 
@@ -2238,11 +1998,11 @@ function App() {
 
     }
 
-    
+
 
     setIsGeneratingCorrection(true)
 
-    
+
 
     try {
 
@@ -2276,7 +2036,7 @@ function App() {
 
       }
 
-      
+
 
       updateStats({
 
@@ -2286,7 +2046,7 @@ function App() {
 
       })
 
-      
+
 
       addToHistory({
 
@@ -2318,7 +2078,7 @@ function App() {
 
       })
 
-      
+
 
       setModalType('success')
 
@@ -2326,7 +2086,7 @@ function App() {
 
       setShowModal(true)
 
-      
+
 
       // Reset form
 
@@ -2368,7 +2128,7 @@ function App() {
 
     }
 
-    
+
 
     if (!countryReplacerOutputPath) {
 
@@ -2382,7 +2142,7 @@ function App() {
 
     }
 
-    
+
 
     if (!settings.partnerJurisdictions || settings.partnerJurisdictions.length === 0) {
 
@@ -2396,13 +2156,13 @@ function App() {
 
     }
 
-    
+
 
     setIsReplacingCountries(true)
 
     setCountryReplacerResult(null)
 
-    
+
 
     try {
 
@@ -2418,7 +2178,7 @@ function App() {
 
       })
 
-      
+
 
       setCountryReplacerResult(result)
 
@@ -2448,468 +2208,30 @@ function App() {
 
 
 
-  // FATCA Generate handler
-
-  const handleGenerateFATCA = async () => {
-
-    // Basic validation
-
-    if (!fatcaFormData.transmittingCountry || !fatcaFormData.outputPath) {
-
-      setModalType('error')
-
-      setModalMessage(t(language, 'errors.pleaseFillRequiredFieldsFATCA'))
-
+  const { handleGenerateFATCA, handleGenerateCBC, handleGenerate } = useGeneration({
+    language,
+    formData,
+    fatcaFormData,
+    cbcFormData,
+    cbcDataMode,
+    cbcCsvPath,
+    cbcFileType,
+    dataMode,
+    csvFilePath,
+    csvStatistics,
+    globalStats,
+    updateStats,
+    addToHistory,
+    validateCsvForm,
+    validateForm,
+    setIsGenerating,
+    setGenerationProgress,
+    onResult: (type, message) => {
+      setModalType(type)
+      setModalMessage(message)
       setShowModal(true)
-
-      return
-
-    }
-
-
-
-    setIsGenerating(true)
-
-    setGenerationProgress(t(language, 'progressMessages.initializingFATCA'))
-
-
-
-    let unsubscribeGenerationProgress
-
-    try {
-
-      unsubscribeGenerationProgress = window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
-
-
-
-      const generateData = {
-
-        ...fatcaFormData,
-
-        transmittingCountry: fatcaFormData.transmittingCountry.toUpperCase(),
-
-        receivingCountry: fatcaFormData.receivingCountry.toUpperCase(),
-
-        numReportingFIs: parseInt(fatcaFormData.numReportingFIs) || 1,
-
-        individualAccounts: parseInt(fatcaFormData.individualAccounts) || 0,
-
-        organisationAccounts: parseInt(fatcaFormData.organisationAccounts) || 0,
-
-        substantialOwners: parseInt(fatcaFormData.substantialOwners) || 1
-
-      }
-
-
-
-      const result = await window.electronAPI.generateFATCA(generateData)
-
-      setGenerationProgress('')
-
-      
-
-      const individualCount = parseInt(fatcaFormData.individualAccounts) || 0
-
-      const organisationCount = parseInt(fatcaFormData.organisationAccounts) || 0
-
-      const fiCount = parseInt(fatcaFormData.numReportingFIs) || 1
-
-      
-
-      updateStats({
-
-        totalXmlGenerated: globalStats.totalXmlGenerated + 1,
-
-        totalIndividualAccounts: globalStats.totalIndividualAccounts + individualCount,
-
-        totalOrganisationAccounts: globalStats.totalOrganisationAccounts + organisationCount,
-
-        totalReportingFIs: globalStats.totalReportingFIs + fiCount,
-
-        lastGenerated: new Date().toISOString()
-
-      })
-
-      
-
-      addToHistory({
-
-        id: Date.now().toString(),
-
-        type: 'fatca-xml',
-
-        mode: 'random',
-
-        fileName: result.filePath.split(/[\\/]/).pop(),
-
-        filePath: result.filePath,
-
-        fileSize: result.fileSize,
-
-        timestamp: new Date().toISOString(),
-
-        accounts: individualCount + organisationCount,
-
-        individualAccounts: individualCount,
-
-        organisationAccounts: organisationCount,
-
-        reportingFIs: fiCount
-
-      })
-
-      
-
-      setModalType('success')
-
-      setModalMessage(`${t(language, 'modals.fatcaGeneratedSuccess')}\n${t(language, 'modals.fileSize', { size: result.fileSize })}`)
-
-      setShowModal(true)
-
-    } catch (error) {
-
-      setGenerationProgress('')
-
-      setModalType('error')
-
-      setModalMessage(error.message || t(language, 'modals.anErrorOccurred'))
-
-      setShowModal(true)
-
-    } finally {
-
-      if (unsubscribeGenerationProgress) unsubscribeGenerationProgress()
-
-      setIsGenerating(false)
-
-    }
-
-  }
-
-
-
-  // CBC Generate handler
-
-  const handleGenerateCBC = async () => {
-
-    // Basic validation
-
-    if (cbcDataMode === 'csv') {
-
-      if (!cbcCsvPath || !cbcFormData.outputPath) {
-
-        setModalType('error')
-
-        setModalMessage(t(language, 'errors.pleaseSelectCsvAndOutput'))
-
-        setShowModal(true)
-
-        return
-
-      }
-
-    } else {
-
-      if (!cbcFormData.transmittingCountry || !cbcFormData.outputPath) {
-
-        setModalType('error')
-
-        setModalMessage(t(language, 'errors.pleaseFillRequiredFieldsFATCA'))
-
-        setShowModal(true)
-
-        return
-
-      }
-
-      // For foreign file type, receiving country is required
-
-      if (cbcFileType === 'foreign' && !cbcFormData.receivingCountry) {
-
-        setModalType('error')
-
-        setModalMessage(t(language, 'errors.specifyReceivingCountry'))
-
-        setShowModal(true)
-
-        return
-
-      }
-
-    }
-
-
-
-    setIsGenerating(true)
-
-    setGenerationProgress(t(language, 'progressMessages.initializingCBC'))
-
-
-
-    let unsubscribeGenerationProgress
-
-    try {
-
-      unsubscribeGenerationProgress = window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
-
-
-
-      // For domestic filing, receiving country = transmitting country
-
-      const effectiveReceivingCountry = cbcFileType === 'domestic' 
-
-        ? cbcFormData.transmittingCountry.toUpperCase()
-
-        : cbcFormData.receivingCountry.toUpperCase()
-
-
-
-      const generateData = {
-
-        ...cbcFormData,
-
-        mode: cbcDataMode,
-
-        csvPath: cbcCsvPath,
-
-        fileType: cbcFileType,
-
-        transmittingCountry: cbcFormData.transmittingCountry.toUpperCase(),
-
-        receivingCountry: effectiveReceivingCountry,
-
-        numCbcReports: parseInt(cbcFormData.numCbcReports) || 3,
-
-        constEntitiesPerReport: parseInt(cbcFormData.constEntitiesPerReport) || 2
-
-      }
-
-
-
-      const result = await window.electronAPI.generateCBC(generateData)
-
-      setGenerationProgress('')
-
-      
-
-      const reportCount = cbcDataMode === 'csv' ? 'N/A' : parseInt(cbcFormData.numCbcReports) || 3
-
-      const entitiesPerReport = cbcDataMode === 'csv' ? 'N/A' : parseInt(cbcFormData.constEntitiesPerReport) || 2
-
-      
-
-      updateStats({
-
-        totalXmlGenerated: globalStats.totalXmlGenerated + 1,
-
-        lastGenerated: new Date().toISOString()
-
-      })
-
-      
-
-      addToHistory({
-
-        id: Date.now().toString(),
-
-        type: 'cbc-xml',
-
-        mode: cbcDataMode,
-
-        fileName: result.filePath.split(/[\\/]/).pop(),
-
-        filePath: result.filePath,
-
-        fileSize: result.fileSize,
-
-        timestamp: new Date().toISOString(),
-
-        cbcReports: reportCount,
-
-        constEntities: cbcDataMode === 'csv' ? 'N/A' : reportCount * entitiesPerReport
-
-      })
-
-      
-
-      setModalType('success')
-
-      const modeMsg = cbcDataMode === 'csv' ? t(language, 'modals.fromCsvData') : t(language, 'modals.jurisdictionReports', { reportCount, entityCount: reportCount * entitiesPerReport })
-
-      setModalMessage(`${t(language, 'modals.cbcGeneratedSuccess')}\n${modeMsg}\n${t(language, 'modals.fileSize', { size: result.fileSize })}`)
-
-      setShowModal(true)
-
-    } catch (error) {
-
-      setGenerationProgress('')
-
-      setModalType('error')
-
-      setModalMessage(error.message || t(language, 'modals.anErrorOccurred'))
-
-      setShowModal(true)
-
-    } finally {
-
-      if (unsubscribeGenerationProgress) unsubscribeGenerationProgress()
-
-      setIsGenerating(false)
-
-    }
-
-  }
-
-
-
-  const handleGenerate = async () => {
-
-    if (dataMode === 'csv') {
-
-      if (!validateCsvForm()) return
-
-    } else {
-
-      if (!validateForm()) return
-
-    }
-
-
-
-    setIsGenerating(true)
-
-    setGenerationProgress(t(language, 'progressMessages.initializing'))
-
-
-
-    let unsubscribeGenerationProgress
-
-    try {
-
-      unsubscribeGenerationProgress = window.electronAPI.onGenerationProgress((data) => setGenerationProgress(data))
-
-
-
-      let generateData
-
-      if (dataMode === 'csv') {
-
-        generateData = { mode: 'csv', csvPath: csvFilePath, outputPath: formData.outputPath }
-
-      } else {
-
-        generateData = {
-
-          mode: 'random',
-
-          ...formData,
-
-          transmittingCountry: formData.transmittingCountry.toUpperCase(),
-
-          receivingCountry: formData.receivingCountry.toUpperCase(),
-
-          numReportingFIs: parseInt(formData.numReportingFIs),
-
-          individualAccounts: parseInt(formData.individualAccounts) || 0,
-
-          organisationAccounts: parseInt(formData.organisationAccounts) || 0,
-
-          controllingPersons: parseInt(formData.controllingPersons) || 0
-
-        }
-
-      }
-
-
-
-      const result = await window.electronAPI.generateCRS(generateData)
-
-      setGenerationProgress('')
-
-      
-
-      const individualCount = dataMode === 'csv' ? (csvStatistics?.individual_accounts || 0) : (parseInt(formData.individualAccounts) || 0) * parseInt(formData.numReportingFIs)
-
-      const organisationCount = dataMode === 'csv' ? (csvStatistics?.organisation_accounts || 0) : (parseInt(formData.organisationAccounts) || 0) * parseInt(formData.numReportingFIs)
-
-      const fiCount = dataMode === 'csv' ? (csvStatistics?.reporting_fis || 0) : parseInt(formData.numReportingFIs)
-
-      
-
-      updateStats({
-
-        totalXmlGenerated: globalStats.totalXmlGenerated + 1,
-
-        totalCsvUploaded: dataMode === 'csv' ? globalStats.totalCsvUploaded + 1 : globalStats.totalCsvUploaded,
-
-        totalIndividualAccounts: globalStats.totalIndividualAccounts + individualCount,
-
-        totalOrganisationAccounts: globalStats.totalOrganisationAccounts + organisationCount,
-
-        totalReportingFIs: globalStats.totalReportingFIs + fiCount,
-
-        lastGenerated: new Date().toISOString()
-
-      })
-
-      
-
-      addToHistory({
-
-        id: Date.now().toString(),
-
-        type: 'xml',
-
-        mode: dataMode,
-
-        fileName: result.filePath.split(/[\\/]/).pop(),
-
-        filePath: result.filePath,
-
-        fileSize: result.fileSize,
-
-        timestamp: new Date().toISOString(),
-
-        accounts: individualCount + organisationCount,
-
-        individualAccounts: individualCount,
-
-        organisationAccounts: organisationCount,
-
-        reportingFIs: fiCount
-
-      })
-
-      
-
-      setModalType('success')
-
-      setModalMessage(`${t(language, 'modals.generatedSuccess')}\n${t(language, 'modals.fileSize', { size: result.fileSize })}`)
-
-      setShowModal(true)
-
-    } catch (error) {
-
-      setGenerationProgress('')
-
-      setModalType('error')
-
-      setModalMessage(error.message || t(language, 'modals.anErrorOccurred'))
-
-      setShowModal(true)
-
-    } finally {
-
-      if (unsubscribeGenerationProgress) unsubscribeGenerationProgress()
-
-      setIsGenerating(false)
-
-    }
-
-  }
-
-
-
+    },
+  })
   const currentYear = new Date().getFullYear()
 
   const years = Array.from({ length: 12 }, (_, i) => currentYear - 10 + i)
@@ -3017,13 +2339,9 @@ function App() {
 
 
 
-  // Home page (module selection) or Settings
+  // Settings can be opened from both the home screen and an active module.
 
-  if (!activeModule) {
-
-    // Settings page - separate return to avoid issues
-
-    if (currentPage === 'settings') {
+  if (currentPage === 'settings') {
 
       return (
 
@@ -3075,9 +2393,9 @@ function App() {
 
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
 
-                    liveAnimations 
+                    liveAnimations
 
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30' 
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
 
                       : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
 
@@ -3217,9 +2535,9 @@ function App() {
 
                     <p className={`text-xs ${theme.textMuted} mt-1`}>
 
-                      {settings.autoValidateCsv 
+                      {settings.autoValidateCsv
 
-                        ? t(language, 'settingsMisc.csvAutoValidateOn') 
+                        ? t(language, 'settingsMisc.csvAutoValidateOn')
 
                         : t(language, 'settingsMisc.csvAutoValidateOff')}
 
@@ -3261,15 +2579,19 @@ function App() {
 
 
 
+            <PartnerJurisdictionsSettings />
+
+
+
             {/* Updates & Version */}
 
-            <div className={`${theme.card} rounded-xl border p-6`}>
+            <div className={`${theme.card} rounded-xl border p-6`} data-testid="update-section">
 
               <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'updates.title')}</h3>
 
               <p className={`text-sm ${theme.textMuted} mb-4`}>{t(language, 'updates.title')}</p>
 
-              
+
 
               <div className="space-y-4">
 
@@ -3285,9 +2607,9 @@ function App() {
 
                   </div>
 
-                  <span className={`px-3 py-1 rounded-full text-sm font-mono font-medium ${theme.badge}`}>
+                  <span className={`px-3 py-1 rounded-full text-sm font-mono font-medium ${theme.badge}`} data-testid="app-version">
 
-                    v{appVersion || '1.3.0'}
+                    {appVersion ? `v${appVersion}` : '—'}
 
                   </span>
 
@@ -3337,9 +2659,9 @@ function App() {
 
                     <p className={`text-xs ${theme.textMuted} mt-1`}>
 
-                      {autoUpdateEnabled 
+                      {autoUpdateEnabled
 
-                        ? t(language, 'settingsMisc.autoUpdateOn') 
+                        ? t(language, 'settingsMisc.autoUpdateOn')
 
                         : t(language, 'settingsMisc.autoUpdateOff')}
 
@@ -3350,6 +2672,12 @@ function App() {
                   <button
 
                     onClick={() => handleToggleAutoUpdate(!autoUpdateEnabled)}
+
+                    type="button"
+
+                    data-testid="auto-update-toggle"
+
+                    aria-pressed={autoUpdateEnabled}
 
                     className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ml-4 ${autoUpdateEnabled ? 'bg-blue-600' : 'bg-gray-400'}`}
 
@@ -3371,6 +2699,10 @@ function App() {
 
                     onClick={handleCheckForUpdates}
 
+                    type="button"
+
+                    data-testid="check-for-updates"
+
                     disabled={updateStatus === 'checking' || updateStatus === 'downloading'}
 
                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
@@ -3391,7 +2723,7 @@ function App() {
 
                     ) : updateStatus === 'downloading' ? (
 
-                      <><Loader2 className="w-4 h-4 animate-spin" /> Downloading... {updateProgress}%</>
+                      <><Loader2 className="w-4 h-4 animate-spin" /> {t(language, 'updates.downloading')} {updateProgress}%</>
 
                     ) : (
 
@@ -3401,11 +2733,11 @@ function App() {
 
                   </button>
 
-                  
+
 
                   {/* Status Messages */}
 
-                  {updateStatus === 'idle' && !updateError && (
+                  {updateStatus === 'current' && !updateError && (
 
                     <span className={`text-sm ${theme.textMuted}`}>
 
@@ -3437,7 +2769,7 @@ function App() {
 
                   {updateStatus === 'error' && (
 
-                    <span className="text-sm text-red-500">
+                    <span className="text-sm text-red-500" data-testid="update-error">
 
                       <AlertCircle className="w-4 h-4 inline mr-1" />
 
@@ -3459,7 +2791,7 @@ function App() {
 
                     <div className="flex justify-between text-xs">
 
-                      <span className={theme.textMuted}>Downloading v{updateInfo?.version}</span>
+                      <span className={theme.textMuted}>{t(language, 'updates.downloading')} v{updateInfo?.version}</span>
 
                       <span className={theme.text}>{updateProgress}%</span>
 
@@ -3489,11 +2821,11 @@ function App() {
 
               <p className={`text-sm ${theme.textMuted} mb-4`}>
 
-                Help us improve by reporting bugs or issues you encounter
+                {t(language, 'bugReport.description')}
 
               </p>
 
-              
+
 
               <button
 
@@ -3533,9 +2865,13 @@ function App() {
 
                 </div>
 
-                
+
 
                 <div className="p-6 space-y-4">
+
+                  <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+                    {t(language, 'bugReport.publicWarning')}
+                  </div>
 
                   {/* Title */}
 
@@ -3731,6 +3067,10 @@ function App() {
 
                     )}
 
+                    <p className={`text-xs ${theme.textMuted} mt-1`}>
+                      {t(language, 'bugReport.emailPublicHint')}
+                    </p>
+
                   </div>
 
 
@@ -3755,6 +3095,12 @@ function App() {
 
                     </button>
 
+                    {bugReportScreenshots.length > 0 && (
+                      <p className="text-sm text-green-600 mt-2" data-testid="bug-screenshot-copied">
+                        {t(language, 'bugReport.screenshotCopied')}
+                      </p>
+                    )}
+
                   </div>
 
 
@@ -3765,11 +3111,11 @@ function App() {
 
                     <p className={`text-sm font-medium ${theme.text} mb-1`}>{t(language, 'bugReport.systemInfo')}</p>
 
-                    <p className={`text-xs ${theme.textMuted}`}>Version: {appVersion || '1.3.0'}</p>
+                    <p className={`text-xs ${theme.textMuted}`}>{t(language, 'bugReport.versionLabel')}: {appVersion || '—'}</p>
 
-                    <p className={`text-xs ${theme.textMuted}`}>Platform: {navigator.platform}</p>
+                    <p className={`text-xs ${theme.textMuted}`}>{t(language, 'bugReport.platformLabel')}: {navigator.platform}</p>
 
-                    <p className={`text-xs ${theme.textMuted}`}>Language: {language.toUpperCase()}</p>
+                    <p className={`text-xs ${theme.textMuted}`}>{t(language, 'bugReport.languageLabel')}: {language.toUpperCase()}</p>
 
                   </div>
 
@@ -3821,7 +3167,7 @@ function App() {
 
           )}
 
-          
+
 
           {/* Success/Error Modal for Bug Reports */}
 
@@ -3837,7 +3183,9 @@ function App() {
 
                     {modalType === 'success' ? <CheckCircle2 className="w-8 h-8" /> : <AlertCircle className="w-8 h-8" />}
 
-                    <h3 className="text-xl font-bold">{modalType === 'success' ? 'Success' : 'Error'}</h3>
+                    <h3 className="text-xl font-bold">
+                      {modalType === 'success' ? t(language, 'messages.success') : t(language, 'messages.error')}
+                    </h3>
 
                   </div>
 
@@ -3863,7 +3211,7 @@ function App() {
 
                   >
 
-                    Close
+                    {t(language, 'actions.close')}
 
                   </button>
 
@@ -3895,7 +3243,7 @@ function App() {
 
                   <div className="flex items-center gap-2">
 
-                    <button 
+                    <button
 
                       onClick={() => { if(window.confirm(t(language, 'stats.resetAllStats'))) resetStats() }}
 
@@ -3917,7 +3265,7 @@ function App() {
 
                 </div>
 
-                
+
 
                 {/* Main Stats Grid */}
 
@@ -4033,7 +3381,7 @@ function App() {
 
                     {fileHistory.length > 0 && (
 
-                      <button 
+                      <button
 
                         onClick={() => { setFileHistory([]); localStorage.removeItem('crs-file-history') }}
 
@@ -4081,7 +3429,7 @@ function App() {
 
                           {file.path && (
 
-                            <button 
+                            <button
 
                               onClick={() => window.electronAPI?.openFileLocation(file.path)}
 
@@ -4151,7 +3499,7 @@ function App() {
 
                 </div>
 
-                
+
 
                 <div className="space-y-6">
 
@@ -4193,7 +3541,7 @@ function App() {
 
                   </div>
 
-                  
+
 
                   <div>
 
@@ -4251,7 +3599,7 @@ function App() {
 
                   </div>
 
-                  
+
 
                   <div>
 
@@ -4285,7 +3633,7 @@ function App() {
 
                 </div>
 
-                
+
 
                 <div className={`mt-6 pt-4 border-t ${theme.border}`}>
 
@@ -4309,9 +3657,11 @@ function App() {
 
       )
 
-    }
+  }
 
 
+
+  if (!activeModule) {
 
     // Home page
 
@@ -4357,7 +3707,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Caustic Light Effect (sunlight through water) */}
 
@@ -4395,7 +3745,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Swimming Fish */}
 
@@ -4461,7 +3811,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Ocean Bubbles */}
 
@@ -4497,27 +3847,27 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Wave Layers at Bottom */}
 
             <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
 
-              <div className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-cyan-600/20 to-transparent animate-wave" 
+              <div className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-cyan-600/20 to-transparent animate-wave"
 
                 style={{ animationDuration: '4s' }} />
 
-              <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-blue-500/15 to-transparent animate-wave" 
+              <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-blue-500/15 to-transparent animate-wave"
 
                 style={{ animationDuration: '5s', animationDelay: '0.5s' }} />
 
-              <div className="absolute bottom-0 w-full h-24 bg-gradient-to-t from-cyan-400/10 to-transparent animate-wave" 
+              <div className="absolute bottom-0 w-full h-24 bg-gradient-to-t from-cyan-400/10 to-transparent animate-wave"
 
                 style={{ animationDuration: '6s', animationDelay: '1s' }} />
 
             </div>
 
-            
+
 
             {/* Floating Seaweed/Kelp */}
 
@@ -4555,7 +3905,7 @@ function App() {
 
         )}
 
-        
+
 
         {liveAnimations && selectedTheme === 'forest' && (
 
@@ -4623,7 +3973,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Grass Ground */}
 
@@ -4661,7 +4011,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Flying Birds */}
 
@@ -4725,7 +4075,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Falling Leaves */}
 
@@ -4761,7 +4111,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Sunlight Rays */}
 
@@ -4791,7 +4141,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Butterflies */}
 
@@ -4831,7 +4181,7 @@ function App() {
 
         )}
 
-        
+
 
         {liveAnimations && selectedTheme === 'sunset' && (
 
@@ -4897,7 +4247,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Golden Hour Glow */}
 
@@ -4909,7 +4259,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Floating Light Particles */}
 
@@ -4951,13 +4301,13 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Warm Shimmer Effect */}
 
             <div className="fixed inset-0 pointer-events-none z-0 opacity-20">
 
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-transparent to-orange-400/20 animate-pulse" 
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-transparent to-orange-400/20 animate-pulse"
 
                 style={{ animationDuration: '5s' }} />
 
@@ -4967,7 +4317,7 @@ function App() {
 
         )}
 
-        
+
 
         {liveAnimations && selectedTheme === 'lavender' && (
 
@@ -5009,7 +4359,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Floating Butterflies */}
 
@@ -5047,7 +4397,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Lavender Flowers */}
 
@@ -5083,7 +4433,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Fairy Lights */}
 
@@ -5125,7 +4475,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Floating Hearts */}
 
@@ -5163,7 +4513,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Magic Dust Particles */}
 
@@ -5205,7 +4555,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Soft Glow Orbs */}
 
@@ -5243,13 +4593,13 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Dreamy Shimmer */}
 
             <div className="fixed inset-0 pointer-events-none z-0 opacity-15">
 
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-300/20 via-transparent to-pink-300/20 animate-pulse" 
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-300/20 via-transparent to-pink-300/20 animate-pulse"
 
                 style={{ animationDuration: '6s' }} />
 
@@ -5259,7 +4609,7 @@ function App() {
 
         )}
 
-        
+
 
         {liveAnimations && selectedTheme === 'midnight' && (
 
@@ -5273,7 +4623,7 @@ function App() {
 
                 {/* Moon Glow - Reduced */}
 
-                <div className="absolute -inset-4 w-28 h-28 rounded-full bg-violet-300/5 blur-3xl animate-pulse" 
+                <div className="absolute -inset-4 w-28 h-28 rounded-full bg-violet-300/5 blur-3xl animate-pulse"
 
                   style={{ animationDuration: '4s' }} />
 
@@ -5303,7 +4653,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Moonlight Beam - Reduced */}
 
@@ -5313,7 +4663,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Twinkling Stars */}
 
@@ -5351,7 +4701,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Violet Nebula Clouds */}
 
@@ -5393,7 +4743,7 @@ function App() {
 
         )}
 
-        
+
 
         {liveAnimations && selectedTheme === 'spaceGalaxy' && (
 
@@ -5437,7 +4787,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Space Rockets */}
 
@@ -5477,7 +4827,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Rocket Trails */}
 
@@ -5511,7 +4861,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Shooting Stars */}
 
@@ -5545,7 +4895,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Planets */}
 
@@ -5583,7 +4933,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Cosmic Nebula */}
 
@@ -5607,7 +4957,7 @@ function App() {
 
                     top: `${i * 20}%`,
 
-                    background: i % 2 === 0 
+                    background: i % 2 === 0
 
                       ? 'radial-gradient(circle, rgba(0, 217, 255, 0.15), transparent)'
 
@@ -5629,7 +4979,7 @@ function App() {
 
         )}
 
-        
+
 
         {liveAnimations && selectedTheme === 'cyberpunkNeon' && (
 
@@ -5729,7 +5079,7 @@ function App() {
 
         )}
 
-        
+
 
         {liveAnimations && selectedTheme === 'organicForest' && (
 
@@ -5767,7 +5117,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Swans in Creek */}
 
@@ -5803,7 +5153,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Peacocks on Grass */}
 
@@ -5839,7 +5189,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Grass Along Creek */}
 
@@ -5875,7 +5225,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Trees in Background */}
 
@@ -5911,7 +5261,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Floating Leaves */}
 
@@ -5947,7 +5297,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Butterflies */}
 
@@ -5983,7 +5333,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Sunlight Beams */}
 
@@ -6013,7 +5363,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Soft Green Glow */}
 
@@ -6027,7 +5377,7 @@ function App() {
 
         )}
 
-        
+
 
         {liveAnimations && selectedTheme === 'oceanUnderwater' && (
 
@@ -6041,7 +5391,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Caustic Light Effect (sunlight through water) */}
 
@@ -6079,7 +5429,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Swimming Fish - Multiple Species */}
 
@@ -6209,7 +5559,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Ocean Bubbles */}
 
@@ -6245,27 +5595,27 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Wave Layers at Bottom */}
 
             <div className="fixed bottom-0 left-0 w-full pointer-events-none z-0">
 
-              <div className="absolute bottom-0 w-full h-48 bg-gradient-to-t from-cyan-700/25 to-transparent animate-wave" 
+              <div className="absolute bottom-0 w-full h-48 bg-gradient-to-t from-cyan-700/25 to-transparent animate-wave"
 
                 style={{ animationDuration: '3.5s' }} />
 
-              <div className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-blue-600/20 to-transparent animate-wave" 
+              <div className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-blue-600/20 to-transparent animate-wave"
 
                 style={{ animationDuration: '4.5s', animationDelay: '0.5s' }} />
 
-              <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-cyan-500/15 to-transparent animate-wave" 
+              <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-cyan-500/15 to-transparent animate-wave"
 
                 style={{ animationDuration: '5.5s', animationDelay: '1s' }} />
 
             </div>
 
-            
+
 
             {/* Coral and Seaweed at Bottom */}
 
@@ -6299,7 +5649,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Bioluminescent Particles */}
 
@@ -6341,7 +5691,7 @@ function App() {
 
         )}
 
-        
+
 
         {liveAnimations && selectedTheme === 'steampunkVictorian' && (
 
@@ -6381,7 +5731,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Steam Pipes */}
 
@@ -6413,7 +5763,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Rising Steam */}
 
@@ -6449,7 +5799,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Clockwork Elements */}
 
@@ -6463,7 +5813,7 @@ function App() {
 
                 {/* Clock Hands */}
 
-                <div 
+                <div
 
                   className="absolute top-1/2 left-1/2 w-1 h-12 bg-amber-800 origin-bottom"
 
@@ -6477,7 +5827,7 @@ function App() {
 
                 />
 
-                <div 
+                <div
 
                   className="absolute top-1/2 left-1/2 w-1 h-8 bg-amber-600 origin-bottom"
 
@@ -6495,7 +5845,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Brass Machinery Parts */}
 
@@ -6533,7 +5883,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Victorian Lamp Posts */}
 
@@ -6569,7 +5919,7 @@ function App() {
 
             </div>
 
-            
+
 
             {/* Brass Glow */}
 
@@ -6583,7 +5933,7 @@ function App() {
 
         )}
 
-        
+
 
         {liveAnimations && (selectedTheme === 'light' || selectedTheme === 'dark') && (
 
@@ -6611,7 +5961,7 @@ function App() {
 
                     top: `${i * 15}%`,
 
-                    background: selectedTheme === 'light' 
+                    background: selectedTheme === 'light'
 
                       ? 'radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent)'
 
@@ -7193,7 +6543,7 @@ function App() {
 
                 </div>
 
-                
+
 
                 <div className="space-y-4">
 
@@ -7297,7 +6647,7 @@ function App() {
 
                   </div>
 
-                  
+
 
                   <div className="flex items-start gap-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
 
@@ -7919,7 +7269,7 @@ function App() {
 
                 </div>
 
-                
+
 
                 <div className="space-y-4">
 
@@ -7981,11 +7331,11 @@ function App() {
 
                   </div>
 
-                  
+
 
                   {errors.csvFilePath && <p className="text-sm text-red-500">{errors.csvFilePath}</p>}
 
-                  
+
 
                   {csvFilePath && csvStatistics && (
 
@@ -8079,7 +7429,7 @@ function App() {
 
                   </button>
 
-                  
+
 
                   {expandedSections.messageHeader && (
 
@@ -8207,7 +7557,7 @@ function App() {
 
                   </button>
 
-                  
+
 
                   {expandedSections.fileSize && (
 
@@ -8241,7 +7591,7 @@ function App() {
 
                       </div>
 
-                      
+
 
                       {formData.reportingFITINs.length > 0 && (
 
@@ -8449,7 +7799,7 @@ function App() {
 
               </div>
 
-              
+
 
               <div className="flex gap-2 mb-4">
 
@@ -8551,7 +7901,7 @@ function App() {
 
                   <p className={`font-medium ${darkMode ? 'text-orange-300' : 'text-orange-800'}`}>
 
-                    {activeModule === 'cbc' ? t(language, 'corrections.generateCBC') : 
+                    {activeModule === 'cbc' ? t(language, 'corrections.generateCBC') :
 
                      activeModule === 'fatca' ? t(language, 'corrections.generateFATCA') : t(language, 'corrections.generateCRS')}
 
@@ -8567,7 +7917,7 @@ function App() {
 
                         ? t(language, 'ui.uploadFatcaCorrection')
 
-                        : correctionDataMode === 'xml' 
+                        : correctionDataMode === 'xml'
 
                           ? t(language, 'ui.uploadCrsCorrection')
 
@@ -8653,7 +8003,7 @@ function App() {
 
               </div>
 
-              
+
 
               <div className="space-y-4">
 
@@ -8667,7 +8017,7 @@ function App() {
 
                       className={`w-full px-4 py-3 rounded-lg border ${theme.input} ${
 
-                        xmlValidation?.is_valid === false ? 'border-red-500' : 
+                        xmlValidation?.is_valid === false ? 'border-red-500' :
 
                         xmlValidation?.can_generate_correction ? 'border-green-500' : ''
 
@@ -8747,7 +8097,7 @@ function App() {
 
                       <span className={`font-medium ${
 
-                        xmlValidation.can_generate_correction 
+                        xmlValidation.can_generate_correction
 
                           ? darkMode ? 'text-green-400' : 'text-green-700'
 
@@ -8767,7 +8117,7 @@ function App() {
 
                     </div>
 
-                    
+
 
                     {xmlValidation.can_generate_correction && (
 
@@ -8809,7 +8159,7 @@ function App() {
 
                     )}
 
-                    
+
 
                     {xmlValidation.errors?.length > 0 && (
 
@@ -8831,7 +8181,7 @@ function App() {
 
                     )}
 
-                    
+
 
                     {xmlValidation.warnings?.length > 0 && (
 
@@ -8869,7 +8219,7 @@ function App() {
 
               </div>
 
-              
+
 
               <div className="space-y-4">
 
@@ -9091,7 +8441,7 @@ function App() {
 
                 </div>
 
-                
+
 
                 <div className="space-y-4">
 
@@ -9101,7 +8451,7 @@ function App() {
 
                   </p>
 
-                  
+
 
                   <div className="flex gap-4">
 
@@ -9193,7 +8543,7 @@ function App() {
 
                 </div>
 
-                
+
 
                 <div className="space-y-6">
 
@@ -9265,9 +8615,9 @@ function App() {
 
                           value={correctionOptions.correctIndividual}
 
-                          onChange={(e) => setCorrectionOptions(prev => ({ 
+                          onChange={(e) => setCorrectionOptions(prev => ({
 
-                            ...prev, 
+                            ...prev,
 
                             correctIndividual: Math.min(xmlValidation.individual_accounts - prev.deleteIndividual, Math.max(0, parseInt(e.target.value) || 0))
 
@@ -9277,9 +8627,9 @@ function App() {
 
                         <button
 
-                          onClick={() => setCorrectionOptions(prev => ({ 
+                          onClick={() => setCorrectionOptions(prev => ({
 
-                            ...prev, 
+                            ...prev,
 
                             correctIndividual: Math.min(xmlValidation.individual_accounts - prev.deleteIndividual, prev.correctIndividual + 1)
 
@@ -9335,9 +8685,9 @@ function App() {
 
                           value={correctionOptions.correctOrganisation}
 
-                          onChange={(e) => setCorrectionOptions(prev => ({ 
+                          onChange={(e) => setCorrectionOptions(prev => ({
 
-                            ...prev, 
+                            ...prev,
 
                             correctOrganisation: Math.min(xmlValidation.organisation_accounts - prev.deleteOrganisation, Math.max(0, parseInt(e.target.value) || 0))
 
@@ -9347,9 +8697,9 @@ function App() {
 
                         <button
 
-                          onClick={() => setCorrectionOptions(prev => ({ 
+                          onClick={() => setCorrectionOptions(prev => ({
 
-                            ...prev, 
+                            ...prev,
 
                             correctOrganisation: Math.min(xmlValidation.organisation_accounts - prev.deleteOrganisation, prev.correctOrganisation + 1)
 
@@ -9405,9 +8755,9 @@ function App() {
 
                           value={correctionOptions.deleteIndividual}
 
-                          onChange={(e) => setCorrectionOptions(prev => ({ 
+                          onChange={(e) => setCorrectionOptions(prev => ({
 
-                            ...prev, 
+                            ...prev,
 
                             deleteIndividual: Math.min(xmlValidation.individual_accounts - prev.correctIndividual, Math.max(0, parseInt(e.target.value) || 0))
 
@@ -9417,9 +8767,9 @@ function App() {
 
                         <button
 
-                          onClick={() => setCorrectionOptions(prev => ({ 
+                          onClick={() => setCorrectionOptions(prev => ({
 
-                            ...prev, 
+                            ...prev,
 
                             deleteIndividual: Math.min(xmlValidation.individual_accounts - prev.correctIndividual, prev.deleteIndividual + 1)
 
@@ -9475,9 +8825,9 @@ function App() {
 
                           value={correctionOptions.deleteOrganisation}
 
-                          onChange={(e) => setCorrectionOptions(prev => ({ 
+                          onChange={(e) => setCorrectionOptions(prev => ({
 
-                            ...prev, 
+                            ...prev,
 
                             deleteOrganisation: Math.min(xmlValidation.organisation_accounts - prev.correctOrganisation, Math.max(0, parseInt(e.target.value) || 0))
 
@@ -9487,9 +8837,9 @@ function App() {
 
                         <button
 
-                          onClick={() => setCorrectionOptions(prev => ({ 
+                          onClick={() => setCorrectionOptions(prev => ({
 
-                            ...prev, 
+                            ...prev,
 
                             deleteOrganisation: Math.min(xmlValidation.organisation_accounts - prev.correctOrganisation, prev.deleteOrganisation + 1)
 
@@ -9567,9 +8917,9 @@ function App() {
 
                         <p className={`text-sm ${theme.textMuted}`}>
 
-                          {correctionOptions.testMode 
+                          {correctionOptions.testMode
 
-                            ? t(language, 'correctionLabels.usingTestIndicators') 
+                            ? t(language, 'correctionLabels.usingTestIndicators')
 
                             : t(language, 'correctionLabels.usingProdIndicators')}
 
@@ -9615,7 +8965,7 @@ function App() {
 
                 </div>
 
-                
+
 
                 <div className="flex gap-2 mb-4">
 
@@ -9663,9 +9013,9 @@ function App() {
 
                   className={`w-full px-6 py-4 bg-gradient-to-r ${
 
-                    activeModule === 'cbc' 
+                    activeModule === 'cbc'
 
-                      ? 'from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600' 
+                      ? 'from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600'
 
                       : 'from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600'
 
@@ -9731,7 +9081,7 @@ function App() {
 
               </div>
 
-              
+
 
               {/* Info Banner */}
 
@@ -10072,7 +9422,7 @@ function App() {
 
                     </div>
 
-                    
+
 
                     {/* DocTypeIndic Conversion Notice */}
 
@@ -10096,7 +9446,7 @@ function App() {
 
                     )}
 
-                    
+
 
                     {/* ReportingFI Fix Notice */}
 
@@ -10120,7 +9470,7 @@ function App() {
 
                     )}
 
-                    
+
 
                     <div className="grid grid-cols-2 gap-4 text-sm">
 
@@ -10354,7 +9704,7 @@ function App() {
 
               </div>
 
-              
+
 
               <div className="max-h-96 overflow-y-auto">
 
@@ -10398,9 +9748,9 @@ function App() {
 
                             <span className={`px-2 py-1 text-xs rounded-full ${
 
-                              entry.mode === 'csv' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 
+                              entry.mode === 'csv' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' :
 
-                              entry.mode === 'preview' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 
+                              entry.mode === 'preview' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' :
 
                               'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
 
@@ -10465,1102 +9815,6 @@ function App() {
         )}
 
 
-
-        {/* Settings Page */}
-
-        {currentPage === 'settings' && (
-
-          <div className={`space-y-6 ${settings.animationsEnabled ? 'animate-fade-in' : ''}`}>
-
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
-
-              <div className="flex items-center justify-between mb-2">
-
-                <h3 className={`text-lg font-semibold ${theme.text}`}>Theme</h3>
-
-                <button
-
-                  onClick={() => setLiveAnimations(!liveAnimations)}
-
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-
-                    liveAnimations 
-
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30' 
-
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-
-                  }`}
-
-                  title={liveAnimations ? t(language, 'settingsMisc.animationsDisable') : t(language, 'settingsMisc.animationsEnable')}
-
-                >
-
-                  <span className="text-lg">{liveAnimations ? '✨' : '🎬'}</span>
-
-                  <span className="text-sm">{liveAnimations ? 'Live Animations ON' : 'Live Animations OFF'}</span>
-
-                </button>
-
-              </div>
-
-              <p className="text-sm text-gray-500 mb-6">Choose your preferred color scheme</p>
-
-              
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-
-                {[
-
-                  { key: 'light', name: 'Light', icon: '☀️', dark: false },
-
-                  { key: 'dark', name: 'Dark', icon: '🌙', dark: true },
-
-                  { key: 'midnight', name: 'Midnight', icon: '🌌', dark: true },
-
-                  { key: 'ocean', name: 'Ocean', icon: '🌊', dark: true },
-
-                  { key: 'sunset', name: 'Sunset', icon: '🌅', dark: false },
-
-                  { key: 'forest', name: 'Forest', icon: '🌲', dark: true },
-
-                  { key: 'lavender', name: 'Lavender', icon: '💜', dark: false },
-
-                  { key: 'spaceGalaxy', name: 'Space Galaxy', icon: '🚀', dark: true },
-
-                  { key: 'cyberpunkNeon', name: 'Cyberpunk', icon: '⚡', dark: true },
-
-                  { key: 'organicForest', name: 'Organic Forest', icon: '🌿', dark: false },
-
-                  { key: 'oceanUnderwater', name: 'Ocean Depths', icon: '🐠', dark: true },
-
-                  { key: 'steampunkVictorian', name: 'Steampunk', icon: '⚙️', dark: false },
-
-                ].map((item) => (
-
-                  <button
-
-                    key={item.key}
-
-                    onClick={() => setSelectedTheme(item.key)}
-
-                    className={`relative rounded-xl overflow-hidden transition-all duration-200 ${
-
-                      selectedTheme === item.key 
-
-                        ? 'ring-2 ring-offset-2 ring-blue-500 border-2 border-blue-500' 
-
-                        : 'border-2 border-gray-200 hover:border-gray-400'
-
-                    }`}
-
-                  >
-
-                    {/* Animated Preview */}
-
-                    <div className={`h-32 relative overflow-hidden ${item.dark ? 'bg-gray-900' : 'bg-gray-50'}`}>
-
-                      {/* Ocean */}
-
-                      {item.key === 'ocean' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-gradient-to-b from-cyan-700/40 to-blue-800/50" />
-
-                          {[...Array(3)].map((_, i) => (
-
-                            <div key={i} className="absolute text-2xl" style={{ left: `${15 + i * 30}%`, top: `${40 + i * 5}%`, animation: `float-bob ${3 + i}s ease-in-out infinite` }}>🐠</div>
-
-                          ))}
-
-                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xl opacity-70">🌊</div>
-
-                        </>
-
-                      )}
-
-                      {/* Forest */}
-
-                      {item.key === 'forest' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-gradient-to-b from-green-800/30 to-green-900/40" />
-
-                          <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-green-600/50 to-transparent" />
-
-                          {[...Array(3)].map((_, i) => (
-
-                            <div key={i} className="absolute text-3xl opacity-80" style={{ left: `${i * 35}%`, bottom: '5px', animation: `wave-motion ${2 + i}s ease-in-out infinite` }}>🌳</div>
-
-                          ))}
-
-                          <div className="absolute top-2 right-2 text-lg">🦅</div>
-
-                        </>
-
-                      )}
-
-                      {/* Sunset */}
-
-                      {item.key === 'sunset' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-gradient-to-br from-amber-300/40 to-rose-300/40" />
-
-                          <div className="absolute top-3 left-3 w-10 h-10 rounded-full bg-gradient-to-br from-yellow-300 to-orange-400 shadow-lg" />
-
-                          <div className="absolute top-2 right-2 text-3xl opacity-80">🌈</div>
-
-                          {[...Array(3)].map((_, i) => (
-
-                            <div key={i} className="absolute w-0.5 h-16 bg-gradient-to-b from-yellow-300/40 to-transparent" style={{ left: `${30 + i * 15}%`, top: '15px', transform: `rotate(${-30 + i * 30}deg)` }} />
-
-                          ))}
-
-                        </>
-
-                      )}
-
-                      {/* Lavender */}
-
-                      {item.key === 'lavender' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-gradient-to-br from-purple-300/40 to-pink-300/40" />
-
-                          {[...Array(6)].map((_, i) => (
-
-                            <div key={i} className="absolute text-lg" style={{ left: `${10 + i * 15}%`, top: `${10 + i * 12}%`, animation: `twinkle ${2 + i * 0.3}s ease-in-out infinite` }}>✨</div>
-
-                          ))}
-
-                          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-2xl">🌸</div>
-
-                          <div className="absolute top-1/2 right-2 text-xl opacity-70">🦋</div>
-
-                        </>
-
-                      )}
-
-                      {/* Midnight */}
-
-                      {item.key === 'midnight' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-[#0f0f23]" />
-
-                          {[...Array(15)].map((_, i) => (
-
-                            <div key={i} className="absolute w-1 h-1 bg-white rounded-full" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, opacity: 0.8, animation: `twinkle ${2 + Math.random()}s ease-in-out infinite` }} />
-
-                          ))}
-
-                          <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-300 overflow-hidden shadow-lg">
-
-                            <div className="absolute -right-1.5 top-0 w-8 h-8 rounded-full bg-[#0f0f23]" />
-
-                          </div>
-
-                        </>
-
-                      )}
-
-                      {/* Space Galaxy */}
-
-                      {item.key === 'spaceGalaxy' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-[#0a0e27]" />
-
-                          {[...Array(20)].map((_, i) => (
-
-                            <div key={i} className="absolute w-1 h-1 rounded-full" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, background: i % 3 === 0 ? '#00d9ff' : i % 3 === 1 ? '#ff006e' : '#fff', opacity: 0.9, animation: `twinkle ${1 + Math.random()}s ease-in-out infinite` }} />
-
-                          ))}
-
-                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl transform -rotate-45 drop-shadow-[0_0_8px_rgba(0,217,255,0.8)]">🚀</div>
-
-                          <div className="absolute bottom-2 right-2 text-xl opacity-70">🪐</div>
-
-                        </>
-
-                      )}
-
-                      {/* Cyberpunk */}
-
-                      {item.key === 'cyberpunkNeon' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-[#0a0a0a]" />
-
-                          <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(255,0,110,0.4) 1px, transparent 1px)', backgroundSize: '15px 15px', opacity: 0.3 }} />
-
-                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl" style={{ textShadow: '0 0 15px #ff006e, 0 0 30px #ff006e' }}>⚡</div>
-
-                          {[...Array(3)].map((_, i) => (
-
-                            <div key={i} className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-40" style={{ top: `${30 + i * 20}%` }} />
-
-                          ))}
-
-                        </>
-
-                      )}
-
-                      {/* Organic Forest */}
-
-                      {item.key === 'organicForest' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-gradient-to-br from-green-200/30 to-emerald-200/30" />
-
-                          <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-blue-400/40 to-transparent" />
-
-                          <div className="absolute bottom-3 left-1/4 text-2xl" style={{ animation: 'float-bob 3s ease-in-out infinite' }}>🦢</div>
-
-                          <div className="absolute bottom-3 right-1/4 text-2xl">🦚</div>
-
-                          {[...Array(3)].map((_, i) => (
-
-                            <div key={i} className="absolute text-lg opacity-60" style={{ left: `${20 + i * 30}%`, bottom: '10px' }}>🌾</div>
-
-                          ))}
-
-                        </>
-
-                      )}
-
-                      {/* Ocean Depths */}
-
-                      {item.key === 'oceanUnderwater' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-gradient-to-b from-cyan-800/50 to-indigo-950/60" />
-
-                          {[...Array(3)].map((_, i) => (
-
-                            <div key={i} className="absolute text-xl" style={{ left: `${20 + i * 30}%`, top: `${30 + i * 15}%`, animation: `float-bob ${3 + i}s ease-in-out infinite` }}>🐠</div>
-
-                          ))}
-
-                          <div className="absolute bottom-1 left-1/3 text-xl">🪸</div>
-
-                          <div className="absolute top-1/4 right-1/4 text-lg opacity-60" style={{ animation: 'float-bob 4s ease-in-out infinite' }}>🪼</div>
-
-                        </>
-
-                      )}
-
-                      {/* Steampunk */}
-
-                      {item.key === 'steampunkVictorian' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-gradient-to-br from-amber-800/40 to-orange-900/40" />
-
-                          {[...Array(3)].map((_, i) => (
-
-                            <div key={i} className="absolute text-2xl opacity-50" style={{ left: `${15 + i * 30}%`, top: `${15 + i * 20}%`, animation: `gear-rotate ${5 + i * 2}s linear infinite`, color: '#b87333' }}>⚙️</div>
-
-                          ))}
-
-                          <div className="absolute bottom-2 left-2 text-lg opacity-60">💨</div>
-
-                          <div className="absolute bottom-2 right-2 text-lg opacity-50">🕯️</div>
-
-                        </>
-
-                      )}
-
-                      {/* Light */}
-
-                      {item.key === 'light' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/30 to-indigo-500/30" />
-
-                          <div className="absolute top-2 right-2 text-3xl">☀️</div>
-
-                        </>
-
-                      )}
-
-                      {/* Dark */}
-
-                      {item.key === 'dark' && (
-
-                        <>
-
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-700/40 to-indigo-900/50" />
-
-                          <div className="absolute top-2 right-2 text-3xl">🌙</div>
-
-                          {[...Array(8)].map((_, i) => (
-
-                            <div key={i} className="absolute w-0.5 h-0.5 bg-white rounded-full" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, opacity: 0.6 }} />
-
-                          ))}
-
-                        </>
-
-                      )}
-
-                    </div>
-
-                    <div className={`py-2.5 px-2 text-center ${item.dark ? 'bg-gray-800' : 'bg-white'}`}>
-
-                      <span className="mr-1">{item.icon}</span>
-
-                      <span className={`font-medium text-sm ${item.dark ? 'text-white' : 'text-gray-900'}`}>{item.name}</span>
-
-                    </div>
-
-                    {selectedTheme === item.key && (
-
-                      <div className="absolute top-1.5 right-1.5 bg-blue-500 rounded-full p-0.5">
-
-                        <CheckCircle2 className="w-4 h-4 text-white" />
-
-                      </div>
-
-                    )}
-
-                  </button>
-
-                ))}
-
-              </div>
-
-            </div>
-
-
-
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-6`}>Appearance</h3>
-
-              
-
-              <div className="space-y-4">
-
-                <div className="flex items-center justify-between">
-
-                  <div>
-
-                    <p className={`font-medium ${theme.text}`}>Animations</p>
-
-                    <p className={`text-sm ${theme.textMuted}`}>Enable smooth transitions and animations</p>
-
-                  </div>
-
-                  <button
-
-                    onClick={() => setSettings(prev => ({ ...prev, animationsEnabled: !prev.animationsEnabled }))}
-
-                    className={`w-12 h-6 rounded-full transition-all relative ${settings.animationsEnabled ? theme.toggleOn : theme.toggleOff}`}
-
-                  >
-
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform shadow-sm ${settings.animationsEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
-
-                  </button>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-
-            {/* Language Settings */}
-
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>Language</h3>
-
-              <p className={`text-sm ${theme.textMuted} mb-6`}>Choose your preferred language for the application</p>
-
-              
-
-              <div className="grid grid-cols-3 gap-3">
-
-                {Object.entries(LANGUAGES).map(([code, lang]) => (
-
-                  <button
-
-                    key={code}
-
-                    onClick={() => setLanguage(code)}
-
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 ${
-
-                      language === code
-
-                        ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/30'
-
-                        : `${theme.border} hover:border-gray-500 ${theme.card}`
-
-                    }`}
-
-                  >
-
-                    <span className="text-2xl">{lang.flag}</span>
-
-                    <div className="text-left">
-
-                      <p className={`font-medium ${theme.text}`}>{lang.nativeName}</p>
-
-                      <p className={`text-xs ${theme.textMuted}`}>{lang.name}</p>
-
-                    </div>
-
-                    {language === code && (
-
-                      <CheckCircle2 className="w-5 h-5 text-blue-500 ml-auto" />
-
-                    )}
-
-                  </button>
-
-                ))}
-
-              </div>
-
-            </div>
-
-
-
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-6`}>CSV Settings</h3>
-
-              
-
-              <div className="space-y-4">
-
-                <div className="flex items-center justify-between">
-
-                  <div>
-
-                    <p className={`font-medium ${theme.text}`}>{t(language, 'csv.autoValidate')}</p>
-
-                    <p className={`text-sm ${theme.textMuted}`}>{t(language, 'csv.autoValidateDescription')}</p>
-
-                  </div>
-
-                  <button
-
-                    onClick={() => setSettings(prev => ({ ...prev, autoValidateCsv: !prev.autoValidateCsv }))}
-
-                    className={`w-12 h-6 rounded-full transition-all relative ${settings.autoValidateCsv ? theme.toggleOn : theme.toggleOff}`}
-
-                  >
-
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform shadow-sm ${settings.autoValidateCsv ? 'translate-x-6' : 'translate-x-0.5'}`} />
-
-                  </button>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-
-            {/* Partner Jurisdictions Settings */}
-
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'jurisdictions.title')}</h3>
-
-              <p className={`text-sm ${theme.textMuted} mb-4`}>
-
-                {t(language, 'jurisdictions.description')}
-
-              </p>
-
-              
-
-              {/* Search and Add */}
-
-              <div className="relative mb-4">
-
-                <div className="flex gap-2">
-
-                  <div className="relative flex-1">
-
-                    <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${theme.textMuted}`} />
-
-                    <input
-
-                      type="text"
-
-                      value={jurisdictionSearch}
-
-                      onChange={(e) => {
-
-                        setJurisdictionSearch(e.target.value)
-
-                        setShowJurisdictionDropdown(true)
-
-                      }}
-
-                      onFocus={() => setShowJurisdictionDropdown(true)}
-
-                      placeholder={t(language, 'jurisdictions.searchPlaceholder')}
-
-                      className={`w-full pl-10 pr-4 py-2 rounded-lg border ${theme.input} ${theme.text}`}
-
-                    />
-
-                  </div>
-
-                </div>
-
-                
-
-                {/* Dropdown */}
-
-                {showJurisdictionDropdown && jurisdictionSearch && (
-
-                  <div className={`absolute z-10 w-full mt-1 ${theme.card} border rounded-lg shadow-lg max-h-60 overflow-y-auto`}>
-
-                    {searchCountries(jurisdictionSearch)
-
-                      .filter(c => !settings.partnerJurisdictions?.includes(c.code))
-
-                      .slice(0, 10)
-
-                      .map(country => (
-
-                        <button
-
-                          key={country.code}
-
-                          onClick={() => {
-
-                            setSettings(prev => ({
-
-                              ...prev,
-
-                              partnerJurisdictions: [...(prev.partnerJurisdictions || []), country.code].sort()
-
-                            }))
-
-                            setJurisdictionSearch('')
-
-                            setShowJurisdictionDropdown(false)
-
-                          }}
-
-                          className={`w-full px-4 py-2 text-left ${theme.cardHover} flex items-center justify-between ${theme.text}`}
-
-                        >
-
-                          <span>{country.name}</span>
-
-                          <span className={`text-sm font-mono ${theme.textMuted}`}>{country.code}</span>
-
-                        </button>
-
-                      ))}
-
-                    {searchCountries(jurisdictionSearch).filter(c => !settings.partnerJurisdictions?.includes(c.code)).length === 0 && (
-
-                      <div className={`px-4 py-2 ${theme.textMuted}`}>{t(language, 'jurisdictions.noCountriesFound')}</div>
-
-                    )}
-
-                  </div>
-
-                )}
-
-              </div>
-
-              
-
-              {/* Selected Jurisdictions */}
-
-              <div className="mb-4">
-
-                <div className="flex items-center justify-between mb-2">
-
-                  <span className={`text-sm font-medium ${theme.text}`}>
-
-                    {t(language, 'jurisdictions.selectedCountries')} ({settings.partnerJurisdictions?.length || 0})
-
-                  </span>
-
-                  <div className="flex items-center gap-2">
-
-                    <button
-
-                      onClick={() => {
-
-                        const allCodes = COUNTRIES.map(c => c.code)
-
-                        setSettings(prev => ({ ...prev, partnerJurisdictions: allCodes }))
-
-                      }}
-
-                      className={`text-xs px-2 py-1 rounded ${theme.buttonSecondary}`}
-
-                    >
-
-                      {t(language, 'jurisdictions.selectAll')}
-
-                    </button>
-
-                    <button
-
-                      onClick={() => setSettings(prev => ({ ...prev, partnerJurisdictions: [] }))}
-
-                      className={`text-xs px-2 py-1 rounded ${theme.buttonSecondary}`}
-
-                    >
-
-                      {t(language, 'jurisdictions.clearAll')}
-
-                    </button>
-
-                    <button
-
-                      onClick={() => setSettings(prev => ({ ...prev, partnerJurisdictions: DEFAULT_PARTNER_JURISDICTIONS }))}
-
-                      className={`text-xs px-2 py-1 rounded ${theme.accentText} hover:opacity-80`}
-
-                    >
-
-                      {t(language, 'jurisdictions.resetToDefault')}
-
-                    </button>
-
-                  </div>
-
-                </div>
-
-                <div className={`flex flex-wrap gap-2 max-h-48 overflow-y-auto p-3 border rounded-lg ${theme.card}`}>
-
-                  {(settings.partnerJurisdictions || []).sort().map(code => (
-
-                    <span
-
-                      key={code}
-
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${theme.badge}`}
-
-                    >
-
-                      <span className="font-medium">{getCountryName(code)}</span>
-
-                      <span className="text-xs font-mono opacity-60">{code}</span>
-
-                      <button
-
-                        onClick={() => setSettings(prev => ({
-
-                          ...prev,
-
-                          partnerJurisdictions: prev.partnerJurisdictions.filter(c => c !== code)
-
-                        }))}
-
-                        className="ml-1 hover:text-red-500 transition-colors"
-
-                      >
-
-                        <X className="w-3 h-3" />
-
-                      </button>
-
-                    </span>
-
-                  ))}
-
-                  {(!settings.partnerJurisdictions || settings.partnerJurisdictions.length === 0) && (
-
-                    <span className={`${theme.textMuted} text-sm`}>{t(language, 'jurisdictions.noCountriesSelected')}</span>
-
-                  )}
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-
-            {/* Bug Reporting Section */}
-
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`} data-testid="bug-report-section">
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'bugReport.title')}</h3>
-
-              <p className={`text-sm ${theme.textMuted} mb-4`}>
-
-                Help us improve by reporting bugs or issues you encounter
-
-              </p>
-
-              
-
-              <button
-
-                onClick={() => setShowBugReportForm(true)}
-
-                data-testid="report-bug-button"
-
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${theme.buttonPrimary}`}
-
-              >
-
-                <AlertCircle className="w-4 h-4" />
-
-                {t(language, 'bugReport.button')}
-
-              </button>
-
-
-
-              {/* Bug Report Form Modal */}
-
-              {showBugReportForm && (
-
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="bug-report-form">
-
-                  <div className={`${theme.card} rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto`}>
-
-                    <div className={`p-6 ${theme.accent} border-b`}>
-
-                      <h3 className="text-xl font-bold text-white">{t(language, 'bugReport.formTitle')}</h3>
-
-                    </div>
-
-                    
-
-                    <div className="p-6 space-y-4">
-
-                      {/* Title */}
-
-                      <div>
-
-                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
-
-                          {t(language, 'bugReport.issueTitle')} *
-
-                        </label>
-
-                        <input
-
-                          type="text"
-
-                          value={bugReportData.title}
-
-                          onChange={(e) => handleBugReportChange('title', e.target.value)}
-
-                          placeholder={t(language, 'bugReport.issueTitlePlaceholder')}
-
-                          data-testid="bug-title-input"
-
-                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
-
-                        />
-
-                        {bugReportErrors.title && (
-
-                          <p className="text-red-500 text-sm mt-1" data-testid="bug-title-error">{bugReportErrors.title}</p>
-
-                        )}
-
-                      </div>
-
-
-
-                      {/* Description */}
-
-                      <div>
-
-                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
-
-                          {t(language, 'bugReport.description')} *
-
-                        </label>
-
-                        <textarea
-
-                          value={bugReportData.description}
-
-                          onChange={(e) => handleBugReportChange('description', e.target.value)}
-
-                          placeholder={t(language, 'bugReport.descriptionPlaceholder')}
-
-                          data-testid="bug-description-input"
-
-                          rows={4}
-
-                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
-
-                        />
-
-                        {bugReportErrors.description && (
-
-                          <p className="text-red-500 text-sm mt-1" data-testid="bug-description-error">{bugReportErrors.description}</p>
-
-                        )}
-
-                      </div>
-
-
-
-                      {/* Steps to Reproduce */}
-
-                      <div>
-
-                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
-
-                          {t(language, 'bugReport.stepsToReproduce')}
-
-                        </label>
-
-                        <textarea
-
-                          value={bugReportData.steps}
-
-                          onChange={(e) => handleBugReportChange('steps', e.target.value)}
-
-                          placeholder={t(language, 'bugReport.stepsPlaceholder')}
-
-                          data-testid="bug-steps-input"
-
-                          rows={3}
-
-                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
-
-                        />
-
-                      </div>
-
-
-
-                      {/* Expected Behavior */}
-
-                      <div>
-
-                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
-
-                          {t(language, 'bugReport.expectedBehavior')}
-
-                        </label>
-
-                        <textarea
-
-                          value={bugReportData.expected}
-
-                          onChange={(e) => handleBugReportChange('expected', e.target.value)}
-
-                          placeholder={t(language, 'bugReport.expectedPlaceholder')}
-
-                          data-testid="bug-expected-input"
-
-                          rows={2}
-
-                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
-
-                        />
-
-                      </div>
-
-
-
-                      {/* Actual Behavior */}
-
-                      <div>
-
-                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
-
-                          {t(language, 'bugReport.actualBehavior')}
-
-                        </label>
-
-                        <textarea
-
-                          value={bugReportData.actual}
-
-                          onChange={(e) => handleBugReportChange('actual', e.target.value)}
-
-                          placeholder={t(language, 'bugReport.actualPlaceholder')}
-
-                          data-testid="bug-actual-input"
-
-                          rows={2}
-
-                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
-
-                        />
-
-                      </div>
-
-
-
-                      {/* Email */}
-
-                      <div>
-
-                        <label className={`block text-sm font-medium ${theme.text} mb-1`}>
-
-                          {t(language, 'bugReport.email')}
-
-                        </label>
-
-                        <input
-
-                          type="email"
-
-                          value={bugReportData.email}
-
-                          onChange={(e) => handleBugReportChange('email', e.target.value)}
-
-                          placeholder={t(language, 'bugReport.emailPlaceholder')}
-
-                          data-testid="bug-email-input"
-
-                          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
-
-                        />
-
-                        {bugReportErrors.email && (
-
-                          <p className="text-red-500 text-sm mt-1" data-testid="bug-email-error">{bugReportErrors.email}</p>
-
-                        )}
-
-                      </div>
-
-
-
-                      {/* Screenshot Button */}
-
-                      <div>
-
-                        <button
-
-                          onClick={handleCaptureScreenshot}
-
-                          data-testid="bug-screenshot-button"
-
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg ${theme.buttonSecondary}`}
-
-                        >
-
-                          <Camera className="w-4 h-4" />
-
-                          {t(language, 'bugReport.screenshot')}
-
-                        </button>
-
-                      </div>
-
-
-
-                      {/* System Info */}
-
-                      <div className={`p-3 rounded-lg ${theme.cardHover}`} data-testid="bug-system-info">
-
-                        <p className={`text-sm font-medium ${theme.text} mb-1`}>{t(language, 'bugReport.systemInfo')}</p>
-
-                        <p className={`text-xs ${theme.textMuted}`}>Version: {appVersion || '1.3.0'}</p>
-
-                        <p className={`text-xs ${theme.textMuted}`}>Platform: {navigator.platform}</p>
-
-                        <p className={`text-xs ${theme.textMuted}`}>Language: {language.toUpperCase()}</p>
-
-                      </div>
-
-                    </div>
-
-
-
-                    {/* Form Actions */}
-
-                    <div className="px-6 pb-6 flex gap-3">
-
-                      <button
-
-                        onClick={handleCancelBugReport}
-
-                        data-testid="bug-cancel-button"
-
-                        disabled={isSubmittingBug}
-
-                        className={`flex-1 py-3 rounded-lg font-semibold ${theme.buttonSecondary}`}
-
-                      >
-
-                        {t(language, 'bugReport.cancel')}
-
-                      </button>
-
-                      <button
-
-                        onClick={handleSubmitBugReport}
-
-                        data-testid="bug-submit-button"
-
-                        disabled={isSubmittingBug}
-
-                        className={`flex-1 py-3 rounded-lg font-semibold ${theme.buttonSuccess}`}
-
-                      >
-
-                        {isSubmittingBug ? t(language, 'bugReport.submitting') : t(language, 'bugReport.submit')}
-
-                      </button>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              )}
-
-            </div>
-
-
-
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-6`}>{t(language, 'settingsMisc.about')}</h3>
-
-              <div className={`text-sm ${theme.textMuted} space-y-2`}>
-
-                <p><strong>MDES XML Studio</strong></p>
-
-                <p>Version {appVersion || '1.1.0'}</p>
-
-                <p>Generate compliant CRS, FATCA, and CBC XML test files for development and testing.</p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        )}
 
       </main>
 
@@ -11940,7 +10194,7 @@ function App() {
 
                 <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-700'}`}>
 
-                  Use this template to create CSV files for generating CRS 701 (new account) XML reports. 
+                  Use this template to create CSV files for generating CRS 701 (new account) XML reports.
 
                   Each row represents one account holder. You can have multiple accounts per Reporting FI.
 
@@ -11948,7 +10202,7 @@ function App() {
 
               </div>
 
-              
+
 
               <h4 className={`font-medium ${theme.text} mb-2`}>Required Columns</h4>
 
@@ -12116,7 +10370,7 @@ function App() {
 
                 <p className={`text-sm ${darkMode ? 'text-amber-400' : 'text-amber-700'}`}>
 
-                  The <strong>DocRefId</strong> column must contain valid document reference IDs from your original CRS701 file. 
+                  The <strong>DocRefId</strong> column must contain valid document reference IDs from your original CRS701 file.
 
                   These IDs are used to identify which accounts to correct or delete.
 
@@ -12124,7 +10378,7 @@ function App() {
 
               </div>
 
-              
+
 
               <h4 className={`font-medium ${theme.text} mb-2`}>Required Columns</h4>
 
@@ -12178,7 +10432,7 @@ function App() {
 
 "NL2024FI001_ACC001","correct","75000.00","EUR"
 
-"NL2024FI001_ACC002","delete","","" 
+"NL2024FI001_ACC002","delete","",""
 
 "NL2024FI001_ACC003","correct","120000.00","USD"`}</pre>
 
@@ -12263,4 +10517,3 @@ function AppWithProviders() {
 
 
 export default AppWithProviders
-

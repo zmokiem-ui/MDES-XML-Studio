@@ -1,9 +1,10 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell, clipboard } = require('electron');
 
 Menu.setApplicationMenu(null);
 const path = require('path');
 const { spawn, execSync } = require('child_process');
 const fs = require('fs');
+const { version: packageVersion } = require('../package.json');
 
 let mainWindow;
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
@@ -82,11 +83,26 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: true,
+      // Keep automated settings/localStorage isolated from the user's real
+      // profile and from other Electron processes in the same test run.
+      ...(process.env.E2E_TEST ? { partition: 'mdes-e2e-memory' } : {}),
       preload: path.join(__dirname, 'preload.js')
     },
     frame: true,
     backgroundColor: '#f8fafc',
     show: false
+  });
+
+  // Keep the privileged renderer on application content only. External URLs
+  // are opened deliberately from validated main-process handlers instead.
+  mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  mainWindow.webContents.on('will-navigate', (event, targetUrl) => {
+    const currentUrl = mainWindow?.webContents.getURL();
+    if (currentUrl && targetUrl !== currentUrl) event.preventDefault();
+  });
+  mainWindow.webContents.session.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(false);
   });
 
   // Load the app
@@ -120,7 +136,8 @@ function getUpdateSettingsPath() {
 function loadUpdateSettings() {
   try {
     const data = fs.readFileSync(getUpdateSettingsPath(), 'utf8');
-    return JSON.parse(data);
+    const settings = JSON.parse(data);
+    return { autoUpdateEnabled: settings.autoUpdateEnabled !== false };
   } catch {
     return { autoUpdateEnabled: true };
   }
@@ -192,8 +209,9 @@ app.whenReady().then(() => {
       // IPC: get/set update settings
       ipcMain.handle('get-update-settings', () => loadUpdateSettings());
       ipcMain.handle('set-update-settings', (event, settings) => {
-        saveUpdateSettings(settings);
-        return settings;
+        const normalized = { autoUpdateEnabled: settings?.autoUpdateEnabled !== false };
+        saveUpdateSettings(normalized);
+        return normalized;
       });
 
       // IPC: get current app version
@@ -202,7 +220,11 @@ app.whenReady().then(() => {
       // Auto-check on startup if enabled
       const updateSettings = loadUpdateSettings();
       if (updateSettings.autoUpdateEnabled) {
-        setTimeout(() => autoUpdater.checkForUpdates(), 3000);
+        setTimeout(() => {
+          autoUpdater.checkForUpdates().catch(err => {
+            console.error('Startup update check failed:', err);
+          });
+        }, 3000);
       }
     } catch (err) {
       console.log('Auto-updater not available:', err.message);
@@ -212,7 +234,7 @@ app.whenReady().then(() => {
     ipcMain.handle('check-for-updates', () => ({ success: false, error: 'Updates not available in dev mode' }));
     ipcMain.handle('get-update-settings', () => ({ autoUpdateEnabled: true }));
     ipcMain.handle('set-update-settings', (event, settings) => settings);
-    ipcMain.handle('get-app-version', () => '1.0.0-dev');
+    ipcMain.handle('get-app-version', () => packageVersion);
   }
 });
 
@@ -1103,6 +1125,7 @@ ipcMain.handle('corrupt-file', async (event, config) => {
   
   // Generate output filename
   const inputPath = inputFile;
+  assertPathAllowed(inputPath, 'error-injector input file');
   const outputDir = path.dirname(inputPath);
   const inputName = path.basename(inputPath, path.extname(inputPath));
   const outputPath = path.join(outputDir, `${inputName}_CORRUPTED_${preset}${path.extname(inputPath)}`);
@@ -1398,58 +1421,57 @@ ipcMain.handle('format-xml', async (event, content) => {
 
 // ============== Bug Reporting IPC Handlers ==============
 
-// Create GitHub issue
+// Open a pre-filled public GitHub issue. Installed applications must never
+// embed a repository token, so the user reviews and submits in their browser.
 ipcMain.handle('create-github-issue', async (event, issueData) => {
   try {
-    const token = process.env.GH_TOKEN;
-    
-    if (!token) {
-      throw new Error('GitHub token not configured. Please set GH_TOKEN environment variable.');
+    const title = typeof issueData?.title === 'string' ? issueData.title.trim() : '';
+    const body = typeof issueData?.body === 'string' ? issueData.body.trim() : '';
+    if (!title || !body) {
+      throw new Error('Issue title and description are required.');
+    }
+    if (title.length > 256 || body.length > 6000) {
+      throw new Error('Bug report is too long. Shorten the title or description and try again.');
     }
 
-    // Use dynamic import for ES Module
-    const { Octokit } = await import('@octokit/rest');
-    const octokit = new Octokit({ auth: token });
-    
-    const response = await octokit.rest.issues.create({
-      owner: 'zmokiem-ui',
-      repo: 'MDES-XML-Studio',
-      title: issueData.title,
-      body: issueData.body,
-      labels: issueData.labels || ['bug', 'user-reported']
-    });
+    const issueUrl = new URL('https://github.com/zmokiem-ui/MDES-XML-Studio/issues/new');
+    issueUrl.searchParams.set('title', title);
+    issueUrl.searchParams.set('body', body);
+    issueUrl.searchParams.set('labels', (issueData.labels || ['bug', 'user-reported']).join(','));
+
+    // Never open the user's real browser during automated tests.
+    if (!process.env.E2E_TEST) {
+      await shell.openExternal(issueUrl.toString());
+    }
 
     return {
       success: true,
-      html_url: response.data.html_url,
-      number: response.data.number
+      openedInBrowser: true,
+      submitted: false,
+      html_url: issueUrl.toString(),
     };
   } catch (error) {
-    console.error('Failed to create GitHub issue:', error);
-    throw new Error(`Failed to create issue: ${error.message}`);
+    console.error('Failed to open GitHub issue form:', error);
+    throw new Error(`Failed to open issue form: ${error.message}`);
   }
 });
 
-// Capture screenshot
+// Capture only this application window and copy it to the clipboard. The
+// user can paste it into the GitHub issue form opened by the submit action.
 ipcMain.handle('capture-screenshot', async () => {
   try {
-    const { desktopCapturer } = require('electron');
-    
-    const sources = await desktopCapturer.getSources({
-      types: ['window', 'screen'],
-      thumbnailSize: { width: 1920, height: 1080 }
-    });
-
-    if (sources.length === 0) {
-      throw new Error('No screen sources available');
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      throw new Error('Application window is not available');
     }
-
-    // Get the first source (main screen)
-    const screenshot = sources[0].thumbnail.toDataURL();
+    const screenshot = await mainWindow.webContents.capturePage();
+    if (screenshot.isEmpty()) {
+      throw new Error('Captured screenshot was empty');
+    }
+    clipboard.writeImage(screenshot);
     
     return {
       success: true,
-      dataUrl: screenshot,
+      copiedToClipboard: true,
       timestamp: Date.now()
     };
   } catch (error) {

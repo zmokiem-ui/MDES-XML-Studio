@@ -22,6 +22,11 @@ def test_every_registered_schema_compiles(key):
     assert isinstance(schema, etree.XMLSchema)
 
 
+def test_fatca_oecd_defaults_to_mdes_accepted_schema():
+    assert xv.DEFAULT_VERSION["FATCA_OECD"] == "2.0.1"
+    assert ("FATCA_OECD", "2.0.1") in xv.SCHEMA_REGISTRY
+
+
 @pytest.mark.parametrize("namespace,expected", [
     ("urn:oecd:ties:crs:v2", "CRS"),
     ("urn:fatcacrs:ties:v2", "FATCA_CRS"),

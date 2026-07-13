@@ -68,7 +68,7 @@ test.describe('E2E FATCA Variant Toggle', () => {
     );
     const json = JSON.parse(result.stdout);
     expect(json.is_valid).toBe(true);
-    expect(json.message_type).toBe('FATCA_OECD');
+    expect(json.xsd_message_type).toBe('FATCA_OECD');
   });
 
   test('3. default variant (fatca-crs) still produces the FATCA-CRS combined schema', async () => {

@@ -35,7 +35,8 @@ from lxml import etree
 SCHEMA_REGISTRY: dict[tuple[str, str], str] = {
     ("CRS", "2.0"): "CRS/v2.0/CrsXML_v2.0.xsd",
     ("FATCA_CRS", "2.2"): "fatca_crs/v2.2/FatcaCrs_v2.2.xsd",  # NL FC combined
-    ("FATCA_OECD", "2.0"): "FATCA/v2.0/FatcaXML_v2.0.xsd",     # pure IRS FATCA
+    ("FATCA_OECD", "2.0"): "FATCA/v2.0/FatcaXML_v2.0.xsd",
+    ("FATCA_OECD", "2.0.1"): "FATCA/v2.0.1/FatcaXML_v2.0.1.xsd",  # MDES upload version
     ("CBC", "2.0"): "CBC/v2.0/CbcXML_v2.0.xsd",
 }
 
@@ -43,7 +44,7 @@ SCHEMA_REGISTRY: dict[tuple[str, str], str] = {
 DEFAULT_VERSION: dict[str, str] = {
     "CRS": "2.0",
     "FATCA_CRS": "2.2",
-    "FATCA_OECD": "2.0",
+    "FATCA_OECD": "2.0.1",
     "CBC": "2.0",
 }
 

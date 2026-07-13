@@ -196,12 +196,12 @@ test.describe('E2E File Generation & Validation', () => {
     assertXmlContains(xml, 'NL', 'Sending country NL');
     assertXmlContains(xml, 'US', 'Receiving country US');
     assertXmlContains(xml, '2024', 'Tax year 2024');
-    assertXmlContains(xml, 'MessageSpec', 'MessageSpec');
+    assertXmlContains(xml, 'MessageHeader', 'FATCA-CRS MessageHeader');
     assertXmlContains(xml, 'ReportingFI', 'ReportingFI');
     assertXmlContains(xml, 'AccountReport', 'AccountReport');
     assertXmlContains(xml, 'DocRefId', 'DocRefId');
 
-    expect(countOccurrences(xml, '<[a-z]+:AccountReport>')).toBeGreaterThanOrEqual(3);
+    expect(countOccurrences(xml, '<(?:[\\w.-]+:)?AccountReport>')).toBeGreaterThanOrEqual(3);
   });
 
   test('2.2 FATCA - Validate generated file passes FATCA validator', async () => {

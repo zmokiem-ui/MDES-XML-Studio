@@ -6,13 +6,16 @@ const path = require('path');
  * Launch the Electron app in production mode (uses built dist, no DevTools)
  */
 async function launchElectronApp() {
+  const env = {
+    ...process.env,
+    NODE_ENV: 'production',
+    E2E_TEST: 'true'
+  };
+  delete env.ELECTRON_RUN_AS_NODE;
+
   const electronApp = await electron.launch({
     args: [path.join(__dirname, '../electron/main.js')],
-    env: {
-      ...process.env,
-      NODE_ENV: 'production',
-      E2E_TEST: 'true'
-    }
+    env
   });
 
   // In production mode, there's only one window (no DevTools)
@@ -29,6 +32,7 @@ async function launchElectronApp() {
  * Close the Electron app
  */
 async function closeElectronApp(electronApp) {
+  if (!electronApp) return;
   await electronApp.close();
 }
 

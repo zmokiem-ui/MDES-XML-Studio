@@ -1,5 +1,6 @@
 const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
+const { version: appVersion } = require('../package.json');
 
 test.describe('Bug Reporting Feature', () => {
   let electronApp;
@@ -10,7 +11,8 @@ test.describe('Bug Reporting Feature', () => {
       args: [path.join(__dirname, '../electron/main.js')],
       env: {
         ...process.env,
-        NODE_ENV: 'test'
+        NODE_ENV: 'test',
+        E2E_TEST: 'true'
       }
     });
     window = await electronApp.firstWindow();
@@ -151,7 +153,7 @@ test.describe('Bug Reporting Feature', () => {
     // Should contain app version
     const systemInfoText = await systemInfo.textContent();
     expect(systemInfoText).toContain('Version');
-    expect(systemInfoText).toContain('1.1.2');
+    expect(systemInfoText).toContain(appVersion);
   });
 
   test('11.8 Cancel button closes form', async () => {

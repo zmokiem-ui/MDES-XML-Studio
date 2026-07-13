@@ -35,7 +35,7 @@ def parse_comma_list(value: Optional[str], uppercase: bool = False) -> List[str]
     """Parse a comma-separated string into a list of stripped values."""
     if not value:
         return []
-    items = [item.strip() for item in value.split(',')]
+    items = [item.strip() for item in value.split(',') if item.strip()]
     return [item.upper() for item in items] if uppercase else items
 
 
@@ -98,7 +98,7 @@ class CorrectionConfig:
     modify_address: bool
     modify_name: bool
     test_mode: bool
-    output_path: str
+    output_path: Path
     
     @classmethod
     def from_args(cls, args) -> 'CorrectionConfig':
@@ -113,7 +113,7 @@ class CorrectionConfig:
             modify_address=args.modify_address,
             modify_name=args.modify_name,
             test_mode=args.test_mode,
-            output_path=args.output
+            output_path=Path(args.output)
         )
 
 
@@ -209,7 +209,7 @@ def format_correction_result(result) -> Dict[str, Any]:
     if result.success:
         return {
             'success': True,
-            'output_path': result.output_path,
+            'output_path': str(result.output_path),
             'corrections_made': result.corrections_made,
             'deletions_made': result.deletions_made,
             'fi_corrected': result.fi_corrected

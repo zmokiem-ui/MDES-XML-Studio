@@ -12,6 +12,31 @@ from typing import Dict, List, Any
 import json
 
 
+XML_PRESETS = {
+    'crs': {
+        'missing_required', 'invalid_dates', 'wrong_country_codes',
+        'invalid_amounts', 'duplicate_docrefids', 'wrong_message_type',
+        'malformed_xml', 'invalid_tin_format',
+    },
+    'fatca': {
+        'missing_required', 'invalid_giin', 'wrong_filer_category',
+        'invalid_account_types', 'wrong_payment_types', 'us_indicia_errors',
+        'malformed_xml',
+    },
+    'cbc': {
+        'missing_required', 'invalid_revenues', 'wrong_entity_types',
+        'missing_cbc_reports', 'invalid_message_type', 'duplicate_entities',
+        'malformed_xml',
+    },
+}
+
+CSV_PRESETS = {
+    'missing_headers', 'wrong_delimiter', 'missing_columns',
+    'invalid_data_types', 'empty_required_fields', 'duplicate_rows',
+    'invalid_dates', 'special_characters', 'encoding_issues', 'line_breaks',
+}
+
+
 class ErrorInjector:
     """Inject errors into XML/CSV files for testing"""
     
@@ -20,10 +45,29 @@ class ErrorInjector:
         self.file_type = file_type.lower()
         self.corruption_level = corruption_level
         self.corruptions_applied = []
+        self._remove_root_closing_tag = False
         
     def corrupt_file(self, input_path: str, output_path: str, preset: str, options: Dict[str, bool]) -> Dict[str, Any]:
         """Main corruption method"""
         try:
+            self.corruptions_applied = []
+            self._remove_root_closing_tag = False
+
+            if self.module not in XML_PRESETS:
+                raise ValueError(f"Unsupported module: {self.module}")
+            if self.file_type not in {'xml', 'csv'}:
+                raise ValueError(f"Unsupported file type: {self.file_type}")
+            if not 1 <= self.corruption_level <= 5:
+                raise ValueError('Corruption level must be between 1 and 5')
+            if Path(input_path).resolve() == Path(output_path).resolve():
+                raise ValueError('Input and output paths must be different')
+
+            allowed_presets = XML_PRESETS[self.module] if self.file_type == 'xml' else CSV_PRESETS
+            if preset not in allowed_presets:
+                raise ValueError(
+                    f"Unsupported {self.file_type.upper()} preset '{preset}' for {self.module.upper()}"
+                )
+
             if self.file_type == 'xml':
                 return self._corrupt_xml(input_path, output_path, preset, options)
             else:
@@ -79,12 +123,26 @@ class ErrorInjector:
             self._corrupt_cbc_message_type(root, ns, options)
         elif preset == 'duplicate_entities':
             self._duplicate_entities(root, ns, options)
+
+        if not self.corruptions_applied:
+            return {
+                'success': False,
+                'error': f"Preset '{preset}' is not applicable: no matching XML elements were changed",
+                'corruptionsApplied': [],
+            }
         
         # Apply corruption level intensity
         self._apply_corruption_intensity(root, ns)
         
         # Write corrupted XML
         tree.write(output_path, encoding='utf-8', xml_declaration=True)
+
+        if self._remove_root_closing_tag:
+            output = Path(output_path)
+            content = output.read_text(encoding='utf-8')
+            closing_tag_start = content.rfind('</')
+            if closing_tag_start >= 0:
+                output.write_text(content[:closing_tag_start], encoding='utf-8')
         
         return {
             'success': True,
@@ -171,6 +229,13 @@ class ErrorInjector:
                     if random.random() < 0.05 * self.corruption_level:
                         row[i] = row[i] + '\n' + 'UNEXPECTED_LINE_BREAK'
             self.corruptions_applied.append('Added random line breaks')
+
+        if not self.corruptions_applied:
+            return {
+                'success': False,
+                'error': f"Preset '{preset}' is not applicable: no matching CSV values were changed",
+                'corruptionsApplied': [],
+            }
         
         # Write corrupted CSV
         delimiter = ';' if preset == 'wrong_delimiter' else ','
@@ -198,6 +263,11 @@ class ErrorInjector:
         if '}' in tag:
             return tag.split('}', 1)[1]
         return tag
+
+    def _option_enabled(self, options, *keys):
+        """Honor both UI camelCase and XML-name option keys."""
+        configured = [bool(options[key]) for key in keys if key in options]
+        return any(configured) if configured else True
     
     def _find_all_by_local_name(self, root, local_name):
         """Find all elements matching a local name, regardless of namespace"""
@@ -238,8 +308,14 @@ class ErrorInjector:
         date_fields = ['ReportingPeriod', 'BirthDate', 'Timestamp']
         invalid_dates = ['9999-99-99', '2024-13-45', 'INVALID', '00-00-0000', '2024/13/32']
         
+        option_keys = {
+            'ReportingPeriod': ('reportingPeriod', 'reportingperiod'),
+            'BirthDate': ('birthDate', 'birthdate'),
+            'Timestamp': ('timestamp',),
+        }
+
         for field in date_fields:
-            if options.get(field.lower(), True):
+            if self._option_enabled(options, *option_keys[field]):
                 elements = self._find_all_by_local_name(root, field)
                 for elem in elements:
                     if random.random() < 0.5 * self.corruption_level:
@@ -251,8 +327,16 @@ class ErrorInjector:
         country_fields = ['ResCountryCode', 'SendingCountry', 'ReceivingCountry', 'TransmittingCountry', 'CountryCode']
         invalid_codes = ['XX', 'ZZ', '99', 'ABC', 'INVALID', '']
         
+        option_keys = {
+            'ResCountryCode': ('resCountryCode', 'rescountrycode'),
+            'SendingCountry': ('sendingCountry', 'sendingcountry'),
+            'ReceivingCountry': ('receivingCountry', 'receivingcountry'),
+            'TransmittingCountry': ('transmittingCountry', 'transmittingcountry'),
+            'CountryCode': ('countryCode', 'countrycode'),
+        }
+
         for field in country_fields:
-            if options.get(field.lower(), True):
+            if self._option_enabled(options, *option_keys[field]):
                 elements = self._find_all_by_local_name(root, field)
                 for elem in elements:
                     if random.random() < 0.4 * self.corruption_level:
@@ -261,10 +345,15 @@ class ErrorInjector:
     
     def _corrupt_amounts(self, root, ns, options):
         """Corrupt monetary amounts"""
-        amount_fields = ['AccountBalance', 'Payment', 'Amount']
+        amount_fields = ['AccountBalance', 'PaymentAmnt', 'Amount']
+        option_keys = {
+            'AccountBalance': ('accountBalance', 'accountbalance'),
+            'PaymentAmnt': ('payment', 'paymentAmnt', 'paymentamnt'),
+            'Amount': ('amount',),
+        }
         
         for field in amount_fields:
-            if options.get(field.lower(), True):
+            if self._option_enabled(options, *option_keys[field]):
                 elements = self._find_all_by_local_name(root, field)
                 for elem in elements:
                     if random.random() < 0.3 * self.corruption_level:
@@ -309,20 +398,14 @@ class ErrorInjector:
     def _malform_xml(self, root, ns, options):
         """Break XML structure"""
         if options.get('unclosedTags', False):
-            # Add text that looks like unclosed tags
-            elements = list(root.iter())
-            if elements:
-                elem = random.choice(elements)
-                if elem.text:
-                    elem.text = elem.text + '<UnclosedTag>'
-                    self.corruptions_applied.append('Added unclosed tag')
+            self._remove_root_closing_tag = True
+            self.corruptions_applied.append('Removed the root closing tag')
         
         if options.get('invalidChars', True):
-            elements = list(root.iter())
-            for elem in elements[:min(5, len(elements))]:
-                if elem.text and random.random() < 0.3:
-                    elem.text = elem.text + chr(0x00) + chr(0x1F)
-                    self.corruptions_applied.append('Added invalid XML characters')
+            target = next((elem for elem in root.iter() if elem.text), None)
+            if target is not None:
+                target.text = target.text + chr(0x00) + chr(0x1F)
+                self.corruptions_applied.append('Added invalid XML characters')
         
         if options.get('brokenNamespaces', False):
             # Change namespace prefix
@@ -362,8 +445,13 @@ class ErrorInjector:
     
     def _corrupt_account_types(self, root, ns, options):
         """Corrupt FATCA account holder types"""
-        elements = self._find_all_by_local_name(root, 'AcctHolderType') + self._find_all_by_local_name(root, 'AccountHolderType')
-        invalid_codes = ['FATCA999', 'FATCA000', 'INVALID']
+        elements = (
+            self._find_all_by_local_name(root, 'AcctHolderTypeFATCA')
+            + self._find_all_by_local_name(root, 'AcctHolderTypeCRS')
+            + self._find_all_by_local_name(root, 'AcctHolderType')
+            + self._find_all_by_local_name(root, 'AccountHolderType')
+        )
+        invalid_codes = ['FATCA999', 'CRS999', 'INVALID']
         
         for elem in elements:
             elem.text = random.choice(invalid_codes)
@@ -371,7 +459,12 @@ class ErrorInjector:
     
     def _corrupt_payment_types(self, root, ns, options):
         """Corrupt FATCA payment types"""
-        elements = self._find_all_by_local_name(root, 'PaymentType') + self._find_all_by_local_name(root, 'Type')
+        parent_map = self._build_parent_map(root)
+        elements = self._find_all_by_local_name(root, 'PaymentType')
+        elements += [
+            elem for elem in self._find_all_by_local_name(root, 'Type')
+            if self._local_name(parent_map.get(elem).tag) == 'Payment'
+        ]
         invalid_codes = ['FATCA999', 'FATCA500', 'INVALID']
         
         for elem in elements:
@@ -381,24 +474,38 @@ class ErrorInjector:
     def _create_us_indicia_errors(self, root, ns, options):
         """Create US indicia conflicts"""
         parent_map = self._build_parent_map(root)
-        # Remove SubstantialOwner when US person exists
-        if options.get('missingSubstantialOwner', True):
-            substantial_owners = self._find_all_by_local_name(root, 'SubstantialOwner')
-            for owner in substantial_owners[:max(1, len(substantial_owners) // 2)]:
-                parent = parent_map.get(owner)
-                if parent is not None:
-                    try:
-                        parent.remove(owner)
-                        self.corruptions_applied.append('Removed SubstantialOwner')
-                    except:
-                        pass
+        # Be Informed rule 90023: a US-resident AccountHolder must have an
+        # AcctHolderTypeFATCA. Remove it to create a real business-rule error.
+        if self._option_enabled(options, 'missingAcctHolderType', 'missingSubstantialOwner'):
+            for holder in self._find_all_by_local_name(root, 'AccountHolder'):
+                has_us_residence = any(
+                    self._local_name(elem.tag) == 'ResCountryCode' and elem.text == 'US'
+                    for elem in holder.iter()
+                )
+                if not has_us_residence:
+                    continue
+                for child in list(holder):
+                    if self._local_name(child.tag) == 'AcctHolderTypeFATCA':
+                        holder.remove(child)
+                        self.corruptions_applied.append(
+                            'Removed AcctHolderTypeFATCA from a US-resident account holder (rule 90023)'
+                        )
     
     def _corrupt_revenues(self, root, ns, options):
         """Corrupt CBC revenue amounts"""
-        revenue_fields = ['Revenues', 'ProfitLoss', 'TaxPaid', 'TaxAccrued', 'Capital', 'Earnings', 'NbEmployees']
+        revenue_fields = ['Revenues', 'ProfitOrLoss', 'TaxPaid', 'TaxAccrued', 'Capital', 'Earnings', 'NbEmployees']
+        option_keys = {
+            'Revenues': ('revenues',),
+            'ProfitOrLoss': ('profitLoss', 'profitOrLoss'),
+            'TaxPaid': ('taxPaid', 'taxpaid'),
+            'TaxAccrued': ('taxAccrued', 'taxaccrued'),
+            'Capital': ('capital',),
+            'Earnings': ('earnings',),
+            'NbEmployees': ('nbEmployees', 'nbemployees'),
+        }
         
         for field in revenue_fields:
-            if options.get(field.lower(), True):
+            if self._option_enabled(options, *option_keys[field]):
                 elements = self._find_all_by_local_name(root, field)
                 for elem in elements:
                     if random.random() < 0.4:
@@ -445,7 +552,9 @@ class ErrorInjector:
     
     def _duplicate_entities(self, root, ns, options):
         """Duplicate entity names in CBC"""
-        entities = self._find_all_by_local_name(root, 'ConstituentEntity')
+        entities = self._find_all_by_local_name(root, 'ConstEntity')
+        if not entities:
+            entities = self._find_all_by_local_name(root, 'ConstituentEntity')
         if len(entities) > 1:
             names_in_first = [e for e in entities[0].iter() if self._local_name(e.tag) == 'Name']
             first_name = names_in_first[0] if names_in_first else None

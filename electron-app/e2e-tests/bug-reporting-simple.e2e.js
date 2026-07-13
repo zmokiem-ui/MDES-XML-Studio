@@ -10,7 +10,8 @@ test.describe('Bug Reporting - Simple Verification', () => {
       args: [path.join(__dirname, '../electron/main.js')],
       env: {
         ...process.env,
-        NODE_ENV: 'test'
+        NODE_ENV: 'test',
+        E2E_TEST: 'true'
       }
     });
     window = await electronApp.firstWindow();

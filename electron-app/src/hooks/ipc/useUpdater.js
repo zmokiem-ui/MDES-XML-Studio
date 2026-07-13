@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 // The single choke point for update status/progress/errors and the
 // check-for-updates / auto-update-toggle actions.
 export function useUpdater() {
-  const [updateStatus, setUpdateStatus] = useState('idle') // idle, checking, available, downloading, ready, error
+  const [updateStatus, setUpdateStatus] = useState('idle') // idle, checking, current, downloading, ready, error
   const [updateInfo, setUpdateInfo] = useState(null)
   const [updateProgress, setUpdateProgress] = useState(0)
   const [updateError, setUpdateError] = useState(null)
@@ -16,14 +16,19 @@ export function useUpdater() {
     if (!window.electronAPI) return
 
     // Load version and update settings
-    window.electronAPI.getAppVersion().then(v => setAppVersion(v))
-    window.electronAPI.getUpdateSettings().then(s => setAutoUpdateEnabled(s.autoUpdateEnabled))
+    window.electronAPI.getAppVersion()
+      .then(v => setAppVersion(v))
+      .catch(error => setUpdateError(error.message))
+    window.electronAPI.getUpdateSettings()
+      .then(s => setAutoUpdateEnabled(s.autoUpdateEnabled))
+      .catch(error => setUpdateError(error.message))
 
     // Listen for update events
     const unsubscribeUpdateEvents = [
       window.electronAPI.onUpdateChecking(() => {
         setUpdateStatus('checking')
         setUpdateError(null)
+        setUpdateProgress(0)
       }),
       window.electronAPI.onUpdateAvailable((info) => {
         setUpdateStatus('downloading')
@@ -31,7 +36,8 @@ export function useUpdater() {
         setUpdateBannerDismissed(false)
       }),
       window.electronAPI.onUpdateNotAvailable(() => {
-        setUpdateStatus('idle')
+        setUpdateStatus('current')
+        setUpdateInfo(null)
       }),
       window.electronAPI.onDownloadProgress((progress) => {
         setUpdateProgress(Math.round(progress.percent || 0))
@@ -55,16 +61,33 @@ export function useUpdater() {
   const handleCheckForUpdates = async () => {
     setUpdateStatus('checking')
     setUpdateError(null)
-    const result = await window.electronAPI?.checkForUpdates()
-    if (result && !result.success) {
+    setUpdateProgress(0)
+    try {
+      if (!window.electronAPI?.checkForUpdates) {
+        throw new Error('Update service is unavailable')
+      }
+      const result = await window.electronAPI.checkForUpdates()
+      if (result && !result.success) {
+        throw new Error(result.error || 'Update check failed')
+      }
+    } catch (error) {
       setUpdateStatus('error')
-      setUpdateError(result.error)
+      setUpdateError(error.message)
     }
   }
 
   const handleToggleAutoUpdate = async (enabled) => {
+    const previous = autoUpdateEnabled
     setAutoUpdateEnabled(enabled)
-    await window.electronAPI?.setUpdateSettings({ autoUpdateEnabled: enabled })
+    try {
+      if (!window.electronAPI?.setUpdateSettings) {
+        throw new Error('Update settings are unavailable')
+      }
+      await window.electronAPI.setUpdateSettings({ autoUpdateEnabled: enabled })
+    } catch (error) {
+      setAutoUpdateEnabled(previous)
+      setUpdateError(error.message)
+    }
   }
 
   return {

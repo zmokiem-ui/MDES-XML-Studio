@@ -138,7 +138,7 @@ test.describe('E2E Regression Test - Full Application', () => {
     await navigateToModule(window, 'FATCA');
     await expect(window.locator('text=Sending Company GIIN').first()).toBeVisible();
     await expect(window.locator('text=Filer Category').first()).toBeVisible();
-    await expect(window.locator('text=Substantial Owners').first()).toBeVisible();
+    await expect(window.locator('text=Controlling Persons per Org').first()).toBeVisible();
     await expect(window.locator('button:has-text("Generate FATCA")')).toBeVisible();
   });
 

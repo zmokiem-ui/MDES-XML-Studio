@@ -25,6 +25,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'missing_required',
         name: 'Missing Required Fields',
         description: 'Remove mandatory fields like DocRefId, MessageRefId, TIN',
+        detection: 'XSD validation',
         severity: 2,
         options: ['docRefId', 'messageRefId', 'tin', 'name', 'address']
       },
@@ -32,6 +33,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'invalid_dates',
         name: 'Invalid Date Formats',
         description: 'Corrupt date fields with invalid formats',
+        detection: 'XSD validation',
         severity: 1,
         options: ['reportingPeriod', 'birthDate', 'timestamp']
       },
@@ -39,6 +41,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'wrong_country_codes',
         name: 'Invalid Country Codes',
         description: 'Use non-existent or wrong format country codes',
+        detection: 'XSD validation',
         severity: 2,
         options: ['resCountryCode', 'sendingCountry', 'receivingCountry']
       },
@@ -46,6 +49,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'invalid_amounts',
         name: 'Invalid Account Balances',
         description: 'Corrupt currency amounts with invalid formats',
+        detection: 'XSD validation',
         severity: 1,
         options: ['accountBalance', 'payment', 'negativeAmounts']
       },
@@ -53,6 +57,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'duplicate_docrefids',
         name: 'Duplicate DocRefIds',
         description: 'Create duplicate document reference IDs',
+        detection: 'business-rule validation',
         severity: 3,
         options: ['duplicateAll', 'duplicateRandom']
       },
@@ -60,6 +65,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'wrong_message_type',
         name: 'Wrong Message Type Indicators',
         description: 'Use incorrect CRS701/702/703 indicators',
+        detection: 'XSD validation',
         severity: 2,
         options: ['messageTypeIndic', 'docTypeIndic']
       },
@@ -67,6 +73,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'malformed_xml',
         name: 'Malformed XML Structure',
         description: 'Break XML syntax (unclosed tags, invalid characters)',
+        detection: 'XML parsing',
         severity: 5,
         options: ['unclosedTags', 'invalidChars', 'brokenNamespaces']
       },
@@ -74,6 +81,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'invalid_tin_format',
         name: 'Invalid TIN Formats',
         description: 'Corrupt TIN/GIIN formats',
+        detection: 'business-rule validation',
         severity: 2,
         options: ['tin', 'giin', 'invalidLength']
       }
@@ -83,6 +91,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'missing_required',
         name: 'Missing Required Fields',
         description: 'Remove mandatory FATCA fields',
+        detection: 'XSD validation',
         severity: 2,
         options: ['docRefId', 'giin', 'filerCategory', 'accountNumber']
       },
@@ -90,6 +99,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'invalid_giin',
         name: 'Invalid GIIN Format',
         description: 'Corrupt GIIN format (should be XXXXXX.XXXXX.XX.XXX)',
+        detection: 'business-rule validation',
         severity: 2,
         options: ['wrongFormat', 'invalidLength', 'missingDots']
       },
@@ -97,13 +107,15 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'wrong_filer_category',
         name: 'Invalid Filer Category',
         description: 'Use non-existent FATCA601-611 codes',
+        detection: 'XSD validation',
         severity: 2,
         options: ['invalidCode', 'wrongRange']
       },
       {
         id: 'invalid_account_types',
         name: 'Invalid Account Holder Types',
-        description: 'Use wrong FATCA101-106 codes',
+        description: 'Replace AcctHolderTypeFATCA/CRS with invalid enum values',
+        detection: 'XSD validation',
         severity: 2,
         options: ['accountHolderType', 'poolReportType']
       },
@@ -111,20 +123,23 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'wrong_payment_types',
         name: 'Invalid Payment Types',
         description: 'Corrupt FATCA501-504 payment codes',
+        detection: 'XSD validation',
         severity: 1,
         options: ['paymentType', 'invalidCode']
       },
       {
         id: 'us_indicia_errors',
         name: 'US Indicia Conflicts',
-        description: 'Create conflicts with US person indicators',
+        description: 'Remove AcctHolderTypeFATCA from a US-resident account holder (Be Informed rule 90023)',
+        detection: 'business-rule validation',
         severity: 3,
-        options: ['missingSubstantialOwner', 'wrongCountryCode']
+        options: ['missingAcctHolderType']
       },
       {
         id: 'malformed_xml',
         name: 'Malformed XML Structure',
         description: 'Break FATCA XML syntax',
+        detection: 'XML parsing',
         severity: 5,
         options: ['unclosedTags', 'invalidChars', 'brokenNamespaces']
       }
@@ -134,6 +149,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'missing_required',
         name: 'Missing Required Fields',
         description: 'Remove mandatory CBC fields',
+        detection: 'XSD validation',
         severity: 2,
         options: ['docRefId', 'reportingEntity', 'revenues', 'constituentEntity']
       },
@@ -141,6 +157,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'invalid_revenues',
         name: 'Invalid Revenue Amounts',
         description: 'Corrupt financial data (revenues, profits, taxes)',
+        detection: 'XSD validation',
         severity: 2,
         options: ['revenues', 'profitLoss', 'taxPaid', 'negativeValues']
       },
@@ -148,6 +165,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'wrong_entity_types',
         name: 'Invalid Entity Types',
         description: 'Use incorrect CBC entity type codes',
+        detection: 'XSD validation',
         severity: 2,
         options: ['entityType', 'invalidCode']
       },
@@ -155,6 +173,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'missing_cbc_reports',
         name: 'Missing CBC Reports',
         description: 'Remove CbcReports or ConstituentEntity sections',
+        detection: 'business-rule validation',
         severity: 3,
         options: ['cbcReports', 'constituentEntity', 'summary']
       },
@@ -162,13 +181,15 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'invalid_message_type',
         name: 'Wrong CBC Message Type',
         description: 'Use incorrect CBC401/402/403 indicators',
+        detection: 'XSD validation',
         severity: 2,
         options: ['messageTypeIndic', 'docTypeIndic']
       },
       {
         id: 'duplicate_entities',
         name: 'Duplicate Entity Names',
-        description: 'Create duplicate constituent entities',
+        description: 'Create duplicate ConstEntity names',
+        detection: 'business-rule validation',
         severity: 2,
         options: ['duplicateNames', 'duplicateDocRefIds']
       },
@@ -176,6 +197,7 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
         id: 'malformed_xml',
         name: 'Malformed XML Structure',
         description: 'Break CBC XML syntax',
+        detection: 'XML parsing',
         severity: 5,
         options: ['unclosedTags', 'invalidChars', 'brokenNamespaces']
       }
@@ -421,6 +443,11 @@ export function ErrorInjector({ theme, language, module = 'crs' }) {
                       {getSeverityBadge(preset.severity)}
                     </div>
                     <p className={`text-sm ${theme.textMuted}`}>{preset.description}</p>
+                    {preset.detection && (
+                      <p className={`text-xs ${theme.textMuted} mt-2`}>
+                        Expected detection: <span className="font-medium">{preset.detection}</span>
+                      </p>
+                    )}
                     
                     {/* Show options if selected */}
                     {selectedPreset?.id === preset.id && preset.options && (

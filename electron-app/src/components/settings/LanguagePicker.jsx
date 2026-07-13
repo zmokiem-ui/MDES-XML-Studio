@@ -8,6 +8,9 @@ export function LanguagePicker({ theme, language, onSelect }) {
         <button
           key={code}
           onClick={() => onSelect(code)}
+          type="button"
+          data-testid={`language-${code}`}
+          aria-pressed={language === code}
           className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 ${
             language === code
               ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/30'

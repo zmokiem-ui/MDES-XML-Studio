@@ -147,7 +147,10 @@ export const translations = {
       partnerJurisdictions: 'Partner Jurisdictions',
       keyboardShortcuts: 'Keyboard Shortcuts',
       appearance: 'Appearance',
-      general: 'General'
+      darkMode: 'Dark Mode',
+      lightMode: 'Light Mode',
+      general: 'General',
+      advanced: 'Advanced'
     },
     
     // History
@@ -294,7 +297,8 @@ export const translations = {
       selectOutputLocation: 'Select output file location...',
       selectFolder: 'Select Folder',
       generating: 'Generating',
-      testMode: 'Test Mode'
+      testMode: 'Test Mode',
+      remove: 'Remove'
     },
 
     // Corrections
@@ -505,6 +509,7 @@ export const translations = {
     bugReport: {
       title: 'Report a Bug',
       button: 'Report a Bug',
+      description: 'Help us improve by reporting bugs or issues you encounter.',
       formTitle: 'Bug Report',
       issueTitle: 'Issue Title',
       issueTitlePlaceholder: 'Brief description of the issue',
@@ -518,13 +523,21 @@ export const translations = {
       actualPlaceholder: 'What actually happened?',
       email: 'Email (optional)',
       emailPlaceholder: 'your.email@example.com',
-      screenshot: 'Add Screenshot',
+      screenshot: 'Copy Screenshot',
+      screenshotCopied: 'Screenshot copied. Paste it into the GitHub issue after it opens.',
+      screenshotError: 'Could not capture the application window.',
       systemInfo: 'System Information',
-      submit: 'Submit Bug Report',
+      publicWarning: 'This opens a public GitHub issue. Do not include passwords, tax data, personal data, or other confidential information. Optional email will also be public.',
+      emailPublicHint: 'Only add an email address if you agree to publish it in the issue.',
+      versionLabel: 'Version',
+      platformLabel: 'Platform',
+      languageLabel: 'Language',
+      submit: 'Open GitHub Issue',
       cancel: 'Cancel',
-      submitting: 'Submitting...',
+      submitting: 'Opening...',
       success: 'Bug report submitted successfully!',
       successMessage: 'Thank you for your report. View issue: {url}',
+      openedMessage: 'A pre-filled public GitHub issue opened in your browser. Review it, paste any copied screenshot, and submit it there.',
       error: 'Failed to submit bug report',
       errorMessage: 'Please try again later or contact support.',
       titleRequired: 'Title is required',
@@ -549,18 +562,18 @@ export const translations = {
       readyToInstall: 'Update ready to install',
       installAndRestart: 'Install & Restart',
       upToDate: 'Up to date',
+      currentVersion: 'Current version: v{version}',
       version: 'Version',
       updateAvailable: 'Update available: v{version}',
       downloadProgress: 'Download progress: {percent}%',
-      whatsNew: "What's New in v1.3.0",
+      whatsNew: 'Recent Improvements',
       changelog: [
-        'NEW: FATCA-CRS Combined format (v2.2) — full rewrite of FATCA generator for FC upload',
-        'NEW: Correct namespaces, MessageHeader, MessageTypeIndic (CRS701/CRS702)',
-        'NEW: OECD DocTypeIndic codes, CRS payment types, ControllingPerson support',
-        'NEW: AcctHolderTypeCRS + AcctHolderTypeFATCA for organisation accounts',
-        'Updated FATCA correction generator for FATCA-CRS combined format',
-        'Updated FATCA validator for FATCA-CRS combined format',
-        'Fixed FATCA XML structure to conform to FatcaCrs_v2.2 schema'
+        'Improved CRS, FATCA, and CBC XML generation and validation coverage',
+        'Expanded corrupt-file presets for parser, schema, and business-rule testing',
+        'Improved CRS correction handling and multi-controlling-person output',
+        'Added safer public GitHub bug reporting with screenshot support',
+        'Hardened auto-update checks, release metadata, and packaged-app smoke tests',
+        'Cleaned up the app shell, settings code, and release validation pipeline'
       ]
     }
   },
@@ -706,7 +719,10 @@ export const translations = {
       partnerJurisdictions: 'Partner Jurisdicties',
       keyboardShortcuts: 'Sneltoetsen',
       appearance: 'Uiterlijk',
-      general: 'Algemeen'
+      darkMode: 'Donkere Modus',
+      lightMode: 'Lichte Modus',
+      general: 'Algemeen',
+      advanced: 'Geavanceerd'
     },
     
     // History
@@ -853,7 +869,8 @@ export const translations = {
       selectOutputLocation: 'Selecteer uitvoerbestandslocatie...',
       selectFolder: 'Selecteer Map',
       generating: 'Genereren',
-      testMode: 'Testmodus'
+      testMode: 'Testmodus',
+      remove: 'Verwijderen'
     },
 
     // Corrections
@@ -1064,6 +1081,7 @@ export const translations = {
     bugReport: {
       title: 'Rapporteer een Bug',
       button: 'Rapporteer een Bug',
+      description: 'Help ons verbeteren door fouten of problemen te melden.',
       formTitle: 'Bugrapport',
       issueTitle: 'Probleem Titel',
       issueTitlePlaceholder: 'Korte beschrijving van het probleem',
@@ -1077,13 +1095,21 @@ export const translations = {
       actualPlaceholder: 'Wat gebeurde er eigenlijk?',
       email: 'E-mail (optioneel)',
       emailPlaceholder: 'jouw.email@voorbeeld.nl',
-      screenshot: 'Screenshot Toevoegen',
+      screenshot: 'Screenshot Kopiëren',
+      screenshotCopied: 'Screenshot gekopieerd. Plak deze in het GitHub-issue nadat dit is geopend.',
+      screenshotError: 'Het applicatievenster kon niet worden vastgelegd.',
       systemInfo: 'Systeeminformatie',
-      submit: 'Bugrapport Verzenden',
+      publicWarning: 'Dit opent een openbaar GitHub-issue. Voeg geen wachtwoorden, belastinggegevens, persoonsgegevens of andere vertrouwelijke informatie toe. Een optioneel e-mailadres wordt ook openbaar.',
+      emailPublicHint: 'Voeg alleen een e-mailadres toe als je akkoord gaat met openbare publicatie in het issue.',
+      versionLabel: 'Versie',
+      platformLabel: 'Platform',
+      languageLabel: 'Taal',
+      submit: 'GitHub-issue Openen',
       cancel: 'Annuleren',
-      submitting: 'Verzenden...',
+      submitting: 'Openen...',
       success: 'Bugrapport succesvol verzonden!',
       successMessage: 'Bedankt voor je rapport. Bekijk issue: {url}',
+      openedMessage: 'Een vooraf ingevuld openbaar GitHub-issue is in je browser geopend. Controleer het, plak een gekopieerde screenshot en dien het daar in.',
       error: 'Verzenden bugrapport mislukt',
       errorMessage: 'Probeer het later opnieuw of neem contact op met support.',
       titleRequired: 'Titel is verplicht',
@@ -1108,18 +1134,18 @@ export const translations = {
       readyToInstall: 'Update klaar om te installeren',
       installAndRestart: 'Installeren & Herstarten',
       upToDate: 'Up-to-date',
+      currentVersion: 'Huidige versie: v{version}',
       version: 'Versie',
       updateAvailable: 'Update beschikbaar: v{version}',
       downloadProgress: 'Downloadvoortgang: {percent}%',
-      whatsNew: 'Wat is nieuw in v1.3.0',
+      whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'NIEUW: FATCA-CRS Gecombineerd formaat (v2.2) — volledige herschrijving FATCA generator voor FC upload',
-        'NIEUW: Correcte namespaces, MessageHeader, MessageTypeIndic (CRS701/CRS702)',
-        'NIEUW: OECD DocTypeIndic codes, CRS betalingstypes, ControllingPerson ondersteuning',
-        'NIEUW: AcctHolderTypeCRS + AcctHolderTypeFATCA voor organisatie rekeningen',
-        'Bijgewerkt: FATCA correctie generator voor FATCA-CRS gecombineerd formaat',
-        'Bijgewerkt: FATCA validator voor FATCA-CRS gecombineerd formaat',
-        'Opgelost: FATCA XML structuur conform FatcaCrs_v2.2 schema'
+        'Verbeterde CRS-, FATCA- en CBC-XML generatie en validatie',
+        'Meer corrupte-bestand presets voor parser-, schema- en business-rule tests',
+        'Verbeterde CRS-correcties en output met meerdere controlling persons',
+        'Veiligere publieke GitHub bugrapportage met screenshot-ondersteuning',
+        'Sterkere auto-update checks, release metadata en packaged-app smoke tests',
+        'Opgeschoonde app shell, instellingen-code en release validatiepipeline'
       ]
     }
   },
@@ -1182,7 +1208,8 @@ export const translations = {
       generatingFATCA: 'Generando XML FATCA...',
       generatingCBC: 'Generando XML CBC...',
       processing: 'Procesando...',
-      open: 'Abrir'
+      open: 'Abrir',
+      downloadCSV: 'Descargar CSV'
     },
     
     // Form labels
@@ -1412,7 +1439,8 @@ export const translations = {
       selectOutputLocation: 'Seleccionar ubicación del archivo de salida...',
       selectFolder: 'Seleccionar Carpeta',
       generating: 'Generando',
-      testMode: 'Modo de Prueba'
+      testMode: 'Modo de Prueba',
+      remove: 'Eliminar'
     },
 
     // Corrections
@@ -1623,6 +1651,7 @@ export const translations = {
     bugReport: {
       title: 'Reportar un Error',
       button: 'Reportar un Error',
+      description: 'Ayúdanos a mejorar informando de errores o problemas.',
       formTitle: 'Reporte de Error',
       issueTitle: 'Título del Problema',
       issueTitlePlaceholder: 'Breve descripción del problema',
@@ -1636,13 +1665,21 @@ export const translations = {
       actualPlaceholder: '¿Qué sucedió realmente?',
       email: 'Correo electrónico (opcional)',
       emailPlaceholder: 'tu.correo@ejemplo.com',
-      screenshot: 'Agregar Captura de Pantalla',
+      screenshot: 'Copiar Captura de Pantalla',
+      screenshotCopied: 'Captura copiada. Pégala en el issue de GitHub después de abrirlo.',
+      screenshotError: 'No se pudo capturar la ventana de la aplicación.',
       systemInfo: 'Información del Sistema',
-      submit: 'Enviar Reporte de Error',
+      publicWarning: 'Esto abre un issue público de GitHub. No incluyas contraseñas, datos fiscales, datos personales ni otra información confidencial. El correo opcional también será público.',
+      emailPublicHint: 'Añade un correo solo si aceptas publicarlo en el issue.',
+      versionLabel: 'Versión',
+      platformLabel: 'Plataforma',
+      languageLabel: 'Idioma',
+      submit: 'Abrir Issue de GitHub',
       cancel: 'Cancelar',
-      submitting: 'Enviando...',
+      submitting: 'Abriendo...',
       success: '¡Reporte de error enviado exitosamente!',
       successMessage: 'Gracias por tu reporte. Ver issue: {url}',
+      openedMessage: 'Se abrió en tu navegador un issue público de GitHub ya rellenado. Revísalo, pega cualquier captura copiada y envíalo allí.',
       error: 'Error al enviar el reporte',
       errorMessage: 'Por favor intenta de nuevo más tarde o contacta soporte.',
       titleRequired: 'El título es obligatorio',
@@ -1667,18 +1704,18 @@ export const translations = {
       readyToInstall: 'Actualización lista para instalar',
       installAndRestart: 'Instalar y Reiniciar',
       upToDate: 'Actualizado',
+      currentVersion: 'Versión actual: v{version}',
       version: 'Versión',
       updateAvailable: 'Actualización disponible: v{version}',
       downloadProgress: 'Progreso de descarga: {percent}%',
-      whatsNew: 'Novedades en v1.3.0',
+      whatsNew: 'Mejoras Recientes',
       changelog: [
-        'NUEVO: Formato combinado FATCA-CRS (v2.2) — reescritura completa del generador FATCA para carga FC',
-        'NUEVO: Namespaces correctos, MessageHeader, MessageTypeIndic (CRS701/CRS702)',
-        'NUEVO: Códigos OECD DocTypeIndic, tipos de pago CRS, soporte ControllingPerson',
-        'NUEVO: AcctHolderTypeCRS + AcctHolderTypeFATCA para cuentas de organización',
-        'Actualizado: Generador de corrección FATCA para formato combinado FATCA-CRS',
-        'Actualizado: Validador FATCA para formato combinado FATCA-CRS',
-        'Corregido: Estructura XML FATCA conforme al esquema FatcaCrs_v2.2'
+        'Generacion y validacion XML mejoradas para CRS, FATCA y CBC',
+        'Mas presets de archivos corruptos para pruebas de parser, esquema y reglas',
+        'Mejor manejo de correcciones CRS y multiples controlling persons',
+        'Reporte publico de bugs en GitHub mas seguro con soporte de capturas',
+        'Auto-update, metadata de release y smoke tests de app empaquetada reforzados',
+        'Limpieza del shell de la app, ajustes y pipeline de validacion de release'
       ]
     }
   }

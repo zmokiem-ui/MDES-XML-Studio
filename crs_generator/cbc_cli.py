@@ -6,10 +6,13 @@ similar to the CRS and FATCA CLIs.
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
-from .cbc_generator import generate_cbc_xml, CBCGeneratorConfig, CBCGenerator
+from lxml import etree
+
+from .cbc_generator import generate_cbc_xml
 from .cbc_correction_generator import generate_cbc_correction, load_doc_ref_ids_from_csv
 
 
@@ -31,6 +34,10 @@ Examples:
   
   # Use CSV for selecting records
   python -m crs_generator.cbc_cli correct --source cbc_output.xml --csv records.csv
+
+  # Validate CSV or XML
+  python -m crs_generator.cbc_cli validate-csv --csv-input cbc_data.csv
+  python -m crs_generator.cbc_cli validate-xml --xml-input cbc_output.xml
         """
     )
     
@@ -81,6 +88,16 @@ Examples:
                             help='Also modify entity names in corrections')
     corr_parser.add_argument('--change-percent', type=float, default=0.1,
                             help='Percentage change for financial values (default: 0.1)')
+
+    # CSV validation command
+    validate_csv_parser = subparsers.add_parser('validate-csv', help='Validate CBC CSV input')
+    validate_csv_parser.add_argument('--csv-input', required=True,
+                                    help='Path to CBC CSV file')
+
+    # XML validation command
+    validate_xml_parser = subparsers.add_parser('validate-xml', help='Validate CBC XML input')
+    validate_xml_parser.add_argument('--xml-input', required=True,
+                                    help='Path to CBC XML file')
     
     return parser
 
@@ -161,6 +178,116 @@ def cmd_correct(args) -> int:
         return 1
 
 
+def _local_name(tag) -> str:
+    if not isinstance(tag, str):
+        return ""
+    return tag.rsplit("}", 1)[-1]
+
+
+def _first_text(root: etree._Element, local_name: str) -> str:
+    for element in root.iter():
+        if _local_name(element.tag) == local_name:
+            return (element.text or "").strip()
+    return ""
+
+
+def _all_texts(root: etree._Element, local_name: str) -> list[str]:
+    return [
+        (element.text or "").strip()
+        for element in root.iter()
+        if _local_name(element.tag) == local_name
+    ]
+
+
+def cmd_validate_csv(args) -> int:
+    """Validate CBC CSV input and print a JSON result."""
+    from .cbc_csv_parser import CBCCSVParser
+
+    result = CBCCSVParser(Path(args.csv_input)).validate()
+
+    stats = result.get('statistics')
+    if stats:
+        stats['total_reports'] = stats.get('jurisdictions', 0)
+        stats['total_entities'] = stats.get('entities', 0)
+
+    print(json.dumps(result))
+    return 0 if result.get('valid') else 1
+
+
+def cmd_validate_xml(args) -> int:
+    """Validate CBC XML input with the bundled XSD oracle and print JSON."""
+    from . import mdes_rules
+    from . import xsd_validator as xv
+
+    try:
+        tree = etree.parse(str(args.xml_input))
+        root = tree.getroot()
+        detected_type = xv.detect_message_type(root)
+        if detected_type != "CBC":
+            payload = {
+                'is_valid': False,
+                'valid': False,
+                'can_generate_correction': False,
+                'errors': [f"Not a valid CBC XML file. Detected {detected_type} XML."],
+                'warnings': [],
+                'doc_count': 0,
+            }
+            print(json.dumps(payload))
+            return 1
+
+        xsd_result = xv.validate_tree(tree, "CBC")
+    except Exception as exc:
+        payload = {
+            'is_valid': False,
+            'valid': False,
+            'can_generate_correction': False,
+            'errors': [str(exc)],
+            'warnings': [],
+            'doc_count': 0,
+        }
+        print(json.dumps(payload))
+        return 1
+
+    doc_ref_ids = [ref for ref in _all_texts(root, "DocRefId") if ref]
+    doc_type_indics = set(_all_texts(root, "DocTypeIndic"))
+    warnings = []
+
+    try:
+        findings = mdes_rules.check_file(args.xml_input, "CBC")
+        warnings.extend(finding.as_text() for finding in findings)
+        mdes_findings = [
+            {'code': finding.code, 'severity': finding.severity, 'message': finding.message}
+            for finding in findings
+        ]
+    except Exception as exc:
+        mdes_findings = []
+        warnings.append(f"[MDES] business-rule check skipped: {exc}")
+
+    errors = [
+        f"line {error['line']}: {error['message']}"
+        for error in xsd_result.errors
+    ]
+
+    payload = {
+        'is_valid': xsd_result.valid,
+        'valid': xsd_result.valid,
+        'xsd_valid': xsd_result.valid,
+        'xsd_message_type': xsd_result.message_type,
+        'schema_version': xsd_result.version,
+        'version': xsd_result.version,
+        'message_type': _first_text(root, "MessageTypeIndic") or "Unknown",
+        'can_generate_correction': xsd_result.valid and len(doc_ref_ids) > 0,
+        'has_corrections': bool(doc_type_indics & {"OECD2", "OECD3", "OECD12", "OECD13"}),
+        'doc_count': len(doc_ref_ids),
+        'doc_ref_ids': doc_ref_ids[:10],
+        'errors': errors,
+        'warnings': warnings,
+        'mdes_findings': mdes_findings,
+    }
+    print(json.dumps(payload))
+    return 0 if xsd_result.valid else 1
+
+
 def main():
     """Main entry point for CBC CLI."""
     parser = create_parser()
@@ -174,6 +301,10 @@ def main():
         return cmd_generate(args)
     elif args.command == 'correct':
         return cmd_correct(args)
+    elif args.command == 'validate-csv':
+        return cmd_validate_csv(args)
+    elif args.command == 'validate-xml':
+        return cmd_validate_xml(args)
     else:
         parser.print_help()
         return 1

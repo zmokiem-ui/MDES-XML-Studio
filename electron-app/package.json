@@ -34,7 +34,9 @@
 
     "test:e2e:files": "playwright test file-generation.e2e.js",
 
-    "test:e2e:full": "playwright test full-regression.e2e.js"
+    "test:e2e:full": "playwright test full-regression.e2e.js",
+
+    "test:e2e:packaged": "playwright test packaged-smoke.e2e.js"
 
   },
 
@@ -85,8 +87,6 @@
   "dependencies": {
 
     "@monaco-editor/react": "^4.7.0",
-
-    "@octokit/rest": "^22.0.1",
 
     "electron-updater": "^6.7.3",
 
@@ -180,9 +180,7 @@
 
       ],
 
-      "icon": "build/icon.ico",
-
-      "signAndEditExecutable": false
+      "icon": "build/icon.ico"
 
     },
 
@@ -201,6 +199,12 @@
       "perMachine": false
 
     }
+
+  },
+
+  "overrides": {
+
+    "dompurify": "3.4.12"
 
   }
 

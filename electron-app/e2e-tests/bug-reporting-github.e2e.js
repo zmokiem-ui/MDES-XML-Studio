@@ -24,17 +24,7 @@ test.describe('Bug Reporting - GitHub Integration', () => {
     await electronApp.close();
   });
 
-  test('Full bug report submission to GitHub', async () => {
-    // Check if GH_TOKEN is set
-    const hasToken = !!process.env.GH_TOKEN;
-    if (!hasToken) {
-      console.log('⚠️  GH_TOKEN not set - skipping GitHub submission test');
-      test.skip();
-      return;
-    }
-
-    console.log('✓ GH_TOKEN is set, proceeding with GitHub submission test');
-
+  test('Full bug report opens a pre-filled public GitHub issue', async () => {
     // Navigate to Settings
     await window.click('[data-testid="nav-settings"]', { timeout: 10000 });
     await window.waitForTimeout(1000);
@@ -77,41 +67,20 @@ test.describe('Bug Reporting - GitHub Integration', () => {
     await window.click('[data-testid="bug-submit-button"]');
     console.log('✓ Submit button clicked, waiting for response...');
 
-    // Wait for either success or error modal (increased timeout for API call)
-    await window.waitForTimeout(5000);
+    await window.waitForTimeout(1000);
 
     // Take screenshot after submission
     await window.screenshot({ path: 'test-results/after-submission.png' });
 
-    // Check for success or error modal
+    // E2E_TEST prevents a real browser launch while exercising the complete IPC flow.
     const modalVisible = await window.locator('.fixed.inset-0.bg-black\\/50').isVisible({ timeout: 5000 });
-    
-    if (modalVisible) {
-      const modalText = await window.locator('.fixed.inset-0.bg-black\\/50').textContent();
-      console.log('Modal content:', modalText);
-
-      // Check if it's a success modal
-      if (modalText.includes('Success') || modalText.includes('successfully')) {
-        console.log('✓ Bug report submitted successfully to GitHub!');
-        
-        // Extract issue URL if present
-        if (modalText.includes('http')) {
-          const urlMatch = modalText.match(/https:\/\/github\.com\/[^\s]+/);
-          if (urlMatch) {
-            console.log('✓ GitHub issue created:', urlMatch[0]);
-          }
-        }
-      } else if (modalText.includes('Error') || modalText.includes('Failed')) {
-        console.log('✗ Bug report submission failed:', modalText);
-        throw new Error(`Bug report submission failed: ${modalText}`);
-      }
-    } else {
-      console.log('⚠️  No modal appeared after submission');
-    }
+    expect(modalVisible).toBe(true);
+    const modalText = await window.locator('.fixed.inset-0.bg-black\\/50').textContent();
+    expect(modalText).toContain('pre-filled public GitHub issue');
 
     // Verify form closed or modal is showing
     const formStillVisible = await window.locator('[data-testid="bug-report-form"]').isVisible({ timeout: 2000 }).catch(() => false);
-    console.log(`Form still visible: ${formStillVisible}`);
+    expect(formStillVisible).toBe(false);
   });
 
   test('Screenshot capture functionality', async () => {
@@ -131,6 +100,8 @@ test.describe('Bug Reporting - GitHub Integration', () => {
     // Click screenshot button
     await window.click('[data-testid="bug-screenshot-button"]');
     await window.waitForTimeout(2000);
+
+    await expect(window.locator('[data-testid="bug-screenshot-copied"]')).toBeVisible();
 
     console.log('✓ Screenshot button clicked');
 

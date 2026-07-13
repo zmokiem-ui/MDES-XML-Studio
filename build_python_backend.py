@@ -72,10 +72,10 @@ CLI_MODULES = [
 def create_entry_scripts():
     """Create thin entry-point scripts that PyInstaller can bundle."""
     scripts = {
-        'entry_crs_cli.py': 'from crs_generator.cli import main; main()',
-        'entry_cbc_cli.py': 'from crs_generator.cbc_cli import main; main()',
-        'entry_fatca_cli.py': 'from crs_generator.fatca_cli import main; main()',
-        'entry_error_injector.py': 'from crs_generator.error_injector import main; main()',
+        'entry_crs_cli.py': 'from crs_generator.cli import main; raise SystemExit(main())',
+        'entry_cbc_cli.py': 'from crs_generator.cbc_cli import main; raise SystemExit(main())',
+        'entry_fatca_cli.py': 'from crs_generator.fatca_cli import main; raise SystemExit(main())',
+        'entry_error_injector.py': 'from crs_generator.error_injector import main; raise SystemExit(main())',
     }
     paths = []
     for filename, code in scripts.items():

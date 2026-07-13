@@ -32,6 +32,7 @@ class BaseDataGenerator:
         self.faker = self.fakers[primary_locale]
         
         self.config = config
+        self._account_counter = 0
         
         # Cache common data for performance
         self._cache = {}
@@ -91,12 +92,20 @@ class BaseDataGenerator:
     def tin(self) -> str:
         """Generate a Tax Identification Number."""
         return str(self.rng.randint(100000000, 999999999))
+
+    def generate_tin(self, country_code: str = "") -> str:
+        """Backward-compatible alias for tests and older callers."""
+        return self.tin()
     
     def birth_date(self) -> str:
         """Generate a birth date for an adult (18-80 years old)."""
         days_back = self.rng.randint(18*365, 80*365)
         birth_date = datetime.now() - timedelta(days=days_back)
         return birth_date.strftime("%Y-%m-%d")
+
+    def generate_date(self) -> str:
+        """Backward-compatible alias for date generation."""
+        return self.birth_date()
     
     def balance(self) -> float:
         """Generate realistic account balance using log-normal distribution."""
@@ -104,6 +113,13 @@ class BaseDataGenerator:
         sigma = 2.5
         balance = self.rng.lognormvariate(mean, sigma)
         return round(balance, 2)
+
+    def generate_balance(self, max_value: Optional[float] = None) -> float:
+        """Backward-compatible alias for balance generation."""
+        value = self.balance()
+        if max_value is not None:
+            value = min(value, max_value)
+        return value
     
     def payment_amount(self, balance: float) -> float:
         """Generate a realistic payment amount (usually 1-20% of balance)."""
@@ -111,9 +127,17 @@ class BaseDataGenerator:
     
     def first_name(self) -> str:
         return self.rng.choice(self._cache['first_names'])
+
+    def generate_first_name(self, language: Optional[str] = None) -> str:
+        """Backward-compatible alias for first-name generation."""
+        return self.first_name()
     
     def last_name(self) -> str:
         return self.rng.choice(self._cache['last_names'])
+
+    def generate_last_name(self, language: Optional[str] = None) -> str:
+        """Backward-compatible alias for last-name generation."""
+        return self.last_name()
     
     def city(self) -> str:
         return self.rng.choice(self._cache['cities'])
@@ -126,6 +150,26 @@ class BaseDataGenerator:
     
     def company(self) -> str:
         return self.rng.choice(self._cache['companies'])
+
+    def generate_account_number(self) -> str:
+        """Generate a unique account number for legacy callers."""
+        self._account_counter += 1
+        return f"ACC-{self._account_counter:08d}-{self.rng.randint(1000, 9999)}"
+
+    def generate_address(self, country_code: str = "") -> Dict[str, str]:
+        """Generate a simple structured address for legacy callers."""
+        return {
+            "street": self.street(),
+            "city": self.city(),
+            "postcode": self.postcode(),
+            "country_code": (country_code or self.address_country()).upper(),
+        }
+
+    def set_seed(self, seed: int) -> None:
+        """Reset generator randomness for deterministic legacy tests."""
+        self.rng.seed(seed)
+        Faker.seed(seed)
+        self._account_counter = 0
     
     def company_name(self) -> str:
         """Generate a realistic financial institution name."""

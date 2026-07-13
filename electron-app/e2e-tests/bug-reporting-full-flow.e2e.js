@@ -6,20 +6,12 @@ test.describe('Bug Reporting - Full Flow with Detailed Logging', () => {
   let window;
 
   test.beforeEach(async () => {
-    // Ensure GH_TOKEN is set
-    if (!process.env.GH_TOKEN) {
-      console.log('⚠️  GH_TOKEN not set - test will verify error handling');
-    } else {
-      console.log('✓ GH_TOKEN is set:', process.env.GH_TOKEN.substring(0, 10) + '...');
-    }
-
     electronApp = await electron.launch({
       args: [path.join(__dirname, '../electron/main.js')],
       env: {
         ...process.env,
         NODE_ENV: 'development',
-        E2E_TEST: 'true',
-        GH_TOKEN: process.env.GH_TOKEN
+        E2E_TEST: 'true'
       }
     });
     
@@ -42,7 +34,7 @@ test.describe('Bug Reporting - Full Flow with Detailed Logging', () => {
     await electronApp.close();
   });
 
-  test('Submit bug report and verify GitHub issue creation', async () => {
+  test('Open a pre-filled GitHub issue without a repository token', async () => {
     console.log('\n=== Starting Bug Report Submission Test ===\n');
 
     // Navigate to Settings
@@ -129,31 +121,15 @@ test.describe('Bug Reporting - Full Flow with Detailed Logging', () => {
     const formStillVisible = await window.locator('[data-testid="bug-report-form"]').isVisible({ timeout: 2000 }).catch(() => false);
     console.log(`Form still visible after submission: ${formStillVisible}`);
 
-    // Verify results
-    if (process.env.GH_TOKEN) {
-      if (isSuccess && issueUrl) {
-        console.log('\n✅ SUCCESS: Bug report submitted and GitHub issue created!');
-        console.log('Issue URL:', issueUrl);
-      } else if (modalFound && !isSuccess) {
-        console.log('\n❌ FAILED: Error occurred during submission');
-        throw new Error('Bug report submission failed - error modal shown');
-      } else if (!modalFound && formStillVisible) {
-        console.log('\n⚠️  WARNING: No modal shown, form still visible - submission may have failed silently');
-        // This is the current state - submission completes but no feedback
-      } else {
-        console.log('\n✓ Submission completed (modal behavior needs investigation)');
-      }
-    } else {
-      console.log('\n⚠️  GH_TOKEN not set - skipping GitHub verification');
-      expect(modalFound).toBe(true); // Should show error modal if no token
-    }
+    expect(modalFound).toBe(true);
+    expect(isSuccess).toBe(true);
+    expect(formStillVisible).toBe(false);
 
     console.log('\n=== Test Complete ===\n');
   });
 
-  test('Verify error handling when GitHub token is invalid', async () => {
-    // This test verifies proper error handling
-    console.log('\n=== Testing Error Handling ===\n');
+  test('A second report also returns clear feedback', async () => {
+    console.log('\n=== Testing Repeat Submission Feedback ===\n');
 
     // Navigate to Settings
     await window.click('[data-testid="nav-settings"]', { timeout: 10000 });

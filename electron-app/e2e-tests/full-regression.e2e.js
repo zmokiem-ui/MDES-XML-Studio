@@ -559,7 +559,7 @@ test.describe.serial('FULL E2E REGRESSION', () => {
     assertXml(xml, 'FATCA', 'FATCA namespace');
     assertXml(xml, 'xmlns', 'namespace');
     assertXml(xml, 'NL', 'Transmitting country');
-    assertXml(xml, 'MessageSpec', 'MessageSpec');
+    assertXml(xml, 'MessageHeader', 'MessageHeader');
     assertXml(xml, 'ReportingFI', 'ReportingFI');
     assertXml(xml, 'DocRefId', 'DocRefId');
   });
@@ -1224,7 +1224,7 @@ test.describe.serial('FULL E2E REGRESSION', () => {
   test('20.4 FATCA file has FATCA-specific elements', async () => {
     if (!fs.existsSync(FATCA_OUTPUT)) { test.skip(); return; }
     const xml = readFile(FATCA_OUTPUT);
-    assertXml(xml, 'FATCA_OECD', 'FATCA root element');
+    assertXml(xml, 'FATCA_CRS', 'FATCA-CRS root element');
     assertXml(xml, 'MessageRefId', 'MessageRefId');
     assertXml(xml, 'ReportingPeriod', 'ReportingPeriod');
   });

@@ -762,7 +762,6 @@ class FATCAGenerator:
                 f"{self.config.sending_country}"
                 f"{self.config.tax_year}"
                 f"{self.config.sending_company_in}"
-                f"MessageHeaderMessageRefID"
                 f"{self.data_gen.rng.randint(1, 9999999999):010d}"
             )
         

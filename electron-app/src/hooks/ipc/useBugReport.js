@@ -42,7 +42,7 @@ export function useBugReport({ language, appVersion, onResult }) {
     try {
       // Collect system information
       const systemInfo = {
-        appVersion: appVersion || '1.3.0',
+        appVersion: appVersion || 'unknown',
         platform: navigator.platform,
         userAgent: navigator.userAgent,
         language: language,
@@ -65,7 +65,8 @@ export function useBugReport({ language, appVersion, onResult }) {
 
       const result = await window.electronAPI.createGitHubIssue(issueData)
 
-      onResult('success', t(language, 'bugReport.successMessage', { url: result.html_url }))
+      const resultKey = result.submitted ? 'bugReport.successMessage' : 'bugReport.openedMessage'
+      onResult('success', t(language, resultKey, { url: result.html_url }))
 
       // Reset form
       setBugReportData(EMPTY_REPORT)
@@ -89,9 +90,13 @@ export function useBugReport({ language, appVersion, onResult }) {
   const handleCaptureScreenshot = async () => {
     try {
       const screenshot = await window.electronAPI.captureScreenshot()
+      if (!screenshot?.success || !screenshot?.copiedToClipboard) {
+        throw new Error(t(language, 'bugReport.screenshotError'))
+      }
       setBugReportScreenshots(prev => [...prev, screenshot])
     } catch (error) {
       console.error('Failed to capture screenshot:', error)
+      onResult('error', error.message || t(language, 'bugReport.screenshotError'))
     }
   }
 

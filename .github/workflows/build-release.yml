@@ -29,6 +29,10 @@ jobs:
 
       - name: Run Python unit tests
         run: python -m pytest tests/unit -q
+
+      - name: Run CLI regression matrix
+        shell: pwsh
+        run: tests\regression_test.ps1
       
       - name: Build Python backend
         run: python build_python_backend.py
@@ -43,6 +47,23 @@ jobs:
       - name: Install Node dependencies
         working-directory: electron-app
         run: npm ci
+
+      - name: Audit production dependencies
+        working-directory: electron-app
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Verify tag matches application version
+        shell: pwsh
+        run: |
+          $packageVersion = node -p "require('./electron-app/package.json').version"
+          $pythonVersion = python -c "import crs_generator; print(crs_generator.__version__)"
+          $tagVersion = '${{ github.ref_name }}'.TrimStart('v')
+          if ($packageVersion -ne $tagVersion) {
+            throw "Release tag $tagVersion does not match package version $packageVersion"
+          }
+          if ($pythonVersion -ne $tagVersion) {
+            throw "Release tag $tagVersion does not match Python package version $pythonVersion"
+          }
       
       - name: Build Vite frontend
         working-directory: electron-app
@@ -52,11 +73,21 @@ jobs:
         working-directory: electron-app
         run: npm run test:e2e:smoke
 
+      - name: Playwright full regression
+        working-directory: electron-app
+        run: npm run test:e2e:full
+
       - name: Build Electron installer
         working-directory: electron-app
         run: npx electron-builder --win --x64 --publish never
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Playwright packaged application smoke
+        working-directory: electron-app
+        run: npm run test:e2e:packaged
+        env:
+          PACKAGED_APP_PATH: ${{ github.workspace }}\electron-app\dist-electron\win-unpacked\MDES XML Studio.exe
 
       - name: Upload installer to releases
         uses: softprops/action-gh-release@v2

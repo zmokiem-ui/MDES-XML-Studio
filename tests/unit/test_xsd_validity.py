@@ -88,6 +88,11 @@ def test_fatca_crs_new_is_xsd_valid(tmp_path, ind, org):
             "--output", str(out))
     r = assert_valid(out)
     assert r.message_type == "FATCA_CRS"
+    message_ref = etree.parse(str(out)).xpath(
+        "string(.//*[local-name()='MessageRefId'][1])"
+    )
+    assert message_ref.startswith("NL2024A1B2C3.00000.SP.350")
+    assert "MessageHeaderMessageRefID" not in message_ref
 
 
 def test_fatca_crs_correction_is_xsd_valid(tmp_path):
@@ -113,6 +118,7 @@ def test_fatca_oecd_variant_is_xsd_valid(tmp_path):
             "--individual-accounts", "2", "--organisation-accounts", "1", "--output", str(out))
     r = assert_valid(out)
     assert r.message_type == "FATCA_OECD"
+    assert r.version == "2.0.1"
     assert_mdes_clean(out)
 
 
