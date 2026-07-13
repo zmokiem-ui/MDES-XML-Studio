@@ -30,13 +30,6 @@ jobs:
       - name: Run Python unit tests
         run: python -m pytest tests/unit -q
 
-      - name: Run CLI regression matrix
-        shell: pwsh
-        run: tests\regression_test.ps1
-      
-      - name: Build Python backend
-        run: python build_python_backend.py
-      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -64,6 +57,13 @@ jobs:
           if ($pythonVersion -ne $tagVersion) {
             throw "Release tag $tagVersion does not match Python package version $pythonVersion"
           }
+
+      - name: Run CLI regression matrix
+        shell: pwsh
+        run: tests\regression_test.ps1
+      
+      - name: Build Python backend
+        run: python build_python_backend.py
       
       - name: Build Vite frontend
         working-directory: electron-app
