@@ -18,6 +18,7 @@ import random
 from datetime import datetime, timedelta, timezone
 from faker import Faker
 import logging
+from .identifiers import normalize_identifier, normalize_identifiers
 from .reportable_jurisdictions import get_reportable_jurisdictions, get_all_country_codes
 from .fatca_generator import _sanitize_text_nodes
 
@@ -108,6 +109,13 @@ class FATCAGeneratorConfig:
     test_mode: bool = True
     
     def __post_init__(self):
+        # Trim identifiers before they are concatenated into MessageRefId /
+        # DocRefId — see crs_generator.identifiers.
+        self.sending_company_in = normalize_identifier(self.sending_company_in)
+        self.sending_country = normalize_identifier(self.sending_country)
+        self.receiving_country = normalize_identifier(self.receiving_country)
+        self.reporting_fi_tins = normalize_identifiers(self.reporting_fi_tins)
+
         # Handle output path
         if isinstance(self.output_path, str):
             self.output_path = Path(self.output_path)

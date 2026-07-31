@@ -23,6 +23,7 @@ from faker import Faker
 import logging
 import uuid
 
+from .identifiers import normalize_identifier, normalize_identifiers
 from .reportable_jurisdictions import get_reportable_jurisdictions, get_all_country_codes
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -128,6 +129,14 @@ class CBCGeneratorConfig:
     seed: int = 42
 
     def __post_init__(self):
+        # Trim identifiers before they are concatenated into MessageRefId /
+        # DocRefId — see crs_generator.identifiers.
+        self.sending_entity_in = normalize_identifier(self.sending_entity_in)
+        self.transmitting_country = normalize_identifier(self.transmitting_country)
+        self.receiving_country = normalize_identifier(self.receiving_country)
+        self.reporting_entity_tin = normalize_identifier(self.reporting_entity_tin)
+        self.jurisdiction_countries = normalize_identifiers(self.jurisdiction_countries)
+
         if not self.jurisdiction_countries:
             # Default to some major jurisdictions
             self.jurisdiction_countries = ['NL', 'US', 'GB', 'DE', 'FR', 'JP', 'AU', 'SG', 'CH', 'IE']

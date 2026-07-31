@@ -21,6 +21,7 @@ import logging
 from multiprocessing import Pool, cpu_count
 import tempfile
 import shutil
+from .identifiers import normalize_identifier, normalize_identifiers
 from .reportable_jurisdictions import get_reportable_jurisdictions, get_all_country_codes
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -68,6 +69,14 @@ class GeneratorConfig:
     pretty_print: bool = True  # Enabled by default for readability
     
     def __post_init__(self):
+
+        # Trim identifiers before anything concatenates them into a RefId — a
+        # pasted trailing space would otherwise sit inside every MessageRefId
+        # and DocRefId and get the file rejected by MDES (rule 80025).
+        self.mytin = normalize_identifier(self.mytin)
+        self.sending_country = normalize_identifier(self.sending_country)
+        self.receiving_country = normalize_identifier(self.receiving_country)
+        self.reporting_fi_tins = normalize_identifiers(self.reporting_fi_tins)
 
         # Handle output path
         if isinstance(self.output_path, str):

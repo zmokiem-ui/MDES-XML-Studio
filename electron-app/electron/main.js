@@ -49,6 +49,18 @@ function assertPathAllowed(target, label = 'path') {
   throw new Error(`Access denied: ${label} is outside the allowed workspace`);
 }
 
+// Identifiers (SendingCompanyIN, FI TINs/GIINs, SendingEntityIN) are
+// concatenated into MessageRefId/DocRefId, so a space a user pasted into the
+// form would sit inside every RefId and MDES rejects the file. Trim on the way
+// out; the Python configs trim again as a backstop.
+function trimId(value) {
+  return typeof value === 'string' ? value.trim() : value;
+}
+
+function trimIdList(values) {
+  return (values || []).map(trimId).filter(v => v !== '');
+}
+
 // Map Python module names to bundled executable names (production only)
 const MODULE_TO_EXE = {
   'crs_generator.cli': 'crs_cli.exe',
@@ -299,7 +311,7 @@ ipcMain.handle('generate-csv-preview', async (event, formData) => {
       '--sending-country', formData.transmittingCountry,
       '--receiving-country', formData.receivingCountry,
       '--tax-year', formData.reportingPeriod,
-      '--mytin', formData.sendingCompanyIN,
+      '--mytin', trimId(formData.sendingCompanyIN),
       '--num-fis', formData.numReportingFIs,
       '--individual-accounts', formData.individualAccounts || '0',
       '--organisation-accounts', formData.organisationAccounts || '0',
@@ -331,7 +343,7 @@ ipcMain.handle('save-csv-preview', async (event, formData) => {
       '--sending-country', formData.transmittingCountry,
       '--receiving-country', formData.receivingCountry,
       '--tax-year', formData.reportingPeriod,
-      '--mytin', formData.sendingCompanyIN,
+      '--mytin', trimId(formData.sendingCompanyIN),
       '--num-fis', formData.numReportingFIs,
       '--individual-accounts', formData.individualAccounts || '0',
       '--organisation-accounts', formData.organisationAccounts || '0',
@@ -355,7 +367,7 @@ ipcMain.handle('generate-crs', async (event, formData) => {
       '--sending-country', formData.transmittingCountry,
       '--receiving-country', formData.receivingCountry,
       '--tax-year', formData.reportingPeriod,
-      '--mytin', formData.sendingCompanyIN,
+      '--mytin', trimId(formData.sendingCompanyIN),
       '--num-fis', formData.numReportingFIs,
       '--individual-accounts', formData.individualAccounts,
       '--organisation-accounts', formData.organisationAccounts,
@@ -364,7 +376,7 @@ ipcMain.handle('generate-crs', async (event, formData) => {
     );
 
     if (formData.reportingFITINs && formData.reportingFITINs.length > 0) {
-      args.push('--reporting-fi-tins', formData.reportingFITINs.join(','));
+      args.push('--reporting-fi-tins', trimIdList(formData.reportingFITINs).join(','));
     }
 
     if (formData.accountHolderMode !== 'random') {
@@ -766,7 +778,7 @@ ipcMain.handle('generate-fatca', async (event, formData) => {
     '--sending-country', formData.transmittingCountry || 'NL',
     '--receiving-country', formData.receivingCountry || 'US',
     '--tax-year', formData.reportingPeriod || new Date().getFullYear().toString(),
-    '--sending-company-in', formData.sendingCompanyIN || '000000.00000.TA.531',
+    '--sending-company-in', trimId(formData.sendingCompanyIN) || '000000.00000.TA.531',
     '--num-fis', formData.numReportingFIs || '1',
     '--filer-category', formData.filerCategory || 'FATCA601',
     '--individual-accounts', formData.individualAccounts || '0',
@@ -988,7 +1000,7 @@ ipcMain.handle('generate-cbc', async (event, formData) => {
       '--mode', 'random',
       '--country', formData.transmittingCountry || 'NL',
       '--year', formData.reportingPeriod || new Date().getFullYear().toString(),
-      '--tin', formData.sendingEntityIN || '123456789',
+      '--tin', trimId(formData.sendingEntityIN) || '123456789',
       '--reports', formData.numCbcReports || '3',
       '--entities', formData.constEntitiesPerReport || '2',
       '--role', formData.reportingRole || 'CBC701',

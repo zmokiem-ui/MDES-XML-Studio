@@ -48,6 +48,29 @@ def test_clean_new_message_has_no_findings():
     assert findings == [], [f.as_text() for f in findings]
 
 
+def test_whitespace_in_messageref_flagged_80025():
+    # A SendingCompanyIN with a trailing space used to land a space inside every
+    # RefId; both the interior and the trailing case must be flagged.
+    root = _doc(sending="SC1 ", message_ref="NL2024SC1 MSG1")
+    assert "80025" in _codes(mr.check_mdes_rules(root, "CRS"))
+
+
+def test_whitespace_in_docref_flagged_80025():
+    root = _doc(docrefs=["NL2024SC1 D0"])
+    findings = mr.check_mdes_rules(root, "CRS")
+    assert "80025" in _codes(findings)
+    assert any("DocRefId" in f.message for f in findings if f.code == "80025")
+
+
+def test_whitespace_findings_are_aggregated_per_tag():
+    root = _doc(doctypes=("OECD11", "OECD11"),
+                docrefs=["NL2024SC1 D0", "NL2024SC1 D1"])
+    docref_findings = [f for f in mr.check_mdes_rules(root, "CRS")
+                       if f.code == "80025" and "DocRefId" in f.message]
+    assert len(docref_findings) == 1
+    assert "and 1 more" in docref_findings[0].message
+
+
 def test_messageref_format_flagged_80017():
     root = _doc(message_ref="XX9999BADREF")
     assert "80017" in _codes(mr.check_mdes_rules(root, "CRS"))

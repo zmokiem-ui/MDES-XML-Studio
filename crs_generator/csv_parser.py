@@ -465,7 +465,13 @@ def generate_csv_preview(
     """
     from faker import Faker
     import random
-    
+
+    from .identifiers import normalize_identifier
+
+    # The preview CSV is also what users save and re-import, so the identifier
+    # is trimmed here too rather than only on the XML path.
+    mytin = normalize_identifier(mytin)
+
     fake = Faker()
     rows = []
     

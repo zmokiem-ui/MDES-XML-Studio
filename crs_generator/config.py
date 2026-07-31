@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
+from .identifiers import normalize_identifier
+
 
 @dataclass
 class DomesticConfig:
@@ -19,7 +21,13 @@ class DomesticConfig:
     output_path: Optional[Path] = None
 
     def __post_init__(self):
-        """Normalize paths after initialization."""
+        """Normalize identifiers and paths after initialization."""
+        # Trimmed because mytin is concatenated into RefIds — see
+        # crs_generator.identifiers.
+        self.mytin = normalize_identifier(self.mytin)
+        self.sending_country = normalize_identifier(self.sending_country)
+        self.receiving_country = normalize_identifier(self.receiving_country)
+
         if isinstance(self.output_path, str):
             self.output_path = Path(self.output_path)
         if self.output_path is None:

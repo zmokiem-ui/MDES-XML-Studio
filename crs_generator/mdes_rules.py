@@ -51,6 +51,15 @@ def _all_texts(root: etree._Element, local_name: str) -> list[str]:
     return out
 
 
+def _all_raw_texts(root: etree._Element, local_name: str) -> list[str]:
+    """Element texts without stripping — whitespace checks need the raw value."""
+    return [el.text or "" for el in root.iter() if _local(el.tag) == local_name]
+
+
+def _has_whitespace(value: str) -> bool:
+    return any(ch.isspace() for ch in value)
+
+
 # Which DocTypeIndic codes are production vs test.
 _PROD_DOCTYPES = {"OECD0", "OECD1", "OECD2", "OECD3"}
 _TEST_DOCTYPES = {"OECD10", "OECD11", "OECD12", "OECD13"}
@@ -89,10 +98,18 @@ def check_mdes_rules(
     if is_crs_family:
         if sending_company is not None and not sending_company:
             findings.append(Finding("80026", "error", "SendingCompanyIN is empty."))
-        if message_ref:
-            if " " in message_ref:
+        # Whitespace anywhere in a RefId is fatal, and a SendingCompanyIN with a
+        # stray space puts one in *every* RefId at once — so these are reported
+        # per tag with a count instead of thousands of near-identical findings.
+        # Checked against the raw text because _first_text/_all_texts have
+        # already stripped a trailing space away.
+        for tag in ("MessageRefId", "CorrMessageRefId", "DocRefId", "CorrDocRefId"):
+            bad = [raw for raw in _all_raw_texts(root, tag) if _has_whitespace(raw)]
+            if bad:
+                extra = f" (and {len(bad) - 1} more)" if len(bad) > 1 else ""
                 findings.append(Finding("80025", "error",
-                    "MessageRefId contains a space."))
+                    f"{tag} '{bad[0]}' contains whitespace{extra}."))
+        if message_ref:
             if sending_company and tax_year:
                 valid_prefixes = {
                     f"{transmitting}{tax_year}{sending_company}",

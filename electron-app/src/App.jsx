@@ -6121,6 +6121,8 @@ function App() {
 
                     onChange={(e) => setFatcaFormData({...fatcaFormData, sendingCompanyIN: e.target.value})}
 
+                    onBlur={(e) => setFatcaFormData({...fatcaFormData, sendingCompanyIN: e.target.value.trim()})}
+
                   />
 
                 </div>
@@ -7448,6 +7450,8 @@ function App() {
                           value={formData.sendingCompanyIN}
 
                           onChange={(e) => handleInputChange('sendingCompanyIN', e.target.value)}
+
+                          onBlur={(e) => handleInputChange('sendingCompanyIN', e.target.value.trim())}
 
                           placeholder="e.g., 12345678"
 
