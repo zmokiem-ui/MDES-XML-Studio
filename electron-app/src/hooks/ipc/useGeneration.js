@@ -172,7 +172,12 @@ export function useGeneration({
     let unsubscribeGenerationProgress
     try {
       const generateData = dataMode === 'csv'
-        ? { mode: 'csv', csvPath: csvFilePath, outputPath: formData.outputPath }
+        ? {
+            mode: 'csv',
+            csvPath: csvFilePath,
+            outputPath: formData.outputPath,
+            crsVersion: formData.crsVersion,
+          }
         : {
             mode: 'random',
             ...formData,

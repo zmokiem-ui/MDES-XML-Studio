@@ -11,6 +11,7 @@
 const { test, expect } = require('@playwright/test');
 const { _electron: electron } = require('playwright');
 const path = require('path');
+const { electronEnv } = require('./helpers');
 const fs = require('fs');
 const { execSync } = require('child_process');
 
@@ -22,6 +23,7 @@ const CRS_OUTPUT = path.join(OUTPUT_DIR, 'crs_regression_output.xml');
 const FATCA_OUTPUT = path.join(OUTPUT_DIR, 'fatca_regression_output.xml');
 const CBC_OUTPUT = path.join(OUTPUT_DIR, 'cbc_regression_output.xml');
 const CRS_CORRECTION_OUTPUT = path.join(OUTPUT_DIR, 'crs_correction_output.xml');
+const CRS3_OUTPUT = path.join(OUTPUT_DIR, 'crs3_regression_output.xml');
 
 // Track which dialog path to return next
 let nextSaveDialogPath = '';
@@ -73,7 +75,7 @@ test.describe.serial('FULL E2E REGRESSION', () => {
     // Launch Electron app
     electronApp = await electron.launch({
       args: [path.join(__dirname, '../electron/main.js')],
-      env: { ...process.env, NODE_ENV: 'production', E2E_TEST: 'true' }
+      env: electronEnv()
     });
     window = await electronApp.firstWindow();
     await window.waitForLoadState('domcontentloaded');
@@ -356,6 +358,56 @@ test.describe.serial('FULL E2E REGRESSION', () => {
     expect(json.is_valid).toBe(true);
     expect(json.transmitting_country).toBe('NL');
     expect(json.receiving_country).toBe('DE');
+  });
+
+  // ============================================================
+  // 2B. CRS 3.0 THROUGH THE UI VERSION SELECTOR
+  // ============================================================
+  test('2.8 CRS 3.0 - Select version 3.0 and generate', async () => {
+    // The selector lives in the Message Header card, which is already expanded
+    // from 2.2. Pick it by its options rather than by index so it survives
+    // other selects being added to the form.
+    const versionSelect = window.locator('select').filter({ has: window.locator('option[value="3.0"]') }).first();
+    await versionSelect.waitFor({ timeout: 5000 });
+    await versionSelect.selectOption('3.0');
+    await window.waitForTimeout(VISIBLE_DELAY);
+
+    await mockSaveDialog(CRS3_OUTPUT);
+    const browseBtn = window.locator('button:has-text("Browse")').first();
+    await browseBtn.waitFor({ timeout: 5000 });
+    await browseBtn.click();
+    await window.waitForTimeout(VISIBLE_DELAY);
+
+    const genBtn = window.locator('button:has-text("Generate CRS XML File")');
+    await genBtn.waitFor({ timeout: 5000 });
+    await genBtn.click();
+    await window.waitForTimeout(8000);
+    await dismissModal();
+    await clearDialogMocks();
+  });
+
+  test('2.9 CRS 3.0 - Generated file is a valid CRS 3.0 document', async () => {
+    expect(fs.existsSync(CRS3_OUTPUT)).toBe(true);
+    const xml = readFile(CRS3_OUTPUT);
+
+    assertXml(xml, 'urn:oecd:ties:crs:v3', 'CRS 3.0 namespace');
+    assertXml(xml, 'version="3.0"', 'CRS 3.0 version attribute');
+    assertXml(xml, '<crs:SelfCert>', 'mandatory SelfCert');
+    assertXml(xml, '<crs:DDProcedure>', 'mandatory DDProcedure');
+    assertXml(xml, '<crs:AccountType>', 'mandatory AccountType');
+
+    const result = runPython(
+      `-m crs_generator.cli --mode validate-xml --xml-input "${CRS3_OUTPUT}" --output dummy`
+    );
+    const json = JSON.parse(result.stdout);
+    expect(json.is_valid).toBe(true);
+    expect(json.version).toBe('3.0');
+  });
+
+  test('2.10 CRS 3.0 - Reset selector back to 2.0 for the remaining flow', async () => {
+    const versionSelect = window.locator('select').filter({ has: window.locator('option[value="3.0"]') }).first();
+    await versionSelect.selectOption('2.0');
+    await window.waitForTimeout(VISIBLE_DELAY);
   });
 
   // ============================================================

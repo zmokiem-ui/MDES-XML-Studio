@@ -1640,7 +1640,9 @@ function App() {
 
         organisationAccounts: formData.organisationAccounts || '0',
 
-        controllingPersons: formData.controllingPersons || '1'
+        controllingPersons: formData.controllingPersons || '1',
+
+        crsVersion: formData.crsVersion
 
       })
 
@@ -1700,7 +1702,9 @@ function App() {
 
         organisationAccounts: formData.organisationAccounts || '0',
 
-        controllingPersons: formData.controllingPersons || '1'
+        controllingPersons: formData.controllingPersons || '1',
+
+        crsVersion: formData.crsVersion
 
       })
 
@@ -7275,6 +7279,37 @@ function App() {
 
                 <div className="space-y-4">
 
+                  {/* The CSV path supports CRS 3.0 through its optional v3
+                      columns, so the version choice belongs here too — the
+                      Message Header card that carries it is random-mode only. */}
+                  <div>
+
+                    <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.crsVersion')}</label>
+
+                    <select
+
+                      className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+
+                      value={formData.crsVersion}
+
+                      onChange={(e) => handleInputChange('crsVersion', e.target.value)}
+
+                    >
+
+                      <option value="2.0">{t(language, 'form.crsVersion20')}</option>
+
+                      <option value="3.0">{t(language, 'form.crsVersion30')}</option>
+
+                    </select>
+
+                    {formData.crsVersion === '3.0' && (
+
+                      <p className={`text-xs ${theme.textMuted} mt-1`}>{t(language, 'form.crsVersion30CsvHint')}</p>
+
+                    )}
+
+                  </div>
+
                   <div className="flex gap-2">
 
                     <div className="flex-1 relative">
@@ -7436,6 +7471,34 @@ function App() {
                   {expandedSections.messageHeader && (
 
                     <div className="px-6 pb-6 grid grid-cols-2 gap-4">
+
+                      <div className="col-span-2">
+
+                        <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.crsVersion')}</label>
+
+                        <select
+
+                          className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+
+                          value={formData.crsVersion}
+
+                          onChange={(e) => handleInputChange('crsVersion', e.target.value)}
+
+                        >
+
+                          <option value="2.0">{t(language, 'form.crsVersion20')}</option>
+
+                          <option value="3.0">{t(language, 'form.crsVersion30')}</option>
+
+                        </select>
+
+                        {formData.crsVersion === '3.0' && (
+
+                          <p className={`text-xs ${theme.textMuted} mt-1`}>{t(language, 'form.crsVersion30Hint')}</p>
+
+                        )}
+
+                      </div>
 
                       <div>
 

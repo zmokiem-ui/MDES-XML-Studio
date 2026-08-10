@@ -53,6 +53,41 @@ function Assert-XsdValid($path, $testName) {
     }
 }
 
+function Assert-XmlContains($path, $pattern, $testName) {
+    if (-not (Test-Path $path)) {
+        Write-Host "  FAIL: $testName - File not found" -ForegroundColor Red
+        $script:fail++
+        $script:results += [PSCustomObject]@{Test=$testName; Status="FAIL"; Details="File not found"}
+        return $false
+    }
+    $content = Get-Content $path -Raw
+    if ($content -match [regex]::Escape($pattern)) {
+        Write-Host "  PASS: $testName" -ForegroundColor Green
+        $script:pass++
+        $script:results += [PSCustomObject]@{Test=$testName; Status="PASS"; Details="Pattern found"}
+        return $true
+    } else {
+        Write-Host "  FAIL: $testName - Pattern '$pattern' not found" -ForegroundColor Red
+        $script:fail++
+        $script:results += [PSCustomObject]@{Test=$testName; Status="FAIL"; Details="Pattern not found"}
+        return $false
+    }
+}
+
+function Assert-Match($output, $pattern, $testName) {
+    if ($output -match $pattern) {
+        Write-Host "  PASS: $testName" -ForegroundColor Green
+        $script:pass++
+        $script:results += [PSCustomObject]@{Test=$testName; Status="PASS"; Details="Matched"}
+        return $true
+    } else {
+        Write-Host "  FAIL: $testName - No match for '$pattern'" -ForegroundColor Red
+        $script:fail++
+        $script:results += [PSCustomObject]@{Test=$testName; Status="FAIL"; Details="No match"}
+        return $false
+    }
+}
+
 function Assert-JsonSuccess($output, $testName) {
     if ($output -match '"success":\s*true') {
         Write-Host "  PASS: $testName" -ForegroundColor Green
@@ -100,6 +135,37 @@ Assert-JsonSuccess $out "CRS correction generation"
 Assert-FileExists "$OutputDir\crs_correction.xml" "CRS correction file created"
 Assert-XsdValid "$OutputDir\crs_correction.xml" "CRS correction XSD validity"
 
+Write-TestHeader "1d. CRS 3.0 Generation (Random)"
+$out = python -m crs_generator.cli --mode random --crs-version 3.0 --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs3_new.xml" 2>&1 | Out-String
+Assert-FileExists "$OutputDir\crs3_new.xml" "CRS 3.0 random XML generation"
+Assert-XsdValid "$OutputDir\crs3_new.xml" "CRS 3.0 XSD validity"
+Assert-XmlContains "$OutputDir\crs3_new.xml" "urn:oecd:ties:crs:v3" "CRS 3.0 uses the v3 namespace"
+Assert-XmlContains "$OutputDir\crs3_new.xml" "<crs:DDProcedure>" "CRS 3.0 emits DDProcedure"
+Assert-XmlContains "$OutputDir\crs3_new.xml" "<crs:AccountType>" "CRS 3.0 emits AccountType"
+Assert-XmlContains "$OutputDir\crs3_new.xml" "<crs:SelfCert>" "CRS 3.0 emits SelfCert"
+
+Write-TestHeader "1e. CRS 3.0 Validation + Correction"
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs3_new.xml" --output dummy 2>&1 | Out-String
+Assert-JsonSuccess $out "CRS 3.0 XML validation"
+Assert-Match $out '"version":\s*"3.0"' "CRS 3.0 version auto-detected on validation"
+$out = python -m crs_generator.cli --mode correction --xml-input "$OutputDir\crs3_new.xml" --output "$OutputDir\crs3_correction.xml" --correct-individual 1 --modify-balance --test-mode 2>&1 | Out-String
+Assert-JsonSuccess $out "CRS 3.0 correction generation"
+Assert-XsdValid "$OutputDir\crs3_correction.xml" "CRS 3.0 correction XSD validity"
+
+Write-TestHeader "1f. CRS CSV Round Trip (2.0)"
+$out = python -m crs_generator.cli --mode preview --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs_data.csv" 2>&1 | Out-String
+Assert-FileExists "$OutputDir\crs_data.csv" "CRS 2.0 preview CSV created"
+$out = python -m crs_generator.cli --mode csv --csv-input "$OutputDir\crs_data.csv" --output "$OutputDir\crs_from_csv.xml" 2>&1 | Out-String
+Assert-FileExists "$OutputDir\crs_from_csv.xml" "CRS 2.0 XML generated from CSV"
+Assert-XsdValid "$OutputDir\crs_from_csv.xml" "CRS 2.0 CSV output XSD validity"
+
+Write-TestHeader "1g. CRS CSV Round Trip (3.0)"
+$out = python -m crs_generator.cli --mode preview --crs-version 3.0 --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs3_data.csv" 2>&1 | Out-String
+Assert-FileExists "$OutputDir\crs3_data.csv" "CRS 3.0 preview CSV created"
+$out = python -m crs_generator.cli --mode csv --crs-version 3.0 --csv-input "$OutputDir\crs3_data.csv" --output "$OutputDir\crs3_from_csv.xml" 2>&1 | Out-String
+Assert-FileExists "$OutputDir\crs3_from_csv.xml" "CRS 3.0 XML generated from CSV"
+Assert-XsdValid "$OutputDir\crs3_from_csv.xml" "CRS 3.0 CSV output XSD validity"
+
 # ============================================================
 # 2. FATCA MODULE
 # ============================================================
@@ -142,6 +208,11 @@ Assert-XsdValid "$OutputDir\cbc_deletion.xml" "CBC deletion XSD validity"
 Write-TestHeader "4. Error Injector - CRS"
 $out = python -m crs_generator.error_injector --input "$OutputDir\crs_new.xml" --output "$OutputDir\ei_crs.xml" --module crs --file-type xml --preset missing_required --level 3 --options "{}" 2>&1 | Out-String
 Assert-JsonSuccess $out "Error Injector CRS missing_required"
+
+Write-TestHeader "4a2. Error Injector - CRS 3.0"
+$out = python -m crs_generator.error_injector --input "$OutputDir\crs3_new.xml" --output "$OutputDir\ei_crs3.xml" --module crs --file-type xml --preset missing_required --level 5 --options "{}" 2>&1 | Out-String
+Assert-JsonSuccess $out "Error Injector CRS 3.0 missing_required"
+Assert-Match $out 'SelfCert|DDProcedure|AccountType' "Error Injector strips CRS 3.0 mandatory fields"
 
 Write-TestHeader "4b. Error Injector - FATCA"
 $out = python -m crs_generator.error_injector --input "$OutputDir\fatca_new.xml" --output "$OutputDir\ei_fatca.xml" --module fatca --file-type xml --preset invalid_giin --level 3 --options "{}" 2>&1 | Out-String

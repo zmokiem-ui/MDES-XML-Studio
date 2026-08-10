@@ -4,6 +4,9 @@ import { t } from '../../i18n/translations'
 const currentYear = () => new Date().getFullYear().toString()
 
 const createCrsFormData = () => ({
+  // CRS schema version to generate. 2.0 stays the default; 3.0 is opt-in and
+  // supported by both the random-data and CSV paths.
+  crsVersion: '2.0',
   sendingCompanyIN: '',
   transmittingCountry: '',
   receivingCountry: '',

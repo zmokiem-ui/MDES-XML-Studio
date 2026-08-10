@@ -60,6 +60,38 @@ def _has_whitespace(value: str) -> bool:
     return any(ch.isspace() for ch in value)
 
 
+def _is_crs_v3(root: etree._Element) -> bool:
+    """Whether the document is CRS 3.0.
+
+    Matches MDES's own gating: ``validation-templates.xsl`` keys its v3-only
+    rules off ``/*/@version = '3.0'``, and ``camel config.xml`` additionally
+    routes on the ``urn:oecd:ties:crs:v3`` namespace. Accept either signal.
+    """
+    if (root.get("version") or "").strip() == "3.0":
+        return True
+    ns = root.tag.rsplit("}", 1)[0].lstrip("{") if "}" in str(root.tag) else ""
+    return ns == "urn:oecd:ties:crs:v3"
+
+
+def _child_text(parent: etree._Element, local_name: str) -> str | None:
+    """Direct-child text by local-name (not descendant — avoids nested matches)."""
+    for el in parent:
+        if _local(el.tag) == local_name:
+            return (el.text or "").strip()
+    return None
+
+
+def _find_all(root: etree._Element, local_name: str) -> list[etree._Element]:
+    return [el for el in root.iter() if _local(el.tag) == local_name]
+
+
+def _attr_by_local(el: etree._Element, local_name: str) -> str | None:
+    for key, value in el.attrib.items():
+        if _local(key) == local_name:
+            return value
+    return None
+
+
 # Which DocTypeIndic codes are production vs test.
 _PROD_DOCTYPES = {"OECD0", "OECD1", "OECD2", "OECD3"}
 _TEST_DOCTYPES = {"OECD10", "OECD11", "OECD12", "OECD13"}
@@ -190,6 +222,26 @@ def check_mdes_rules(
                 findings.append(Finding("60002", "error", f"AccountBalance '{bal}' is negative."))
         except ValueError:
             pass
+
+    # --- CRS 3.0 only rules -------------------------------------------------
+    if message_type == "CRS" and _is_crs_v3(root):
+        for report in _find_all(root, "AccountReport"):
+            acct_number = None
+            for el in report:
+                if _local(el.tag) == "AccountNumber":
+                    acct_number = el
+                    break
+            if acct_number is None:
+                continue
+
+            # --- 60017: a Specified Electronic Money Product account
+            # (OECD606) must be reported as a Depository Account (CRS1101).
+            if _attr_by_local(acct_number, "AcctNumberType") == "OECD606":
+                if _child_text(report, "AccountType") != "CRS1101":
+                    findings.append(Finding("60017", "error",
+                        f"AccountNumber '{(acct_number.text or '').strip()}' is "
+                        "AcctNumberType OECD606 (Specified Electronic Money "
+                        "Product), so AccountType must be CRS1101."))
 
     return findings
 

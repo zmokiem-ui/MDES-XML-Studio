@@ -8,7 +8,8 @@ pairs a Python generation/validation backend (`crs_generator`) with an Electron/
 
 | Module | Schema | Notes |
 | --- | --- | --- |
-| CRS | `CrsXML_v2.0` | new + corrections |
+| CRS | `CrsXML_v2.0` | default; new + corrections |
+| CRS 3.0 | `CrsXML_v3.0` | opt-in via `--crs-version 3.0`; `urn:oecd:ties:crs:v3` |
 | FATCA-CRS Combined | `FatcaCrs_v2.2` | default FATCA flow (FC upload) |
 | IRS FATCA (`FATCA_OECD`) | `FatcaXML_v2.0.1` | second FATCA flow; MDES hard-checks `@version="2.0.1"` |
 | CbC | `CbcXML_v2.0` | new + corrections/deletions |
@@ -16,6 +17,41 @@ pairs a Python generation/validation backend (`crs_generator`) with an Electron/
 All generated output is validated against the official XSDs bundled under
 `crs_generator/schemas/`, and business rules mirror the MDES validation XSLTs
 (see `crs_generator/mdes_rules.py`).
+
+CRS 3.0 keeps the v2 supporting schemas but moves to its own root namespace and
+makes account classification mandatory: `SelfCert` on every account holder and
+controlling person, `DDProcedure` and `AccountType` on every account report, and
+`CtrlgPersonType` repeatable and required. `EquityInterestType` and
+`JointAccount/Number` are new and optional. Version is auto-detected on
+validation (by namespace, falling back to `@version`), so 2.0 and 3.0 files can
+be mixed freely; only generation needs the explicit switch. Rule **60017** —
+an `OECD606` (specified electronic money product) account number requires
+`AccountType` `CRS1101` — applies to 3.0 only, matching MDES's own gating.
+
+### CRS 3.0 from CSV
+
+Both CRS generation paths support 3.0: random data and CSV input. A CSV may add
+these optional columns; each one left out falls back to the default shown, so a
+2.0-era CSV regenerates as a valid 3.0 file unchanged.
+
+| Column | Default | Values |
+| --- | --- | --- |
+| `AcctNumberType` | `OECD601` | `OECD601`–`OECD606` |
+| `SelfCert` | `CRS901` | `CRS901`, `CRS902`, `CRS900` |
+| `DDProcedure` | `CRS1201` | `CRS1201`, `CRS1202`, `CRS1200` |
+| `AccountType` | `CRS1101` | `CRS1101`–`CRS1104`, `CRS1100` |
+| `EquityInterestType` | none | comma-separated `CRS401`–`CRS410` |
+| `JointAccount_Number` | none | 1–200 |
+| `ControllingPerson_CtrlgPersonType` | `CRS801` | `CRS801`–`CRS813`, `CRS800` |
+| `ControllingPerson_SelfCert` | `CRS1001` | `CRS1001`, `CRS1002`, `CRS1000` |
+
+The `xx00` members are the transitional "not reported" codes, valid on input for
+correcting pre-3.0 data but never generated for new data. `--mode preview` with
+`--crs-version 3.0` emits a CSV template that already includes and populates
+these columns. Invalid values, an out-of-range `JointAccount_Number`, an
+`OECD606` row whose `AccountType` is not `CRS1101` (rule 60017), and a closed
+account with a non-zero balance (rule 60003) are all reported as row-level CSV
+errors rather than written into the output.
 
 ## Download (end users)
 
@@ -44,6 +80,10 @@ python -m crs_generator.cli   --mode random --sending-country NL --receiving-cou
                               --tax-year 2024 --mytin 12345678 --num-fis 1 \
                               --individual-accounts 5 --organisation-accounts 2 \
                               --controlling-persons 1 --output out/crs.xml
+python -m crs_generator.cli   --mode random --crs-version 3.0 --sending-country NL \
+                              --receiving-country DE --tax-year 2024 --mytin 12345678 \
+                              --num-fis 1 --individual-accounts 5 --organisation-accounts 2 \
+                              --controlling-persons 1 --output out/crs3.xml
 python -m crs_generator.fatca_cli --mode random --variant fatca-oecd ... --output out/fatca.xml
 python -m crs_generator.cbc_cli   generate --country NL --year 2024 --tin 999888777 ...
 ```

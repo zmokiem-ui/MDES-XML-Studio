@@ -69,7 +69,22 @@ class CRSCorrectionGenerator:
         'iso': 'urn:oecd:ties:isocrstypes:v1',
         'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
     }
-    
+
+    # CRS 3.0 moved the crs namespace to v3 but kept the v2 supporting schemas.
+    NAMESPACES_V3 = {
+        'crs': 'urn:oecd:ties:crs:v3',
+        'cfc': 'urn:oecd:ties:commontypesfatcacrs:v2',
+        'stf': 'urn:oecd:ties:crsstf:v5',
+        'iso': 'urn:oecd:ties:isocrstypes:v1',
+        'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
+    }
+
+    NAMESPACES_BY_VERSION = {
+        '1.0': NAMESPACES_V1,
+        '2.0': NAMESPACES_V2,
+        '3.0': NAMESPACES_V3,
+    }
+
     def __init__(self):
         self.validator = CRSXMLValidator()
         self.version = "2.0"
@@ -134,7 +149,7 @@ class CRSCorrectionGenerator:
         
         # Set version and namespaces
         self.version = validation.xml_version
-        self.namespaces = self.NAMESPACES_V2 if self.version == "2.0" else self.NAMESPACES_V1
+        self.namespaces = self.NAMESPACES_BY_VERSION.get(self.version, self.NAMESPACES_V1)
         self.test_mode = options.test_mode
         
         # Read source file
@@ -187,7 +202,7 @@ class CRSCorrectionGenerator:
         
         # Set version
         self.version = validation.xml_version
-        self.namespaces = self.NAMESPACES_V2 if self.version == "2.0" else self.NAMESPACES_V1
+        self.namespaces = self.NAMESPACES_BY_VERSION.get(self.version, self.NAMESPACES_V1)
         
         # Parse and generate
         try:

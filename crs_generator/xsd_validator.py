@@ -34,13 +34,16 @@ from lxml import etree
 # (Linux CI) as well as Windows.
 SCHEMA_REGISTRY: dict[tuple[str, str], str] = {
     ("CRS", "2.0"): "CRS/v2.0/CrsXML_v2.0.xsd",
+    ("CRS", "3.0"): "CRS/v3.0/CrsXML_v3.0.xsd",
     ("FATCA_CRS", "2.2"): "fatca_crs/v2.2/FatcaCrs_v2.2.xsd",  # NL FC combined
     ("FATCA_OECD", "2.0"): "FATCA/v2.0/FatcaXML_v2.0.xsd",
     ("FATCA_OECD", "2.0.1"): "FATCA/v2.0.1/FatcaXML_v2.0.1.xsd",  # MDES upload version
     ("CBC", "2.0"): "CBC/v2.0/CbcXML_v2.0.xsd",
 }
 
-# Default (latest bundled) version per message type.
+# Default version per message type, used only when the document itself carries
+# no version signal. CRS stays on 2.0: 3.0 is opt-in for generation, and a v3
+# document is recognised by its own namespace/@version (see detect_version).
 DEFAULT_VERSION: dict[str, str] = {
     "CRS": "2.0",
     "FATCA_CRS": "2.2",
@@ -54,10 +57,19 @@ DEFAULT_VERSION: dict[str, str] = {
 # rather than an opaque "unknown type".
 NAMESPACE_TO_TYPE: dict[str, str] = {
     "urn:oecd:ties:crs:v2": "CRS",
+    "urn:oecd:ties:crs:v3": "CRS",
     "urn:fatcacrs:ties:v2": "FATCA_CRS",
     "urn:fatcacrs:ties:v1": "FATCA_CRS",
     "urn:oecd:ties:fatca:v2": "FATCA_OECD",
     "urn:oecd:ties:cbc:v2": "CBC",
+}
+
+# Root-element namespace URI -> schema version, for families where several
+# versions coexist and are distinguishable by namespace. CRS 3.0 moved to a new
+# namespace (crs:v3) while keeping the same supporting schemas.
+NAMESPACE_TO_VERSION: dict[str, str] = {
+    "urn:oecd:ties:crs:v2": "2.0",
+    "urn:oecd:ties:crs:v3": "3.0",
 }
 
 # Expected root local-name per type (used as a secondary signal / sanity check).
@@ -146,6 +158,27 @@ def detect_message_type(root: etree._Element) -> str:
     )
 
 
+def detect_version(root: etree._Element, message_type: str) -> str:
+    """Determine the schema version a document should be validated against.
+
+    Mirrors how MDES itself routes CRS uploads (``camel config.xml``): a
+    document is v3 if its root namespace is ``urn:oecd:ties:crs:v3`` *or* it
+    carries ``@version="3.0"``. Without this, a v3 file would silently be
+    checked against the v2 schema and every new CRS 3.0 element would be
+    reported as unexpected.
+    """
+    ns = etree.QName(root.tag).namespace or ""
+    by_ns = NAMESPACE_TO_VERSION.get(ns)
+    if by_ns is not None:
+        return by_ns
+
+    declared = (root.get("version") or "").strip()
+    if declared and (message_type, declared) in SCHEMA_REGISTRY:
+        return declared
+
+    return DEFAULT_VERSION.get(message_type)
+
+
 # --- Public validation API --------------------------------------------------
 
 def _errors_from_log(schema: etree.XMLSchema) -> list[dict]:
@@ -164,7 +197,7 @@ def validate_tree(
     if message_type is None:
         message_type = detect_message_type(root)
     if version is None:
-        version = DEFAULT_VERSION.get(message_type)
+        version = detect_version(root, message_type)
     schema = load_schema(message_type, version)
     valid = schema.validate(tree)
     return ValidationResult(
@@ -206,7 +239,8 @@ def _main(argv: list[str]) -> int:
     parser.add_argument("--type", dest="message_type", default=None,
                         help="Force message type (CRS, FATCA_CRS, FATCA_OECD, CBC).")
     parser.add_argument("--version", dest="version", default=None,
-                        help="Force schema version (e.g. 2.0, 2.2).")
+                        help="Force schema version (e.g. 2.0, 3.0, 2.2). "
+                             "Auto-detected from the document when omitted.")
     args = parser.parse_args(argv)
 
     try:

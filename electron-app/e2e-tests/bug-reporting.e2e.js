@@ -1,5 +1,6 @@
 const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
+const { electronEnv } = require('./helpers');
 const { version: appVersion } = require('../package.json');
 
 test.describe('Bug Reporting Feature', () => {
@@ -9,11 +10,7 @@ test.describe('Bug Reporting Feature', () => {
   test.beforeEach(async () => {
     electronApp = await electron.launch({
       args: [path.join(__dirname, '../electron/main.js')],
-      env: {
-        ...process.env,
-        NODE_ENV: 'test',
-        E2E_TEST: 'true'
-      }
+      env: electronEnv({ NODE_ENV: 'test' })
     });
     window = await electronApp.firstWindow();
     await window.waitForLoadState('domcontentloaded');

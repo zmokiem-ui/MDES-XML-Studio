@@ -3,15 +3,31 @@ const { _electron: electron } = require('playwright');
 const path = require('path');
 
 /**
- * Launch the Electron app in production mode (uses built dist, no DevTools)
+ * Build the environment for an Electron launch.
+ *
+ * ELECTRON_RUN_AS_NODE must be cleared. Any terminal hosted inside an Electron
+ * app (VS Code, Cursor) exports it, and inheriting it makes the launched binary
+ * run as plain Node: `require('electron')` then yields no Menu/app/BrowserWindow
+ * and main.js dies on its first Menu call, surfacing only as Playwright's
+ * "Process failed to launch!". CI does not set it, so this fails locally while
+ * passing on the runner. Every electron.launch must go through this.
  */
-async function launchElectronApp() {
+function electronEnv(overrides = {}) {
   const env = {
     ...process.env,
     NODE_ENV: 'production',
-    E2E_TEST: 'true'
+    E2E_TEST: 'true',
+    ...overrides
   };
   delete env.ELECTRON_RUN_AS_NODE;
+  return env;
+}
+
+/**
+ * Launch the Electron app in production mode (uses built dist, no DevTools)
+ */
+async function launchElectronApp() {
+  const env = electronEnv();
 
   const electronApp = await electron.launch({
     args: [path.join(__dirname, '../electron/main.js')],
@@ -165,6 +181,7 @@ async function navigateToSettings(window) {
 }
 
 module.exports = {
+  electronEnv,
   launchElectronApp,
   closeElectronApp,
   clickElement,

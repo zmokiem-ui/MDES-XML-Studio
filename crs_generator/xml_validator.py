@@ -47,14 +47,38 @@ class CRSXMLValidator:
         'stf': 'urn:oecd:ties:crsstf:v5',
         'iso': 'urn:oecd:ties:isocrstypes:v1'
     }
-    
+
+    # CRS 3.0 moved the crs namespace to v3 but kept the v2 supporting schemas.
+    NAMESPACES_V3 = {
+        'crs': 'urn:oecd:ties:crs:v3',
+        'cfc': 'urn:oecd:ties:commontypesfatcacrs:v2',
+        'stf': 'urn:oecd:ties:crsstf:v5',
+        'iso': 'urn:oecd:ties:isocrstypes:v1'
+    }
+
+    NAMESPACES_BY_VERSION = {
+        '1.0': NAMESPACES_V1,
+        '2.0': NAMESPACES_V2,
+        '3.0': NAMESPACES_V3,
+    }
+
     # Valid codes
     VALID_MESSAGE_TYPE_INDIC = ['CRS701', 'CRS702', 'CRS703']
     VALID_DOC_TYPE_INDIC = ['OECD0', 'OECD1', 'OECD2', 'OECD3', 'OECD10', 'OECD11', 'OECD12', 'OECD13']
     VALID_ACCT_HOLDER_TYPES = ['CRS101', 'CRS102', 'CRS103']
     VALID_PAYMENT_TYPES = ['CRS501', 'CRS502', 'CRS503', 'CRS504']
     VALID_CTRL_PERSON_TYPES = [f'CRS80{i}' for i in range(1, 10)] + [f'CRS81{i}' for i in range(0, 4)]
-    
+
+    # CRS 3.0 additions. The "xx00" members are the transitional "not reported"
+    # codes, legal on the wire (they exist for correcting pre-3.0 data), so they
+    # are accepted here even though the generator never emits them.
+    VALID_CTRL_PERSON_TYPES_V3 = VALID_CTRL_PERSON_TYPES + ['CRS800']
+    VALID_EQUITY_INTEREST_TYPES = [f'CRS4{i:02d}' for i in range(1, 11)]
+    VALID_SELF_CERT = ['CRS901', 'CRS902', 'CRS900']
+    VALID_CP_SELF_CERT = ['CRS1001', 'CRS1002', 'CRS1000']
+    VALID_ACCOUNT_TYPES = ['CRS1101', 'CRS1102', 'CRS1103', 'CRS1104', 'CRS1100']
+    VALID_DD_PROCEDURES = ['CRS1201', 'CRS1202', 'CRS1200']
+
     # ISO country codes (subset - common ones)
     VALID_COUNTRY_CODES = [
         'AF', 'AL', 'DZ', 'AD', 'AO', 'AG', 'AR', 'AM', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB',
@@ -90,17 +114,21 @@ class CRSXMLValidator:
         
         # Check root element namespace
         root_tag = root.tag
+        if 'crs:v3' in root_tag or 'urn:oecd:ties:crs:v3' in str(root.attrib):
+            return "3.0"
         if 'crs:v2' in root_tag or 'urn:oecd:ties:crs:v2' in str(root.attrib):
             return "2.0"
         if 'crs:v1' in root_tag or 'urn:oecd:ties:crs:v1' in str(root.attrib):
             return "1.0"
-            
+
         # Check version attribute
         version = root.get('version', '1.0')
         return version
-    
+
     def detect_version_from_string(self, xml_content: str) -> str:
         """Detect version from XML string"""
+        if 'urn:oecd:ties:crs:v3' in xml_content:
+            return "3.0"
         if 'urn:oecd:ties:crs:v2' in xml_content:
             return "2.0"
         if 'urn:oecd:ties:crs:v1' in xml_content:
@@ -133,7 +161,7 @@ class CRSXMLValidator:
         # Detect version
         result.xml_version = self.detect_version_from_string(xml_content)
         self.version = result.xml_version
-        self.namespaces = self.NAMESPACES_V2 if result.xml_version == "2.0" else self.NAMESPACES_V1
+        self.namespaces = self.NAMESPACES_BY_VERSION.get(result.xml_version, self.NAMESPACES_V1)
         
         # Parse XML
         try:
@@ -477,7 +505,56 @@ class CRSXMLValidator:
         payments = self._findall(account, 'crs:Payment')
         for k, payment in enumerate(payments):
             self._validate_payment(payment, f"{prefix} Payment {k+1}", result)
-    
+
+        if self.version == "3.0":
+            self._validate_account_report_v3(account, acct_number, prefix, result)
+
+    def _validate_account_report_v3(self, account: ET.Element, acct_number: Optional[ET.Element],
+                                    prefix: str, result: ValidationResult):
+        """Validate the AccountReport-level fields CRS 3.0 made mandatory."""
+        dd_procedure = self._get_text(account, 'crs:DDProcedure')
+        if not dd_procedure:
+            result.errors.append(f"{prefix}: Missing DDProcedure (mandatory in CRS 3.0)")
+            result.is_valid = False
+        elif dd_procedure not in self.VALID_DD_PROCEDURES:
+            result.errors.append(f"{prefix}: Invalid DDProcedure '{dd_procedure}'")
+            result.is_valid = False
+
+        account_type = self._get_text(account, 'crs:AccountType')
+        if not account_type:
+            result.errors.append(f"{prefix}: Missing AccountType (mandatory in CRS 3.0)")
+            result.is_valid = False
+        elif account_type not in self.VALID_ACCOUNT_TYPES:
+            result.errors.append(f"{prefix}: Invalid AccountType '{account_type}'")
+            result.is_valid = False
+
+        # MDES rule 60017: a Specified Electronic Money Product account number
+        # (OECD606) must be reported as a Depository Account (CRS1101).
+        if acct_number is not None and acct_number.get('AcctNumberType') == 'OECD606':
+            if account_type != 'CRS1101':
+                result.errors.append(
+                    f"{prefix}: AcctNumberType OECD606 requires AccountType CRS1101 (Error 60017)")
+                result.is_valid = False
+
+        joint_account = self._find(account, 'crs:JointAccount')
+        if joint_account is not None:
+            number = self._get_text(joint_account, 'crs:Number')
+            if not number:
+                result.errors.append(f"{prefix}: JointAccount is missing Number")
+                result.is_valid = False
+            else:
+                try:
+                    holders = int(number)
+                except ValueError:
+                    result.errors.append(f"{prefix}: JointAccount Number '{number}' must be an integer")
+                    result.is_valid = False
+                else:
+                    if not 1 <= holders <= 200:
+                        result.errors.append(
+                            f"{prefix}: JointAccount Number {holders} must be between 1 and 200")
+                        result.is_valid = False
+
+
     def _validate_account_holder(self, holder: ET.Element, prefix: str, result: ValidationResult):
         """Validate AccountHolder element"""
         individual = self._find(holder, 'crs:Individual')
@@ -498,7 +575,23 @@ class CRSXMLValidator:
         else:
             result.errors.append(f"{prefix}: Must have either Individual or Organisation")
             result.is_valid = False
-    
+
+        if self.version == "3.0":
+            self_cert = self._get_text(holder, 'crs:SelfCert')
+            if not self_cert:
+                result.errors.append(f"{prefix}: Missing SelfCert (mandatory in CRS 3.0)")
+                result.is_valid = False
+            elif self_cert not in self.VALID_SELF_CERT:
+                result.errors.append(f"{prefix}: Invalid SelfCert '{self_cert}'")
+                result.is_valid = False
+
+            for equity in self._findall(holder, 'crs:EquityInterestType'):
+                value = (equity.text or '').strip()
+                if value not in self.VALID_EQUITY_INTEREST_TYPES:
+                    result.errors.append(f"{prefix}: Invalid EquityInterestType '{value}'")
+                    result.is_valid = False
+
+
     def _validate_individual(self, individual: ET.Element, prefix: str, result: ValidationResult):
         """Validate Individual element"""
         # ResCountryCode
@@ -614,12 +707,34 @@ class CRSXMLValidator:
         else:
             self._validate_individual(individual, f"{prefix} ControllingPerson", result)
         
-        # CtrlgPersonType is required for CRS101 organisations
-        ctrl_person_type = self._get_text(cp, 'crs:CtrlgPersonType')
-        if ctrl_person_type and ctrl_person_type not in self.VALID_CTRL_PERSON_TYPES:
-            result.errors.append(f"{prefix} ControllingPerson: Invalid CtrlgPersonType '{ctrl_person_type}'")
+        # CtrlgPersonType is required for CRS101 organisations, and CRS 3.0
+        # promoted it to mandatory and repeatable (1..unbounded).
+        valid_cp_types = (self.VALID_CTRL_PERSON_TYPES_V3 if self.version == "3.0"
+                          else self.VALID_CTRL_PERSON_TYPES)
+        ctrl_person_types = self._findall(cp, 'crs:CtrlgPersonType')
+
+        if self.version == "3.0" and not ctrl_person_types:
+            result.errors.append(
+                f"{prefix} ControllingPerson: Missing CtrlgPersonType (mandatory in CRS 3.0)")
             result.is_valid = False
-    
+
+        for element in ctrl_person_types:
+            value = (element.text or '').strip()
+            if value and value not in valid_cp_types:
+                result.errors.append(f"{prefix} ControllingPerson: Invalid CtrlgPersonType '{value}'")
+                result.is_valid = False
+
+        if self.version == "3.0":
+            self_cert = self._get_text(cp, 'crs:SelfCert')
+            if not self_cert:
+                result.errors.append(
+                    f"{prefix} ControllingPerson: Missing SelfCert (mandatory in CRS 3.0)")
+                result.is_valid = False
+            elif self_cert not in self.VALID_CP_SELF_CERT:
+                result.errors.append(f"{prefix} ControllingPerson: Invalid SelfCert '{self_cert}'")
+                result.is_valid = False
+
+
     def _validate_doc_spec(self, element: ET.Element, prefix: str, result: ValidationResult):
         """Validate DocSpec element"""
         doc_spec = self._find(element, 'crs:DocSpec')

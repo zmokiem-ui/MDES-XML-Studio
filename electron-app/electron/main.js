@@ -316,6 +316,7 @@ ipcMain.handle('generate-csv-preview', async (event, formData) => {
       '--individual-accounts', formData.individualAccounts || '0',
       '--organisation-accounts', formData.organisationAccounts || '0',
       '--controlling-persons', formData.controllingPersons || '1',
+      '--crs-version', formData.crsVersion || '2.0',
       '--output', tempCsvPath,
       '--preview-limit', '20',
       '--preview-json'
@@ -348,6 +349,7 @@ ipcMain.handle('save-csv-preview', async (event, formData) => {
       '--individual-accounts', formData.individualAccounts || '0',
       '--organisation-accounts', formData.organisationAccounts || '0',
       '--controlling-persons', formData.controllingPersons || '1',
+      '--crs-version', formData.crsVersion || '2.0',
       '--output', dialogResult.filePath
     ],
     parseJson: false,
@@ -361,6 +363,8 @@ ipcMain.handle('generate-crs', async (event, formData) => {
   
   if (formData.mode === 'csv') {
     args.push('--mode', 'csv', '--csv-input', formData.csvPath, '--output', formData.outputPath);
+    // The CSV path supports CRS 3.0 too, driven by the optional v3 columns.
+    if (formData.crsVersion) args.push('--crs-version', formData.crsVersion);
   } else {
     args.push(
       '--mode', 'random',
@@ -374,6 +378,12 @@ ipcMain.handle('generate-crs', async (event, formData) => {
       '--controlling-persons', formData.controllingPersons,
       '--output', formData.outputPath
     );
+
+    // CRS schema version. Both paths support 3.0; the CSV branch above passes
+    // the same flag.
+    if (formData.crsVersion) {
+      args.push('--crs-version', formData.crsVersion);
+    }
 
     if (formData.reportingFITINs && formData.reportingFITINs.length > 0) {
       args.push('--reporting-fi-tins', trimIdList(formData.reportingFITINs).join(','));

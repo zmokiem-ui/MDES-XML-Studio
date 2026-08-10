@@ -28,6 +28,10 @@ class ControllingPersonData:
     address_city: str
     address_country_code: str
     res_country_code: str
+    # CtrlgPersonType is required whenever a controlling person is reported;
+    # self_cert is additionally mandatory from CRS 3.0 on.
+    ctrlg_person_type: str = 'CRS801'
+    self_cert: str = 'CRS1001'
 
 
 @dataclass
@@ -67,6 +71,16 @@ class AccountData:
     individual: Optional[IndividualData] = None
     organisation: Optional[OrganisationData] = None
     payment: Optional[PaymentData] = None
+    # OECD601 keeps the long-standing default. OECD606 (specified electronic
+    # money product) is a CRS 3.0 addition and forces account_type CRS1101
+    # under MDES rule 60017.
+    acct_number_type: str = 'OECD601'
+    # CRS 3.0 classification. Ignored when generating 2.0.
+    self_cert: str = 'CRS901'
+    dd_procedure: str = 'CRS1201'
+    account_type: str = 'CRS1101'
+    equity_interest_types: List[str] = field(default_factory=list)
+    joint_account_number: Optional[int] = None
 
 
 @dataclass
@@ -136,12 +150,39 @@ class CRSCSVParser:
         'ControllingPerson_ResCountryCode'
     ]
     
+    # CRS 3.0 columns. All optional — a 2.0-era CSV keeps working, and any
+    # column left out falls back to the documented default below. Values are
+    # checked against the CrsXML_v3.0.xsd enumerations.
+    CRS3_COLUMNS = [
+        'AcctNumberType', 'SelfCert', 'DDProcedure', 'AccountType',
+        'EquityInterestType', 'JointAccount_Number',
+        'ControllingPerson_CtrlgPersonType', 'ControllingPerson_SelfCert',
+    ]
+
     VALID_PAYMENT_TYPES = ['CRS501', 'CRS502', 'CRS503', 'CRS504']
-    
-    def __init__(self, csv_path: Path):
+
+    # The trailing "xx00" member of each CRS 3.0 enumeration means "not
+    # reported" and exists for correcting pre-3.0 data. Accepted on input
+    # because MDES accepts it, but never a default.
+    VALID_ACCT_NUMBER_TYPES = ['OECD601', 'OECD602', 'OECD603', 'OECD604', 'OECD605', 'OECD606']
+    VALID_SELF_CERT = ['CRS901', 'CRS902', 'CRS900']
+    VALID_CP_SELF_CERT = ['CRS1001', 'CRS1002', 'CRS1000']
+    VALID_DD_PROCEDURES = ['CRS1201', 'CRS1202', 'CRS1200']
+    VALID_ACCOUNT_TYPES = ['CRS1101', 'CRS1102', 'CRS1103', 'CRS1104', 'CRS1100']
+    VALID_EQUITY_INTEREST_TYPES = [f'CRS4{i:02d}' for i in range(1, 11)]
+    VALID_CTRLG_PERSON_TYPES = (
+        [f'CRS8{i:02d}' for i in range(1, 14)] + ['CRS800']
+    )
+
+    def __init__(self, csv_path: Path, crs_version: str = '2.0'):
         self.csv_path = Path(csv_path)
+        self.crs_version = str(crs_version).strip()
         self.errors: List[str] = []
         self.warnings: List[str] = []
+
+    @property
+    def is_v3(self) -> bool:
+        return self.crs_version == '3.0'
     
     def parse(self) -> CRSDataFromCSV:
         """Parse CSV file and return structured CRS data"""
@@ -284,13 +325,13 @@ class CRSCSVParser:
                     self.errors.append(f"Row {row_num}: Missing required Organisation field '{col}'")
                     valid = False
             
-            # Check Controlling Person for Organisation
+            # A Controlling Person is optional: it makes the holder a passive NFE
+            # (CRS101), and omitting it reports a CRS103 holder instead. MDES
+            # rule 60005 forbids a controlling person on CRS102/CRS103, so
+            # demanding one for every organisation was wrong. When present,
+            # every controlling-person field must be complete.
             has_cp = bool(self._safe_get(row, 'ControllingPerson_FirstName'))
-            if not has_cp:
-                self.errors.append(f"Row {row_num}: Organisation accounts must have a Controlling Person.")
-                valid = False
-            else:
-                # Validate Controlling Person required fields
+            if has_cp:
                 for col in self.CONTROLLING_PERSON_COLUMNS:
                     if col not in row:
                         self.errors.append(f"Row {row_num}: Missing column '{col}' required for Controlling Person.")
@@ -319,6 +360,23 @@ class CRSCSVParser:
                     self.errors.append(f"Row {row_num}: '{col}' must be a number, got '{val}'")
                     valid = False
         
+        # A closed account must report a zero balance (MDES rule 60003). The CSV
+        # states both values, so a contradiction is rejected rather than silently
+        # rewritten.
+        if self._safe_get(row, 'AccountClosed').lower() == 'true':
+            balance = self._safe_get(row, 'AccountBalance')
+            try:
+                if balance and float(balance) != 0:
+                    self.errors.append(
+                        f"Row {row_num}: AccountClosed is true, so AccountBalance must be 0, "
+                        f"got '{balance}' (MDES Error 60003)")
+                    valid = False
+            except ValueError:
+                pass
+
+        if not self._validate_crs3_row(row, row_num):
+            valid = False
+
         # Validate TaxYear
         tax_year = self._safe_get(row, 'TaxYear')
         if tax_year:
@@ -333,6 +391,70 @@ class CRSCSVParser:
         
         return valid
     
+    def _validate_crs3_row(self, row: Dict[str, str], row_num: int) -> bool:
+        """Validate the optional CRS 3.0 columns.
+
+        AcctNumberType is checked for every version — it has always been written
+        into the output. The rest only constrain a 3.0 run, but an out-of-range
+        value is reported whatever the version so a typo is not silently dropped
+        when the same CSV is later regenerated as 3.0.
+        """
+        valid = True
+
+        enum_columns = [
+            ('AcctNumberType', self.VALID_ACCT_NUMBER_TYPES),
+            ('SelfCert', self.VALID_SELF_CERT),
+            ('DDProcedure', self.VALID_DD_PROCEDURES),
+            ('AccountType', self.VALID_ACCOUNT_TYPES),
+            ('ControllingPerson_CtrlgPersonType', self.VALID_CTRLG_PERSON_TYPES),
+            ('ControllingPerson_SelfCert', self.VALID_CP_SELF_CERT),
+        ]
+        for col, allowed in enum_columns:
+            value = self._safe_get(row, col)
+            if value and value not in allowed:
+                self.errors.append(
+                    f"Row {row_num}: Invalid {col} '{value}'. Must be one of: {', '.join(allowed)}")
+                valid = False
+
+        # EquityInterestType is repeatable; a single cell holds a comma-separated list.
+        for value in self._split_list(self._safe_get(row, 'EquityInterestType')):
+            if value not in self.VALID_EQUITY_INTEREST_TYPES:
+                self.errors.append(
+                    f"Row {row_num}: Invalid EquityInterestType '{value}'. Must be one of: "
+                    f"{', '.join(self.VALID_EQUITY_INTEREST_TYPES)}")
+                valid = False
+
+        joint = self._safe_get(row, 'JointAccount_Number')
+        if joint:
+            try:
+                holders = int(joint)
+            except ValueError:
+                self.errors.append(
+                    f"Row {row_num}: JointAccount_Number must be a whole number, got '{joint}'")
+                valid = False
+            else:
+                if not 1 <= holders <= 200:
+                    self.errors.append(
+                        f"Row {row_num}: JointAccount_Number must be between 1 and 200, got {holders}")
+                    valid = False
+
+        # MDES rule 60017, checked at the source so the file is never generated
+        # invalid in the first place.
+        if self._safe_get(row, 'AcctNumberType') == 'OECD606':
+            account_type = self._safe_get(row, 'AccountType')
+            if account_type and account_type != 'CRS1101':
+                self.errors.append(
+                    f"Row {row_num}: AcctNumberType OECD606 requires AccountType CRS1101, "
+                    f"got '{account_type}' (MDES Error 60017)")
+                valid = False
+
+        return valid
+
+    @staticmethod
+    def _split_list(value: str) -> List[str]:
+        """Split a comma-separated cell into trimmed, non-empty entries."""
+        return [part.strip() for part in value.split(',') if part.strip()]
+
     def _parse_rows(self, rows: List[Dict[str, str]]) -> CRSDataFromCSV:
         """Parse validated rows into CRS data structure"""
         # Validate all rows first
@@ -398,6 +520,8 @@ class CRSCSVParser:
         individual = None
         organisation = None
         
+        has_controlling_person = bool(self._get_value(row, 'ControllingPerson_FirstName'))
+
         if self._get_value(row, 'Individual_FirstName'):
             individual = IndividualData(
                 first_name=self._get_value(row, 'Individual_FirstName'),
@@ -412,19 +536,25 @@ class CRSCSVParser:
                 res_country_code=self._get_value(row, 'Individual_ResCountryCode').upper()
             )
         else:
-            # Parse controlling person
-            cp = ControllingPersonData(
-                first_name=self._get_value(row, 'ControllingPerson_FirstName'),
-                last_name=self._get_value(row, 'ControllingPerson_LastName'),
-                birth_date=self._parse_date(self._get_value(row, 'ControllingPerson_BirthDate')) or '',
-                tin=self._get_value(row, 'ControllingPerson_TIN'),
-                tin_country_code=self._get_value(row, 'ControllingPerson_TIN_CountryCode').upper(),
-                address_street=self._get_value(row, 'ControllingPerson_Address_Street'),
-                address_city=self._get_value(row, 'ControllingPerson_Address_City'),
-                address_country_code=self._get_value(row, 'ControllingPerson_Address_CountryCode').upper(),
-                res_country_code=self._get_value(row, 'ControllingPerson_ResCountryCode').upper()
-            )
-            
+            # Parse controlling person. Absent means the holder is reported as
+            # CRS103 rather than CRS101 — see the generator.
+            cp = None
+            if has_controlling_person:
+                cp = ControllingPersonData(
+                    first_name=self._get_value(row, 'ControllingPerson_FirstName'),
+                    last_name=self._get_value(row, 'ControllingPerson_LastName'),
+                    birth_date=self._parse_date(self._get_value(row, 'ControllingPerson_BirthDate')) or '',
+                    tin=self._get_value(row, 'ControllingPerson_TIN'),
+                    tin_country_code=self._get_value(row, 'ControllingPerson_TIN_CountryCode').upper(),
+                    address_street=self._get_value(row, 'ControllingPerson_Address_Street'),
+                    address_city=self._get_value(row, 'ControllingPerson_Address_City'),
+                    address_country_code=self._get_value(row, 'ControllingPerson_Address_CountryCode').upper(),
+                    res_country_code=self._get_value(row, 'ControllingPerson_ResCountryCode').upper(),
+                    ctrlg_person_type=self._get_value(row, 'ControllingPerson_CtrlgPersonType') or 'CRS801',
+                    self_cert=self._get_value(row, 'ControllingPerson_SelfCert') or 'CRS1001',
+                )
+
+
             organisation = OrganisationData(
                 name=self._get_value(row, 'Organisation_Name'),
                 tin=self._get_value(row, 'Organisation_TIN'),
@@ -437,6 +567,12 @@ class CRSCSVParser:
                 controlling_person=cp
             )
         
+        acct_number_type = self._get_value(row, 'AcctNumberType') or 'OECD601'
+        # CRS1101 (depository account) is the default AccountType, which also
+        # happens to be the only value rule 60017 allows for an OECD606 account
+        # number — a conflicting explicit value is rejected during validation.
+        joint_account_number = self._get_value(row, 'JointAccount_Number')
+
         return AccountData(
             account_number=self._get_value(row, 'AccountNumber'),
             balance=float(self._get_value(row, 'AccountBalance') or '0'),
@@ -445,7 +581,13 @@ class CRSCSVParser:
             is_dormant=self._get_value(row, 'AccountDormant').lower() == 'true',
             individual=individual,
             organisation=organisation,
-            payment=payment
+            payment=payment,
+            acct_number_type=acct_number_type,
+            self_cert=self._get_value(row, 'SelfCert') or 'CRS901',
+            dd_procedure=self._get_value(row, 'DDProcedure') or 'CRS1201',
+            account_type=self._get_value(row, 'AccountType') or 'CRS1101',
+            equity_interest_types=self._split_list(self._get_value(row, 'EquityInterestType')),
+            joint_account_number=int(joint_account_number) if joint_account_number else None,
         )
 
 
@@ -457,11 +599,16 @@ def generate_csv_preview(
     num_fis: int,
     individual_accounts: int,
     organisation_accounts: int,
-    controlling_persons: int = 1
+    controlling_persons: int = 1,
+    crs_version: str = '2.0'
 ) -> List[Dict[str, str]]:
     """
     Generate CSV preview data using Faker for random data.
     Returns list of dictionaries representing CSV rows.
+
+    With crs_version '3.0' the CRS 3.0 columns are included and populated, so a
+    preview CSV can be saved, edited and re-imported as a 3.0 file. They are
+    omitted for 2.0 to keep that template unchanged.
     """
     from faker import Faker
     import random
@@ -472,9 +619,39 @@ def generate_csv_preview(
     # is trimmed here too rather than only on the XML path.
     mytin = normalize_identifier(mytin)
 
+    is_v3 = str(crs_version).strip() == '3.0'
+    # Organisation accounts only get a controlling person when one was asked
+    # for; without one the holder is reported as CRS103 (MDES 60005/60006).
+    include_controlling_person = controlling_persons > 0
+
+    def crs3_columns(is_organisation: bool) -> Dict[str, str]:
+        """CRS 3.0 classification columns for one row (empty dict on 2.0)."""
+        if not is_v3:
+            return {}
+        acct_number_type = random.choice(
+            ['OECD601', 'OECD602', 'OECD603', 'OECD604', 'OECD605', 'OECD606'])
+        columns = {
+            'AcctNumberType': acct_number_type,
+            'SelfCert': random.choice(['CRS901', 'CRS902']),
+            'DDProcedure': random.choice(['CRS1201', 'CRS1202']),
+            # Rule 60017: an OECD606 electronic money product must be CRS1101.
+            'AccountType': ('CRS1101' if acct_number_type == 'OECD606'
+                            else random.choice(['CRS1101', 'CRS1102', 'CRS1103', 'CRS1104'])),
+            'EquityInterestType': ','.join(random.sample(
+                [f'CRS4{i:02d}' for i in range(1, 11)], 2 if is_organisation else 1)),
+            'JointAccount_Number': str(random.randint(2, 5)) if random.random() < 0.2 else '',
+            'ControllingPerson_CtrlgPersonType': '',
+            'ControllingPerson_SelfCert': '',
+        }
+        if is_organisation and include_controlling_person:
+            columns['ControllingPerson_CtrlgPersonType'] = random.choice(
+                [f'CRS8{i:02d}' for i in range(1, 14)])
+            columns['ControllingPerson_SelfCert'] = random.choice(['CRS1001', 'CRS1002'])
+        return columns
+
     fake = Faker()
     rows = []
-    
+
     # Generate data for each FI
     for fi_idx in range(num_fis):
         fi_tin = f"FI{str(fi_idx + 1).zfill(3)}" if num_fis > 1 else mytin
@@ -534,10 +711,11 @@ def generate_csv_preview(
                 'ControllingPerson_ResCountryCode': '',
                 'Payment_Type': random.choice(['CRS501', 'CRS502', 'CRS503', 'CRS504']),
                 'Payment_Amount': f"{random.uniform(100, 50000):.2f}",
-                'Payment_Currency': random.choice(['EUR', 'USD', 'GBP'])
+                'Payment_Currency': random.choice(['EUR', 'USD', 'GBP']),
+                **crs3_columns(is_organisation=False)
             })
             account_num += 1
-        
+
         # Generate organisation accounts
         for _ in range(organisation_accounts):
             rows.append({
@@ -575,18 +753,23 @@ def generate_csv_preview(
                 'Organisation_Address_PostCode': fake.postcode(),
                 'Organisation_Address_CountryCode': receiving_country,
                 'Organisation_ResCountryCode': receiving_country,
-                'ControllingPerson_FirstName': fake.first_name(),
-                'ControllingPerson_LastName': fake.last_name(),
-                'ControllingPerson_BirthDate': fake.date_of_birth(minimum_age=25, maximum_age=70).strftime('%Y-%m-%d'),
-                'ControllingPerson_TIN': fake.bothify(text='CP######'),
-                'ControllingPerson_TIN_CountryCode': receiving_country,
-                'ControllingPerson_Address_Street': f"{fake.street_name()} {fake.building_number()}",
-                'ControllingPerson_Address_City': fake.city(),
-                'ControllingPerson_Address_CountryCode': receiving_country,
-                'ControllingPerson_ResCountryCode': receiving_country,
+                'ControllingPerson_FirstName': fake.first_name() if include_controlling_person else '',
+                'ControllingPerson_LastName': fake.last_name() if include_controlling_person else '',
+                'ControllingPerson_BirthDate': (
+                    fake.date_of_birth(minimum_age=25, maximum_age=70).strftime('%Y-%m-%d')
+                    if include_controlling_person else ''),
+                'ControllingPerson_TIN': fake.bothify(text='CP######') if include_controlling_person else '',
+                'ControllingPerson_TIN_CountryCode': receiving_country if include_controlling_person else '',
+                'ControllingPerson_Address_Street': (
+                    f"{fake.street_name()} {fake.building_number()}"
+                    if include_controlling_person else ''),
+                'ControllingPerson_Address_City': fake.city() if include_controlling_person else '',
+                'ControllingPerson_Address_CountryCode': receiving_country if include_controlling_person else '',
+                'ControllingPerson_ResCountryCode': receiving_country if include_controlling_person else '',
                 'Payment_Type': random.choice(['CRS501', 'CRS502', 'CRS503', 'CRS504']),
                 'Payment_Amount': f"{random.uniform(500, 100000):.2f}",
-                'Payment_Currency': random.choice(['EUR', 'USD', 'GBP'])
+                'Payment_Currency': random.choice(['EUR', 'USD', 'GBP']),
+                **crs3_columns(is_organisation=True)
             })
             account_num += 1
     

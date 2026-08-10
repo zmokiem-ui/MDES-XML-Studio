@@ -1,17 +1,14 @@
 // Quick verification that E2E setup works
 const { _electron: electron } = require('playwright');
 const path = require('path');
+const { electronEnv } = require('./helpers');
 
 async function quickVerify() {
   console.log('🚀 Launching Electron app...');
   
   const electronApp = await electron.launch({
     args: [path.join(__dirname, '../electron/main.js')],
-    env: {
-      ...process.env,
-      NODE_ENV: 'production',
-      E2E_TEST: 'true'
-    }
+    env: electronEnv()
   });
 
   console.log('✅ App launched successfully');

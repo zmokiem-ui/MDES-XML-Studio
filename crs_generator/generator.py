@@ -28,6 +28,43 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 
+# --- CRS version support ----------------------------------------------------
+# CRS 3.0 keeps the v2 supporting schemas (cfc/stf/iso) but moves to its own
+# root namespace and adds mandatory classification fields. MDES routes an
+# upload by root namespace *or* @version (see camel config.xml), so both have
+# to match the version being generated.
+SUPPORTED_CRS_VERSIONS = ("2.0", "3.0")
+
+CRS_NAMESPACES = {
+    "2.0": "urn:oecd:ties:crs:v2",
+    "3.0": "urn:oecd:ties:crs:v3",
+}
+
+CRS_TEMPLATES = {
+    "2.0": "CRS.Generic.2021.Domestic.xml",
+    "3.0": "CRS3.Generic.Domestic.xml",
+}
+
+# Enumerations CRS 3.0 introduced, read off CrsXML_v3.0.xsd. Each of these
+# types also has a trailing "xx00" member (CRS400/800/900/1000/1100/1200)
+# meaning "not reported" — those are transitional codes for correcting data
+# that predates 3.0, so freshly generated data never draws one.
+CRS3_EQUITY_INTEREST_TYPES = [f"CRS4{n:02d}" for n in range(1, 11)]   # CRS401-410
+CRS3_CTRLG_PERSON_TYPES = [f"CRS8{n:02d}" for n in range(1, 14)]      # CRS801-813
+CRS3_SELF_CERT = ["CRS901", "CRS902"]
+CRS3_CP_SELF_CERT = ["CRS1001", "CRS1002"]
+CRS3_ACCOUNT_TYPES = ["CRS1101", "CRS1102", "CRS1103", "CRS1104"]
+CRS3_DD_PROCEDURES = ["CRS1201", "CRS1202"]
+
+# Share of CRS 3.0 accounts reported as a specified electronic money product
+# (AcctNumberType OECD606). MDES rule 60017 forces AccountType CRS1101 for
+# those, so a non-zero share keeps that rule exercised by generated data.
+CRS3_EMONEY_ACCOUNT_RATIO = 0.1
+
+# Share of CRS 3.0 accounts that get the optional JointAccount/Number element.
+CRS3_JOINT_ACCOUNT_RATIO = 0.2
+
+
 @dataclass
 class GeneratorConfig:
     """Configuration for CRS XML generation."""
@@ -36,7 +73,11 @@ class GeneratorConfig:
     receiving_country: str = "NL"
     tax_year: int = 2021
     mytin: str = "999999999"  # Default test TIN - replace with actual SendingCompanyIN
-    
+
+    # Schema version to generate. Defaults to 2.0 so existing callers keep
+    # producing what they produced before; 3.0 is opt-in.
+    crs_version: str = "2.0"
+
     # ReportingFI TINs (one per ReportingFI)
     reporting_fi_tins: List[str] = field(default_factory=list)
     
@@ -70,6 +111,13 @@ class GeneratorConfig:
     
     def __post_init__(self):
 
+        self.crs_version = str(self.crs_version).strip()
+        if self.crs_version not in SUPPORTED_CRS_VERSIONS:
+            raise ValueError(
+                f"Unsupported crs_version {self.crs_version!r}; "
+                f"expected one of {', '.join(SUPPORTED_CRS_VERSIONS)}"
+            )
+
         # Trim identifiers before anything concatenates them into a RefId — a
         # pasted trailing space would otherwise sit inside every MessageRefId
         # and DocRefId and get the file rejected by MDES (rule 80025).
@@ -83,7 +131,10 @@ class GeneratorConfig:
             self.output_path = Path(self.output_path)
         
         if self.output_path is None:
-            self.output_path = Path.cwd() / "out" / f"crs_{self.sending_country}_{self.tax_year}.xml"
+            # Version in the default name so a 3.0 run does not silently
+            # overwrite the 2.0 file for the same country and year.
+            prefix = "crs" if self.crs_version == "2.0" else "crs3"
+            self.output_path = Path.cwd() / "out" / f"{prefix}_{self.sending_country}_{self.tax_year}.xml"
         else:
             # If user provides just a filename (no directory), auto-prepend 'out/'
             if not self.output_path.parent or str(self.output_path.parent) == '.':
@@ -238,9 +289,10 @@ class CRSGenerator:
         self.config = config
         self.data_gen = DataGenerator(config.seed, config)
         
-        # Namespace map
+        # Namespace map. Only the crs prefix moves between versions — the
+        # supporting schemas are shared by 2.0 and 3.0.
         self.ns = {
-            'crs': 'urn:oecd:ties:crs:v2',
+            'crs': CRS_NAMESPACES[config.crs_version],
             'stf': 'urn:oecd:ties:crsstf:v5',
             'cfc': 'urn:oecd:ties:commontypesfatcacrs:v2',
             'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
@@ -256,8 +308,9 @@ class CRSGenerator:
         return 'OECD11' if self.config.test_mode else 'OECD1'
 
     def _load_base_template(self) -> tuple[etree._ElementTree, dict]:
-        """Load the base CRS template."""
-        template_path = Path(__file__).parent / "templates" / "CRS.Generic.2021.Domestic.xml"
+        """Load the base CRS template for the configured version."""
+        template_name = CRS_TEMPLATES[self.config.crs_version]
+        template_path = Path(__file__).parent / "templates" / template_name
         if not template_path.exists():
             raise FileNotFoundError(f"Base template not found: {template_path}")
         
@@ -357,6 +410,90 @@ class CRSGenerator:
         
         elem.text = text
     
+    def _apply_crs3_fields(self, account: etree._Element, ns: dict, is_organisation: bool):
+        """Fill the classification fields CRS 3.0 made mandatory.
+
+        No-op on 2.0. The v3 template already carries these elements in schema
+        order, but the repeating and optional ones are rebuilt here rather than
+        edited in place so each account gets an independent draw:
+
+          AccountHolder     : EquityInterestType* (first child), SelfCert
+          ControllingPerson : CtrlgPersonType+ , SelfCert
+          AccountReport     : DDProcedure, AccountType, JointAccount?
+
+        Must run *after* controlling-person cloning, otherwise every clone
+        inherits the same CtrlgPersonType and SelfCert as the original.
+        """
+        if self.config.crs_version != "3.0":
+            return
+
+        rng = self.data_gen.rng
+        crs_uri = ns['crs']
+
+        def crs_element(local_name: str) -> etree._Element:
+            return etree.Element(f'{{{crs_uri}}}{local_name}')
+
+        holder = account.find('crs:AccountHolder', namespaces=ns)
+        if holder is not None:
+            # EquityInterestType is 0..unbounded and leads the sequence. The
+            # trunk reference files give individuals one and organisations up
+            # to two, so mirror that.
+            for existing in holder.findall('crs:EquityInterestType', namespaces=ns):
+                holder.remove(existing)
+            wanted = rng.randint(1, 2) if is_organisation else 1
+            for position, value in enumerate(rng.sample(CRS3_EQUITY_INTEREST_TYPES, wanted)):
+                node = crs_element('EquityInterestType')
+                node.text = value
+                holder.insert(position, node)
+
+            self_cert = holder.find('crs:SelfCert', namespaces=ns)
+            if self_cert is not None:
+                self_cert.text = rng.choice(CRS3_SELF_CERT)
+
+        for cp in account.findall('crs:ControllingPerson', namespaces=ns):
+            # CtrlgPersonType went from optional-single in 2.0 to mandatory
+            # 1..unbounded in 3.0.
+            cp_types = cp.findall('crs:CtrlgPersonType', namespaces=ns)
+            if cp_types:
+                first = cp_types[0]
+                for extra in cp_types[1:]:
+                    cp.remove(extra)
+                insert_at = cp.index(first)
+                values = rng.sample(CRS3_CTRLG_PERSON_TYPES, rng.randint(1, 2))
+                first.text = values[0]
+                for offset, value in enumerate(values[1:], start=1):
+                    node = crs_element('CtrlgPersonType')
+                    node.text = value
+                    cp.insert(insert_at + offset, node)
+
+            cp_self_cert = cp.find('crs:SelfCert', namespaces=ns)
+            if cp_self_cert is not None:
+                cp_self_cert.text = rng.choice(CRS3_CP_SELF_CERT)
+
+        dd_procedure = account.find('crs:DDProcedure', namespaces=ns)
+        if dd_procedure is not None:
+            dd_procedure.text = rng.choice(CRS3_DD_PROCEDURES)
+
+        # MDES rule 60017: an OECD606 account number (specified electronic
+        # money product) forces AccountType CRS1101.
+        is_emoney = rng.random() < CRS3_EMONEY_ACCOUNT_RATIO
+        acc_num = account.find('crs:AccountNumber', namespaces=ns)
+        if acc_num is not None:
+            acc_num.set('AcctNumberType', 'OECD606' if is_emoney else 'OECD605')
+
+        account_type = account.find('crs:AccountType', namespaces=ns)
+        if account_type is not None:
+            account_type.text = 'CRS1101' if is_emoney else rng.choice(CRS3_ACCOUNT_TYPES)
+
+        # JointAccount is optional and closes the sequence, so appending it is
+        # already schema-order correct.
+        for existing in account.findall('crs:JointAccount', namespaces=ns):
+            account.remove(existing)
+        if rng.random() < CRS3_JOINT_ACCOUNT_RATIO:
+            joint = etree.SubElement(account, f'{{{crs_uri}}}JointAccount')
+            number = etree.SubElement(joint, f'{{{crs_uri}}}Number')
+            number.text = str(rng.randint(2, 5))
+
     def _randomize_balance_and_payment(self, account: etree._Element, ns: dict):
         """Randomize account balance and create 1-5 random payment nodes."""
         currency = self.data_gen.rng.choice(self.config.currencies)
@@ -394,8 +531,13 @@ class CRSGenerator:
             payment_amnt_elem.set('currCode', currency)
             payment_amnt_elem.text = f"{payment_amount:.2f}"
         
-        # Create additional payments if needed
+        # Create additional payments if needed.
+        # Insert straight after the template payment rather than appending:
+        # Payment ends the AccountReport sequence in CRS 2.0, but in 3.0
+        # DDProcedure/AccountType/JointAccount follow it, so appending would
+        # push the extra payments past them and break element order.
         parent = template_payment.getparent()
+        insert_at = parent.index(template_payment) + 1
         for i in range(1, num_payments):
             new_payment = deepcopy(template_payment)
             
@@ -410,8 +552,9 @@ class CRSGenerator:
                 payment_amount = self.data_gen.payment_amount(balance)
                 payment_amnt_elem.set('currCode', currency)
                 payment_amnt_elem.text = f"{payment_amount:.2f}"
-            
-            parent.append(new_payment)
+
+            parent.insert(insert_at, new_payment)
+            insert_at += 1
     
     def _create_individual_account(self, template: etree._Element, ns: dict) -> etree._Element:
         """Create an individual account from template."""
@@ -478,9 +621,11 @@ class CRSGenerator:
         docref = account.find('.//stf:DocRefId', namespaces=ns)
         if docref is not None:
             docref.text = self._next_docref_id()
-        
+
+        self._apply_crs3_fields(account, ns, is_organisation=False)
+
         return account
-    
+
     def _create_organisation_account(self, template: etree._Element, ns: dict) -> etree._Element:
         """Create an organisation account from template."""
         account = deepcopy(template)
@@ -609,7 +754,11 @@ class CRSGenerator:
                     # with more than one controlling person XSD-invalid.
                     parent.insert(insert_at, new_cp)
                     insert_at += 1
-        
+
+        # After CP cloning, so every controlling person draws its own
+        # CtrlgPersonType and SelfCert.
+        self._apply_crs3_fields(account, ns, is_organisation=True)
+
         return account
     
     def _update_message_spec(self, root: etree._Element, ns: dict):
@@ -738,6 +887,7 @@ class CRSGenerator:
         logger.info("🏦 CRS XML GENERATOR")
         logger.info("="*70)
         logger.info(f"📊 Configuration:")
+        logger.info(f"   CRS Version: {self.config.crs_version}")
         logger.info(f"   Country: {self.config.sending_country} → {self.config.receiving_country}")
         logger.info(f"   Tax Year: {self.config.tax_year}")
         logger.info(f"   MYTIN: {self.config.mytin}")
@@ -963,7 +1113,7 @@ class CRSGenerator:
             with etree.xmlfile(str(self.config.output_path), encoding='utf-8') as xf:
                 xf.write_declaration()
                 
-                with xf.element(root.tag, nsmap=root.nsmap, version="2.0"):
+                with xf.element(root.tag, nsmap=root.nsmap, version=self.config.crs_version):
                     # Write MessageSpec
                     msg_spec = root.find('.//crs:MessageSpec', namespaces=ns)
                     if msg_spec is not None:
@@ -1034,18 +1184,22 @@ def _generate_chunk_worker(chunk_data: dict) -> Path:
     # (the previous 100k stride collided once any worker emitted >100k IDs).
     worker_gen.docref_counter = worker_id * 10_000_000  # Offset to avoid ID collisions
     
-    # Create root for this chunk
+    # Create root for this chunk. The chunk files are intermediates whose
+    # CrsBody elements get streamed into the real root, but they still have to
+    # carry the right crs namespace or the merge step's iterparse tag filter
+    # (which keys on ns['crs']) matches nothing.
+    crs_uri = CRS_NAMESPACES[config.crs_version]
     root = etree.Element(
-        '{urn:oecd:ties:crs:v2}CRS_OECD',
+        f'{{{crs_uri}}}CRS_OECD',
         nsmap={
-            'crs': 'urn:oecd:ties:crs:v2',
+            'crs': crs_uri,
             'stf': 'urn:oecd:ties:crsstf:v5',
             'cfc': 'urn:oecd:ties:commontypesfatcacrs:v2',
             'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
             'iso': 'urn:oecd:ties:isocrstypes:v1',
             'ftc': 'urn:oecd:ties:fatca:v1'
         },
-        version="2.0"
+        version=config.crs_version
     )
     
     # Generate FIs for this chunk

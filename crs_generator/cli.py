@@ -13,6 +13,7 @@ from .cli_utils import (
     add_correction_arguments, add_account_holder_arguments, add_generation_arguments,
     CorrectionConfig, format_validation_result, format_correction_result
 )
+from .generator import SUPPORTED_CRS_VERSIONS
 
 
 def validate_xml_mode(args):
@@ -72,8 +73,8 @@ def validate_csv_mode(args):
             'errors': [f'CSV file not found: {args.csv_input}']
         }
     
-    parser = CRSCSVParser(csv_path)
-    
+    parser = CRSCSVParser(csv_path, crs_version=args.crs_version)
+
     try:
         # This will populate parser.errors if there are issues
         data = parser.parse()
@@ -147,12 +148,23 @@ def main():
     parser.add_argument('--mytin', help='Sending company TIN')
     parser.add_argument('--num-fis', type=int, help='Number of reporting FIs')
     parser.add_argument('--output', required=True, help='Output file path')
+    parser.add_argument('--crs-version', choices=list(SUPPORTED_CRS_VERSIONS), default='2.0',
+                        help='CRS schema version to generate (default: 2.0). '
+                             '3.0 uses the urn:oecd:ties:crs:v3 namespace and emits the '
+                             'fields CRS 3.0 made mandatory (SelfCert, DDProcedure, '
+                             'AccountType, CtrlgPersonType).')
     
     # Optional arguments for random mode
     parser.add_argument('--reporting-fi-tins', help='Comma-separated list of FI TINs')
     parser.add_argument('--individual-accounts', type=int, default=0, help='Individual accounts per FI')
     parser.add_argument('--organisation-accounts', type=int, default=0, help='Organisation accounts per FI')
-    parser.add_argument('--controlling-persons', type=int, default=0, help='Controlling persons per org')
+    # Default is None rather than 0 so an explicit "--controlling-persons 0" is
+    # distinguishable from the flag being absent. The two modes have different
+    # historical defaults (0 for random, 1 for preview), and "or" collapsed a
+    # deliberate 0 into the fallback.
+    parser.add_argument('--controlling-persons', type=int, default=None,
+                        help='Controlling persons per organisation '
+                             '(default: 0 for random mode, 1 for preview mode)')
     parser.add_argument('--account-holder-mode', default='random', help='Account holder country mode')
     parser.add_argument('--account-holder-countries', help='Comma-separated country codes')
     
@@ -214,10 +226,12 @@ def generate_from_csv_mode(args):
         print(f"Error: CSV file not found: {csv_path}", file=sys.stderr)
         sys.exit(1)
     
-    print(f"Generating CRS XML from CSV: {csv_path}")
-    
+    print(f"Generating CRS {args.crs_version} XML from CSV: {csv_path}")
+
     try:
-        result_path = generate_from_csv(str(csv_path), args.output)
+        result_path = generate_from_csv(str(csv_path), args.output,
+                                        crs_version=args.crs_version,
+                                        test_mode=args.test_mode)
         file_size = result_path.stat().st_size / (1024 * 1024)
         
         print(f"\nGeneration complete!")
@@ -256,7 +270,9 @@ def generate_preview_mode(args):
             num_fis=args.num_fis,
             individual_accounts=args.individual_accounts or 0,
             organisation_accounts=args.organisation_accounts or 0,
-            controlling_persons=args.controlling_persons or 1
+            controlling_persons=(1 if args.controlling_persons is None
+                                 else args.controlling_persons),
+            crs_version=args.crs_version
         )
         
         # Limit rows for preview
@@ -311,11 +327,12 @@ def generate_random_mode(args):
         from multiprocessing import cpu_count
         num_workers = min(8, cpu_count())
     
-    print(f"Generating CRS file with {total_accounts:,} total accounts...")
+    print(f"Generating CRS {args.crs_version} file with {total_accounts:,} total accounts...")
     print(f"Parallel processing: {'Yes' if use_parallel else 'No'} ({num_workers} workers)")
-    
+
     try:
         config = GeneratorConfig(
+            crs_version=args.crs_version,
             sending_country=args.sending_country,
             receiving_country=args.receiving_country,
             tax_year=args.tax_year,
@@ -324,7 +341,7 @@ def generate_random_mode(args):
             num_reporting_fis=args.num_fis,
             individual_accounts_per_fi=args.individual_accounts,
             organisation_accounts_per_fi=args.organisation_accounts,
-            controlling_persons_per_org=args.controlling_persons,
+            controlling_persons_per_org=args.controlling_persons or 0,
             account_holder_country_mode=args.account_holder_mode,
             account_holder_countries=account_holder_countries,
             output_path=Path(args.output),

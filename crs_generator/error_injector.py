@@ -284,9 +284,17 @@ class ErrorInjector:
             'address': 'Address',
             'giin': 'GIIN',
             'accountNumber': 'AccountNumber',
-            'filerCategory': 'FilerCategory'
+            'filerCategory': 'FilerCategory',
+            # Mandatory from CRS 3.0 on. Absent from 2.0 files, so these are
+            # simply no-ops there. Mirrors the trunk's own error cases
+            # (Testfiles v3 ...05_Invalid_Missing_CRS3_Fields,
+            # ...07_Error_Missing_SelfCert).
+            'selfCert': 'SelfCert',
+            'ddProcedure': 'DDProcedure',
+            'accountType': 'AccountType',
+            'ctrlgPersonType': 'CtrlgPersonType',
         }
-        
+
         for field, local_name in field_map.items():
             if options.get(field, True):
                 elements = self._find_all_by_local_name(root, local_name)

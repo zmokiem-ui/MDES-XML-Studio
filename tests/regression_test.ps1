@@ -193,6 +193,75 @@ Write-TestHeader "1.10 CRS CSV Preview"
 $out = python -m crs_generator.cli --mode preview --output dummy --preview-json 2>&1 | Out-String
 Assert-OutputContains $out "AccountNumber|DocRefId|TIN" "CRS CSV preview has expected columns"
 
+# 1.11 CSV -> XML, the path that had no coverage before 2.0
+Write-TestHeader "1.11 CRS CSV to XML (2.0)"
+$null = python -m crs_generator.cli --mode preview --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 2 --individual-accounts 2 --organisation-accounts 2 --controlling-persons 1 --output "$OutputDir\crs_csv_2.csv" 2>&1
+Assert-FileExists "$OutputDir\crs_csv_2.csv" "CRS 2.0 preview CSV saved"
+$null = python -m crs_generator.cli --mode csv --csv-input "$OutputDir\crs_csv_2.csv" --output "$OutputDir\crs_from_csv.xml" 2>&1
+Assert-FileExists "$OutputDir\crs_from_csv.xml" "CRS 2.0 XML from CSV"
+Assert-XmlContains "$OutputDir\crs_from_csv.xml" "ReportingGroup" "CSV output nests AccountReport in ReportingGroup"
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_from_csv.xml" --output dummy 2>&1 | Out-String
+Assert-JsonField $out "is_valid" "true" "CRS 2.0 CSV output is valid"
+
+# 1.12 Organisation without controlling person is a valid CRS103 holder
+Write-TestHeader "1.12 CRS Organisation without Controlling Person"
+$null = python -m crs_generator.cli --mode preview --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 0 --organisation-accounts 2 --controlling-persons 0 --output "$OutputDir\crs_csv_nocp.csv" 2>&1
+$null = python -m crs_generator.cli --mode csv --csv-input "$OutputDir\crs_csv_nocp.csv" --output "$OutputDir\crs_nocp.xml" 2>&1
+Assert-FileExists "$OutputDir\crs_nocp.xml" "CRS XML from CSV without controlling persons"
+Assert-XmlContains "$OutputDir\crs_nocp.xml" "CRS103" "Organisation without CP is reported as CRS103"
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_nocp.xml" --output dummy 2>&1 | Out-String
+Assert-JsonField $out "is_valid" "true" "CRS103 organisation output is valid"
+
+# ============================================================
+# SECTION 1B: CRS 3.0
+# ============================================================
+Write-Section "SECTION 1B: CRS 3.0"
+
+Write-TestHeader "1B.1 CRS 3.0 Random Generation"
+$null = python -m crs_generator.cli --mode random --crs-version 3.0 --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 2 --individual-accounts 3 --organisation-accounts 3 --controlling-persons 2 --output "$OutputDir\crs3_basic.xml" 2>&1
+Assert-FileExists "$OutputDir\crs3_basic.xml" "CRS 3.0 basic random generation"
+Assert-XmlContains "$OutputDir\crs3_basic.xml" "urn:oecd:ties:crs:v3" "CRS 3.0 root namespace"
+Assert-XmlContains "$OutputDir\crs3_basic.xml" 'version="3.0"' "CRS 3.0 version attribute"
+
+Write-TestHeader "1B.2 CRS 3.0 Mandatory Classification Fields"
+Assert-XmlContains "$OutputDir\crs3_basic.xml" "<crs:SelfCert>" "CRS 3.0 AccountHolder SelfCert"
+Assert-XmlContains "$OutputDir\crs3_basic.xml" "<crs:DDProcedure>" "CRS 3.0 DDProcedure"
+Assert-XmlContains "$OutputDir\crs3_basic.xml" "<crs:AccountType>" "CRS 3.0 AccountType"
+Assert-XmlContains "$OutputDir\crs3_basic.xml" "<crs:CtrlgPersonType>" "CRS 3.0 CtrlgPersonType"
+Assert-XmlContains "$OutputDir\crs3_basic.xml" "<crs:EquityInterestType>" "CRS 3.0 EquityInterestType"
+
+Write-TestHeader "1B.3 CRS 3.0 Version Auto-Detection"
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs3_basic.xml" --output dummy 2>&1 | Out-String
+Assert-JsonField $out "is_valid" "true" "CRS 3.0 file validates"
+Assert-JsonField $out "version" '"3.0"' "CRS 3.0 version auto-detected"
+
+Write-TestHeader "1B.4 CRS 2.0 Still Defaults and Detects as 2.0"
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_basic.xml" --output dummy 2>&1 | Out-String
+Assert-JsonField $out "version" '"2.0"' "CRS 2.0 file still detected as 2.0"
+
+Write-TestHeader "1B.5 CRS 3.0 Correction and Deletion"
+$out = python -m crs_generator.cli --mode correction --xml-input "$OutputDir\crs3_basic.xml" --output "$OutputDir\crs3_corr.xml" --correct-individual 1 --correct-organisation 1 --modify-balance --test-mode 2>&1 | Out-String
+Assert-JsonSuccess $out "CRS 3.0 correction generation"
+Assert-XmlContains "$OutputDir\crs3_corr.xml" "urn:oecd:ties:crs:v3" "CRS 3.0 correction keeps v3 namespace"
+$out = python -m crs_generator.cli --mode correction --xml-input "$OutputDir\crs3_basic.xml" --output "$OutputDir\crs3_del.xml" --delete-individual 1 --test-mode 2>&1 | Out-String
+Assert-JsonSuccess $out "CRS 3.0 deletion generation"
+
+Write-TestHeader "1B.6 CRS 3.0 CSV Round Trip"
+$null = python -m crs_generator.cli --mode preview --crs-version 3.0 --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 2 --individual-accounts 2 --organisation-accounts 2 --controlling-persons 1 --output "$OutputDir\crs3_csv.csv" 2>&1
+Assert-FileExists "$OutputDir\crs3_csv.csv" "CRS 3.0 preview CSV saved"
+Assert-XmlContains "$OutputDir\crs3_csv.csv" "DDProcedure" "CRS 3.0 preview CSV has v3 columns"
+$null = python -m crs_generator.cli --mode csv --crs-version 3.0 --csv-input "$OutputDir\crs3_csv.csv" --output "$OutputDir\crs3_from_csv.xml" 2>&1
+Assert-FileExists "$OutputDir\crs3_from_csv.xml" "CRS 3.0 XML from CSV"
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs3_from_csv.xml" --output dummy 2>&1 | Out-String
+Assert-JsonField $out "is_valid" "true" "CRS 3.0 CSV output is valid"
+Assert-JsonField $out "version" '"3.0"' "CRS 3.0 CSV output detected as 3.0"
+
+Write-TestHeader "1B.7 CRS 3.0 Error Injection"
+$out = python -m crs_generator.error_injector --input "$OutputDir\crs3_basic.xml" --output "$OutputDir\ei_crs3.xml" --module crs --file-type xml --preset missing_required --level 5 --options "{}" 2>&1 | Out-String
+Assert-JsonSuccess $out "CRS 3.0 error injection"
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\ei_crs3.xml" --output dummy 2>&1 | Out-String
+Assert-JsonField $out "is_valid" "false" "Corrupted CRS 3.0 file is invalid"
+
 # ============================================================
 # SECTION 2: FATCA MODULE - FULL COVERAGE
 # ============================================================
