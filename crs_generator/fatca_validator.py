@@ -62,11 +62,22 @@ class FATCAXMLValidator:
     ]
     
     VALID_ACCT_HOLDER_TYPE_FATCA = [
-        'FATCA101', 'FATCA102', 'FATCA103', 'FATCA104',
+        # FATCA105 (Direct Reporting NFFE) was missing here, so a schema-valid
+        # file carrying it was rejected. AcctHolderTypeFatca_EnumType allows
+        # FATCA101-105 in both FatcaCrsTypes v2.2 and v3.0.
+        'FATCA101', 'FATCA102', 'FATCA103', 'FATCA104', 'FATCA105',
     ]
     
     # CRS payment types
     VALID_PAYMENT_TYPES = ['CRS501', 'CRS502', 'CRS503', 'CRS504']
+
+    # FC 3.0 additions. The trailing "xx00" member of each list means "not
+    # reported"; it is legal on the wire for correcting pre-3.0 data, so it is
+    # accepted here even though the generator never emits it.
+    VALID_SELF_CERT = ['CRS901', 'CRS902', 'CRS900']
+    VALID_CP_SELF_CERT = ['CRS1001', 'CRS1002', 'CRS1000']
+    VALID_DD_PROCEDURES = ['CRS1201', 'CRS1202', 'CRS1200']
+    VALID_ACCOUNT_TYPES = ['CRS1101', 'CRS1102', 'CRS1103', 'CRS1104', 'CRS1100']
     
     # MessageTypeIndic values
     VALID_MESSAGE_TYPE_INDIC = ['CRS701', 'CRS702', 'CRS703']
@@ -293,9 +304,108 @@ class FATCAXMLValidator:
         payments = account.findall('sfa_ftc:Payment', namespaces=self.ns)
         for payment in payments:
             self._validate_payment(payment, result)
-    
+
+        if result.xml_version == '3.0':
+            self._validate_account_report_fc3(account, acc_num, payments, result)
+
+    def _validate_account_report_fc3(self, account, acc_num, payments,
+                                     result: FATCAValidationResult):
+        """Validate what FC 3.0 made mandatory, plus the MDES combinations.
+
+        The XSD accepts any AccountType next to any account-number or payment
+        type, but MDES constrains them (rules 60018-60023 in the record-level
+        catalogue). Checking here means the app reports the problem instead of
+        the upload doing it.
+        """
+        dd_procedure = account.findtext('sfa_ftc:DDProcedure', namespaces=self.ns)
+        if not dd_procedure:
+            result.errors.append("AccountReport missing DDProcedure (mandatory in FC 3.0)")
+            result.is_valid = False
+        elif dd_procedure not in self.VALID_DD_PROCEDURES:
+            result.errors.append(f"Invalid DDProcedure: {dd_procedure}")
+            result.is_valid = False
+
+        account_type = account.findtext('sfa_ftc:AccountType', namespaces=self.ns)
+        if not account_type:
+            result.errors.append("AccountReport missing AccountType (mandatory in FC 3.0)")
+            result.is_valid = False
+        elif account_type not in self.VALID_ACCOUNT_TYPES:
+            result.errors.append(f"Invalid AccountType: {account_type}")
+            result.is_valid = False
+
+        number_type = acc_num.get('AccNumberType') if acc_num is not None else None
+
+        # 60018: an IBAN account number must be a depository account.
+        if number_type == 'OECD601' and account_type != 'CRS1101':
+            result.errors.append(
+                f"AccNumberType OECD601 requires AccountType CRS1101, got "
+                f"{account_type or 'nothing'} (MDES Error 60018)")
+            result.is_valid = False
+
+        # 60020: a cash value insurance/annuity contract is unspecified.
+        if account_type == 'CRS1103' and number_type != 'OECD605':
+            result.errors.append(
+                f"AccountType CRS1103 requires AccNumberType OECD605, got "
+                f"{number_type or 'nothing'} (MDES Error 60020)")
+            result.is_valid = False
+
+        # 60021/60022/60023: payment types admitted by the account type.
+        payment_rules = (
+            ('60021', 'CRS1101', {'CRS502'}),
+            ('60022', 'CRS1104', {'CRS503', 'CRS504'}),
+            ('60023', 'CRS1103', {'CRS503', 'CRS504'}),
+        )
+        emitted = [p.findtext('sfa_ftc:Type', namespaces=self.ns) or '' for p in payments]
+        for code, constrained_type, allowed in payment_rules:
+            if account_type != constrained_type:
+                continue
+            offenders = sorted({p for p in emitted if p and p not in allowed})
+            if offenders:
+                result.errors.append(
+                    f"AccountType {constrained_type} requires every Payment Type in "
+                    f"{', '.join(sorted(allowed))}, found {', '.join(offenders)} "
+                    f"(MDES Error {code})")
+                result.is_valid = False
+
+        joint = account.find('sfa_ftc:JointAccount', namespaces=self.ns)
+        if joint is not None:
+            number = joint.findtext('sfa_ftc:Number', namespaces=self.ns)
+            try:
+                holders = int(number)
+            except (TypeError, ValueError):
+                result.errors.append(f"JointAccount Number must be an integer, got {number!r}")
+                result.is_valid = False
+            else:
+                if not 1 <= holders <= 200:
+                    result.errors.append(
+                        f"JointAccount Number {holders} must be between 1 and 200")
+                    result.is_valid = False
+
+        for cp in account.findall('sfa_ftc:ControllingPerson', namespaces=self.ns):
+            if not cp.findall('sfa_ftc:CtrlgPersonType', namespaces=self.ns):
+                result.errors.append(
+                    "ControllingPerson missing CtrlgPersonType (mandatory in FC 3.0)")
+                result.is_valid = False
+            cp_self_cert = cp.findtext('sfa_ftc:SelfCert', namespaces=self.ns)
+            if not cp_self_cert:
+                result.errors.append(
+                    "ControllingPerson missing SelfCert (mandatory in FC 3.0)")
+                result.is_valid = False
+            elif cp_self_cert not in self.VALID_CP_SELF_CERT:
+                result.errors.append(f"Invalid ControllingPerson SelfCert: {cp_self_cert}")
+                result.is_valid = False
+
     def _validate_account_holder(self, account_holder: etree._Element, result: FATCAValidationResult):
         """Validate AccountHolder element."""
+        if result.xml_version == '3.0':
+            self_cert = account_holder.findtext('sfa_ftc:SelfCert', namespaces=self.ns)
+            if not self_cert:
+                result.errors.append("AccountHolder missing SelfCert (mandatory in FC 3.0)")
+                result.is_valid = False
+            elif self_cert not in self.VALID_SELF_CERT:
+                result.errors.append(f"Invalid AccountHolder SelfCert: {self_cert}")
+                result.is_valid = False
+
         individual = account_holder.find('sfa_ftc:Individual', namespaces=self.ns)
         organisation = account_holder.find('sfa_ftc:Organisation', namespaces=self.ns)
         

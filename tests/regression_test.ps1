@@ -302,6 +302,34 @@ Assert-JsonSuccess $out "FATCA deletion generation"
 Assert-FileExists "$OutputDir\fatca_del.xml" "FATCA deletion file exists"
 
 # ============================================================
+# SECTION 2B: FATCA-CRS COMBINED 3.0
+# ============================================================
+Write-Section "SECTION 2B: FC 3.0"
+
+Write-TestHeader "2B.1 FC 3.0 Generation"
+$null = python -m crs_generator.fatca_cli --mode random --variant fatca-crs --fc-version 3.0 --sending-country CW --receiving-country CW --tax-year 2024 --sending-company-in "A1B2C3.00000.SP.350" --num-fis 2 --individual-accounts 3 --organisation-accounts 3 --substantial-owners 2 --output "$OutputDir\fc3_basic.xml" 2>&1
+Assert-FileExists "$OutputDir\fc3_basic.xml" "FC 3.0 generation"
+Assert-XmlContains "$OutputDir\fc3_basic.xml" 'version="3.0"' "FC 3.0 version attribute"
+Assert-XmlContains "$OutputDir\fc3_basic.xml" "urn:fatcacrs:ties:v2" "FC 3.0 keeps the 2.2 namespace"
+
+Write-TestHeader "2B.2 FC 3.0 Mandatory Fields"
+Assert-XmlContains "$OutputDir\fc3_basic.xml" "<sfa_ftc:SelfCert>" "FC 3.0 AccountHolder SelfCert"
+Assert-XmlContains "$OutputDir\fc3_basic.xml" "<sfa_ftc:DDProcedure>" "FC 3.0 DDProcedure"
+Assert-XmlContains "$OutputDir\fc3_basic.xml" "<sfa_ftc:AccountType>" "FC 3.0 AccountType"
+
+Write-TestHeader "2B.3 FC Version Detection"
+$out = python -m crs_generator.fatca_cli --mode validate-xml --xml-input "$OutputDir\fc3_basic.xml" --output dummy 2>&1 | Out-String
+Assert-JsonField $out "is_valid" "true" "FC 3.0 file validates"
+Assert-JsonField $out "version" '"3.0"' "FC 3.0 version auto-detected"
+$out = python -m crs_generator.fatca_cli --mode validate-xml --xml-input "$OutputDir\fatca_basic.xml" --output dummy 2>&1 | Out-String
+Assert-JsonField $out "version" '"2.2"' "FC 2.2 still detected as 2.2"
+
+Write-TestHeader "2B.4 FC 3.0 Correction"
+$out = python -m crs_generator.fatca_cli --mode correction --variant fatca-crs --xml-input "$OutputDir\fc3_basic.xml" --output "$OutputDir\fc3_corr.xml" --correct-individual 1 --modify-balance 2>&1 | Out-String
+Assert-JsonSuccess $out "FC 3.0 correction generation"
+Assert-XmlContains "$OutputDir\fc3_corr.xml" 'version="3.0"' "FC 3.0 correction keeps version 3.0"
+
+# ============================================================
 # SECTION 3: CBC MODULE - FULL COVERAGE
 # ============================================================
 Write-Section "SECTION 3: CBC MODULE"

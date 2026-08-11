@@ -24,6 +24,9 @@ const createCrsFormData = () => ({
 
 const createFatcaFormData = () => ({
   variant: 'fatca-crs',
+  // FATCA-CRS combined schema version. 2.2 stays the default; 3.0 is opt-in and
+  // applies to the fatca-crs variant only.
+  fcVersion: '2.2',
   sendingCompanyIN: '',
   transmittingCountry: '',
   receivingCountry: 'US',

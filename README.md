@@ -11,6 +11,7 @@ pairs a Python generation/validation backend (`crs_generator`) with an Electron/
 | CRS | `CrsXML_v2.0` | default; new + corrections |
 | CRS 3.0 | `CrsXML_v3.0` | opt-in via `--crs-version 3.0`; `urn:oecd:ties:crs:v3` |
 | FATCA-CRS Combined | `FatcaCrs_v2.2` | default FATCA flow (FC upload) |
+| FATCA-CRS Combined 3.0 | `FatcaCrs_v3.0` | opt-in via `--fc-version 3.0`; same namespace as 2.2, version is in `@version` |
 | IRS FATCA (`FATCA_OECD`) | `FatcaXML_v2.0.1` | second FATCA flow; MDES hard-checks `@version="2.0.1"` |
 | CbC | `CbcXML_v2.0` | new + corrections/deletions |
 
@@ -70,6 +71,23 @@ these columns. Invalid values, an out-of-range `JointAccount_Number`, an
 `OECD606` row whose `AccountType` is not `CRS1101` (rule 60017), and a closed
 account with a non-zero balance (rule 60003) are all reported as row-level CSV
 errors rather than written into the output.
+
+### FATCA-CRS combined 3.0
+
+The FC upload has its own 3.0, carrying the same classification into the combined
+format: `SelfCert` on the account holder and on each controlling person,
+`DDProcedure` and `AccountType` on the account report, `CtrlgPersonType`
+repeatable, and an optional `JointAccount/Number`. FC 3.0 has **no**
+`EquityInterestType`, and its `AccNumberType` stops at `OECD605` (there is no
+`OECD606`), so rules 60017 and 60019 cannot arise on an FC upload.
+
+The catch: **FC 3.0 keeps the 2.2 namespace** (`urn:fatcacrs:ties:v2`) and is
+distinguished only by `@version` (`fixed="2.2"` vs `fixed="3.0"`). Validation
+detects it from that attribute; without it a 3.0 file would be checked against
+the 2.2 schema and every new element reported as unexpected.
+
+Generate with `--fc-version 3.0`, or pick the version in the FATCA form. The
+same AccountType/account-number/payment constraints as CRS apply.
 
 ## Download (end users)
 
