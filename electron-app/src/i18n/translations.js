@@ -573,12 +573,12 @@ export const translations = {
       downloadProgress: 'Download progress: {percent}%',
       whatsNew: 'Recent Improvements',
       changelog: [
-        'Improved CRS, FATCA, and CBC XML generation and validation coverage',
-        'Expanded corrupt-file presets for parser, schema, and business-rule testing',
-        'Improved CRS correction handling and multi-controlling-person output',
-        'Added safer public GitHub bug reporting with screenshot support',
-        'Hardened auto-update checks, release metadata, and packaged-app smoke tests',
-        'Cleaned up the app shell, settings code, and release validation pipeline'
+        'Added CRS 3.0: generation, validation and corrections, from random data or CSV',
+        'CRS version is picked per run and auto-detected when validating an existing file',
+        'Generated files now satisfy the MDES record-level rules the XSD cannot express',
+        'Fixed CSV-generated CRS files being rejected by the schema',
+        'CSV input follows the test/production setting and validates closed-account balances',
+        'Organisation accounts without a controlling person are now supported'
       ]
     }
   },
@@ -1150,12 +1150,12 @@ export const translations = {
       downloadProgress: 'Downloadvoortgang: {percent}%',
       whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'Verbeterde CRS-, FATCA- en CBC-XML generatie en validatie',
-        'Meer corrupte-bestand presets voor parser-, schema- en business-rule tests',
-        'Verbeterde CRS-correcties en output met meerdere controlling persons',
-        'Veiligere publieke GitHub bugrapportage met screenshot-ondersteuning',
-        'Sterkere auto-update checks, release metadata en packaged-app smoke tests',
-        'Opgeschoonde app shell, instellingen-code en release validatiepipeline'
+        'CRS 3.0 toegevoegd: generatie, validatie en correcties, vanuit random data of CSV',
+        'CRS-versie kies je per run en wordt automatisch herkend bij het valideren',
+        'Gegenereerde bestanden voldoen nu aan de MDES-recordregels die het XSD niet ziet',
+        'Opgelost: uit CSV gegenereerde CRS-bestanden werden door het schema afgekeurd',
+        'CSV-invoer volgt de test/productie-instelling en controleert saldo bij gesloten rekeningen',
+        'Organisatierekeningen zonder controlling person worden nu ondersteund'
       ]
     }
   },
@@ -1725,12 +1725,12 @@ export const translations = {
       downloadProgress: 'Progreso de descarga: {percent}%',
       whatsNew: 'Mejoras Recientes',
       changelog: [
-        'Generacion y validacion XML mejoradas para CRS, FATCA y CBC',
-        'Mas presets de archivos corruptos para pruebas de parser, esquema y reglas',
-        'Mejor manejo de correcciones CRS y multiples controlling persons',
-        'Reporte publico de bugs en GitHub mas seguro con soporte de capturas',
-        'Auto-update, metadata de release y smoke tests de app empaquetada reforzados',
-        'Limpieza del shell de la app, ajustes y pipeline de validacion de release'
+        'CRS 3.0 anadido: generacion, validacion y correcciones, desde datos aleatorios o CSV',
+        'La version CRS se elige por ejecucion y se detecta automaticamente al validar',
+        'Los archivos generados cumplen las reglas de registro de MDES que el XSD no ve',
+        'Corregido: los archivos CRS generados desde CSV eran rechazados por el esquema',
+        'La entrada CSV respeta el ajuste test/produccion y valida saldos de cuentas cerradas',
+        'Cuentas de organizacion sin controlling person ahora son compatibles'
       ]
     }
   }

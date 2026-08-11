@@ -21,6 +21,17 @@ Update both version fields so the app and the Python package agree:
 The release workflow blocks tags where either value does not match the tag.
 Follow semver: patch for fixes, minor for features, major for breaking changes.
 
+## 1b. Update the in-app "Recent Improvements" list
+
+Settings -> Updates & Version shows a changelog read from
+`electron-app/src/i18n/translations.js` -> `updates.changelog`. It is static
+text, so it does not follow the version automatically and will otherwise keep
+describing an older release next to the new version number.
+
+Rewrite it for the release, in all three languages (`en`, `nl`, `es`), keeping
+the lists the same length. Write for the tester using the app - what they can
+now do, or what no longer breaks - not for the repo. Six short bullets.
+
 ## 2. Release description
 
 Use this short release description template in GitHub. The GitLab release is
