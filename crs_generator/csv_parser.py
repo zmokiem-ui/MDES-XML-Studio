@@ -71,10 +71,10 @@ class AccountData:
     individual: Optional[IndividualData] = None
     organisation: Optional[OrganisationData] = None
     payment: Optional[PaymentData] = None
-    # OECD601 keeps the long-standing default. OECD606 (specified electronic
-    # money product) is a CRS 3.0 addition and forces account_type CRS1101
-    # under MDES rule 60017.
-    acct_number_type: str = 'OECD601'
+    # OECD605 ("unspecified") is the default: OECD601/OECD603 oblige the account
+    # number to follow the IBAN/ISIN formats (MDES 60000/60001), which generated
+    # numbers do not, and OECD601/OECD606 force account_type CRS1101 in CRS 3.0.
+    acct_number_type: str = 'OECD605'
     # CRS 3.0 classification. Ignored when generating 2.0.
     self_cert: str = 'CRS901'
     dd_procedure: str = 'CRS1201'
@@ -438,14 +438,73 @@ class CRSCSVParser:
                         f"Row {row_num}: JointAccount_Number must be between 1 and 200, got {holders}")
                     valid = False
 
-        # MDES rule 60017, checked at the source so the file is never generated
-        # invalid in the first place.
-        if self._safe_get(row, 'AcctNumberType') == 'OECD606':
-            account_type = self._safe_get(row, 'AccountType')
-            if account_type and account_type != 'CRS1101':
+        # MDES rules 60017-60023, checked at the source so a rule-violating file
+        # is never generated in the first place. These combinations are legal
+        # per the XSD, so nothing downstream would catch them before upload.
+        number_type = self._safe_get(row, 'AcctNumberType')
+        account_type = self._safe_get(row, 'AccountType')
+        payment_type = self._safe_get(row, 'Payment_Type')
+        equity = self._split_list(self._safe_get(row, 'EquityInterestType'))
+
+        # MDES 60011/60012: the account is only reportable if the holder - or,
+        # for an entity holder, one of its controlling persons - is resident in
+        # the receiving country.
+        receiving = self._safe_get(row, 'ReceivingCountry').upper()
+        if receiving:
+            if self._safe_get(row, 'Individual_FirstName'):
+                if self._safe_get(row, 'Individual_ResCountryCode').upper() != receiving:
+                    self.errors.append(
+                        f"Row {row_num}: Individual_ResCountryCode must match "
+                        f"ReceivingCountry '{receiving}' (MDES Error 60011)")
+                    valid = False
+            elif self._safe_get(row, 'Organisation_Name'):
+                residences = {
+                    self._safe_get(row, 'Organisation_ResCountryCode').upper(),
+                    self._safe_get(row, 'ControllingPerson_ResCountryCode').upper(),
+                }
+                if receiving not in residences:
+                    self.errors.append(
+                        f"Row {row_num}: Organisation_ResCountryCode or "
+                        f"ControllingPerson_ResCountryCode must match ReceivingCountry "
+                        f"'{receiving}' (MDES Error 60012)")
+                    valid = False
+
+        # Only when generating 3.0: these columns are not emitted at all for
+        # 2.0, so a 2.0 run must not be blocked by a combination that will never
+        # reach the output.
+        if not self.is_v3:
+            return valid
+
+        for code, forcing_type in (('60017', 'OECD606'), ('60018', 'OECD601')):
+            if number_type == forcing_type and account_type and account_type != 'CRS1101':
                 self.errors.append(
-                    f"Row {row_num}: AcctNumberType OECD606 requires AccountType CRS1101, "
-                    f"got '{account_type}' (MDES Error 60017)")
+                    f"Row {row_num}: AcctNumberType {forcing_type} requires AccountType "
+                    f"CRS1101, got '{account_type}' (MDES Error {code})")
+                valid = False
+
+        if equity and account_type and account_type != 'CRS1104':
+            self.errors.append(
+                f"Row {row_num}: EquityInterestType is provided, so AccountType must be "
+                f"CRS1104, got '{account_type}' (MDES Error 60019)")
+            valid = False
+
+        if account_type == 'CRS1103' and number_type and number_type != 'OECD605':
+            self.errors.append(
+                f"Row {row_num}: AccountType CRS1103 requires AcctNumberType OECD605, "
+                f"got '{number_type}' (MDES Error 60020)")
+            valid = False
+
+        payment_constraints = (
+            ('60021', 'CRS1101', {'CRS502'}),
+            ('60022', 'CRS1104', {'CRS503', 'CRS504'}),
+            ('60023', 'CRS1103', {'CRS503', 'CRS504'}),
+        )
+        for code, constrained_type, allowed in payment_constraints:
+            if account_type == constrained_type and payment_type and payment_type not in allowed:
+                self.errors.append(
+                    f"Row {row_num}: AccountType {constrained_type} requires Payment_Type "
+                    f"in {', '.join(sorted(allowed))}, got '{payment_type}' "
+                    f"(MDES Error {code})")
                 valid = False
 
         return valid
@@ -567,7 +626,11 @@ class CRSCSVParser:
                 controlling_person=cp
             )
         
-        acct_number_type = self._get_value(row, 'AcctNumberType') or 'OECD601'
+        # OECD605 ("unspecified") is the safe default: OECD601 and OECD603
+        # oblige the account number to follow the IBAN/ISIN structured formats
+        # (MDES 60000/60001), and OECD601 additionally forces AccountType
+        # CRS1101 in CRS 3.0 (60018).
+        acct_number_type = self._get_value(row, 'AcctNumberType') or 'OECD605'
         # CRS1101 (depository account) is the default AccountType, which also
         # happens to be the only value rule 60017 allows for an OECD606 account
         # number — a conflicting explicit value is rejected during validation.
@@ -625,24 +688,35 @@ def generate_csv_preview(
     include_controlling_person = controlling_persons > 0
 
     def crs3_columns(is_organisation: bool) -> Dict[str, str]:
-        """CRS 3.0 classification columns for one row (empty dict on 2.0)."""
+        """CRS 3.0 classification columns for one row (empty dict on 2.0).
+
+        AccountType is drawn first and the account-number type, payment type and
+        EquityInterestType follow from it, because MDES rules 60017-60023
+        constrain those combinations. Payment_Type is deliberately returned here
+        so it overrides the unconstrained value set earlier in the row.
+        """
         if not is_v3:
             return {}
-        acct_number_type = random.choice(
-            ['OECD601', 'OECD602', 'OECD603', 'OECD604', 'OECD605', 'OECD606'])
+
+        from .generator import CRS3_ACCOUNT_PROFILES
+
+        account_type = random.choice(list(CRS3_ACCOUNT_PROFILES))
+        profile = CRS3_ACCOUNT_PROFILES[account_type]
+
         columns = {
-            'AcctNumberType': acct_number_type,
+            'AcctNumberType': random.choice(profile['number_types']),
             'SelfCert': random.choice(['CRS901', 'CRS902']),
             'DDProcedure': random.choice(['CRS1201', 'CRS1202']),
-            # Rule 60017: an OECD606 electronic money product must be CRS1101.
-            'AccountType': ('CRS1101' if acct_number_type == 'OECD606'
-                            else random.choice(['CRS1101', 'CRS1102', 'CRS1103', 'CRS1104'])),
-            'EquityInterestType': ','.join(random.sample(
-                [f'CRS4{i:02d}' for i in range(1, 11)], 2 if is_organisation else 1)),
+            'AccountType': account_type,
+            'Payment_Type': random.choice(profile['payment_types']),
+            'EquityInterestType': '',
             'JointAccount_Number': str(random.randint(2, 5)) if random.random() < 0.2 else '',
             'ControllingPerson_CtrlgPersonType': '',
             'ControllingPerson_SelfCert': '',
         }
+        if profile['equity_interest']:
+            columns['EquityInterestType'] = ','.join(random.sample(
+                [f'CRS4{i:02d}' for i in range(1, 11)], 2 if is_organisation else 1))
         if is_organisation and include_controlling_person:
             columns['ControllingPerson_CtrlgPersonType'] = random.choice(
                 [f'CRS8{i:02d}' for i in range(1, 14)])

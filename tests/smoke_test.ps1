@@ -88,6 +88,25 @@ function Assert-Match($output, $pattern, $testName) {
     }
 }
 
+function Assert-NoMdesFindings($path, $testName) {
+    # XSD validity is not enough: MDES also enforces record-level business
+    # rules (60011/60012 residence, 60017-60023 account-type consistency) that
+    # the schema cannot express. v2.0.0 shipped violating several of them.
+    $out = python -c "import sys, json; from crs_generator.mdes_rules import check_file; print(json.dumps([f.code for f in check_file(sys.argv[1], environment_is_test=True)]))" $path 2>&1 | Out-String
+    $out = $out.Trim()
+    if ($out -eq '[]') {
+        Write-Host "  PASS: $testName (no MDES findings)" -ForegroundColor Green
+        $script:pass++
+        $script:results += [PSCustomObject]@{Test=$testName; Status="PASS"; Details="no findings"}
+        return $true
+    } else {
+        Write-Host "  FAIL: $testName - MDES findings: $out" -ForegroundColor Red
+        $script:fail++
+        $script:results += [PSCustomObject]@{Test=$testName; Status="FAIL"; Details=$out.Substring(0, [Math]::Min(200, $out.Length))}
+        return $false
+    }
+}
+
 function Assert-JsonSuccess($output, $testName) {
     if ($output -match '"success":\s*true') {
         Write-Host "  PASS: $testName" -ForegroundColor Green
@@ -124,6 +143,7 @@ Write-TestHeader "1. CRS Generation (Random)"
 $out = python -m crs_generator.cli --mode random --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs_new.xml" 2>&1 | Out-String
 Assert-FileExists "$OutputDir\crs_new.xml" "CRS random XML generation"
 Assert-XsdValid "$OutputDir\crs_new.xml" "CRS XSD validity"
+Assert-NoMdesFindings "$OutputDir\crs_new.xml" "CRS 2.0 MDES business rules"
 
 Write-TestHeader "1b. CRS Validation"
 $out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_new.xml" --output dummy 2>&1 | Out-String
@@ -139,6 +159,7 @@ Write-TestHeader "1d. CRS 3.0 Generation (Random)"
 $out = python -m crs_generator.cli --mode random --crs-version 3.0 --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs3_new.xml" 2>&1 | Out-String
 Assert-FileExists "$OutputDir\crs3_new.xml" "CRS 3.0 random XML generation"
 Assert-XsdValid "$OutputDir\crs3_new.xml" "CRS 3.0 XSD validity"
+Assert-NoMdesFindings "$OutputDir\crs3_new.xml" "CRS 3.0 MDES business rules"
 Assert-XmlContains "$OutputDir\crs3_new.xml" "urn:oecd:ties:crs:v3" "CRS 3.0 uses the v3 namespace"
 Assert-XmlContains "$OutputDir\crs3_new.xml" "<crs:DDProcedure>" "CRS 3.0 emits DDProcedure"
 Assert-XmlContains "$OutputDir\crs3_new.xml" "<crs:AccountType>" "CRS 3.0 emits AccountType"
@@ -158,6 +179,7 @@ Assert-FileExists "$OutputDir\crs_data.csv" "CRS 2.0 preview CSV created"
 $out = python -m crs_generator.cli --mode csv --csv-input "$OutputDir\crs_data.csv" --output "$OutputDir\crs_from_csv.xml" 2>&1 | Out-String
 Assert-FileExists "$OutputDir\crs_from_csv.xml" "CRS 2.0 XML generated from CSV"
 Assert-XsdValid "$OutputDir\crs_from_csv.xml" "CRS 2.0 CSV output XSD validity"
+Assert-NoMdesFindings "$OutputDir\crs_from_csv.xml" "CRS 2.0 CSV output MDES business rules"
 
 Write-TestHeader "1g. CRS CSV Round Trip (3.0)"
 $out = python -m crs_generator.cli --mode preview --crs-version 3.0 --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs3_data.csv" 2>&1 | Out-String
@@ -165,6 +187,7 @@ Assert-FileExists "$OutputDir\crs3_data.csv" "CRS 3.0 preview CSV created"
 $out = python -m crs_generator.cli --mode csv --crs-version 3.0 --csv-input "$OutputDir\crs3_data.csv" --output "$OutputDir\crs3_from_csv.xml" 2>&1 | Out-String
 Assert-FileExists "$OutputDir\crs3_from_csv.xml" "CRS 3.0 XML generated from CSV"
 Assert-XsdValid "$OutputDir\crs3_from_csv.xml" "CRS 3.0 CSV output XSD validity"
+Assert-NoMdesFindings "$OutputDir\crs3_from_csv.xml" "CRS 3.0 CSV output MDES business rules"
 
 # ============================================================
 # 2. FATCA MODULE

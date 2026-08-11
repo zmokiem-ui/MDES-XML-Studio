@@ -257,10 +257,13 @@ def test_unsupported_version_is_rejected(tmp_path):
 # --- CRS 3.0 content -------------------------------------------------------
 
 def test_v3_csv_columns_drive_the_output(tmp_path):
+    # Combinations must satisfy MDES 60017-60023: EquityInterestType only on a
+    # CRS1104 holding, whose payments must be CRS503/CRS504.
     rows = [
         individual_row(SelfCert="CRS902", DDProcedure="CRS1202",
-                       AccountType="CRS1103", EquityInterestType="CRS401,CRS410",
-                       JointAccount_Number="4", AcctNumberType="OECD605"),
+                       AccountType="CRS1104", EquityInterestType="CRS401,CRS410",
+                       JointAccount_Number="4", AcctNumberType="OECD605",
+                       Payment_Type="CRS503"),
         organisation_row(SelfCert="CRS901", DDProcedure="CRS1201",
                          AccountType="CRS1102",
                          ControllingPerson_CtrlgPersonType="CRS807",
@@ -279,7 +282,7 @@ def test_v3_csv_columns_drive_the_output(tmp_path):
     assert [e.text for e in holder.findall("crs:EquityInterestType", ns)] == ["CRS401", "CRS410"]
     assert holder.findtext("crs:SelfCert", namespaces=ns) == "CRS902"
     assert first.findtext("crs:DDProcedure", namespaces=ns) == "CRS1202"
-    assert first.findtext("crs:AccountType", namespaces=ns) == "CRS1103"
+    assert first.findtext("crs:AccountType", namespaces=ns) == "CRS1104"
     assert first.findtext("crs:JointAccount/crs:Number", namespaces=ns) == "4"
     assert first.find("crs:AccountNumber", ns).get("AcctNumberType") == "OECD605"
 
@@ -312,6 +315,9 @@ def test_v3_defaults_apply_when_columns_are_absent(tmp_path):
 
 
 def test_v2_output_has_no_v3_elements_even_if_columns_present(tmp_path):
+    # Deliberately a combination MDES would reject under 3.0 (EquityInterestType
+    # on a CRS1103 account): for 2.0 these columns are never emitted, so the
+    # 3.0-only cross-field rules must not block the run.
     rows = [individual_row(SelfCert="CRS902", DDProcedure="CRS1202",
                            AccountType="CRS1103", JointAccount_Number="3",
                            EquityInterestType="CRS401")]

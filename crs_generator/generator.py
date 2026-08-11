@@ -56,10 +56,43 @@ CRS3_CP_SELF_CERT = ["CRS1001", "CRS1002"]
 CRS3_ACCOUNT_TYPES = ["CRS1101", "CRS1102", "CRS1103", "CRS1104"]
 CRS3_DD_PROCEDURES = ["CRS1201", "CRS1202"]
 
-# Share of CRS 3.0 accounts reported as a specified electronic money product
-# (AcctNumberType OECD606). MDES rule 60017 forces AccountType CRS1101 for
-# those, so a non-zero share keeps that rule exercised by generated data.
-CRS3_EMONEY_ACCOUNT_RATIO = 0.1
+# CRS 3.0 account profiles. AccountType is not independent of the rest of the
+# report - MDES constrains which account-number types and payment types may
+# accompany it, so the type is drawn first and everything else follows from it.
+# Getting this wrong is not caught by the XSD; MDES rejects the upload instead.
+#
+#   60017/60018  OECD606 / OECD601 account number  -> AccountType CRS1101
+#   60019        EquityInterestType present        -> AccountType CRS1104
+#   60020        AccountType CRS1103               -> AcctNumberType OECD605
+#   60021        AccountType CRS1101               -> every Payment CRS502
+#   60022        AccountType CRS1104               -> every Payment CRS503/504
+#   60023        AccountType CRS1103               -> every Payment CRS503/504
+#
+# OECD601 (IBAN) and OECD603 (ISIN) are deliberately absent: rules 60000/60001
+# require the account number to actually follow those structured formats, which
+# the generated numbers do not.
+CRS3_ACCOUNT_PROFILES: dict[str, dict] = {
+    "CRS1101": {  # Depository Account
+        "number_types": ["OECD605", "OECD606"],
+        "payment_types": ["CRS502"],
+        "equity_interest": False,
+    },
+    "CRS1102": {  # Custodial Account
+        "number_types": ["OECD602", "OECD604", "OECD605"],
+        "payment_types": ["CRS501", "CRS502", "CRS503", "CRS504"],
+        "equity_interest": False,
+    },
+    "CRS1103": {  # Cash Value Insurance / Annuity Contract
+        "number_types": ["OECD605"],
+        "payment_types": ["CRS503", "CRS504"],
+        "equity_interest": False,
+    },
+    "CRS1104": {  # Debt or Equity Interest in an Investment Entity
+        "number_types": ["OECD602", "OECD604", "OECD605"],
+        "payment_types": ["CRS503", "CRS504"],
+        "equity_interest": True,
+    },
+}
 
 # Share of CRS 3.0 accounts that get the optional JointAccount/Number element.
 CRS3_JOINT_ACCOUNT_RATIO = 0.2
@@ -410,6 +443,31 @@ class CRSGenerator:
         
         elem.text = text
     
+    def _ensure_reportable_residence(self, party: etree._Element, ns: dict):
+        """Guarantee the party is resident in the receiving jurisdiction.
+
+        MDES rules 60011/60012: an account is only reportable to the receiving
+        country if the individual holder, the entity holder, or a controlling
+        person is resident there. Random residences drawn from the reportable-
+        jurisdiction list almost never hit it, so the receiving country is added
+        as an extra ResCountryCode. Both PersonParty_Type and
+        OrganisationParty_Type allow ResCountryCode 0..unbounded, so the
+        randomly drawn residence is kept alongside it for variety.
+        """
+        if party is None:
+            return
+
+        receiving = self.config.receiving_country
+        existing = party.findall('crs:ResCountryCode', namespaces=ns)
+        if any((el.text or '').strip() == receiving for el in existing):
+            return
+
+        node = etree.Element(f"{{{ns['crs']}}}ResCountryCode")
+        node.text = receiving
+        # ResCountryCode opens both party sequences, so the block of them has
+        # to stay at the front and contiguous.
+        party.insert(len(existing), node)
+
     def _apply_crs3_fields(self, account: etree._Element, ns: dict, is_organisation: bool):
         """Fill the classification fields CRS 3.0 made mandatory.
 
@@ -433,18 +491,23 @@ class CRSGenerator:
         def crs_element(local_name: str) -> etree._Element:
             return etree.Element(f'{{{crs_uri}}}{local_name}')
 
+        # Draw the account type first; the account-number type, payment types
+        # and whether EquityInterestType may appear all follow from it.
+        account_type_value = rng.choice(list(CRS3_ACCOUNT_PROFILES))
+        profile = CRS3_ACCOUNT_PROFILES[account_type_value]
+
         holder = account.find('crs:AccountHolder', namespaces=ns)
         if holder is not None:
-            # EquityInterestType is 0..unbounded and leads the sequence. The
-            # trunk reference files give individuals one and organisations up
-            # to two, so mirror that.
+            # EquityInterestType is 0..unbounded and leads the sequence, but it
+            # is only legal on a CRS1104 holding (rule 60019).
             for existing in holder.findall('crs:EquityInterestType', namespaces=ns):
                 holder.remove(existing)
-            wanted = rng.randint(1, 2) if is_organisation else 1
-            for position, value in enumerate(rng.sample(CRS3_EQUITY_INTEREST_TYPES, wanted)):
-                node = crs_element('EquityInterestType')
-                node.text = value
-                holder.insert(position, node)
+            if profile["equity_interest"]:
+                wanted = rng.randint(1, 2) if is_organisation else 1
+                for position, value in enumerate(rng.sample(CRS3_EQUITY_INTEREST_TYPES, wanted)):
+                    node = crs_element('EquityInterestType')
+                    node.text = value
+                    holder.insert(position, node)
 
             self_cert = holder.find('crs:SelfCert', namespaces=ns)
             if self_cert is not None:
@@ -474,16 +537,20 @@ class CRSGenerator:
         if dd_procedure is not None:
             dd_procedure.text = rng.choice(CRS3_DD_PROCEDURES)
 
-        # MDES rule 60017: an OECD606 account number (specified electronic
-        # money product) forces AccountType CRS1101.
-        is_emoney = rng.random() < CRS3_EMONEY_ACCOUNT_RATIO
         acc_num = account.find('crs:AccountNumber', namespaces=ns)
         if acc_num is not None:
-            acc_num.set('AcctNumberType', 'OECD606' if is_emoney else 'OECD605')
+            acc_num.set('AcctNumberType', rng.choice(profile["number_types"]))
 
         account_type = account.find('crs:AccountType', namespaces=ns)
         if account_type is not None:
-            account_type.text = 'CRS1101' if is_emoney else rng.choice(CRS3_ACCOUNT_TYPES)
+            account_type.text = account_type_value
+
+        # Payments were drawn before the account type existed, so re-draw them
+        # from the set this account type admits (rules 60021/60022/60023).
+        for payment in account.findall('crs:Payment', namespaces=ns):
+            payment_type = payment.find('crs:Type', namespaces=ns)
+            if payment_type is not None:
+                payment_type.text = rng.choice(profile["payment_types"])
 
         # JointAccount is optional and closes the sequence, so appending it is
         # already schema-order correct.
@@ -622,6 +689,9 @@ class CRSGenerator:
         if docref is not None:
             docref.text = self._next_docref_id()
 
+        individual = account.find('.//crs:Individual', namespaces=ns)
+        self._ensure_reportable_residence(individual, ns)
+
         self._apply_crs3_fields(account, ns, is_organisation=False)
 
         return account
@@ -754,6 +824,15 @@ class CRSGenerator:
                     # with more than one controlling person XSD-invalid.
                     parent.insert(insert_at, new_cp)
                     insert_at += 1
+
+        # After CP cloning, so each clone gets its own residence too.
+        holder = account.find('crs:AccountHolder', namespaces=ns)
+        if holder is not None:
+            self._ensure_reportable_residence(
+                holder.find('crs:Organisation', namespaces=ns), ns)
+        for cp in account.findall('crs:ControllingPerson', namespaces=ns):
+            self._ensure_reportable_residence(
+                cp.find('crs:Individual', namespaces=ns), ns)
 
         # After CP cloning, so every controlling person draws its own
         # CtrlgPersonType and SelfCert.

@@ -85,6 +85,15 @@ def _find_all(root: etree._Element, local_name: str) -> list[etree._Element]:
     return [el for el in root.iter() if _local(el.tag) == local_name]
 
 
+def _direct_texts(parent: etree._Element, local_name: str) -> list[str]:
+    """Direct-child texts by local-name, for repeatable elements.
+
+    Direct children only: a ControllingPerson nested in the same AccountReport
+    must not have its ResCountryCode counted as the account holder's.
+    """
+    return [(el.text or "").strip() for el in parent if _local(el.tag) == local_name]
+
+
 def _attr_by_local(el: etree._Element, local_name: str) -> str | None:
     for key, value in el.attrib.items():
         if _local(key) == local_name:
@@ -108,6 +117,7 @@ def check_mdes_rules(
     findings: list[Finding] = []
 
     transmitting = _first_text(root, "TransmittingCountry") or ""
+    receiving = _first_text(root, "ReceivingCountry") or ""
     message_ref = _first_text(root, "MessageRefId") or ""
     sending_company = _first_text(root, "SendingCompanyIN")
     reporting_period = _first_text(root, "ReportingPeriod") or ""
@@ -234,14 +244,120 @@ def check_mdes_rules(
             if acct_number is None:
                 continue
 
-            # --- 60017: a Specified Electronic Money Product account
-            # (OECD606) must be reported as a Depository Account (CRS1101).
-            if _attr_by_local(acct_number, "AcctNumberType") == "OECD606":
-                if _child_text(report, "AccountType") != "CRS1101":
-                    findings.append(Finding("60017", "error",
-                        f"AccountNumber '{(acct_number.text or '').strip()}' is "
-                        "AcctNumberType OECD606 (Specified Electronic Money "
-                        "Product), so AccountType must be CRS1101."))
+            number_type = _attr_by_local(acct_number, "AcctNumberType")
+            account_type = _child_text(report, "AccountType")
+            shown = (acct_number.text or "").strip()
+
+            payment_types = [
+                _child_text(payment, "Type") or ""
+                for payment in report
+                if _local(payment.tag) == "Payment"
+            ]
+
+            holder = next((el for el in report
+                           if _local(el.tag) == "AccountHolder"), None)
+            has_equity_interest = bool(
+                holder is not None
+                and [el for el in holder if _local(el.tag) == "EquityInterestType"])
+
+            # --- 60017 / 60018: an OECD606 (specified electronic money product)
+            # or OECD601 (IBAN) account number must be a Depository Account.
+            for code, forcing_type in (("60017", "OECD606"), ("60018", "OECD601")):
+                if number_type == forcing_type and account_type != "CRS1101":
+                    findings.append(Finding(code, "error",
+                        f"AccountNumber '{shown}' is AcctNumberType {forcing_type}, "
+                        f"so AccountType must be CRS1101 (got "
+                        f"{account_type or 'nothing'})."))
+
+            # --- 60019: EquityInterestType only belongs on a debt/equity
+            # interest in an investment entity.
+            if has_equity_interest and account_type != "CRS1104":
+                findings.append(Finding("60019", "error",
+                    f"AccountNumber '{shown}' provides EquityInterestType, so "
+                    f"AccountType must be CRS1104 (got {account_type or 'nothing'})."))
+
+            # --- 60020: a cash value insurance/annuity contract is identified
+            # by an unspecified account number.
+            if account_type == "CRS1103" and number_type != "OECD605":
+                findings.append(Finding("60020", "error",
+                    f"AccountNumber '{shown}' is AccountType CRS1103, so "
+                    f"AcctNumberType must be OECD605 (got {number_type or 'nothing'})."))
+
+            # --- 60021 / 60022 / 60023: the payment types an account type
+            # admits. Each rule fires when *any* payment falls outside the set.
+            payment_constraints = (
+                ("60021", "CRS1101", {"CRS502"}),
+                ("60022", "CRS1104", {"CRS503", "CRS504"}),
+                ("60023", "CRS1103", {"CRS503", "CRS504"}),
+            )
+            for code, constrained_type, allowed in payment_constraints:
+                if account_type != constrained_type:
+                    continue
+                offenders = sorted({p for p in payment_types if p and p not in allowed})
+                if offenders:
+                    findings.append(Finding(code, "error",
+                        f"AccountNumber '{shown}' is AccountType {constrained_type}, "
+                        f"so every Payment/Type must be one of "
+                        f"{', '.join(sorted(allowed))} (found {', '.join(offenders)})."))
+
+    # --- 60011 / 60012: residence must reach the receiving jurisdiction -----
+    # Applies to every CRS version. An account is only reportable to the
+    # receiving country if someone on it is resident there: the individual
+    # holder (or a controlling person) for 60011, and the entity holder or a
+    # controlling person for 60012.
+    if message_type == "CRS" and receiving:
+        for report in _find_all(root, "AccountReport"):
+            holder = next((el for el in report
+                           if _local(el.tag) == "AccountHolder"), None)
+            if holder is None:
+                continue
+
+            controlling_persons = [el for el in report
+                                   if _local(el.tag) == "ControllingPerson"]
+            cp_countries = {
+                text
+                for cp in controlling_persons
+                for individual in cp
+                if _local(individual.tag) == "Individual"
+                for text in _direct_texts(individual, "ResCountryCode")
+            }
+
+            individual = next((el for el in holder
+                               if _local(el.tag) == "Individual"), None)
+            organisation = next((el for el in holder
+                                 if _local(el.tag) == "Organisation"), None)
+
+            # 60011 is worded per person ("when the Person is a Controlling
+            # Person or an Individual Account Holder"), so each such person is
+            # checked on its own residences rather than the account's combined
+            # set. 60012 below is the one worded as an either/or.
+            if individual is not None:
+                holder_countries = set(_direct_texts(individual, "ResCountryCode"))
+                if receiving not in holder_countries:
+                    findings.append(Finding("60011", "error",
+                        "An individual account holder must have a ResCountryCode "
+                        f"matching the receiving country {receiving}; found "
+                        f"{', '.join(sorted(holder_countries)) or 'none'}."))
+
+            for cp in controlling_persons:
+                for person in cp:
+                    if _local(person.tag) != "Individual":
+                        continue
+                    own = set(_direct_texts(person, "ResCountryCode"))
+                    if receiving not in own:
+                        findings.append(Finding("60011", "error",
+                            "A controlling person must have a ResCountryCode "
+                            f"matching the receiving country {receiving}; found "
+                            f"{', '.join(sorted(own)) or 'none'}."))
+
+            if organisation is not None:
+                holder_countries = set(_direct_texts(organisation, "ResCountryCode"))
+                if receiving not in holder_countries | cp_countries:
+                    findings.append(Finding("60012", "error",
+                        "An entity account holder or one of its controlling persons "
+                        f"must have a ResCountryCode matching the receiving country "
+                        f"{receiving}; found "
+                        f"{', '.join(sorted(holder_countries | cp_countries)) or 'none'}."))
 
     return findings
 

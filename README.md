@@ -36,7 +36,7 @@ these optional columns; each one left out falls back to the default shown, so a
 
 | Column | Default | Values |
 | --- | --- | --- |
-| `AcctNumberType` | `OECD601` | `OECD601`–`OECD606` |
+| `AcctNumberType` | `OECD605` | `OECD601`–`OECD606` |
 | `SelfCert` | `CRS901` | `CRS901`, `CRS902`, `CRS900` |
 | `DDProcedure` | `CRS1201` | `CRS1201`, `CRS1202`, `CRS1200` |
 | `AccountType` | `CRS1101` | `CRS1101`–`CRS1104`, `CRS1100` |
@@ -46,7 +46,25 @@ these optional columns; each one left out falls back to the default shown, so a
 | `ControllingPerson_SelfCert` | `CRS1001` | `CRS1001`, `CRS1002`, `CRS1000` |
 
 The `xx00` members are the transitional "not reported" codes, valid on input for
-correcting pre-3.0 data but never generated for new data. `--mode preview` with
+correcting pre-3.0 data but never generated for new data.
+
+`AccountType` is not free-standing: MDES rules 60017-60023 tie it to the
+account-number type, the payment types and `EquityInterestType`. A row whose
+combination breaks one of them is rejected with its MDES error code rather than
+written into the output.
+
+| AccountType | AcctNumberType | Payment_Type | EquityInterestType |
+| --- | --- | --- | --- |
+| `CRS1101` Depository | `OECD605`, `OECD606` | `CRS502` only | not allowed |
+| `CRS1102` Custodial | `OECD602`, `OECD604`, `OECD605` | any | not allowed |
+| `CRS1103` Insurance/Annuity | `OECD605` only | `CRS503`, `CRS504` | not allowed |
+| `CRS1104` Debt/Equity Interest | `OECD602`, `OECD604`, `OECD605` | `CRS503`, `CRS504` | allowed |
+
+`OECD601` and `OECD603` are absent by design: rules 60000/60001 require the
+account number to follow the IBAN and ISIN formats, which generated numbers do
+not. Rules 60011/60012 additionally require the account holder - or, for an
+entity holder, one of its controlling persons - to be resident in the receiving
+country; that applies to CRS 2.0 as well. `--mode preview` with
 `--crs-version 3.0` emits a CSV template that already includes and populates
 these columns. Invalid values, an out-of-range `JointAccount_Number`, an
 `OECD606` row whose `AccountType` is not `CRS1101` (rule 60017), and a closed
