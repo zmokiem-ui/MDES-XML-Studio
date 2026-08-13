@@ -39,7 +39,7 @@ function bridgeParameters() {
   return {
     GIT_REF: process.env.CI_MERGE_REQUEST_REF_PATH ||
       (isTag ? `refs/tags/${process.env.CI_COMMIT_TAG}` : `refs/heads/${process.env.CI_COMMIT_REF_NAME}`),
-    GIT_COMMIT: process.env.CI_COMMIT_SHA || '',
+    SOURCE_COMMIT: process.env.CI_COMMIT_SHA || '',
     GIT_REPOSITORY: process.env.CI_PROJECT_URL || '',
     GITLAB_PROJECT_PATH: process.env.CI_PROJECT_PATH || '',
     GITLAB_PROJECT_ID: process.env.CI_PROJECT_ID || '',
