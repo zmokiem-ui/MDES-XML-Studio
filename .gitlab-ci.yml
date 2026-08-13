@@ -1,138 +1,29 @@
 workflow:
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+    - when: never
 
 stages:
-  - test
-  - release
+  - bridge
 
 default:
+  image: node:22-bookworm
   tags:
-    - windows
+    - linux
   interruptible: true
 
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  npm_config_cache: "$CI_PROJECT_DIR/.cache/npm"
-  CSC_IDENTITY_AUTO_DISCOVERY: "false"
-
-cache:
-  paths:
-    - .cache/pip/
-    - .cache/npm/
-
-python-tests:
-  stage: test
-  script:
-    - python --version
-    - python -m pip install --upgrade pip
-    - python -m pip install -e ".[test]"
-    - python -m pytest tests/unit -q
-
-frontend-e2e:
-  stage: test
-  script:
-    - python --version
-    - node --version
-    - npm --version
-    - python -m pip install --upgrade pip
-    - python -m pip install -r requirements.txt
-    - Set-Location electron-app
-    - npm ci
-    - npm run build
-    - npm run test:e2e:smoke
-
-release-windows:
-  stage: release
-  interruptible: false
-  resource_group: "release-$CI_COMMIT_TAG"
-  needs:
-    - python-tests
-    - frontend-e2e
+trigger_windows_jenkins:
+  stage: bridge
+  timeout: 120m
   rules:
+    # Protected Jenkins variables are only used for trusted refs.
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+    - when: never
   script:
-    - |
-      $packageVersion = (node -p "require('./electron-app/package.json').version").Trim()
-      $pythonVersion = (python -c "import crs_generator; print(crs_generator.__version__)").Trim()
-      $tagVersion = $env:CI_COMMIT_TAG.TrimStart('v')
-      if ($packageVersion -ne $tagVersion) {
-        throw "Release tag $tagVersion does not match package version $packageVersion"
-      }
-      if ($pythonVersion -ne $tagVersion) {
-        throw "Release tag $tagVersion does not match Python package version $pythonVersion"
-      }
-    - python -m pip install --upgrade pip
-    - python -m pip install pytest -r requirements.txt -r requirements-build.txt
-    - python -m pytest tests/unit -q
-    - tests\regression_test.ps1
-    - python build_python_backend.py
-    - Set-Location electron-app
-    - npm ci
-    - npm audit --omit=dev --audit-level=high
-    - npm run build
-    - npm run test:e2e:smoke
-    - npm run test:e2e:full
-    - npx electron-builder --win --x64 --publish never
-    - |
-      $env:PACKAGED_APP_PATH = Join-Path $env:CI_PROJECT_DIR 'electron-app\dist-electron\win-unpacked\MDES XML Studio.exe'
-      npm run test:e2e:packaged
-    - Set-Location $env:CI_PROJECT_DIR
-    - |
-      $tagVersion = $env:CI_COMMIT_TAG.TrimStart('v')
-      $packageBase = "$env:CI_API_V4_URL/projects/$env:CI_PROJECT_ID/packages/generic/mdes-xml-studio/$tagVersion"
-      $headers = @{ 'JOB-TOKEN' = $env:CI_JOB_TOKEN }
-      $files = @(
-        Get-ChildItem 'electron-app\dist-electron\*.exe' -File
-        Get-ChildItem 'electron-app\dist-electron\*.blockmap' -File
-        Get-Item 'electron-app\dist-electron\latest.yml'
-      )
-      if ($files.Count -lt 3) {
-        throw "Expected installer, blockmap, and latest.yml release assets"
-      }
+    - node scripts/trigger-jenkins.mjs
 
-      $links = foreach ($file in $files) {
-        $encodedName = [Uri]::EscapeDataString($file.Name)
-        $assetUrl = "$packageBase/$encodedName"
-        Invoke-RestMethod -Method Put -Uri $assetUrl -Headers $headers -InFile $file.FullName -ContentType 'application/octet-stream'
-        @{ name = $file.Name; url = $assetUrl; link_type = 'package' }
-      }
-
-      $releaseBase = "$env:CI_API_V4_URL/projects/$env:CI_PROJECT_ID/releases"
-      $encodedTag = [Uri]::EscapeDataString($env:CI_COMMIT_TAG)
-      $description = "Automated Windows release for $env:CI_COMMIT_TAG. Existing installed clients continue to update from the matching GitHub release during the migration period."
-      $releaseExists = $true
-      try {
-        Invoke-RestMethod -Method Get -Uri "$releaseBase/$encodedTag" -Headers $headers | Out-Null
-      }
-      catch {
-        $statusCode = [int]$_.Exception.Response.StatusCode
-        if ($statusCode -ne 404) { throw }
-        $releaseExists = $false
-      }
-
-      if ($releaseExists) {
-        $body = @{
-          name = "MDES XML Studio $env:CI_COMMIT_TAG"
-          description = $description
-          assets = @{ links = @($links) }
-        } | ConvertTo-Json -Depth 6
-        Invoke-RestMethod -Method Put -Uri "$releaseBase/$encodedTag" -Headers $headers -ContentType 'application/json' -Body $body | Out-Null
-      }
-      else {
-        $body = @{
-          name = "MDES XML Studio $env:CI_COMMIT_TAG"
-          tag_name = $env:CI_COMMIT_TAG
-          description = $description
-          assets = @{ links = @($links) }
-        } | ConvertTo-Json -Depth 6
-        Invoke-RestMethod -Method Post -Uri $releaseBase -Headers $headers -ContentType 'application/json' -Body $body | Out-Null
-      }
-  artifacts:
-    expire_in: 7 days
-    paths:
-      - electron-app/dist-electron/*.exe
-      - electron-app/dist-electron/*.blockmap
-      - electron-app/dist-electron/latest.yml
+# Merge-request validation remains available in GitHub Actions until the
+# protected Jenkins bridge is approved for merge-request pipelines.
