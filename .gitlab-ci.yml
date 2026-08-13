@@ -1,5 +1,12 @@
 workflow:
   rules:
+    # The Jenkins bridge is inert until JENKINS_JOB_URL is configured. Without it
+    # the only job below can do nothing but fail its own missing-variable check,
+    # so suppress the pipeline entirely rather than emit a red run per push.
+    # This clears itself the moment the variable is set. Both comparisons are
+    # required: an unset variable is null, and null == "" is false in GitLab.
+    - if: '$JENKINS_JOB_URL == null || $JENKINS_JOB_URL == ""'
+      when: never
     # Merge-request events are deliberately absent. The only job below cannot run
     # on an MR (protected variables are not exposed to it), and a pipeline whose
     # rules match no jobs is rejected by GitLab as an errored pipeline.
