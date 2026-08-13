@@ -36,6 +36,9 @@ SCHEMA_REGISTRY: dict[tuple[str, str], str] = {
     ("CRS", "2.0"): "CRS/v2.0/CrsXML_v2.0.xsd",
     ("CRS", "3.0"): "CRS/v3.0/CrsXML_v3.0.xsd",
     ("FATCA_CRS", "2.2"): "fatca_crs/v2.2/FatcaCrs_v2.2.xsd",  # NL FC combined
+    # FC 3.0 keeps the 2.2 namespace, so detect_version can only tell the two
+    # apart by @version — registering it here is what makes that fallback work.
+    ("FATCA_CRS", "3.0"): "fatca_crs/v3.0/FatcaCrs_v3.0.xsd",
     ("FATCA_OECD", "2.0"): "FATCA/v2.0/FatcaXML_v2.0.xsd",
     ("FATCA_OECD", "2.0.1"): "FATCA/v2.0.1/FatcaXML_v2.0.1.xsd",  # MDES upload version
     ("CBC", "2.0"): "CBC/v2.0/CbcXML_v2.0.xsd",

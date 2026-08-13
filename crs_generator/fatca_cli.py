@@ -12,6 +12,7 @@ from .cli_utils import (
     output_json, error_exit, parse_comma_list,
     CorrectionConfig, format_validation_result, format_correction_result
 )
+from .fatca_generator import SUPPORTED_FC_VERSIONS
 
 
 def validate_fatca_xml_mode(args):
@@ -80,6 +81,7 @@ def generate_fatca_random_mode(args):
     account_holder_countries = parse_comma_list(args.account_holder_countries, uppercase=True)
     
     config = FATCAGeneratorConfig(
+        fc_version=getattr(args, 'fc_version', None) or '2.2',
         sending_country=args.sending_country or 'CW',
         receiving_country=args.receiving_country or 'CW',
         tax_year=args.tax_year or 2024,
@@ -149,6 +151,11 @@ def main():
     # Mode selection
     parser.add_argument('--mode', choices=['random', 'validate-xml', 'correction'], default='random',
                         help='Generation mode: random, validate-xml, or correction')
+    parser.add_argument('--fc-version', choices=list(SUPPORTED_FC_VERSIONS), default='2.2',
+                        help='FATCA-CRS combined schema version (default: 2.2). 3.0 adds the '
+                             'mandatory SelfCert, DDProcedure and AccountType fields. Applies '
+                             'to the fatca-crs variant only; the namespace is unchanged between '
+                             'versions, so it is carried in @version.')
     parser.add_argument('--variant', choices=['fatca-crs', 'fatca-oecd'], default='fatca-crs',
                         help='FATCA format: fatca-crs (FATCA-CRS combined, FC upload) or '
                              'fatca-oecd (pure IRS FATCA_OECD v2.0.1)')

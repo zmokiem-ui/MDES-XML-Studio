@@ -207,6 +207,23 @@ Assert-JsonSuccess $out "FATCA correction generation"
 Assert-FileExists "$OutputDir\fatca_correction.xml" "FATCA correction file created"
 Assert-XsdValid "$OutputDir\fatca_correction.xml" "FATCA correction XSD validity"
 
+Write-TestHeader "2d. FATCA-CRS 3.0 Generation"
+$out = python -m crs_generator.fatca_cli --mode random --variant fatca-crs --fc-version 3.0 --sending-country CW --receiving-country CW --tax-year 2024 --sending-company-in "A1B2C3.00000.SP.350" --num-fis 1 --individual-accounts 2 --organisation-accounts 2 --substantial-owners 1 --output "$OutputDir\fc3_new.xml" 2>&1 | Out-String
+Assert-FileExists "$OutputDir\fc3_new.xml" "FC 3.0 XML generation"
+Assert-XsdValid "$OutputDir\fc3_new.xml" "FC 3.0 XSD validity"
+Assert-NoMdesFindings "$OutputDir\fc3_new.xml" "FC 3.0 MDES business rules"
+Assert-XmlContains "$OutputDir\fc3_new.xml" 'version="3.0"' "FC 3.0 version attribute"
+Assert-XmlContains "$OutputDir\fc3_new.xml" "<sfa_ftc:DDProcedure>" "FC 3.0 emits DDProcedure"
+Assert-XmlContains "$OutputDir\fc3_new.xml" "<sfa_ftc:AccountType>" "FC 3.0 emits AccountType"
+
+Write-TestHeader "2e. FATCA-CRS 3.0 Validation + Correction"
+$out = python -m crs_generator.fatca_cli --mode validate-xml --xml-input "$OutputDir\fc3_new.xml" --output dummy 2>&1 | Out-String
+Assert-JsonSuccess $out "FC 3.0 XML validation"
+Assert-Match $out '"version":\s*"3.0"' "FC 3.0 version auto-detected"
+$out = python -m crs_generator.fatca_cli --mode correction --variant fatca-crs --xml-input "$OutputDir\fc3_new.xml" --output "$OutputDir\fc3_correction.xml" --correct-individual 1 --modify-balance 2>&1 | Out-String
+Assert-JsonSuccess $out "FC 3.0 correction generation"
+Assert-XsdValid "$OutputDir\fc3_correction.xml" "FC 3.0 correction XSD validity"
+
 # ============================================================
 # 3. CBC MODULE
 # ============================================================

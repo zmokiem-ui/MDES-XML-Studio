@@ -124,6 +124,58 @@ CONTROLLING_PERSON_TYPES = [
 ]
 
 
+# --- FATCA-CRS combined (FC) version support ---------------------------------
+# FC 3.0 carries the CRS 3.0 classification into the combined upload. Unlike
+# CRS, the namespace does NOT change between versions - both 2.2 and 3.0 are
+# urn:fatcacrs:ties:v2 and only @version distinguishes them (fixed="2.2" vs
+# fixed="3.0" in the schema). MDES routes the upload on that attribute too, so
+# version detection cannot rely on the namespace here.
+SUPPORTED_FC_VERSIONS = ("2.2", "3.0")
+
+FC_TEMPLATES = {
+    "2.2": "FATCA-CRS.Template.Nieuw.xml",
+    "3.0": "FATCA-CRS.Template.v3.0.xml",
+}
+
+# Enumerations FC 3.0 introduced, read off FatcaCrsTypes_v3.0.xsd. As in CRS
+# 3.0 the trailing "xx00" member of each list means "not reported" and exists
+# for correcting pre-3.0 data, so generated data never draws one.
+FC3_SELF_CERT = ["CRS901", "CRS902"]
+FC3_CP_SELF_CERT = ["CRS1001", "CRS1002"]
+FC3_DD_PROCEDURES = ["CRS1201", "CRS1202"]
+
+# FC 3.0 account profiles. MDES ties AccountType to the account-number type and
+# the payment types (rules 60017-60023 in the CRS record-level catalogue), so
+# AccountType is drawn first and the rest follows - the same approach the CRS
+# generator uses. FC 3.0 has no EquityInterestType, so rule 60019 cannot apply.
+#
+# OECD601 (IBAN) and OECD603 (ISIN) are excluded: rules 60000/60001 require the
+# account number to follow those structured formats, which generated numbers do
+# not. Note FC's AccountNumberType stops at OECD605 - there is no OECD606 as
+# there is for CRS, so rule 60017 cannot arise on an FC upload at all.
+FC3_ACCOUNT_PROFILES: dict[str, dict] = {
+    "CRS1101": {  # Depository Account
+        "number_types": ["OECD605"],
+        "payment_types": ["CRS502"],
+    },
+    "CRS1102": {  # Custodial Account
+        "number_types": ["OECD602", "OECD604", "OECD605"],
+        "payment_types": ["CRS501", "CRS502", "CRS503", "CRS504"],
+    },
+    "CRS1103": {  # Cash Value Insurance / Annuity Contract
+        "number_types": ["OECD605"],
+        "payment_types": ["CRS503", "CRS504"],
+    },
+    "CRS1104": {  # Debt or Equity Interest in an Investment Entity
+        "number_types": ["OECD602", "OECD604", "OECD605"],
+        "payment_types": ["CRS503", "CRS504"],
+    },
+}
+
+# Share of FC 3.0 accounts that get the optional JointAccount/Number element.
+FC3_JOINT_ACCOUNT_RATIO = 0.2
+
+
 @dataclass
 class FATCAGeneratorConfig:
     """Configuration for FATCA-CRS combined XML generation."""
@@ -132,7 +184,11 @@ class FATCAGeneratorConfig:
     receiving_country: str = "CW"  # Receiving country
     tax_year: int = 2024
     sending_company_in: str = "20016636"  # SendingCompanyIN
-    
+
+    # FC schema version. 2.2 stays the default so existing callers are
+    # unaffected; 3.0 is opt-in. Only applies to the fatca-crs variant.
+    fc_version: str = "2.2"
+
     # ReportingFI GIINs (one per ReportingFI)
     reporting_fi_tins: List[str] = field(default_factory=list)
     filer_category: str = "FATCA601"  # Default filer category
@@ -166,6 +222,13 @@ class FATCAGeneratorConfig:
     test_mode: bool = True
     
     def __post_init__(self):
+        self.fc_version = str(self.fc_version).strip()
+        if self.fc_version not in SUPPORTED_FC_VERSIONS:
+            raise ValueError(
+                f"Unsupported fc_version {self.fc_version!r}; "
+                f"expected one of {', '.join(SUPPORTED_FC_VERSIONS)}"
+            )
+
         # Trim identifiers before they are concatenated into MessageRefId /
         # DocRefId — see crs_generator.identifiers.
         self.sending_company_in = normalize_identifier(self.sending_company_in)
@@ -339,9 +402,14 @@ class FATCAGenerator:
         
         self.docref_counter = 0
         
+    @property
+    def is_fc3(self) -> bool:
+        return self.config.fc_version == "3.0"
+
     def _load_base_template(self) -> tuple[etree._ElementTree, dict]:
-        """Load the base FATCA-CRS combined template."""
-        template_path = Path(__file__).parent / "template FATCA" / "FATCA-CRS.Template.Nieuw.xml"
+        """Load the base FATCA-CRS combined template for the configured version."""
+        template_name = FC_TEMPLATES[self.config.fc_version]
+        template_path = Path(__file__).parent / "template FATCA" / template_name
         if not template_path.exists():
             raise FileNotFoundError(f"Base template not found: {template_path}")
         
@@ -452,9 +520,11 @@ class FATCAGenerator:
 
         # Update balance and payments
         self._randomize_balance_and_payment(account, ns)
-        
+
+        self._apply_fc3_fields(account, ns)
+
         return account
-    
+
     def _create_organisation_account(self, template: etree._Element, ns: dict) -> etree._Element:
         """Create an organisation account with controlling persons."""
         account = deepcopy(template)
@@ -561,9 +631,13 @@ class FATCAGenerator:
         
         # Update balance and payments
         self._randomize_balance_and_payment(account, ns)
-        
+
+        # After controlling-person handling, so each person draws its own
+        # CtrlgPersonType and SelfCert.
+        self._apply_fc3_fields(account, ns)
+
         return account
-    
+
     def _add_controlling_persons(self, account: etree._Element, ns: dict):
         """Add controlling persons to an organisation account."""
         # Find AccountBalance to insert ControllingPerson before it
@@ -633,18 +707,111 @@ class FATCAGenerator:
         # Add 1-3 random payments
         num_payments = self.data_gen.rng.randint(1, 3)
         
-        # Find parent to insert payments (after AccountBalance)
+        # Insert the payments directly after AccountBalance rather than
+        # appending: Payment ends the AccountReport sequence in FC 2.2, but in
+        # 3.0 DDProcedure/AccountType/JointAccount follow it, so appending would
+        # push the payments past them and break element order.
         parent = balance_elem.getparent() if balance_elem is not None else account
-        
+        insert_at = (parent.index(balance_elem) + 1) if balance_elem is not None else len(parent)
+
         for _ in range(num_payments):
-            payment = etree.SubElement(parent, f"{{{self.ns['sfa_ftc']}}}Payment")
-            
+            payment = etree.Element(f"{{{self.ns['sfa_ftc']}}}Payment")
+
             type_elem = etree.SubElement(payment, f"{{{self.ns['sfa_ftc']}}}Type")
             type_elem.text = self.data_gen.payment_type()
-            
+
             amnt_elem = etree.SubElement(payment, f"{{{self.ns['sfa_ftc']}}}PaymentAmnt")
             amnt_elem.set('currCode', currency)
             amnt_elem.text = f"{self.data_gen.payment_amount(balance):.2f}"
+
+            parent.insert(insert_at, payment)
+            insert_at += 1
+
+    def _apply_fc3_fields(self, account: etree._Element, ns: dict):
+        """Fill the classification fields FC 3.0 made mandatory.
+
+        No-op on 2.2. The v3 template already carries SelfCert, DDProcedure and
+        AccountType in schema order; JointAccount is optional and built here.
+
+        AccountType is drawn first and the account-number type and payment types
+        follow from it, so the output cannot break MDES rules 60017-60023. I
+        could not confirm from the process model whether MDES applies those
+        record-level rules to an FC upload as it does to CRS - the FCE entry
+        point runs the message-level instrument, and the account-report rules
+        live in a CRS-specific one. Satisfying them costs nothing and removes
+        the question, so generated data conforms either way.
+        """
+        if not self.is_fc3:
+            return
+
+        rng = self.data_gen.rng
+        uri = self.ns['sfa_ftc']
+
+        account_type_value = rng.choice(list(FC3_ACCOUNT_PROFILES))
+        profile = FC3_ACCOUNT_PROFILES[account_type_value]
+
+        holder = account.find('sfa_ftc:AccountHolder', namespaces=ns)
+        if holder is not None:
+            self_cert = holder.find('sfa_ftc:SelfCert', namespaces=ns)
+            if self_cert is not None:
+                self_cert.text = rng.choice(FC3_SELF_CERT)
+
+        for cp in account.findall('sfa_ftc:ControllingPerson', namespaces=ns):
+            # CtrlgPersonType went from 1..1 in 2.2 to 1..unbounded in 3.0.
+            cp_types = cp.findall('sfa_ftc:CtrlgPersonType', namespaces=ns)
+            values = rng.sample(CONTROLLING_PERSON_TYPES, rng.randint(1, 2))
+            if cp_types:
+                first = cp_types[0]
+                for extra in cp_types[1:]:
+                    cp.remove(extra)
+                insert_at = cp.index(first)
+                first.text = values[0]
+                for offset, value in enumerate(values[1:], start=1):
+                    node = etree.Element(f"{{{uri}}}CtrlgPersonType")
+                    node.text = value
+                    cp.insert(insert_at + offset, node)
+            else:
+                for value in values:
+                    node = etree.SubElement(cp, f"{{{uri}}}CtrlgPersonType")
+                    node.text = value
+
+            # SelfCert closes ControllingPerson_Type in 3.0. Controlling persons
+            # built programmatically carry no SelfCert, so create it rather than
+            # only rewriting one that happens to exist.
+            cp_self_cert = cp.find('sfa_ftc:SelfCert', namespaces=ns)
+            if cp_self_cert is None:
+                cp_self_cert = etree.SubElement(cp, f"{{{uri}}}SelfCert")
+            cp_self_cert.text = rng.choice(FC3_CP_SELF_CERT)
+
+        acc_num = account.find('sfa_ftc:AccountNumber', namespaces=ns)
+        if acc_num is not None:
+            # FC spells the attribute AccNumberType, not AcctNumberType.
+            acc_num.set('AccNumberType', rng.choice(profile["number_types"]))
+
+        dd_procedure = account.find('sfa_ftc:DDProcedure', namespaces=ns)
+        if dd_procedure is not None:
+            dd_procedure.text = rng.choice(FC3_DD_PROCEDURES)
+
+        account_type = account.find('sfa_ftc:AccountType', namespaces=ns)
+        if account_type is not None:
+            account_type.text = account_type_value
+
+        # Payments were drawn before the account type existed, so re-draw them
+        # from the set this account type admits.
+        for payment in account.findall('sfa_ftc:Payment', namespaces=ns):
+            payment_type = payment.find('sfa_ftc:Type', namespaces=ns)
+            if payment_type is not None:
+                payment_type.text = rng.choice(profile["payment_types"])
+
+        # JointAccount is optional and sits after AccountType, before the
+        # optional AdditionalData.
+        for existing in account.findall('sfa_ftc:JointAccount', namespaces=ns):
+            account.remove(existing)
+        if rng.random() < FC3_JOINT_ACCOUNT_RATIO and account_type is not None:
+            joint = etree.Element(f"{{{uri}}}JointAccount")
+            number = etree.SubElement(joint, f"{{{uri}}}Number")
+            number.text = str(rng.randint(2, 5))
+            account.insert(account.index(account_type) + 1, joint)
     
     def generate(self) -> Path:
         """Generate the FATCA-CRS combined XML file."""
