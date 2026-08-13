@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         SCM_CREDENTIALS_ID = 'mdes-xml-tooling-readonly'
+        SCM_REPOSITORY_URL = 'https://gitlab.dcsc.com/mdes/xml-tooling.git'
     }
 
     options {
@@ -14,7 +15,7 @@ pipeline {
 
     parameters {
         string(name: 'GIT_REF', defaultValue: 'main', description: 'Git ref requested by GitLab')
-        string(name: 'GIT_COMMIT', defaultValue: '', description: 'Exact Git commit requested by GitLab')
+        string(name: 'SOURCE_COMMIT', defaultValue: '', description: 'Exact Git commit requested by GitLab')
         string(name: 'GIT_REPOSITORY', defaultValue: '', description: 'Repository URL for traceability')
         string(name: 'GITLAB_PROJECT_PATH', defaultValue: '', description: 'GitLab project path')
         string(name: 'GITLAB_PROJECT_ID', defaultValue: '', description: 'GitLab project ID')
@@ -29,11 +30,20 @@ pipeline {
     stages {
         stage('Checkout requested source') {
             steps {
+                script {
+                    def expectedRepository = env.SCM_REPOSITORY_URL.replaceFirst(/\.git$/, '')
+                    def requestedRepository = (params.GIT_REPOSITORY ?: expectedRepository)
+                        .replaceAll(/\/+$/, '')
+                        .replaceFirst(/\.git$/, '')
+                    if (requestedRepository != expectedRepository) {
+                        error("Refusing credentialed checkout from unexpected repository: ${params.GIT_REPOSITORY}")
+                    }
+                }
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: params.GIT_COMMIT ?: params.GIT_REF]],
+                    branches: [[name: params.SOURCE_COMMIT ?: params.GIT_REF]],
                     userRemoteConfigs: [[
-                        url: params.GIT_REPOSITORY ?: 'https://gitlab.dcsc.com/mdes/xml-tooling.git',
+                        url: env.SCM_REPOSITORY_URL,
                         credentialsId: env.SCM_CREDENTIALS_ID
                     ]],
                     extensions: [[$class: 'CleanBeforeCheckout']]
@@ -41,8 +51,8 @@ pipeline {
                 powershell '''
                     $ErrorActionPreference = "Stop"
                     $actual = (git rev-parse HEAD).Trim()
-                    if ($env:GIT_COMMIT -and $actual -ne $env:GIT_COMMIT) {
-                        throw "Jenkins checked out $actual but GitLab requested $env:GIT_COMMIT. Configure the SCM ref correctly."
+                    if ($env:SOURCE_COMMIT -and $actual -ne $env:SOURCE_COMMIT) {
+                        throw "Jenkins checked out $actual but GitLab requested $env:SOURCE_COMMIT. Configure the SCM ref correctly."
                     }
                     Write-Host "Validated source commit: $actual"
                     Write-Host "GitLab pipeline: $env:GITLAB_PIPELINE_URL"
