@@ -60,9 +60,28 @@ pipeline {
             }
         }
 
+        stage('Python environment') {
+            steps {
+                powershell '''
+                    $ErrorActionPreference = "Stop"
+                    # Build-local virtualenv. Nothing is ever installed into the
+                    # machine-wide Python: the QA automation jobs on this agent share
+                    # C:\\Python313, and a dependency change or pip upgrade from this
+                    # build could break them. Every later stage prepends the same path.
+                    python -m venv .venv
+                    $env:PATH = "$PWD\\.venv\\Scripts;$env:PATH"
+                    python -m pip install --upgrade pip
+                    Write-Host "Using interpreter: $((Get-Command python).Source)"
+                '''
+            }
+        }
+
         stage('Toolchain information') {
             steps {
-                powershell 'python --version; node --version; npm --version'
+                powershell '''
+                    $env:PATH = "$PWD\\.venv\\Scripts;$env:PATH"
+                    python --version; node --version; npm --version
+                '''
             }
         }
 
@@ -70,7 +89,7 @@ pipeline {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
-                    python -m pip install --upgrade pip
+                    $env:PATH = "$PWD\\.venv\\Scripts;$env:PATH"
                     python -m pip install -e ".[test]"
                     python -m pytest tests/unit -q
                 '''
@@ -81,6 +100,7 @@ pipeline {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
+                    $env:PATH = "$PWD\\.venv\\Scripts;$env:PATH"
                     python -m pip install -r requirements.txt
                     Set-Location electron-app
                     npm ci
@@ -95,6 +115,7 @@ pipeline {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
+                    $env:PATH = "$PWD\\.venv\\Scripts;$env:PATH"
                     if (-not $env:GIT_REF.StartsWith('refs/tags/v')) { throw "Release qualification requires a vMAJOR.MINOR.PATCH tag." }
                     $tagVersion = $env:GIT_REF -replace '^refs/tags/v', ''
                     $packageVersion = (node -p "require('./electron-app/package.json').version").Trim()
