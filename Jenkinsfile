@@ -181,7 +181,15 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'electron-app/dist-electron/*.exe,electron-app/dist-electron/*.blockmap,electron-app/dist-electron/latest.yml', allowEmptyArchive: true
+            script {
+                // Only release builds produce installer artifacts. Archiving
+                // unconditionally makes Jenkins print "No artifacts found...
+                // Configuration error?" on every normal build, which trains
+                // people to ignore the warnings that do matter.
+                if (params.QUALIFY_TAG || params.PUBLISH_RELEASE) {
+                    archiveArtifacts artifacts: 'electron-app/dist-electron/*.exe,electron-app/dist-electron/*.blockmap,electron-app/dist-electron/latest.yml', allowEmptyArchive: true
+                }
+            }
         }
     }
 }
