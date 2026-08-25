@@ -113,6 +113,10 @@ pipeline {
         stage('Tag release qualification') {
             when { expression { params.QUALIFY_TAG } }
             steps {
+                // The installer carries the GitLab feed it will later update from.
+                // Read-only, package-registry-scoped; the app falls back to the
+                // GitHub feed baked into app-update.yml when GitLab does not answer.
+                withCredentials([string(credentialsId: 'mdes-xml-studio-update-feed-token', variable: 'GITLAB_UPDATE_TOKEN')]) {
                 powershell '''
                     $ErrorActionPreference = "Stop"
                     $env:PATH = "$PWD\\.venv\\Scripts;$env:PATH"
@@ -129,12 +133,15 @@ pipeline {
                     npm ci
                     npm audit --omit=dev --audit-level=high
                     npm run build
+                    npm run test:update-feed
                     npm run test:e2e:smoke
                     npm run test:e2e:full
+                    npm run update-feed
                     npx electron-builder --win --x64 --publish never
                     $env:PACKAGED_APP_PATH = Join-Path $env:WORKSPACE 'electron-app\\dist-electron\\win-unpacked\\MDES XML Studio.exe'
                     npm run test:e2e:packaged
                 '''
+                }
             }
         }
 
@@ -162,6 +169,27 @@ pipeline {
                             Invoke-RestMethod -Method Put -Uri $assetUrl -Headers $headers -InFile $file.FullName -ContentType 'application/octet-stream'
                             @{ name = $file.Name; url = $assetUrl; link_type = 'package' }
                         }
+
+                        # The app's update feed. electron-updater fetches
+                        # <feed>/latest.yml before it knows which version is newest,
+                        # so the feed root cannot contain a version - it is republished
+                        # here on every release. The per-version upload above stays as
+                        # the archive.
+                        #
+                        # The old "latest" package is deleted first so the feed cannot
+                        # end up serving a stale latest.yml from a duplicate file,
+                        # whatever the project's duplicate-package policy happens to be.
+                        $latestVersion = 'latest'
+                        $existing = Invoke-RestMethod -Method Get -Uri "$base/packages?package_type=generic&package_name=mdes-xml-studio" -Headers $headers
+                        foreach ($pkg in @($existing | Where-Object { $_.version -eq $latestVersion })) {
+                            Write-Host "Removing previous '$latestVersion' package $($pkg.id)"
+                            Invoke-RestMethod -Method Delete -Uri "$base/packages/$($pkg.id)" -Headers $headers | Out-Null
+                        }
+                        foreach ($file in $files) {
+                            $encodedName = [Uri]::EscapeDataString($file.Name)
+                            Invoke-RestMethod -Method Put -Uri "$base/packages/generic/mdes-xml-studio/$latestVersion/$encodedName" -Headers $headers -InFile $file.FullName -ContentType 'application/octet-stream'
+                        }
+                        Write-Host "Update feed republished at .../packages/generic/mdes-xml-studio/$latestVersion"
                         $releaseBase = "$base/releases"
                         $encodedTag = [Uri]::EscapeDataString($tag)
                         $description = "Automated Windows release for $tag. Existing installed clients continue to update from the matching GitHub release during the migration period."

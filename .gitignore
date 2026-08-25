@@ -30,6 +30,8 @@ out/
 build/
 !electron-app/build/
 electron-app/python-dist/
+# Generated at build time and contains the GitLab update-feed token.
+electron-app/electron/update-feed.json
 electron-app/dist/
 electron-app/dist-electron/
 *.exe

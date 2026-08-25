@@ -104,19 +104,77 @@ GitHub Actions continues to build releases independently.
 
 ## 6. Auto-updates
 
-The app currently uses `electron-updater` with GitHub as its provider. On
-startup, packaged builds fetch `latest.yml` from the latest GitHub release,
-compare versions, download the installer, and offer a one-click install/restart.
+Packaged builds check **two** feeds, in order:
 
-- `latest.yml` records the installer name, version, and SHA.
-- `*.blockmap` enables differential downloads. It must be uploaded next to the
-  installer, or every update becomes a full re-download.
-- During the transition, the build must be published as a GitHub release with a
-  higher semver than the currently installed app.
+1. **GitLab** (preferred) - the generic package registry at
+   `.../projects/31/packages/generic/mdes-xml-studio/latest`. Reachable on the
+   company VPN only.
+2. **GitHub** (fallback) - the provider in `build.publish`, written into
+   `app-update.yml` by electron-builder.
 
-A future bridge release can switch the updater to a GitLab-hosted generic feed.
-That bridge version must first be published on GitHub so existing clients can
-receive it. Only after adoption is confirmed should releases become GitLab-only.
+At startup the app probes GitLab's `latest.yml` with a 5s timeout. On a 200 it
+switches the feed; on anything else - off VPN, wrong token, registry empty - it
+silently keeps the GitHub feed. That fallback is why an off-VPN tester still
+receives updates, and why a GitLab misconfiguration degrades instead of
+stranding anyone. `electron/main.js` -> `selectUpdateFeed`.
+
+Both feeds serve the *same* `latest.yml`: electron-builder writes relative paths
+(`path: MDES-XML-Studio-Setup-X.Y.Z.exe`), so the file resolves against whichever
+feed root it was fetched from. The installer must sit next to it in both places.
+
+### Prerequisites before the next release
+
+These are required once, and the Jenkins one is **blocking**: `withCredentials`
+fails the build outright if the credential is missing, which is deliberate - a
+release that silently shipped a GitHub-only installer would be worse.
+
+1. In GitLab, create a **project deploy token** on `mdes/xml-tooling` with only
+   the `read_package_registry` scope.
+2. Add it to Jenkins as a Secret Text credential with the ID
+   `mdes-xml-studio-update-feed-token`.
+3. Add the same value to GitHub as the repository secret `GITLAB_UPDATE_TOKEN`.
+
+### The GitLab feed token
+
+The registry is private, so the feed needs a credential. `electron/update-feed.json`
+is generated at package time by `electron-app/scripts/write-update-feed.mjs` from
+`GITLAB_UPDATE_TOKEN`, and sent as a `PRIVATE-TOKEN` header.
+
+- Use a **project deploy token scoped to `read_package_registry` only**. It ships
+  inside the installer and is therefore extractable; scoped this way the worst
+  case is that someone already on the VPN can download an installer they could
+  download anyway. Rotate it like any other credential.
+- Jenkins reads it from the credential `mdes-xml-studio-update-feed-token`;
+  GitHub Actions reads it from the secret `GITLAB_UPDATE_TOKEN`.
+- **With no token the script writes a disabled stub and the build is GitHub-only.**
+  A fork, a local build, or a pipeline missing the secret degrades rather than
+  breaks - but it also means a silently-missing secret ships a GitHub-only
+  installer, so check the "Bake update feed" step's log line when releasing.
+- `electron/update-feed.json` is gitignored. Never commit it.
+
+### Why the feed path has no version in it
+
+`latest.yml` is fetched *before* the app knows which version is newest, so the
+feed root cannot contain a version. The Jenkins publish stage uploads the three
+assets twice: once to `.../mdes-xml-studio/<version>/` as an archive, and once to
+`.../mdes-xml-studio/latest/`, which is the feed. It deletes the previous
+`latest` package first so a duplicate cannot leave a stale `latest.yml` in place.
+
+### Ordering: never strand a client
+
+A client updates from the feed baked into **the build it is currently running**.
+So a change to the feed only reaches people through a release published on the
+feed they are already using.
+
+- Clients on 2.2.0 and earlier poll **GitHub only**. They will pick up the
+  GitLab-preferring behaviour with 2.3.0, because 2.3.0 is published to GitHub.
+- Keep publishing GitHub releases until every installed client has been seen on
+  2.3.0 or later. Anyone who misses that release stays on the GitHub feed
+  permanently and needs a manual reinstall.
+- Only then is a GitLab-only release safe.
+
+`*.blockmap` must be uploaded next to the installer on both feeds, or every
+update becomes a full re-download instead of a differential one.
 
 ## 7. Update drill
 

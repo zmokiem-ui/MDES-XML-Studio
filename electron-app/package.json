@@ -1,212 +1,108 @@
 {
-
   "name": "mdes-xml-studio",
-
   "version": "2.2.0",
-
   "description": "MDES XML Studio - Professional XML generation for CRS, FATCA, and CBC reporting",
-
   "main": "electron/main.js",
-
   "scripts": {
-
     "dev": "vite",
-
     "build": "vite build",
-
     "electron": "electron .",
-
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
-
-    "electron:build": "npm run build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --x64",
-
+    "electron:build": "npm run build && npm run update-feed && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --x64",
     "test:e2e": "playwright test",
-
     "test:e2e:smoke": "playwright test smoke.e2e.js",
-
     "test:e2e:regression": "playwright test regression.e2e.js",
-
     "test:e2e:ui": "playwright test --ui",
-
     "test:e2e:headed": "playwright test --headed",
-
     "test:e2e:debug": "playwright test --debug",
-
     "test:e2e:files": "playwright test file-generation.e2e.js",
-
     "test:e2e:full": "playwright test full-regression.e2e.js",
-
-    "test:e2e:packaged": "playwright test packaged-smoke.e2e.js"
-
+    "test:e2e:packaged": "playwright test packaged-smoke.e2e.js",
+    "update-feed": "node scripts/write-update-feed.mjs",
+    "test:update-feed": "node --test e2e-tests/update-feed.test.mjs"
   },
-
   "keywords": [
-
     "crs",
-
     "xml",
-
     "generator",
-
     "electron"
-
   ],
-
   "author": "CRS Generator Team",
-
   "license": "MIT",
-
   "devDependencies": {
-
     "@playwright/test": "^1.58.2",
-
     "@vitejs/plugin-react": "^5.2.0",
-
     "autoprefixer": "^10.4.16",
-
     "concurrently": "^8.2.2",
-
     "cross-env": "^10.1.0",
-
     "electron": "^43.1.0",
-
     "electron-builder": "^26.15.3",
-
     "playwright": "^1.58.2",
-
     "postcss": "^8.4.32",
-
     "tailwindcss": "^3.4.0",
-
     "vite": "^7.3.6",
-
     "wait-on": "^7.2.0"
-
   },
-
   "dependencies": {
-
     "@monaco-editor/react": "^4.7.0",
-
     "electron-updater": "^6.8.9",
-
     "lucide-react": "^1.23.0",
-
     "monaco-editor": "^0.55.1",
-
     "react": "^19.2.7",
-
     "react-dom": "^19.2.7"
-
   },
-
   "build": {
-
     "appId": "com.mdes.xml-studio",
-
     "productName": "MDES XML Studio",
-
     "directories": {
-
       "output": "dist-electron"
-
     },
-
     "files": [
-
       "dist/**/*",
-
       "electron/**/*",
-
       "build/icon.ico"
-
     ],
-
     "extraResources": [
-
       {
-
         "from": "python-dist/",
-
         "to": "python-dist/",
-
         "filter": [
-
           "**/*"
-
         ]
-
       },
-
       {
-
         "from": "build/icon.ico",
-
         "to": "icon.ico"
-
       }
-
     ],
-
     "publish": [
-
       {
-
         "provider": "github",
-
         "owner": "zmokiem-ui",
-
         "repo": "MDES-XML-Studio"
-
       }
-
     ],
-
     "win": {
-
       "target": [
-
         {
-
           "target": "nsis",
-
           "arch": [
-
             "x64"
-
           ]
-
         }
-
       ],
-
       "icon": "build/icon.ico"
-
     },
-
     "nsis": {
-
       "oneClick": false,
-
       "allowToChangeInstallationDirectory": true,
-
       "createDesktopShortcut": true,
-
       "createStartMenuShortcut": true,
-
       "artifactName": "MDES-XML-Studio-Setup-${version}.exe",
-
       "perMachine": false
-
     }
-
   },
-
   "overrides": {
-
     "dompurify": "3.4.12"
-
   }
-
 }
-

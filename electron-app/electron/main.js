@@ -159,6 +159,76 @@ function saveUpdateSettings(settings) {
   fs.writeFileSync(getUpdateSettingsPath(), JSON.stringify(settings, null, 2));
 }
 
+// --- Update feed selection ----------------------------------------------
+// electron-updater reads exactly one provider from app-update.yml, which
+// electron-builder generates from build.publish (GitHub). That is the fallback
+// and the reason nothing here can strand a user: if any of this fails we simply
+// leave the baked-in GitHub feed alone.
+//
+// electron/update-feed.json is written at package time by
+// scripts/write-update-feed.mjs. It is absent in dev and in any build that was
+// not given GITLAB_UPDATE_TOKEN, in which case the company feed is skipped.
+//
+// GitLab is preferred when it answers, because it is the authoritative internal
+// feed. It is only reachable on the VPN, so the probe below is what keeps
+// off-VPN users updating from GitHub instead of failing silently.
+const FEED_PROBE_TIMEOUT_MS = 5000;
+
+function loadGitlabFeed() {
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, 'update-feed.json'), 'utf8');
+    const feed = JSON.parse(raw);
+    if (!feed || typeof feed.url !== 'string' || typeof feed.token !== 'string') return null;
+    if (!feed.url || !feed.token) return null;
+    return feed;
+  } catch {
+    return null;  // absent or malformed: GitHub only.
+  }
+}
+
+// Resolve to true only on a real 200 for latest.yml. A 401/404 means the token
+// or the path is wrong, and falling back is better than erroring at the user.
+function probeFeed(feed) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = (value) => { if (!settled) { settled = true; resolve(value); } };
+    const timer = setTimeout(() => done(false), FEED_PROBE_TIMEOUT_MS);
+    try {
+      const { net } = require('electron');
+      const request = net.request(`${feed.url}/latest.yml`);
+      request.setHeader('PRIVATE-TOKEN', feed.token);
+      request.on('response', (response) => {
+        clearTimeout(timer);
+        response.on('data', () => {});      // drain; leaving it unread keeps the socket open
+        response.on('end', () => {});
+        done(response.statusCode === 200);
+      });
+      request.on('error', () => { clearTimeout(timer); done(false); });
+      request.end();
+    } catch {
+      clearTimeout(timer);
+      done(false);
+    }
+  });
+}
+
+// Called once before the first update check. Returns the feed actually in use,
+// for logging and for the Settings screen.
+async function selectUpdateFeed(autoUpdater) {
+  const feed = loadGitlabFeed();
+  if (!feed) return 'github';
+  if (!(await probeFeed(feed))) {
+    console.log('GitLab update feed unreachable; using the GitHub feed.');
+    return 'github';
+  }
+  autoUpdater.requestHeaders = { 'PRIVATE-TOKEN': feed.token };
+  autoUpdater.setFeedURL({ provider: 'generic', url: feed.url, channel: 'latest' });
+  console.log('Using the GitLab update feed.');
+  return 'gitlab';
+}
+
+let activeUpdateFeed = 'github';
+
 let updaterInstance = null;
 
 app.whenReady().then(() => {
@@ -208,15 +278,32 @@ app.whenReady().then(() => {
         autoUpdater.quitAndInstall(false, true);
       });
 
+      // Feed selection runs once and both check paths await it, so a manual
+      // check triggered during the startup probe cannot race it onto the wrong
+      // feed.
+      let feedSelection = null;
+      const ensureFeedSelected = () => {
+        if (!feedSelection) {
+          feedSelection = selectUpdateFeed(autoUpdater)
+            .then((feed) => { activeUpdateFeed = feed; return feed; })
+            .catch(() => 'github');   // never let feed selection break updating
+        }
+        return feedSelection;
+      };
+
       // IPC: manual check for updates
       ipcMain.handle('check-for-updates', async () => {
         try {
+          await ensureFeedSelected();
           await autoUpdater.checkForUpdates();
-          return { success: true };
+          return { success: true, feed: activeUpdateFeed };
         } catch (err) {
           return { success: false, error: err.message };
         }
       });
+
+      // IPC: which feed the app is actually updating from (Settings display)
+      ipcMain.handle('get-update-feed', async () => ({ feed: await ensureFeedSelected() }));
 
       // IPC: get/set update settings
       ipcMain.handle('get-update-settings', () => loadUpdateSettings());
@@ -233,9 +320,11 @@ app.whenReady().then(() => {
       const updateSettings = loadUpdateSettings();
       if (updateSettings.autoUpdateEnabled) {
         setTimeout(() => {
-          autoUpdater.checkForUpdates().catch(err => {
-            console.error('Startup update check failed:', err);
-          });
+          ensureFeedSelected()
+            .then(() => autoUpdater.checkForUpdates())
+            .catch(err => {
+              console.error('Startup update check failed:', err);
+            });
         }, 3000);
       }
     } catch (err) {
@@ -244,6 +333,7 @@ app.whenReady().then(() => {
   } else {
     // Dev mode: still register handlers so UI doesn't break
     ipcMain.handle('check-for-updates', () => ({ success: false, error: 'Updates not available in dev mode' }));
+    ipcMain.handle('get-update-feed', () => ({ feed: 'dev' }));
     ipcMain.handle('get-update-settings', () => ({ autoUpdateEnabled: true }));
     ipcMain.handle('set-update-settings', (event, settings) => settings);
     ipcMain.handle('get-app-version', () => packageVersion);

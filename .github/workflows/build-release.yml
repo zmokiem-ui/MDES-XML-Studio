@@ -72,6 +72,10 @@ jobs:
         working-directory: electron-app
         run: npm run build
 
+      - name: Update feed unit tests
+        working-directory: electron-app
+        run: npm run test:update-feed
+
       - name: Playwright smoke test
         working-directory: electron-app
         run: npm run test:e2e:smoke
@@ -79,6 +83,16 @@ jobs:
       - name: Playwright full regression
         working-directory: electron-app
         run: npm run test:e2e:full
+
+      # The installer carries the GitLab feed it will later prefer, falling back
+      # to the GitHub feed in app-update.yml when GitLab does not answer. Without
+      # the secret this writes a disabled stub and the build stays GitHub-only,
+      # so a fork or a missing secret degrades rather than breaks.
+      - name: Bake update feed
+        working-directory: electron-app
+        run: npm run update-feed
+        env:
+          GITLAB_UPDATE_TOKEN: ${{ secrets.GITLAB_UPDATE_TOKEN }}
 
       - name: Build Electron installer
         working-directory: electron-app
