@@ -133,10 +133,24 @@ pipeline {
                     npm ci
                     npm audit --omit=dev --audit-level=high
                     npm run build
-                    npm run test:update-feed
+                    # Jenkins loads the Jenkinsfile from the default branch but
+                    # checks out the source at the requested ref, so rebuilding a
+                    # tag from before the update feed existed would otherwise die
+                    # on two npm scripts that are not in its package.json. Skip
+                    # them for that source and keep the tag rebuildable; anything
+                    # from v2.3.0 on always has them.
+                    if (Test-Path scripts\write-update-feed.mjs) {
+                        npm run test:update-feed
+                        if ($LASTEXITCODE -ne 0) { throw "update-feed tests failed" }
+                    } else {
+                        Write-Host "No update feed in this source revision - skipping feed steps."
+                    }
                     npm run test:e2e:smoke
                     npm run test:e2e:full
-                    npm run update-feed
+                    if (Test-Path scripts\write-update-feed.mjs) {
+                        npm run update-feed
+                        if ($LASTEXITCODE -ne 0) { throw "update-feed generation failed" }
+                    }
                     npx electron-builder --win --x64 --publish never
                     $env:PACKAGED_APP_PATH = Join-Path $env:WORKSPACE 'electron-app\\dist-electron\\win-unpacked\\MDES XML Studio.exe'
                     npm run test:e2e:packaged
