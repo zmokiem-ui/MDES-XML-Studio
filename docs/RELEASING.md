@@ -79,12 +79,21 @@ On the `v*` tag, both release pipelines perform the same quality gates:
 6. Runs Playwright smoke and full regression tests.
 7. Builds the NSIS installer in `electron-app/dist-electron/`.
 8. Runs packaged-app smoke tests against `win-unpacked`.
-9. Publishes the `.exe`, `.blockmap`, and `latest.yml` to its host:
-   GitHub Releases on GitHub, and the Generic Package Registry plus a release
-   entry on GitLab.
+9. Publishes the `.exe`, `.blockmap`, and `latest.yml`.
 
-The GitLab pipeline uses `CI_JOB_TOKEN`; no personal access token is stored in
-the repository or required as a CI/CD variable.
+**The two hosts publish differently.** On GitHub, the workflow uploads to GitHub
+Releases directly. On GitLab, **Jenkins does not publish** - it builds, tests and
+archives, and the bridge job (`scripts/trigger-jenkins.mjs` ->
+`scripts/publish-release.mjs`) downloads those artifacts afterwards and uploads
+them to the package registry and a GitLab release.
+
+That split is not a preference. Publishing from Jenkins needs credentials in its
+system credential store, and adding them there is `Access Denied` for the
+account the bridge uses - it holds only `authenticated`. Credentials added
+through the Jenkins UI can land in a *personal* store, which pipelines cannot
+read; `withCredentials` then fails with "Could not find credentials entry",
+having already spent a 22-minute build. The GitLab side already holds the tokens
+as masked CI variables, so publishing moved there.
 
 Keep the electron-builder `artifactName` (`MDES-XML-Studio-Setup-${version}.exe`)
 and `nsis.perMachine: false` unchanged. The auto-updater and installed clients
@@ -122,17 +131,26 @@ Both feeds serve the *same* `latest.yml`: electron-builder writes relative paths
 (`path: MDES-XML-Studio-Setup-X.Y.Z.exe`), so the file resolves against whichever
 feed root it was fetched from. The installer must sit next to it in both places.
 
-### Prerequisites before the next release
+### Where the credentials live
 
-These are required once, and the Jenkins one is **blocking**: `withCredentials`
-fails the build outright if the credential is missing, which is deliberate - a
-release that silently shipped a GitHub-only installer would be worse.
+All of this is already configured. It is recorded so it can be rebuilt or
+rotated, and so nobody re-adds the Jenkins credentials that were tried first and
+do not work.
 
-1. In GitLab, create a **project deploy token** on `mdes/xml-tooling` with only
-   the `read_package_registry` scope.
-2. Add it to Jenkins as a Secret Text credential with the ID
-   `mdes-xml-studio-update-feed-token`.
-3. Add the same value to GitHub as the repository secret `GITLAB_UPDATE_TOKEN`.
+| Secret | Stored as | Used for |
+| --- | --- | --- |
+| Deploy token, `read_package_registry` | GitLab CI variable `GITLAB_UPDATE_TOKEN` (masked, protected) | baked into the installer as its update feed |
+| | GitHub secret `GITLAB_UPDATE_TOKEN` | the same, for GitHub-built releases |
+| Project access token, `api`, Maintainer | GitLab CI variable `GITLAB_RELEASE_TOKEN` (masked, protected) | the bridge publishing packages and releases |
+
+Two things to know if you rebuild this:
+
+- **Nothing goes in Jenkins.** The feed token reaches the Windows agent as a
+  `password` build parameter set by the bridge, because it has to be present when
+  electron-builder packages the app. Jenkins masks password parameters.
+- `main` and `v*` are protected refs, which is what makes the protected CI
+  variables visible to both branch and tag pipelines. Removing that protection
+  silently strips the variables and the publish step fails with an empty token.
 
 ### The GitLab feed token
 
@@ -156,8 +174,8 @@ that cannot authenticate.
   case is that someone already on the VPN can download an installer they could
   download anyway. Rotate it like any other credential. A personal or project
   access token also works but carries far broader scope - do not ship one.
-- Jenkins reads it from the credential `mdes-xml-studio-update-feed-token`;
-  GitHub Actions reads it from the secret `GITLAB_UPDATE_TOKEN`.
+- Jenkins receives it as the `GITLAB_UPDATE_TOKEN` build parameter from the
+  bridge; GitHub Actions reads it from the secret of the same name.
 - **With no token the script writes a disabled stub and the build is GitHub-only.**
   A fork, a local build, or a pipeline missing the secret degrades rather than
   breaks - but it also means a silently-missing secret ships a GitHub-only
@@ -186,6 +204,23 @@ which is wider than the project's member list and narrower than GitHub's
 
 Nobody loses updates by being outside that set: the probe fails and they update
 from GitHub instead.
+
+### Failure modes worth recognising
+
+Every one of these cost a full build cycle to diagnose. The symptom is listed
+first, because that is what you will have.
+
+| Symptom | Cause |
+| --- | --- |
+| Build fails in ~18ms, no stage output | The Jenkinsfile does not parse. Usually a lone backslash in a triple-quoted string - Groovy processes escapes there, so Windows paths need `\` or a forward slash. |
+| "Could not find credentials entry with ID ..." | The credential is in a personal store, or absent. Pipelines only read the system and folder stores. |
+| `SELF_SIGNED_CERT_IN_CHAIN` from the bridge | Node ships its own CA bundle and ignores the system trust store, so it rejects a chain git accepts. Hence `--use-openssl-ca` and `NODE_EXTRA_CA_CERTS` in `.gitlab-ci.yml`. |
+| A tag rebuild fails on a missing npm script | Jenkins loads the Jenkinsfile from the default branch but checks out the source at the requested ref. Feed steps are guarded on `scripts/write-update-feed.mjs` existing for this reason. |
+| Release API returns 403 | `PUT /releases/:tag` answers 403, not 404, when the release does not exist. Create with `POST` first and fall back to `PUT` on 409. |
+| Retrying a tag pipeline reruns old config | A pipeline runs the `.gitlab-ci.yml` of the ref it was triggered for. A CI fix on `main` needs a new tag, not a retry. |
+
+The bridge runs a GitLab API preflight before triggering Jenkins so TLS and token
+problems fail in seconds rather than after the build.
 
 ### Ordering: never strand a client
 

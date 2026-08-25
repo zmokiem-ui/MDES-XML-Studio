@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class UpdateChecker:
     """Checks for and manages application updates from GitHub releases."""
     
-    def __init__(self, current_version: str, repo_owner: str = "zmokiem-ui", repo_name: str = "CRS-xml-generator"):
+    def __init__(self, current_version: str, repo_owner: str = "zmokiem-ui", repo_name: str = "MDES-XML-Studio"):
         self.current_version = current_version
         self.repo_owner = repo_owner
         self.repo_name = repo_name
