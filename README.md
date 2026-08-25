@@ -122,7 +122,14 @@ same AccountType/account-number/payment constraints as CRS apply.
 ## Download (end users)
 
 Grab the latest installer from [GitHub Releases](https://github.com/zmokiem-ui/MDES-XML-Studio/releases).
-The app auto-updates from new releases.
+
+The app then updates itself. From **2.3.0** it checks the company GitLab package
+registry first and falls back to GitHub when GitLab does not answer — which is
+what happens off the VPN, since `gitlab.dcsc.com` is only reachable inside the
+network. There is nothing to configure and no GitLab account is needed: the
+installer carries a read-only token and authenticates as that token, not as you.
+
+Settings → Updates shows which feed is actually in use.
 
 ## Quick start (developers)
 
@@ -159,7 +166,8 @@ Add `--production` (CRS/FATCA) or `--production` (CbC) to emit production DocTyp
 
 ## Documentation
 
-- **[docs/DEVELOPING.md](docs/DEVELOPING.md)** — project layout, running, tests, building the backend, CI.
-- **[docs/RELEASING.md](docs/RELEASING.md)** — versioning, the tag-driven release pipeline, and auto-updates.
+- **[docs/DEVELOPING.md](docs/DEVELOPING.md)** — project layout, running, tests, building the backend, both CI pipelines.
+- **[docs/RELEASING.md](docs/RELEASING.md)** — **read this before releasing.** Versioning, the tag-driven pipelines, where every credential lives, how the two update feeds work, the ordering rule that stops clients being stranded, and a symptom-first table of every way this pipeline has broken.
+- **[docs/gitlab-jenkins-bridge.md](docs/gitlab-jenkins-bridge.md)** — how the GitLab pipeline drives the Jenkins Windows agent, and why publishing lives on the GitLab side rather than in Jenkins.
 - **[AGENTS.md](AGENTS.md)** — working conventions for AI/dev agents.
 - **[SECURITY.md](SECURITY.md)** — security policy and ignored-file patterns.

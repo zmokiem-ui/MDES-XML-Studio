@@ -1,6 +1,8 @@
 # GitLab to Jenkins Windows CI bridge
 
-GitLab performs the lightweight trigger on the MDES Linux runner. Jenkins performs the Windows Python, Electron, Playwright, packaging, and optional GitLab release work.
+GitLab performs the lightweight trigger on the MDES Linux runner. Jenkins performs the Windows Python, Electron, Playwright and packaging work, and archives the result.
+
+**Jenkins does not publish.** After a successful tag build the GitLab job downloads Jenkins' archived artifacts and uploads them to the package registry and a GitLab release. See [Publishing](#publishing) for why.
 
 ## GitLab variables
 
@@ -8,7 +10,7 @@ Configure these as protected, masked project or MDES group variables. Never comm
 
 - `JENKINS_JOB_URL`: full URL of the DevOps-created Jenkins job.
 - `JENKINS_USER`: Jenkins service user allowed to trigger this job.
-- `JENKINS_API_TOKEN`: API token for that service user.
+- `JENKINS_API_TOKEN`: API token for that service user. Stored **hidden**, so the value cannot be read back through the API or UI by anyone, including the owner. Reading Jenkins logs needs a separate token.
 - Optional `JENKINS_TIMEOUT_SECONDS`: defaults to `5400`.
 - Optional `JENKINS_POLL_SECONDS`: defaults to `10`.
 
@@ -26,11 +28,26 @@ Create a Pipeline job under the agreed MDES folder using **Pipeline script from 
 
 Configure the Pipeline definition to read the Jenkinsfile from the repository's `main` branch. The Jenkinsfile then performs an explicit checkout using the ref/commit passed by GitLab and verifies the resulting commit against `GIT_COMMIT`; it fails closed if the wrong source is checked out.
 
-## Release publishing credential
+## Publishing
 
-For tag pipelines, the bridge requests `PUBLISH_RELEASE=true`. DevOps must create a Jenkins **Secret Text** credential with ID `mdes-xml-studio-gitlab-release-token`. The token needs only the GitLab API permission required to upload the generic package assets and create/update a release for this project. Keep it in Jenkins credentials; it is never passed through GitLab job parameters or printed.
+Publishing happens on the **GitLab** side, not in Jenkins. `scripts/trigger-jenkins.mjs` waits for the Jenkins result and, on a successful tag build, hands off to `scripts/publish-release.mjs`, which downloads the archived `.exe`, `.blockmap` and `latest.yml` from Jenkins and uploads them to the generic package registry and a GitLab release.
 
-The release job builds and tests before publishing. It does not sign artifacts or publish to GitHub. Existing installed clients remain on the GitHub updater path until a separate updater migration is verified.
+**Do not try to move this back into Jenkins without checking permissions first.** It was built that way originally and does not work: publishing from Jenkins needs a credential in its *system* store, and creating one is `Access Denied` for the bridge service account, which holds only `authenticated`. Credentials added through the Jenkins UI can silently land in a **personal** store, which pipelines cannot read — `withCredentials` then fails with "Could not find credentials entry with ID ...", after the build has already spent its full runtime.
+
+`PUBLISH_RELEASE` is therefore always sent as `false` and the parameter is vestigial. It is kept only so older tags stay buildable.
+
+Two tokens are involved, both held as masked, protected GitLab CI variables — **never in Jenkins credentials**:
+
+| Variable | Token | Used by |
+| --- | --- | --- |
+| `GITLAB_UPDATE_TOKEN` | deploy token, `read_package_registry` | passed to Jenkins as a `password` build parameter, because it must be present when electron-builder packages the app |
+| `GITLAB_RELEASE_TOKEN` | project access token, `api`, Maintainer | the bridge, to upload packages and create the release |
+
+The update-feed token is the one exception to "never through job parameters": it has to reach the Windows agent to be baked into the installer, and it ships inside every installer anyway, so a masked parameter is not a meaningful widening of its exposure. Jenkins masks password parameters in the console and build UI.
+
+Both hosts run the same electron-builder signing path; there is no signing difference between a GitHub-built and a Jenkins-built installer.
+
+Installed clients from 2.3.0 onward prefer the GitLab feed and fall back to GitHub. See [RELEASING.md](RELEASING.md) for the feed layout, the ordering rule, and a symptom-first table of the ways this pipeline has broken.
 
 ## Trigger behavior
 

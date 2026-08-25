@@ -105,5 +105,18 @@ python build_python_backend.py
 - **ci.yml** runs on every push/PR (windows-latest): pytest (3.12) + Vite build +
   Playwright smoke.
 - **build-release.yml** runs on `v*` tags: pytest gate → PyInstaller backend →
-  Vite build → Playwright smoke → electron-builder NSIS installer → upload. See
-  [RELEASING.md](RELEASING.md).
+  Vite build → update-feed tests → bake update feed → Playwright smoke and full
+  regression → electron-builder NSIS installer → packaged-app smoke → upload to
+  GitHub Releases.
+
+There is a **second, independent pipeline on GitLab.** `main` and `v*` tags
+trigger `.gitlab-ci.yml`, which calls a Jenkins Windows agent through
+`scripts/trigger-jenkins.mjs`. Jenkins builds, tests and archives; the GitLab job
+then publishes the artifacts to the package registry and a GitLab release. The
+two pipelines run the same gates and neither depends on the other.
+
+Both must stay green for a release: GitHub is what installed clients on 2.2.0 and
+earlier update from, GitLab is what 2.3.0 and later prefer.
+
+See [RELEASING.md](RELEASING.md) for the release procedure and
+[gitlab-jenkins-bridge.md](gitlab-jenkins-bridge.md) for the bridge's setup.
