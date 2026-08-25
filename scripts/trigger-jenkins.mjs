@@ -1,3 +1,4 @@
+import { publishRelease } from './publish-release.mjs';
 const required = ['JENKINS_JOB_URL', 'JENKINS_USER', 'JENKINS_API_TOKEN'];
 const missing = required.filter((name) => !process.env[name]);
 
@@ -48,7 +49,15 @@ function bridgeParameters() {
     GITLAB_PIPELINE_URL: process.env.CI_PIPELINE_URL || '',
     GITLAB_PIPELINE_SOURCE: process.env.CI_PIPELINE_SOURCE || '',
     QUALIFY_TAG: isTag ? 'true' : 'false',
-    PUBLISH_RELEASE: isTag ? 'true' : 'false',
+    // Publishing moved to this script - Jenkins builds and archives, GitLab
+    // publishes. Adding credentials to the Jenkins system store needs a
+    // permission we do not have, and this side already holds the tokens as
+    // masked CI variables.
+    PUBLISH_RELEASE: 'false',
+    // Baked into the installer as its update feed. Must be present at package
+    // time, which only happens on the Windows agent, so it has to travel there.
+    // Declared as a password parameter in the Jenkinsfile so Jenkins masks it.
+    GITLAB_UPDATE_TOKEN: process.env.GITLAB_UPDATE_TOKEN || '',
   };
 }
 
@@ -91,7 +100,9 @@ while (Date.now() < deadline) {
   const build = await readJson(buildResponse, 'Jenkins build lookup');
   if (!build.building) {
     console.log(`Jenkins result: ${build.result || 'UNKNOWN'} (${buildUrl})`);
-    process.exit(build.result === 'SUCCESS' ? 0 : 1);
+    if (build.result !== 'SUCCESS') process.exit(1);
+    if (process.env.CI_COMMIT_TAG) await publishRelease(buildUrl, process.env.CI_COMMIT_TAG, headers());
+    process.exit(0);
   }
   await new Promise((resolve) => setTimeout(resolve, pollSeconds * 1000));
 }

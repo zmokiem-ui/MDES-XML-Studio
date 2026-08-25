@@ -24,7 +24,16 @@ pipeline {
         string(name: 'GITLAB_PIPELINE_URL', defaultValue: '', description: 'Originating GitLab pipeline URL')
         string(name: 'GITLAB_PIPELINE_SOURCE', defaultValue: '', description: 'Originating GitLab pipeline source')
         booleanParam(name: 'QUALIFY_TAG', defaultValue: false, description: 'Run tag/version qualification')
-        booleanParam(name: 'PUBLISH_RELEASE', defaultValue: false, description: 'Publish the built release to GitLab Package Registry and Releases')
+        booleanParam(name: 'PUBLISH_RELEASE', defaultValue: false, description: 'Deprecated: publishing now happens on the GitLab side after this build succeeds')
+        // Supplied by the GitLab bridge from a masked CI variable. A password
+        // parameter rather than a Jenkins credential because adding credentials
+        // to the system store needs a permission we do not have here; Jenkins
+        // masks password parameters in the console and the build UI.
+        //
+        // This one is low-value by construction: read_package_registry only, and
+        // it ships inside every installer anyway, so the exposure is the same
+        // population that could extract it from the app.
+        password(name: 'GITLAB_UPDATE_TOKEN', defaultValue: '', description: 'GitLab deploy token baked into the installer as its update feed')
     }
 
     stages {
@@ -116,7 +125,7 @@ pipeline {
                 // The installer carries the GitLab feed it will later update from.
                 // Read-only, package-registry-scoped; the app falls back to the
                 // GitHub feed baked into app-update.yml when GitLab does not answer.
-                withCredentials([string(credentialsId: 'mdes-xml-studio-update-feed-token', variable: 'GITLAB_UPDATE_TOKEN')]) {
+                withEnv(["GITLAB_UPDATE_TOKEN=${params.GITLAB_UPDATE_TOKEN}"]) {
                 powershell '''
                     $ErrorActionPreference = "Stop"
                     $env:PATH = "$PWD\\.venv\\Scripts;$env:PATH"
@@ -159,66 +168,6 @@ pipeline {
             }
         }
 
-        stage('Publish GitLab release') {
-            when { expression { params.PUBLISH_RELEASE } }
-            steps {
-                withCredentials([string(credentialsId: 'mdes-xml-studio-gitlab-release-token', variable: 'GITLAB_RELEASE_TOKEN')]) {
-                    powershell '''
-                        $ErrorActionPreference = "Stop"
-                        if (-not $env:GITLAB_RELEASE_TOKEN) { throw 'The Jenkins GitLab release credential is not configured.' }
-                        $tag = $env:GIT_REF -replace '^refs/tags/', ''
-                        $version = $tag.TrimStart('v')
-                        $base = "$env:GITLAB_API_V4_URL/projects/$env:GITLAB_PROJECT_ID"
-                        $headers = @{ 'PRIVATE-TOKEN' = $env:GITLAB_RELEASE_TOKEN }
-                        $packageBase = "$base/packages/generic/mdes-xml-studio/$version"
-                        $files = @(
-                            Get-ChildItem "$env:WORKSPACE\\electron-app\\dist-electron\\*.exe" -File
-                            Get-ChildItem "$env:WORKSPACE\\electron-app\\dist-electron\\*.blockmap" -File
-                            Get-Item "$env:WORKSPACE\\electron-app\\dist-electron\\latest.yml"
-                        )
-                        if ($files.Count -lt 3) { throw 'Expected installer, blockmap, and latest.yml release assets.' }
-                        $links = foreach ($file in $files) {
-                            $encodedName = [Uri]::EscapeDataString($file.Name)
-                            $assetUrl = "$packageBase/$encodedName"
-                            Invoke-RestMethod -Method Put -Uri $assetUrl -Headers $headers -InFile $file.FullName -ContentType 'application/octet-stream'
-                            @{ name = $file.Name; url = $assetUrl; link_type = 'package' }
-                        }
-
-                        # The app's update feed. electron-updater fetches
-                        # <feed>/latest.yml before it knows which version is newest,
-                        # so the feed root cannot contain a version - it is republished
-                        # here on every release. The per-version upload above stays as
-                        # the archive.
-                        #
-                        # The old "latest" package is deleted first so the feed cannot
-                        # end up serving a stale latest.yml from a duplicate file,
-                        # whatever the project's duplicate-package policy happens to be.
-                        $latestVersion = 'latest'
-                        $existing = Invoke-RestMethod -Method Get -Uri "$base/packages?package_type=generic&package_name=mdes-xml-studio" -Headers $headers
-                        foreach ($pkg in @($existing | Where-Object { $_.version -eq $latestVersion })) {
-                            Write-Host "Removing previous '$latestVersion' package $($pkg.id)"
-                            Invoke-RestMethod -Method Delete -Uri "$base/packages/$($pkg.id)" -Headers $headers | Out-Null
-                        }
-                        foreach ($file in $files) {
-                            $encodedName = [Uri]::EscapeDataString($file.Name)
-                            Invoke-RestMethod -Method Put -Uri "$base/packages/generic/mdes-xml-studio/$latestVersion/$encodedName" -Headers $headers -InFile $file.FullName -ContentType 'application/octet-stream'
-                        }
-                        Write-Host "Update feed republished at .../packages/generic/mdes-xml-studio/$latestVersion"
-                        $releaseBase = "$base/releases"
-                        $encodedTag = [Uri]::EscapeDataString($tag)
-                        $description = "Automated Windows release for $tag. Existing installed clients continue to update from the matching GitHub release during the migration period."
-                        $body = @{ name = "MDES XML Studio $tag"; tag_name = $tag; description = $description; assets = @{ links = @($links) } } | ConvertTo-Json -Depth 6
-                        try {
-                            Invoke-RestMethod -Method Put -Uri "$releaseBase/$encodedTag" -Headers $headers -ContentType 'application/json' -Body $body | Out-Null
-                        }
-                        catch {
-                            if ([int]$_.Exception.Response.StatusCode -ne 404) { throw }
-                            Invoke-RestMethod -Method Post -Uri $releaseBase -Headers $headers -ContentType 'application/json' -Body $body | Out-Null
-                        }
-                    '''
-                }
-            }
-        }
     }
 
     post {
