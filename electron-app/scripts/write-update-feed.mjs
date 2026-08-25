@@ -29,10 +29,26 @@ const outputPath = join(here, '..', 'electron', 'update-feed.json');
 const DEFAULT_URL =
   'https://gitlab.dcsc.com/api/v4/projects/31/packages/generic/mdes-xml-studio/latest';
 
+// GitLab keys the header to the token type, and getting it wrong is a silent
+// 401 rather than an error you can see:
+//   deploy token  (read_package_registry only) -> DEPLOY-TOKEN
+//   personal / project access token            -> PRIVATE-TOKEN
+// The deploy token is the narrower of the two and therefore the default.
+const DEFAULT_HEADER = 'DEPLOY-TOKEN';
+const ALLOWED_HEADERS = ['DEPLOY-TOKEN', 'PRIVATE-TOKEN', 'JOB-TOKEN'];
+
 const token = (process.env.GITLAB_UPDATE_TOKEN || '').trim();
 const url = (process.env.GITLAB_UPDATE_URL || DEFAULT_URL).trim();
+const header = (process.env.GITLAB_UPDATE_TOKEN_HEADER || DEFAULT_HEADER).trim().toUpperCase();
 
-const feed = token ? { url, token } : {};
+if (token && !ALLOWED_HEADERS.includes(header)) {
+  console.error(
+    `GITLAB_UPDATE_TOKEN_HEADER must be one of ${ALLOWED_HEADERS.join(', ')} (got ${header}).`
+  );
+  process.exit(1);
+}
+
+const feed = token ? { url, token, header } : {};
 
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, JSON.stringify(feed, null, 2) + '\n', 'utf8');
@@ -40,6 +56,6 @@ writeFileSync(outputPath, JSON.stringify(feed, null, 2) + '\n', 'utf8');
 // Never print the token itself - this runs in CI logs.
 console.log(
   feed.token
-    ? `Update feed: GitLab preferred (${url}), GitHub fallback`
+    ? `Update feed: GitLab preferred (${url}) via ${header}, GitHub fallback`
     : 'Update feed: GitHub only (GITLAB_UPDATE_TOKEN not set)'
 );

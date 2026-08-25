@@ -138,12 +138,24 @@ release that silently shipped a GitHub-only installer would be worse.
 
 The registry is private, so the feed needs a credential. `electron/update-feed.json`
 is generated at package time by `electron-app/scripts/write-update-feed.mjs` from
-`GITLAB_UPDATE_TOKEN`, and sent as a `PRIVATE-TOKEN` header.
+`GITLAB_UPDATE_TOKEN`.
+
+**GitLab keys the auth header to the token type, and the wrong one is an
+indistinguishable 401** - verified against project 31:
+
+| Token type | Header | Set via |
+| --- | --- | --- |
+| Deploy token (`read_package_registry`) | `DEPLOY-TOKEN` | default |
+| Personal / project access token | `PRIVATE-TOKEN` | `GITLAB_UPDATE_TOKEN_HEADER=PRIVATE-TOKEN` |
+
+An unrecognised header value fails the build rather than shipping an installer
+that cannot authenticate.
 
 - Use a **project deploy token scoped to `read_package_registry` only**. It ships
   inside the installer and is therefore extractable; scoped this way the worst
   case is that someone already on the VPN can download an installer they could
-  download anyway. Rotate it like any other credential.
+  download anyway. Rotate it like any other credential. A personal or project
+  access token also works but carries far broader scope - do not ship one.
 - Jenkins reads it from the credential `mdes-xml-studio-update-feed-token`;
   GitHub Actions reads it from the secret `GITLAB_UPDATE_TOKEN`.
 - **With no token the script writes a disabled stub and the build is GitHub-only.**
@@ -159,6 +171,21 @@ feed root cannot contain a version. The Jenkins publish stage uploads the three
 assets twice: once to `.../mdes-xml-studio/<version>/` as an archive, and once to
 `.../mdes-xml-studio/latest/`, which is the feed. It deletes the previous
 `latest` package first so a duplicate cannot leave a stale `latest.yml` in place.
+
+### Who receives GitLab updates
+
+**Users do not need a GitLab account and do not need to be project members.**
+The installer carries the token and authenticates as the token, not as the
+person. There is no login and nothing to provision per user.
+
+What a user does need is **network reach to `gitlab.dcsc.com`** - the company
+VPN. So the audience is "anyone running the app, on the corporate network",
+which is wider than the project's member list and narrower than GitHub's
+"anyone, anywhere". Confirmed: unauthenticated requests to the registry return
+401, so the feed is not public.
+
+Nobody loses updates by being outside that set: the probe fails and they update
+from GitHub instead.
 
 ### Ordering: never strand a client
 

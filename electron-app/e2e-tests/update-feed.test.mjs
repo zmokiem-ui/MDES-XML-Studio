@@ -23,9 +23,24 @@ function run(env) {
   const stdout = execFileSync(process.execPath, [script], {
     cwd: root,
     encoding: 'utf8',
-    env: { ...process.env, GITLAB_UPDATE_TOKEN: '', GITLAB_UPDATE_URL: '', ...env },
+    env: {
+      ...process.env,
+      GITLAB_UPDATE_TOKEN: '',
+      GITLAB_UPDATE_URL: '',
+      GITLAB_UPDATE_TOKEN_HEADER: '',
+      ...env,
+    },
   });
   return { stdout, feed: JSON.parse(readFileSync(output, 'utf8')) };
+}
+
+function runExpectingFailure(env) {
+  try {
+    run(env);
+  } catch (err) {
+    return err;
+  }
+  throw new Error('expected the generator to exit non-zero');
 }
 
 test('no token produces a disabled feed, so the build stays GitHub-only', () => {
@@ -50,6 +65,29 @@ test('the feed root carries no version', () => {
 test('the token is never printed', () => {
   const { stdout } = run({ GITLAB_UPDATE_TOKEN: 'glpat-secret-value' });
   assert.ok(!stdout.includes('glpat-secret-value'), 'the token must not reach CI logs');
+});
+
+test('a deploy token gets the DEPLOY-TOKEN header by default', () => {
+  // GitLab returns an indistinguishable 401 for the wrong header, so the
+  // default must match the token type the release docs tell you to create.
+  const { feed } = run({ GITLAB_UPDATE_TOKEN: 'gldt-example' });
+  assert.equal(feed.header, 'DEPLOY-TOKEN');
+});
+
+test('a personal or project token can select PRIVATE-TOKEN', () => {
+  const { feed } = run({
+    GITLAB_UPDATE_TOKEN: 'glpat-example',
+    GITLAB_UPDATE_TOKEN_HEADER: 'private-token',
+  });
+  assert.equal(feed.header, 'PRIVATE-TOKEN', 'header should be normalised to upper case');
+});
+
+test('an unrecognised header fails the build instead of shipping a 401', () => {
+  const err = runExpectingFailure({
+    GITLAB_UPDATE_TOKEN: 'glpat-example',
+    GITLAB_UPDATE_TOKEN_HEADER: 'Authorization',
+  });
+  assert.match(String(err.stderr || err.message), /must be one of/);
 });
 
 test('the URL can be overridden without touching the code', () => {

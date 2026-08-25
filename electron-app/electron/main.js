@@ -180,7 +180,10 @@ function loadGitlabFeed() {
     const feed = JSON.parse(raw);
     if (!feed || typeof feed.url !== 'string' || typeof feed.token !== 'string') return null;
     if (!feed.url || !feed.token) return null;
-    return feed;
+    // GitLab keys the header to the token type: a deploy token authenticates
+    // with DEPLOY-TOKEN and a personal/project token with PRIVATE-TOKEN. The
+    // wrong one is an indistinguishable 401, so it is decided at build time.
+    return { ...feed, header: feed.header || 'DEPLOY-TOKEN' };
   } catch {
     return null;  // absent or malformed: GitHub only.
   }
@@ -196,7 +199,7 @@ function probeFeed(feed) {
     try {
       const { net } = require('electron');
       const request = net.request(`${feed.url}/latest.yml`);
-      request.setHeader('PRIVATE-TOKEN', feed.token);
+      request.setHeader(feed.header, feed.token);
       request.on('response', (response) => {
         clearTimeout(timer);
         response.on('data', () => {});      // drain; leaving it unread keeps the socket open
@@ -221,7 +224,7 @@ async function selectUpdateFeed(autoUpdater) {
     console.log('GitLab update feed unreachable; using the GitHub feed.');
     return 'github';
   }
-  autoUpdater.requestHeaders = { 'PRIVATE-TOKEN': feed.token };
+  autoUpdater.requestHeaders = { [feed.header]: feed.token };
   autoUpdater.setFeedURL({ provider: 'generic', url: feed.url, channel: 'latest' });
   console.log('Using the GitLab update feed.');
   return 'gitlab';
