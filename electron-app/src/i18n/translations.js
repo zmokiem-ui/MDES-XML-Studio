@@ -581,12 +581,12 @@ export const translations = {
       downloadProgress: 'Download progress: {percent}%',
       whatsNew: 'Recent Improvements',
       changelog: [
-        'CRS files can now be generated as a foreign delivery, not only a domestic filing',
-        'Pick Domestic or Foreign at the top of the CRS form before you fill anything in',
-        'A domestic filing no longer asks for a receiving country - it follows the sender',
-        'A foreign delivery must name two different countries, and the form checks it',
-        'Foreign account holders default to the receiving jurisdiction, so MDES accepts them',
-        'Foreign files are named the way MDES tooling expects, ready to encrypt and upload'
+        'Updates now come from the company GitLab when you are on the VPN',
+        'Off the VPN the app keeps updating from its previous source, as before',
+        'Nothing to set up: no GitLab account or login is needed to receive updates',
+        'CRS foreign deliveries, added last release, are unchanged',
+        'Settings now shows which update source the app is actually using',
+        'No change to how any XML is generated or validated'
       ]
     }
   },
@@ -1166,12 +1166,12 @@ export const translations = {
       downloadProgress: 'Downloadvoortgang: {percent}%',
       whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'CRS-bestanden kunnen nu als buitenlandse levering worden gegenereerd',
-        'Kies bovenaan het CRS-formulier eerst Binnenlands of Buitenlands',
-        'Een binnenlandse indiening vraagt niet meer om een ontvangend land',
-        'Een buitenlandse levering moet twee verschillende landen noemen; dat wordt gecontroleerd',
-        'Buitenlandse rekeninghouders staan standaard in het ontvangende land, zodat MDES ze accepteert',
-        'Buitenlandse bestanden krijgen de naam die MDES-tooling verwacht, klaar om te encrypten'
+        'Updates komen nu van de bedrijfs-GitLab wanneer u op de VPN zit',
+        'Buiten de VPN blijft de app updaten via de vorige bron, net als eerst',
+        'Niets in te stellen: u hebt geen GitLab-account of login nodig voor updates',
+        'CRS buitenlandse leveringen, toegevoegd in de vorige versie, zijn ongewijzigd',
+        'Instellingen toont nu welke updatebron de app daadwerkelijk gebruikt',
+        'Geen wijziging in hoe XML wordt gegenereerd of gevalideerd'
       ]
     }
   },
@@ -1749,12 +1749,12 @@ export const translations = {
       downloadProgress: 'Progreso de descarga: {percent}%',
       whatsNew: 'Mejoras Recientes',
       changelog: [
-        'Los archivos CRS ahora pueden generarse como entrega extranjera, no solo nacional',
-        'Elija Nacional o Extranjera al principio del formulario CRS antes de rellenar nada',
-        'Una presentacion nacional ya no pide pais receptor: sigue al pais transmisor',
-        'Una entrega extranjera debe nombrar dos paises distintos, y el formulario lo comprueba',
-        'Los titulares extranjeros residen por defecto en el pais receptor, y MDES los acepta',
-        'Los archivos extranjeros reciben el nombre que espera MDES, listos para cifrar'
+        'Las actualizaciones ahora llegan desde el GitLab corporativo cuando esta en la VPN',
+        'Fuera de la VPN la app sigue actualizandose desde su origen anterior, como antes',
+        'Nada que configurar: no necesita cuenta ni inicio de sesion en GitLab',
+        'Las entregas extranjeras CRS, anadidas en la version anterior, no cambian',
+        'Ajustes ahora muestra que origen de actualizacion usa realmente la app',
+        'Sin cambios en como se genera o valida el XML'
       ]
     }
   }
