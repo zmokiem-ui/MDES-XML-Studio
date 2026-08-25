@@ -237,6 +237,15 @@ test.describe.serial('FULL E2E REGRESSION', () => {
     await tinInput.fill('99887766');
     await window.waitForTimeout(VISIBLE_DELAY);
 
+    // This scenario reports NL -> DE, which is a foreign delivery. The receiving
+    // country field only exists in that mode; a domestic filing derives it from
+    // the transmitting country and hides the input.
+    const foreignToggle = window.locator('button', { hasText: 'Foreign Delivery' });
+    if (await foreignToggle.first().isVisible().catch(() => false)) {
+      await foreignToggle.first().click();
+      await window.waitForTimeout(500);
+    }
+
     // Transmitting Country - look for maxLength=2 inputs
     const countryInputs = window.locator('input[maxlength="2"]');
     const countryCount = await countryInputs.count();

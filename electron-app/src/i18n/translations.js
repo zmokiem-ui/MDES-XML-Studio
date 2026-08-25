@@ -113,6 +113,9 @@ export const translations = {
       foreignExchange: 'Foreign Exchange',
       domesticFilingDesc: 'File submitted to your local tax authority. Receiving country will be the same as the transmitting country.',
       foreignExchangeDesc: 'File for automatic exchange with foreign tax authorities. You must specify the receiving country (partner jurisdiction).',
+      crsFileType: 'CRS File Type',
+      foreignDelivery: 'Foreign Delivery',
+      foreignDeliveryDesc: 'File received from a partner jurisdiction, uploaded under CRS foreign deliveries. The transmitting and receiving countries must differ, and the reported account holders are resident in the receiving country.',
       mneGroupName: 'MNE Group Name',
       reportingEntityName: 'Reporting Entity Name',
       reportingRole: 'Reporting Role',
@@ -407,6 +410,7 @@ export const translations = {
     // Form validation errors
     errors: {
       mustBe2LetterISO: 'Must be 2-letter ISO code',
+      foreignCountriesMustDiffer: 'A foreign delivery must come from a different country than the receiving one',
       mustBeAtLeast1: 'Must be at least 1',
       pleaseSelectCsvFile: 'Please select a CSV file',
       pleaseSelectXmlFile: 'Please select a CRS XML file first.',
@@ -577,12 +581,12 @@ export const translations = {
       downloadProgress: 'Download progress: {percent}%',
       whatsNew: 'Recent Improvements',
       changelog: [
-        'Added CRS 3.0 and FATCA-CRS 3.0: generation, validation and corrections',
-        'Schema version is picked per run and auto-detected when validating an existing file',
-        'Generated files now satisfy the MDES record-level rules the XSD cannot express',
-        'Fixed CSV-generated CRS files being rejected by the schema',
-        'CSV input follows the test/production setting and validates closed-account balances',
-        'Organisation accounts without a controlling person are now supported'
+        'CRS files can now be generated as a foreign delivery, not only a domestic filing',
+        'Pick Domestic or Foreign at the top of the CRS form before you fill anything in',
+        'A domestic filing no longer asks for a receiving country - it follows the sender',
+        'A foreign delivery must name two different countries, and the form checks it',
+        'Foreign account holders default to the receiving jurisdiction, so MDES accepts them',
+        'Foreign files are named the way MDES tooling expects, ready to encrypt and upload'
       ]
     }
   },
@@ -694,6 +698,9 @@ export const translations = {
       foreignExchange: 'Buitenlandse Uitwisseling',
       domesticFilingDesc: 'Bestand ingediend bij uw lokale belastingdienst. Ontvangend land zal hetzelfde zijn als het verzendende land.',
       foreignExchangeDesc: 'Bestand voor automatische uitwisseling met buitenlandse belastingdiensten. U moet het ontvangende land (partnerjurisdictie) specificeren.',
+      crsFileType: 'CRS Bestandstype',
+      foreignDelivery: 'Buitenlandse Levering',
+      foreignDeliveryDesc: 'Bestand ontvangen van een partnerjurisdictie, geupload onder CRS buitenlandse leveringen. Het verzendende en ontvangende land moeten verschillen, en de gerapporteerde rekeninghouders wonen in het ontvangende land.',
       mneGroupName: 'MNE Groepsnaam',
       reportingEntityName: 'Rapporterende Entiteitsnaam',
       reportingRole: 'Rapportagerol',
@@ -988,6 +995,7 @@ export const translations = {
     // Form validation errors
     errors: {
       mustBe2LetterISO: 'Moet een 2-letterige ISO code zijn',
+      foreignCountriesMustDiffer: 'Een buitenlandse levering moet uit een ander land komen dan het ontvangende land',
       mustBeAtLeast1: 'Moet minimaal 1 zijn',
       pleaseSelectCsvFile: 'Selecteer een CSV bestand',
       pleaseSelectXmlFile: 'Selecteer eerst een CRS XML bestand.',
@@ -1158,12 +1166,12 @@ export const translations = {
       downloadProgress: 'Downloadvoortgang: {percent}%',
       whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'CRS 3.0 en FATCA-CRS 3.0 toegevoegd: generatie, validatie en correcties',
-        'Schemaversie kies je per run en wordt automatisch herkend bij het valideren',
-        'Gegenereerde bestanden voldoen nu aan de MDES-recordregels die het XSD niet ziet',
-        'Opgelost: uit CSV gegenereerde CRS-bestanden werden door het schema afgekeurd',
-        'CSV-invoer volgt de test/productie-instelling en controleert saldo bij gesloten rekeningen',
-        'Organisatierekeningen zonder controlling person worden nu ondersteund'
+        'CRS-bestanden kunnen nu als buitenlandse levering worden gegenereerd',
+        'Kies bovenaan het CRS-formulier eerst Binnenlands of Buitenlands',
+        'Een binnenlandse indiening vraagt niet meer om een ontvangend land',
+        'Een buitenlandse levering moet twee verschillende landen noemen; dat wordt gecontroleerd',
+        'Buitenlandse rekeninghouders staan standaard in het ontvangende land, zodat MDES ze accepteert',
+        'Buitenlandse bestanden krijgen de naam die MDES-tooling verwacht, klaar om te encrypten'
       ]
     }
   },
@@ -1273,6 +1281,9 @@ export const translations = {
       foreignExchange: 'Intercambio Extranjero',
       domesticFilingDesc: 'Archivo presentado a su autoridad fiscal local. El país receptor será el mismo que el país transmisor.',
       foreignExchangeDesc: 'Archivo para intercambio automático con autoridades fiscales extranjeras. Debe especificar el país receptor (jurisdicción asociada).',
+      crsFileType: 'Tipo de Archivo CRS',
+      foreignDelivery: 'Entrega Extranjera',
+      foreignDeliveryDesc: 'Archivo recibido de una jurisdicción asociada, cargado en entregas extranjeras CRS. Los países transmisor y receptor deben diferir, y los titulares de cuenta reportados residen en el país receptor.',
       mneGroupName: 'Nombre del Grupo MNE',
       reportingEntityName: 'Nombre de la Entidad Reportante',
       reportingRole: 'Rol de Reporte',
@@ -1567,6 +1578,7 @@ export const translations = {
     // Form validation errors
     errors: {
       mustBe2LetterISO: 'Debe ser un código ISO de 2 letras',
+      foreignCountriesMustDiffer: 'Una entrega extranjera debe provenir de un país distinto al receptor',
       mustBeAtLeast1: 'Debe ser al menos 1',
       pleaseSelectCsvFile: 'Seleccione un archivo CSV',
       pleaseSelectXmlFile: 'Seleccione primero un archivo XML CRS.',
@@ -1737,12 +1749,12 @@ export const translations = {
       downloadProgress: 'Progreso de descarga: {percent}%',
       whatsNew: 'Mejoras Recientes',
       changelog: [
-        'CRS 3.0 y FATCA-CRS 3.0 anadidos: generacion, validacion y correcciones',
-        'La version del esquema se elige por ejecucion y se detecta automaticamente al validar',
-        'Los archivos generados cumplen las reglas de registro de MDES que el XSD no ve',
-        'Corregido: los archivos CRS generados desde CSV eran rechazados por el esquema',
-        'La entrada CSV respeta el ajuste test/produccion y valida saldos de cuentas cerradas',
-        'Cuentas de organizacion sin controlling person ahora son compatibles'
+        'Los archivos CRS ahora pueden generarse como entrega extranjera, no solo nacional',
+        'Elija Nacional o Extranjera al principio del formulario CRS antes de rellenar nada',
+        'Una presentacion nacional ya no pide pais receptor: sigue al pais transmisor',
+        'Una entrega extranjera debe nombrar dos paises distintos, y el formulario lo comprueba',
+        'Los titulares extranjeros residen por defecto en el pais receptor, y MDES los acepta',
+        'Los archivos extranjeros reciben el nombre que espera MDES, listos para cifrar'
       ]
     }
   }

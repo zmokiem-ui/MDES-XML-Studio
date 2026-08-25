@@ -212,6 +212,29 @@ Assert-XmlContains "$OutputDir\crs_nocp.xml" "CRS103" "Organisation without CP i
 $out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_nocp.xml" --output dummy 2>&1 | Out-String
 Assert-JsonField $out "is_valid" "true" "CRS103 organisation output is valid"
 
+# 1.13 Foreign delivery: a CRS file arriving from a partner jurisdiction.
+# Uploaded under /crs/foreign-deliveries/crs-country-reports, so the two
+# countries must differ and the reported holders must reach the receiving one.
+Write-TestHeader "1.13 CRS Foreign Delivery"
+$null = python -m crs_generator.cli --mode random --file-type foreign --sending-country IT --receiving-country CW --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --account-holder-mode single --account-holder-countries CW --output "$OutputDir\crs_foreign.xml" 2>&1
+Assert-FileExists "$OutputDir\crs_foreign.xml" "CRS foreign delivery generation"
+Assert-XmlContains "$OutputDir\crs_foreign.xml" "<crs:TransmittingCountry>IT</crs:TransmittingCountry>" "Foreign delivery transmits from IT"
+Assert-XmlContains "$OutputDir\crs_foreign.xml" "<crs:ReceivingCountry>CW</crs:ReceivingCountry>" "Foreign delivery is addressed to CW"
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_foreign.xml" --file-type foreign --output dummy 2>&1 | Out-String
+Assert-JsonField $out "is_valid" "true" "Foreign delivery is schema valid"
+Assert-OutputContains $out '"mdes_findings":\s*\[\]' "Foreign delivery raises no MDES findings"
+
+Write-TestHeader "1.14 CRS Foreign Delivery Must Cross A Border"
+$out = python -m crs_generator.cli --mode random --file-type foreign --sending-country NL --receiving-country NL --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 1 --organisation-accounts 0 --output "$OutputDir\crs_foreign_same.xml" 2>&1 | Out-String
+Assert-OutputContains $out "different transmitting and receiving" "Foreign delivery to its own country is rejected"
+# A same-country file declared as a foreign delivery is caught at validation too.
+$null = python -m crs_generator.cli --mode random --sending-country NL --receiving-country NL --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 1 --organisation-accounts 0 --output "$OutputDir\crs_domestic_nl.xml" 2>&1
+Assert-FileExists "$OutputDir\crs_domestic_nl.xml" "CRS domestic NL->NL generation"
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_domestic_nl.xml" --file-type foreign --output dummy 2>&1 | Out-String
+Assert-OutputContains $out "FILETYPE-01" "Domestic file validated as foreign is flagged"
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_domestic_nl.xml" --file-type domestic --output dummy 2>&1 | Out-String
+Assert-JsonField $out "is_valid" "true" "Same file validated as domestic stays clean"
+
 # ============================================================
 # SECTION 1B: CRS 3.0
 # ============================================================

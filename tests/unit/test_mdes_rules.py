@@ -104,3 +104,49 @@ def test_negative_balance_flagged_60002():
 def test_bad_birthdate_flagged_60014():
     root = _doc(birthdate="1850-01-01")
     assert "60014" in _codes(mr.check_mdes_rules(root, "CRS"))
+
+
+# --- File type: foreign deliveries must cross a border ----------------------
+
+
+def _country_pair_doc(transmitting="IT", receiving="CW"):
+    """Minimal document carrying just the MessageSpec country pair."""
+    root = etree.Element(f"{{{NS}}}CRS_OECD")
+    spec = etree.SubElement(root, f"{{{NS}}}MessageSpec")
+    etree.SubElement(spec, f"{{{NS}}}TransmittingCountry").text = transmitting
+    etree.SubElement(spec, f"{{{NS}}}ReceivingCountry").text = receiving
+    return root
+
+
+def test_foreign_delivery_with_matching_countries_is_flagged():
+    findings = mr.check_mdes_rules(_country_pair_doc("CW", "CW"), "CRS",
+                                   file_type="foreign")
+    assert "FILETYPE-01" in _codes(findings)
+    finding = next(f for f in findings if f.code == "FILETYPE-01")
+    # Not an MDES portal code, and it must not claim to be one.
+    assert finding.source == "XML Studio"
+    assert finding.as_text().startswith("[XML Studio FILETYPE-01]")
+
+
+def test_foreign_delivery_across_countries_is_not_flagged():
+    findings = mr.check_mdes_rules(_country_pair_doc("IT", "CW"), "CRS",
+                                   file_type="foreign")
+    assert "FILETYPE-01" not in _codes(findings)
+
+
+def test_domestic_filing_may_name_the_same_country_twice():
+    findings = mr.check_mdes_rules(_country_pair_doc("CW", "CW"), "CRS",
+                                   file_type="domestic")
+    assert "FILETYPE-01" not in _codes(findings)
+
+
+def test_file_type_check_is_skipped_when_the_caller_says_nothing():
+    """Existing callers pass no file_type and must be unaffected."""
+    findings = mr.check_mdes_rules(_country_pair_doc("CW", "CW"), "CRS")
+    assert "FILETYPE-01" not in _codes(findings)
+
+
+def test_findings_default_to_mdes_as_their_source():
+    finding = mr.Finding("80017", "error", "example")
+    assert finding.source == "MDES"
+    assert finding.as_text() == "[MDES 80017] example"

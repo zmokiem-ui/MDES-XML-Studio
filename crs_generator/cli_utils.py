@@ -153,7 +153,8 @@ def format_validation_result(result, module_type: str = 'crs') -> Dict[str, Any]
     return base_result
 
 
-def apply_xsd_verdict(base_result: Dict[str, Any], xml_path: str) -> Dict[str, Any]:
+def apply_xsd_verdict(base_result: Dict[str, Any], xml_path: str,
+                      file_type: Optional[str] = None) -> Dict[str, Any]:
     """Make real XSD validation the authoritative verdict for a validate result.
 
     The hand-rolled validators (xml_validator / fatca_validator) are
@@ -190,9 +191,11 @@ def apply_xsd_verdict(base_result: Dict[str, Any], xml_path: str) -> Dict[str, A
     # app can predict portal acceptance. These never change the schema verdict.
     try:
         from . import mdes_rules
-        mdes_findings = mdes_rules.check_file(xml_path, result.message_type)
+        mdes_findings = mdes_rules.check_file(xml_path, result.message_type,
+                                              file_type=file_type)
         base_result['mdes_findings'] = [
-            {'code': f.code, 'severity': f.severity, 'message': f.message}
+            {'code': f.code, 'severity': f.severity, 'message': f.message,
+             'source': f.source}
             for f in mdes_findings
         ]
         warnings.extend(f.as_text() for f in mdes_findings)

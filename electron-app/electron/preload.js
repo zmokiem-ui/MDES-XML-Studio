@@ -15,7 +15,7 @@ function subscribeNoData(channel, callback) {
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld('electronAPI', {
-  selectOutputFile: (module) => ipcRenderer.invoke('select-output-file', module),
+  selectOutputFile: (module, defaultName) => ipcRenderer.invoke('select-output-file', module, defaultName),
   selectCsvFile: () => ipcRenderer.invoke('select-csv-file'),
   generateCsvPreview: (formData) => ipcRenderer.invoke('generate-csv-preview', formData),
   saveCsvPreview: (formData) => ipcRenderer.invoke('save-csv-preview', formData),

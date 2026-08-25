@@ -19,6 +19,7 @@ from datetime import datetime, timedelta, timezone
 from faker import Faker
 import logging
 from multiprocessing import Pool, cpu_count
+import string
 import tempfile
 import shutil
 from .identifiers import normalize_identifier, normalize_identifiers
@@ -34,6 +35,34 @@ logger = logging.getLogger(__name__)
 # upload by root namespace *or* @version (see camel config.xml), so both have
 # to match the version being generated.
 SUPPORTED_CRS_VERSIONS = ("2.0", "3.0")
+
+
+# --- Domestic vs foreign ----------------------------------------------------
+# CRS files reach MDES through two different intakes. A *domestic* filing is
+# submitted by a local FI to its own tax authority, so TransmittingCountry ==
+# ReceivingCountry. A *foreign delivery* arrives from a partner jurisdiction and
+# is uploaded under /crs/foreign-deliveries/crs-country-reports; the two
+# countries differ, the ReportingFI is resident in the transmitting country and
+# the reported holders are resident in the receiving one (MDES 60011/60012).
+SUPPORTED_FILE_TYPES = ("domestic", "foreign")
+
+
+def foreign_delivery_filename(transmitting_country: str,
+                              rng: Optional[random.Random] = None) -> str:
+    """Name a foreign-delivery XML the way MDES test tooling expects.
+
+    Mirrors ``Script: Generate CRS XML report`` in the ART trunk
+    (``TestSuite/Templates/CRS_Levering_Upload.resource``), which writes
+    ``{TransmittingCountry}_CRS_{timestamp}Z_{32 random chars}.xml``. That name
+    is carried through into the encrypted ZIP the tester builds afterwards, so
+    matching it keeps the two halves of the flow recognisably the same file.
+    """
+    picker = rng or random.Random()
+    alphabet = string.ascii_letters + string.digits
+    suffix = ''.join(picker.choice(alphabet) for _ in range(32))
+    stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%f')[:-3]
+    return f"{transmitting_country}_CRS_{stamp}Z_{suffix}.xml"
+
 
 CRS_NAMESPACES = {
     "2.0": "urn:oecd:ties:crs:v2",
@@ -107,6 +136,11 @@ class GeneratorConfig:
     tax_year: int = 2021
     mytin: str = "999999999"  # Default test TIN - replace with actual SendingCompanyIN
 
+    # Which MDES intake the file is destined for: "domestic" (same country on
+    # both sides) or "foreign" (a delivery from a partner jurisdiction).
+    # Domestic stays the default so existing callers are unaffected.
+    file_type: str = "domestic"
+
     # Schema version to generate. Defaults to 2.0 so existing callers keep
     # producing what they produced before; 3.0 is opt-in.
     crs_version: str = "2.0"
@@ -151,6 +185,13 @@ class GeneratorConfig:
                 f"expected one of {', '.join(SUPPORTED_CRS_VERSIONS)}"
             )
 
+        self.file_type = str(self.file_type).strip().lower()
+        if self.file_type not in SUPPORTED_FILE_TYPES:
+            raise ValueError(
+                f"Unsupported file_type {self.file_type!r}; "
+                f"expected one of {', '.join(SUPPORTED_FILE_TYPES)}"
+            )
+
         # Trim identifiers before anything concatenates them into a RefId — a
         # pasted trailing space would otherwise sit inside every MessageRefId
         # and DocRefId and get the file rejected by MDES (rule 80025).
@@ -159,15 +200,32 @@ class GeneratorConfig:
         self.receiving_country = normalize_identifier(self.receiving_country)
         self.reporting_fi_tins = normalize_identifiers(self.reporting_fi_tins)
 
+        # A "foreign" delivery addressed to its own transmitting country is not
+        # one: MDES would treat it as a domestic filing, and the residence rules
+        # 60011/60012 would be satisfied trivially rather than meaningfully.
+        # Caught here so the file is never written, not after it is rejected.
+        if (self.file_type == "foreign"
+                and self.sending_country == self.receiving_country):
+            raise ValueError(
+                "A foreign delivery needs different transmitting and receiving "
+                f"countries; both are {self.sending_country!r}."
+            )
+
         # Handle output path
         if isinstance(self.output_path, str):
             self.output_path = Path(self.output_path)
         
         if self.output_path is None:
-            # Version in the default name so a 3.0 run does not silently
-            # overwrite the 2.0 file for the same country and year.
-            prefix = "crs" if self.crs_version == "2.0" else "crs3"
-            self.output_path = Path.cwd() / "out" / f"{prefix}_{self.sending_country}_{self.tax_year}.xml"
+            if self.file_type == "foreign":
+                # The random suffix already makes this unique, so it needs no
+                # version marker the way the domestic name below does.
+                self.output_path = (Path.cwd() / "out"
+                                    / foreign_delivery_filename(self.sending_country))
+            else:
+                # Version in the default name so a 3.0 run does not silently
+                # overwrite the 2.0 file for the same country and year.
+                prefix = "crs" if self.crs_version == "2.0" else "crs3"
+                self.output_path = Path.cwd() / "out" / f"{prefix}_{self.sending_country}_{self.tax_year}.xml"
         else:
             # If user provides just a filename (no directory), auto-prepend 'out/'
             if not self.output_path.parent or str(self.output_path.parent) == '.':
@@ -967,6 +1025,7 @@ class CRSGenerator:
         logger.info("="*70)
         logger.info(f"📊 Configuration:")
         logger.info(f"   CRS Version: {self.config.crs_version}")
+        logger.info(f"   File Type: {self.config.file_type}")
         logger.info(f"   Country: {self.config.sending_country} → {self.config.receiving_country}")
         logger.info(f"   Tax Year: {self.config.tax_year}")
         logger.info(f"   MYTIN: {self.config.mytin}")

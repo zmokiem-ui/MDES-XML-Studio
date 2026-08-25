@@ -25,9 +25,13 @@ class Finding:
     code: str
     severity: str  # "error" | "warning"
     message: str
+    # Where the rule comes from. Almost everything here is a real MDES rule
+    # keyed by its portal error code; the few checks this app adds on its own
+    # say so rather than borrowing a code MDES never issues.
+    source: str = "MDES"
 
     def as_text(self) -> str:
-        return f"[MDES {self.code}] {self.message}"
+        return f"[{self.source} {self.code}] {self.message}"
 
 
 def _local(tag) -> str:
@@ -112,8 +116,16 @@ def check_mdes_rules(
     root: etree._Element,
     message_type: str,
     environment_is_test: bool = True,
+    file_type: str | None = None,
 ) -> list[Finding]:
-    """Run the MDES business-rule checks applicable to a parsed document."""
+    """Run the MDES business-rule checks applicable to a parsed document.
+
+    ``file_type`` is the intake the file is meant for — ``"domestic"`` or
+    ``"foreign"``. It cannot be read off the document (a foreign delivery
+    addressed to its own country is indistinguishable from a domestic filing),
+    so the caller states it. Left at ``None``, the file-type checks are skipped
+    and behaviour is exactly as before.
+    """
     findings: list[Finding] = []
 
     transmitting = _first_text(root, "TransmittingCountry") or ""
@@ -129,6 +141,19 @@ def check_mdes_rules(
     # are Dutch CRS/FC conventions; the IRS FATCA_OECD format has its own
     # identifier conventions, so those checks only apply to the CRS family.
     is_crs_family = message_type in ("CRS", "FATCA_CRS")
+
+    # --- File type: a foreign delivery must cross a border ------------------
+    # Not an MDES portal code. MDES routes on the country pair, so a "foreign"
+    # file naming the same country twice is simply accepted as a domestic
+    # filing — the upload succeeds and the test silently proves nothing. The
+    # residence rules 60011/60012 below are the ones that make a foreign
+    # delivery meaningful, and they are vacuous when the countries match.
+    if file_type == "foreign" and transmitting and transmitting == receiving:
+        findings.append(Finding(
+            "FILETYPE-01", "error",
+            "A foreign delivery must have different transmitting and receiving "
+            f"countries; both are {transmitting}.",
+            source="XML Studio"))
 
     # --- 98017: no SQL-comment substrings anywhere in the file (universal) ---
     xml_text = etree.tostring(root, encoding="unicode")
@@ -362,10 +387,11 @@ def check_mdes_rules(
     return findings
 
 
-def check_file(path, message_type=None, environment_is_test=True) -> list[Finding]:
+def check_file(path, message_type=None, environment_is_test=True,
+               file_type=None) -> list[Finding]:
     from . import xsd_validator as xv
     tree = etree.parse(str(path))
     root = tree.getroot()
     if message_type is None:
         message_type = xv.detect_message_type(root)
-    return check_mdes_rules(root, message_type, environment_is_test)
+    return check_mdes_rules(root, message_type, environment_is_test, file_type)

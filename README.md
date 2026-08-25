@@ -19,6 +19,36 @@ All generated output is validated against the official XSDs bundled under
 `crs_generator/schemas/`, and business rules mirror the MDES validation XSLTs
 (see `crs_generator/mdes_rules.py`).
 
+### Domestic filings and foreign deliveries
+
+CRS reaches MDES through two intakes, and the CRS form asks which one you want
+before anything else.
+
+A **domestic filing** is submitted by a local FI to its own tax authority, so
+`TransmittingCountry` equals `ReceivingCountry`; the form derives the receiving
+country from the transmitting one and does not ask for it.
+
+A **foreign delivery** is a file arriving from a partner jurisdiction, uploaded
+under `/crs/foreign-deliveries/crs-country-reports`. The two countries must
+differ, the ReportingFI is resident in the transmitting country, and every
+reported account holder is resident in the receiving one — which is what MDES
+rules 60011/60012 check. Choosing Foreign defaults the account-holder country to
+the receiving jurisdiction and names the file
+`{TransmittingCountry}_CRS_{timestamp}Z_{random}.xml`, the convention the MDES
+test tooling uses, so it lines up with the ZIP you encrypt from it.
+
+The CLI takes the same switch:
+
+```bash
+python -m crs_generator.cli --mode random --file-type foreign \
+  --sending-country IT --receiving-country CW --tax-year 2024 \
+  --mytin 123456789 --num-fis 1 --individual-accounts 5 \
+  --organisation-accounts 5 --output out/foreign.xml
+```
+
+Signing, encryption and ZIP packaging are out of scope — the app produces the
+plaintext XML, and you encrypt it with the existing cipher tool.
+
 CRS 3.0 keeps the v2 supporting schemas but moves to its own root namespace and
 makes account classification mandatory: `SelfCert` on every account holder and
 controlling person, `DDProcedure` and `AccountType` on every account report, and

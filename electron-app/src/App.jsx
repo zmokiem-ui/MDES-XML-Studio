@@ -1093,6 +1093,7 @@ function App() {
     cbcDataMode, setCbcDataMode,
     cbcCsvPath, setCbcCsvPath,
     cbcFileType, setCbcFileType,
+    crsFileType, setCrsFileType, handleCrsFileTypeChange,
     expandedSections, errors, setErrors,
     toggleSection, handleInputChange, handleNumFIsChange, handleTINChange,
     validateForm,
@@ -1484,9 +1485,43 @@ function App() {
 
 
 
+  // A domestic filing is addressed to the sender's own tax authority, so its
+  // receiving country is the transmitting one and the field is not shown; only
+  // a foreign delivery names a second jurisdiction. Same rule as useGeneration.
+  const effectiveReceivingCountry = () => (crsFileType === 'domestic'
+
+    ? formData.transmittingCountry
+
+    : formData.receivingCountry).toUpperCase()
+
+
+
+  // Foreign deliveries get the name MDES test tooling uses —
+  // {TransmittingCountry}_CRS_{timestamp}Z_{random}.xml — so the plaintext XML
+  // and the ZIP the tester encrypts from it stay recognisably the same file.
+  const foreignDeliveryFileName = (transmittingCountry) => {
+
+    const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+
+    const suffix = Array.from({ length: 32 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('')
+
+    const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.(\d{3})Z$/, '$1')
+
+    return `${transmittingCountry || 'XX'}_CRS_${stamp}Z_${suffix}.xml`
+
+  }
+
+
+
   const handleSelectOutputFile = async () => {
 
-    const filePath = await window.electronAPI.selectOutputFile(activeModule)
+    const suggested = activeModule === 'crs' && crsFileType === 'foreign'
+
+      ? foreignDeliveryFileName(formData.transmittingCountry)
+
+      : null
+
+    const filePath = await window.electronAPI.selectOutputFile(activeModule, suggested)
 
     if (filePath) handleInputChange('outputPath', filePath)
 
@@ -1608,7 +1643,7 @@ function App() {
 
   const handleGeneratePreview = async () => {
 
-    if (!formData.sendingCompanyIN || !formData.transmittingCountry || !formData.receivingCountry || !formData.numReportingFIs) {
+    if (!formData.sendingCompanyIN || !formData.transmittingCountry || (crsFileType === 'foreign' && !formData.receivingCountry) || !formData.numReportingFIs) {
 
       setModalType('error')
 
@@ -1628,7 +1663,7 @@ function App() {
 
         transmittingCountry: formData.transmittingCountry.toUpperCase(),
 
-        receivingCountry: formData.receivingCountry.toUpperCase(),
+        receivingCountry: effectiveReceivingCountry(),
 
         reportingPeriod: formData.reportingPeriod,
 
@@ -1672,7 +1707,7 @@ function App() {
 
   const handleDownloadCsv = async () => {
 
-    if (!formData.sendingCompanyIN || !formData.transmittingCountry || !formData.receivingCountry || !formData.numReportingFIs) {
+    if (!formData.sendingCompanyIN || !formData.transmittingCountry || (crsFileType === 'foreign' && !formData.receivingCountry) || !formData.numReportingFIs) {
 
       setModalType('error')
 
@@ -1690,7 +1725,7 @@ function App() {
 
         transmittingCountry: formData.transmittingCountry.toUpperCase(),
 
-        receivingCountry: formData.receivingCountry.toUpperCase(),
+        receivingCountry: effectiveReceivingCountry(),
 
         reportingPeriod: formData.reportingPeriod,
 
@@ -2220,6 +2255,7 @@ function App() {
     cbcDataMode,
     cbcCsvPath,
     cbcFileType,
+    crsFileType,
     dataMode,
     csvFilePath,
     csvStatistics,
@@ -7474,6 +7510,85 @@ function App() {
 
               <>
 
+                {/* CRS File Type — which MDES intake the file targets */}
+
+                <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
+
+                  <div className="flex items-center gap-3 mb-4">
+
+                    <FileCheck className={`w-6 h-6 ${theme.accentText}`} />
+
+                    <h2 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'form.crsFileType')}</h2>
+
+                  </div>
+
+                  <div className="flex gap-4 mb-4">
+
+                    {[
+
+                      { id: 'domestic', icon: Home, label: t(language, 'form.domesticFiling') },
+
+                      { id: 'foreign', icon: Globe, label: t(language, 'form.foreignDelivery') }
+
+                    ].map(({ id, icon: Icon, label }) => (
+
+                      <button
+
+                        key={id}
+
+                        onClick={() => handleCrsFileTypeChange(id)}
+
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
+
+                          crsFileType === id
+
+                            ? `${theme.buttonPrimary} shadow-md`
+
+                            : `${theme.buttonSecondary}`
+
+                        }`}
+
+                      >
+
+                        <Icon className="w-5 h-5" />
+
+                        {label}
+
+                      </button>
+
+                    ))}
+
+                  </div>
+
+                  <div className={`${theme.accentLight} border rounded-lg p-3`}>
+
+                    <p className={`text-sm ${theme.text}`}>
+
+                      {crsFileType === 'domestic' ? (
+
+                        <>
+
+                          <strong>{t(language, 'form.domesticFiling')}:</strong> {t(language, 'form.domesticFilingDesc')}
+
+                        </>
+
+                      ) : (
+
+                        <>
+
+                          <strong>{t(language, 'form.foreignDelivery')}:</strong> {t(language, 'form.foreignDeliveryDesc')}
+
+                        </>
+
+                      )}
+
+                    </p>
+
+                  </div>
+
+                </div>
+
+
                 {/* Message Header */}
 
                 <div className={`${theme.card} rounded-xl border shadow-sm overflow-hidden`}>
@@ -7600,29 +7715,35 @@ function App() {
 
                       </div>
 
-                      <div>
+                      {crsFileType === 'foreign' && (
 
-                        <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.receivingCountry')} *</label>
+                        <div>
 
-                        <input
+                          <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.receivingCountry')} *</label>
 
-                          type="text"
+                          <input
 
-                          className={`w-full px-4 py-2 rounded-lg border ${theme.input} ${errors.receivingCountry ? 'border-red-500' : ''}`}
+                            type="text"
 
-                          value={formData.receivingCountry}
+                            className={`w-full px-4 py-2 rounded-lg border ${theme.input} ${errors.receivingCountry ? 'border-red-500' : ''}`}
 
-                          onChange={(e) => handleInputChange('receivingCountry', e.target.value.toUpperCase())}
+                            value={formData.receivingCountry}
 
-                          placeholder="e.g., DE"
+                            onChange={(e) => handleInputChange('receivingCountry', e.target.value.toUpperCase())}
 
-                          maxLength={2}
+                            placeholder="e.g., DE"
 
-                        />
+                            maxLength={2}
 
-                        {errors.receivingCountry && <p className="text-xs text-red-500 mt-1">{errors.receivingCountry}</p>}
+                          />
 
-                      </div>
+                          {errors.receivingCountry && <p className="text-xs text-red-500 mt-1">{errors.receivingCountry}</p>}
+
+                          <p className={`text-xs ${theme.textMuted} mt-1`}>{t(language, 'ui.partnerJurisdiction')}</p>
+
+                        </div>
+
+                      )}
 
                     </div>
 

@@ -76,6 +76,10 @@ export function useFormState(language) {
   const [cbcDataMode, setCbcDataMode] = useState('random')
   const [cbcCsvPath, setCbcCsvPath] = useState('')
   const [cbcFileType, setCbcFileType] = useState('domestic')
+  // Which MDES intake the CRS file targets. 'domestic' keeps the previous
+  // behaviour (receiving country mirrors the transmitting one); 'foreign'
+  // is a delivery from a partner jurisdiction and needs both countries.
+  const [crsFileType, setCrsFileType] = useState('domestic')
   const [expandedSections, setExpandedSections] = useState(INITIAL_EXPANDED_SECTIONS)
   const [errors, setErrors] = useState({})
 
@@ -84,7 +88,17 @@ export function useFormState(language) {
   }
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData(prev => {
+      const next = { ...prev, [field]: value }
+      // On a foreign delivery the reported holders live in the receiving
+      // jurisdiction, so keep the account-holder country following that field
+      // rather than making the user set the same code twice.
+      if (field === 'receivingCountry' && crsFileType === 'foreign'
+          && next.accountHolderMode === 'single') {
+        next.accountHolderCountries = value
+      }
+      return next
+    })
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }))
     }
@@ -98,6 +112,18 @@ export function useFormState(language) {
       ...prev,
       reportingFITINs: num >= 1 ? Array(num).fill('') : [],
     }))
+  }
+
+  // Switching intake rewrites the fields that only make sense for one of them.
+  // Foreign deliveries report holders resident in the receiving jurisdiction
+  // (MDES 60011/60012), so that becomes the account-holder default; going back
+  // to domestic clears both and restores the random spread.
+  const handleCrsFileTypeChange = (fileType) => {
+    setCrsFileType(fileType)
+    setErrors(prev => ({ ...prev, receivingCountry: null }))
+    setFormData(prev => fileType === 'foreign'
+      ? { ...prev, accountHolderMode: 'single', accountHolderCountries: prev.receivingCountry }
+      : { ...prev, receivingCountry: '', accountHolderMode: 'random', accountHolderCountries: '' })
   }
 
   const handleTINChange = (index, value) => {
@@ -116,10 +142,17 @@ export function useFormState(language) {
     } else if (!/^[A-Z]{2}$/.test(formData.transmittingCountry.toUpperCase())) {
       newErrors.transmittingCountry = t(language, 'errors.mustBe2LetterISO')
     }
-    if (!formData.receivingCountry) {
-      newErrors.receivingCountry = t(language, 'messages.requiredField')
-    } else if (!/^[A-Z]{2}$/.test(formData.receivingCountry.toUpperCase())) {
-      newErrors.receivingCountry = t(language, 'errors.mustBe2LetterISO')
+    // A domestic filing has no separate receiving country — it is derived from
+    // the transmitting one at generation time, so the field is not shown.
+    if (crsFileType === 'foreign') {
+      if (!formData.receivingCountry) {
+        newErrors.receivingCountry = t(language, 'messages.requiredField')
+      } else if (!/^[A-Z]{2}$/.test(formData.receivingCountry.toUpperCase())) {
+        newErrors.receivingCountry = t(language, 'errors.mustBe2LetterISO')
+      } else if (formData.receivingCountry.toUpperCase()
+                 === formData.transmittingCountry.toUpperCase()) {
+        newErrors.receivingCountry = t(language, 'errors.foreignCountriesMustDiffer')
+      }
     }
     if (!formData.numReportingFIs || parseInt(formData.numReportingFIs) < 1) {
       newErrors.numReportingFIs = t(language, 'errors.mustBeAtLeast1')
@@ -141,6 +174,7 @@ export function useFormState(language) {
     cbcDataMode, setCbcDataMode,
     cbcCsvPath, setCbcCsvPath,
     cbcFileType, setCbcFileType,
+    crsFileType, setCrsFileType, handleCrsFileTypeChange,
     expandedSections, errors, setErrors,
     toggleSection, handleInputChange, handleNumFIsChange, handleTINChange,
     validateForm,

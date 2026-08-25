@@ -10,6 +10,7 @@ export function useGeneration({
   cbcDataMode,
   cbcCsvPath,
   cbcFileType,
+  crsFileType,
   dataMode,
   csvFilePath,
   csvStatistics,
@@ -171,6 +172,13 @@ export function useGeneration({
 
     let unsubscribeGenerationProgress
     try {
+      // A domestic filing is addressed to the sender's own tax authority, so
+      // the receiving country is the transmitting one; only a foreign delivery
+      // names a second jurisdiction. Same derivation the CBC module uses.
+      const effectiveReceivingCountry = crsFileType === 'domestic'
+        ? formData.transmittingCountry.toUpperCase()
+        : formData.receivingCountry.toUpperCase()
+
       const generateData = dataMode === 'csv'
         ? {
             mode: 'csv',
@@ -181,8 +189,9 @@ export function useGeneration({
         : {
             mode: 'random',
             ...formData,
+            fileType: crsFileType,
             transmittingCountry: formData.transmittingCountry.toUpperCase(),
-            receivingCountry: formData.receivingCountry.toUpperCase(),
+            receivingCountry: effectiveReceivingCountry,
             numReportingFIs: parseInt(formData.numReportingFIs),
             individualAccounts: parseInt(formData.individualAccounts) || 0,
             organisationAccounts: parseInt(formData.organisationAccounts) || 0,

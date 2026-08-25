@@ -265,12 +265,12 @@ app.on('activate', () => {
 // IPC Handlers
 
 // Select output file
-ipcMain.handle('select-output-file', async (event, module = 'crs') => {
+ipcMain.handle('select-output-file', async (event, module = 'crs', defaultName = null) => {
   const modulePrefix = module.toLowerCase();
   const moduleName = module.toUpperCase();
   const result = await dialog.showSaveDialog(mainWindow, {
     title: `Save ${moduleName} XML File`,
-    defaultPath: `${modulePrefix}_output.xml`,
+    defaultPath: defaultName || `${modulePrefix}_output.xml`,
     filters: [
       { name: 'XML Files', extensions: ['xml'] },
       { name: 'All Files', extensions: ['*'] }
@@ -378,6 +378,13 @@ ipcMain.handle('generate-crs', async (event, formData) => {
       '--controlling-persons', formData.controllingPersons,
       '--output', formData.outputPath
     );
+
+    // Domestic vs foreign delivery. The generator uses it to reject a "foreign"
+    // file whose two countries match, which MDES would silently treat as a
+    // domestic filing.
+    if (formData.fileType) {
+      args.push('--file-type', formData.fileType);
+    }
 
     // CRS schema version. Both paths support 3.0; the CSV branch above passes
     // the same flag.

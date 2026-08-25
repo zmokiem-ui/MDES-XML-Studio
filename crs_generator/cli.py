@@ -13,7 +13,7 @@ from .cli_utils import (
     add_correction_arguments, add_account_holder_arguments, add_generation_arguments,
     CorrectionConfig, format_validation_result, format_correction_result
 )
-from .generator import SUPPORTED_CRS_VERSIONS
+from .generator import SUPPORTED_CRS_VERSIONS, SUPPORTED_FILE_TYPES
 
 
 def validate_xml_mode(args):
@@ -30,7 +30,8 @@ def validate_xml_mode(args):
     validator = CRSXMLValidator()
     result = validator.validate_file(args.xml_input)
     from .cli_utils import apply_xsd_verdict
-    return apply_xsd_verdict(format_validation_result(result, 'crs'), args.xml_input)
+    return apply_xsd_verdict(format_validation_result(result, 'crs'), args.xml_input,
+                             file_type=getattr(args, 'file_type', None))
 
 
 def generate_correction_mode(args):
@@ -144,6 +145,13 @@ def main():
     # Random mode arguments
     parser.add_argument('--sending-country', help='Sending country code')
     parser.add_argument('--receiving-country', help='Receiving country code')
+    parser.add_argument('--file-type', choices=list(SUPPORTED_FILE_TYPES), default='domestic',
+                        help='Which MDES intake the file targets (default: domestic). '
+                             'domestic = filed with the local tax authority, so the '
+                             'transmitting and receiving countries match. '
+                             'foreign = a delivery from a partner jurisdiction, uploaded '
+                             'under /crs/foreign-deliveries/crs-country-reports; the two '
+                             'countries must differ.')
     parser.add_argument('--tax-year', type=int, help='Tax year')
     parser.add_argument('--mytin', help='Sending company TIN')
     parser.add_argument('--num-fis', type=int, help='Number of reporting FIs')
@@ -327,7 +335,8 @@ def generate_random_mode(args):
         from multiprocessing import cpu_count
         num_workers = min(8, cpu_count())
     
-    print(f"Generating CRS {args.crs_version} file with {total_accounts:,} total accounts...")
+    print(f"Generating CRS {args.crs_version} {args.file_type} file "
+          f"with {total_accounts:,} total accounts...")
     print(f"Parallel processing: {'Yes' if use_parallel else 'No'} ({num_workers} workers)")
 
     try:
@@ -335,6 +344,7 @@ def generate_random_mode(args):
             crs_version=args.crs_version,
             sending_country=args.sending_country,
             receiving_country=args.receiving_country,
+            file_type=args.file_type,
             tax_year=args.tax_year,
             mytin=args.mytin,
             reporting_fi_tins=reporting_fi_tins,
