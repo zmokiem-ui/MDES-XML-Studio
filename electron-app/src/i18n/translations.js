@@ -581,7 +581,7 @@ export const translations = {
       downloadProgress: 'Download progress: {percent}%',
       whatsNew: 'Recent Improvements',
       changelog: [
-        'Updates now come from the company GitLab when you are on the VPN',
+        'Fixes publishing this release to the company GitLab automatically',
         'Off the VPN the app keeps updating from its previous source, as before',
         'Nothing to set up: no GitLab account or login is needed to receive updates',
         'CRS foreign deliveries, added last release, are unchanged',
@@ -1166,7 +1166,7 @@ export const translations = {
       downloadProgress: 'Downloadvoortgang: {percent}%',
       whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'Updates komen nu van de bedrijfs-GitLab wanneer u op de VPN zit',
+        'Lost op dat deze release automatisch naar de bedrijfs-GitLab wordt gepubliceerd',
         'Buiten de VPN blijft de app updaten via de vorige bron, net als eerst',
         'Niets in te stellen: u hebt geen GitLab-account of login nodig voor updates',
         'CRS buitenlandse leveringen, toegevoegd in de vorige versie, zijn ongewijzigd',
@@ -1749,7 +1749,7 @@ export const translations = {
       downloadProgress: 'Progreso de descarga: {percent}%',
       whatsNew: 'Mejoras Recientes',
       changelog: [
-        'Las actualizaciones ahora llegan desde el GitLab corporativo cuando esta en la VPN',
+        'Corrige la publicacion automatica de esta version en el GitLab corporativo',
         'Fuera de la VPN la app sigue actualizandose desde su origen anterior, como antes',
         'Nada que configurar: no necesita cuenta ni inicio de sesion en GitLab',
         'Las entregas extranjeras CRS, anadidas en la version anterior, no cambian',

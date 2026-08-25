@@ -2,5 +2,5 @@
 
 from .generator import CRSGenerator, GeneratorConfig, DataGenerator
 
-__version__ = "2.3.0"
+__version__ = "2.3.1"
 __all__ = ["CRSGenerator", "GeneratorConfig", "DataGenerator"]
