@@ -139,7 +139,7 @@ pipeline {
                     # on two npm scripts that are not in its package.json. Skip
                     # them for that source and keep the tag rebuildable; anything
                     # from v2.3.0 on always has them.
-                    if (Test-Path scripts\write-update-feed.mjs) {
+                    if (Test-Path scripts/write-update-feed.mjs) {
                         npm run test:update-feed
                         if ($LASTEXITCODE -ne 0) { throw "update-feed tests failed" }
                     } else {
@@ -147,7 +147,7 @@ pipeline {
                     }
                     npm run test:e2e:smoke
                     npm run test:e2e:full
-                    if (Test-Path scripts\write-update-feed.mjs) {
+                    if (Test-Path scripts/write-update-feed.mjs) {
                         npm run update-feed
                         if ($LASTEXITCODE -ne 0) { throw "update-feed generation failed" }
                     }
