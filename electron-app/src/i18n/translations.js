@@ -80,8 +80,11 @@ export const translations = {
       fcVersion22: '2.2 — current MDES production schema',
       fcVersion30: '3.0 — adds mandatory account classification',
       fcVersion30Hint: 'FC 3.0 keeps the same namespace as 2.2 and is identified by @version. It adds mandatory SelfCert, DDProcedure and AccountType fields, makes CtrlgPersonType repeatable, and allows an optional JointAccount.',
-      crsVersion20: '2.0 — current MDES production schema',
-      crsVersion30: '3.0 — adds mandatory account classification',
+      crsVersion20Standard: '2.0 — current MDES production schema',
+      crsVersion20Legacy: '2.0 — legacy schema, for correcting older data',
+      crsVersion30Standard: '3.0 — current MDES production schema',
+      crsVersion30Upcoming: '3.0 — from 1 Jan 2027, adds mandatory account classification',
+      crsVersionLegacyTag: 'legacy',
       crsVersion30Hint: 'CRS 3.0 uses the urn:oecd:ties:crs:v3 namespace and adds mandatory SelfCert, DDProcedure, AccountType and CtrlgPersonType fields, plus optional EquityInterestType and JointAccount.',
       crsVersion30CsvHint: 'Your CSV may add the optional CRS 3.0 columns (AcctNumberType, SelfCert, DDProcedure, AccountType, EquityInterestType, JointAccount_Number, ControllingPerson_CtrlgPersonType, ControllingPerson_SelfCert). Any column you leave out gets a valid default.',
       reportingFI: 'Reporting Financial Institution',
@@ -336,6 +339,7 @@ export const translations = {
       modifyExisting: 'Modify existing report data',
       deleteExisting: 'Delete existing report data',
       validFile: 'Valid File',
+      versionInherited: 'This will produce a CRS {version} correction. A CRS702 has to match the schema version of the file it corrects, so upload a CRS 3.0 file to get a CRS 3.0 correction or deletion.',
       validationFailed: 'Validation Failed'
     },
 
@@ -433,6 +437,7 @@ export const translations = {
       templateSaved: 'Template saved to: {path}',
       csvSaved: 'CSV saved to: {path}',
       correctionGenerated: 'Correction file generated!',
+      correctionVersion: 'Schema version: CRS {version}',
       correctionsCount: 'Corrections: {count}',
       deletionsCount: 'Deletions: {count}',
       fiCorrected: 'FI Corrected: Yes',
@@ -581,12 +586,12 @@ export const translations = {
       downloadProgress: 'Download progress: {percent}%',
       whatsNew: 'Recent Improvements',
       changelog: [
-        'Fixes publishing this release to the company GitLab automatically',
-        'Off the VPN the app keeps updating from its previous source, as before',
-        'Nothing to set up: no GitLab account or login is needed to receive updates',
-        'CRS foreign deliveries, added last release, are unchanged',
-        'Settings now shows which update source the app is actually using',
-        'No change to how any XML is generated or validated'
+        'CRS 3.0 becomes the default on 1 January 2027; nothing to change by hand',
+        'CRS 2.0 stays selectable after that, labelled as the legacy schema',
+        'The version dropdown now says which schema MDES actually expects today',
+        'Corrections and deletions work on CRS 3.0 files and stay in CRS 3.0',
+        'The corrections page names the schema version before and after you generate',
+        'Pick either version yourself at any time; the default is only a starting point'
       ]
     }
   },
@@ -665,8 +670,11 @@ export const translations = {
       fcVersion22: '2.2 — huidig MDES productieschema',
       fcVersion30: '3.0 — voegt verplichte rekeningclassificatie toe',
       fcVersion30Hint: 'FC 3.0 gebruikt dezelfde namespace als 2.2 en wordt herkend via @version. Het voegt verplichte velden SelfCert, DDProcedure en AccountType toe, maakt CtrlgPersonType herhaalbaar en staat een optionele JointAccount toe.',
-      crsVersion20: '2.0 — huidig MDES productieschema',
-      crsVersion30: '3.0 — voegt verplichte rekeningclassificatie toe',
+      crsVersion20Standard: '2.0 — huidig MDES productieschema',
+      crsVersion20Legacy: '2.0 — verouderd schema, voor het corrigeren van oudere gegevens',
+      crsVersion30Standard: '3.0 — huidig MDES productieschema',
+      crsVersion30Upcoming: '3.0 — vanaf 1 jan 2027, voegt verplichte rekeningclassificatie toe',
+      crsVersionLegacyTag: 'verouderd',
       crsVersion30Hint: 'CRS 3.0 gebruikt de namespace urn:oecd:ties:crs:v3 en voegt verplichte velden SelfCert, DDProcedure, AccountType en CtrlgPersonType toe, plus optionele EquityInterestType en JointAccount.',
       crsVersion30CsvHint: 'Je CSV kan de optionele CRS 3.0-kolommen bevatten (AcctNumberType, SelfCert, DDProcedure, AccountType, EquityInterestType, JointAccount_Number, ControllingPerson_CtrlgPersonType, ControllingPerson_SelfCert). Elke ontbrekende kolom krijgt een geldige standaardwaarde.',
       reportingFI: 'Rapporterende Financiële Instelling',
@@ -921,6 +929,7 @@ export const translations = {
       modifyExisting: 'Bestaande rapportgegevens wijzigen',
       deleteExisting: 'Bestaande rapportgegevens verwijderen',
       validFile: 'Geldig Bestand',
+      versionInherited: 'Dit levert een CRS {version}-correctie op. Een CRS702 moet dezelfde schemaversie hebben als het bestand dat het corrigeert, dus upload een CRS 3.0-bestand voor een CRS 3.0-correctie of -verwijdering.',
       validationFailed: 'Validatie Mislukt'
     },
 
@@ -1018,6 +1027,7 @@ export const translations = {
       templateSaved: 'Sjabloon opgeslagen naar: {path}',
       csvSaved: 'CSV opgeslagen naar: {path}',
       correctionGenerated: 'Correctiebestand gegenereerd!',
+      correctionVersion: 'Schemaversie: CRS {version}',
       correctionsCount: 'Correcties: {count}',
       deletionsCount: 'Verwijderingen: {count}',
       fiCorrected: 'FI Gecorrigeerd: Ja',
@@ -1166,12 +1176,12 @@ export const translations = {
       downloadProgress: 'Downloadvoortgang: {percent}%',
       whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'Lost op dat deze release automatisch naar de bedrijfs-GitLab wordt gepubliceerd',
-        'Buiten de VPN blijft de app updaten via de vorige bron, net als eerst',
-        'Niets in te stellen: u hebt geen GitLab-account of login nodig voor updates',
-        'CRS buitenlandse leveringen, toegevoegd in de vorige versie, zijn ongewijzigd',
-        'Instellingen toont nu welke updatebron de app daadwerkelijk gebruikt',
-        'Geen wijziging in hoe XML wordt gegenereerd of gevalideerd'
+        'CRS 3.0 wordt de standaard op 1 januari 2027; u hoeft niets aan te passen',
+        'CRS 2.0 blijft daarna selecteerbaar, aangeduid als het verouderde schema',
+        'De versiekeuzelijst laat nu zien welk schema MDES vandaag verwacht',
+        'Correcties en verwijderingen werken op CRS 3.0-bestanden en blijven CRS 3.0',
+        'De correctiepagina noemt de schemaversie voor en na het genereren',
+        'U kiest zelf altijd een versie; de standaard is alleen een vertrekpunt'
       ]
     }
   },
@@ -1248,8 +1258,11 @@ export const translations = {
       fcVersion22: '2.2 — esquema de produccion MDES actual',
       fcVersion30: '3.0 — anade clasificacion obligatoria de cuentas',
       fcVersion30Hint: 'FC 3.0 mantiene el mismo espacio de nombres que 2.2 y se identifica por @version. Anade los campos obligatorios SelfCert, DDProcedure y AccountType, hace CtrlgPersonType repetible y permite un JointAccount opcional.',
-      crsVersion20: '2.0 — esquema de producción MDES actual',
-      crsVersion30: '3.0 — añade clasificación obligatoria de cuentas',
+      crsVersion20Standard: '2.0 — esquema de producción MDES actual',
+      crsVersion20Legacy: '2.0 — esquema heredado, para corregir datos anteriores',
+      crsVersion30Standard: '3.0 — esquema de producción MDES actual',
+      crsVersion30Upcoming: '3.0 — desde el 1 ene 2027, añade clasificación obligatoria de cuentas',
+      crsVersionLegacyTag: 'heredado',
       crsVersion30Hint: 'CRS 3.0 usa el espacio de nombres urn:oecd:ties:crs:v3 y añade los campos obligatorios SelfCert, DDProcedure, AccountType y CtrlgPersonType, además de EquityInterestType y JointAccount opcionales.',
       crsVersion30CsvHint: 'Su CSV puede incluir las columnas opcionales de CRS 3.0 (AcctNumberType, SelfCert, DDProcedure, AccountType, EquityInterestType, JointAccount_Number, ControllingPerson_CtrlgPersonType, ControllingPerson_SelfCert). Cualquier columna omitida recibe un valor predeterminado válido.',
       reportingFI: 'Institución Financiera Reportante',
@@ -1504,6 +1517,7 @@ export const translations = {
       modifyExisting: 'Modificar datos de informe existentes',
       deleteExisting: 'Eliminar datos de informe existentes',
       validFile: 'Archivo Válido',
+      versionInherited: 'Esto generará una corrección CRS {version}. Un CRS702 debe coincidir con la versión de esquema del archivo que corrige, así que cargue un archivo CRS 3.0 para obtener una corrección o eliminación CRS 3.0.',
       validationFailed: 'Validación Fallida'
     },
 
@@ -1601,6 +1615,7 @@ export const translations = {
       templateSaved: 'Plantilla guardada en: {path}',
       csvSaved: 'CSV guardado en: {path}',
       correctionGenerated: '¡Archivo de corrección generado!',
+      correctionVersion: 'Versión de esquema: CRS {version}',
       correctionsCount: 'Correcciones: {count}',
       deletionsCount: 'Eliminaciones: {count}',
       fiCorrected: 'IF Corregida: Sí',
@@ -1749,12 +1764,12 @@ export const translations = {
       downloadProgress: 'Progreso de descarga: {percent}%',
       whatsNew: 'Mejoras Recientes',
       changelog: [
-        'Corrige la publicacion automatica de esta version en el GitLab corporativo',
-        'Fuera de la VPN la app sigue actualizandose desde su origen anterior, como antes',
-        'Nada que configurar: no necesita cuenta ni inicio de sesion en GitLab',
-        'Las entregas extranjeras CRS, anadidas en la version anterior, no cambian',
-        'Ajustes ahora muestra que origen de actualizacion usa realmente la app',
-        'Sin cambios en como se genera o valida el XML'
+        'CRS 3.0 sera el valor predeterminado el 1 de enero de 2027; no cambie nada',
+        'CRS 2.0 seguira disponible despues, indicado como el esquema heredado',
+        'La lista de versiones ahora indica que esquema espera MDES actualmente',
+        'Las correcciones y eliminaciones funcionan en archivos CRS 3.0 y siguen en CRS 3.0',
+        'La pagina de correcciones nombra la version del esquema antes y despues de generar',
+        'Usted elige la version cuando quiera; el valor predeterminado es solo un punto de partida'
       ]
     }
   }

@@ -13,7 +13,10 @@ from .cli_utils import (
     add_correction_arguments, add_account_holder_arguments, add_generation_arguments,
     CorrectionConfig, format_validation_result, format_correction_result
 )
-from .generator import SUPPORTED_CRS_VERSIONS, SUPPORTED_FILE_TYPES
+from .generator import (
+    CRS3_STANDARD_FROM, SUPPORTED_CRS_VERSIONS, SUPPORTED_FILE_TYPES,
+    default_crs_version,
+)
 
 
 def validate_xml_mode(args):
@@ -156,11 +159,14 @@ def main():
     parser.add_argument('--mytin', help='Sending company TIN')
     parser.add_argument('--num-fis', type=int, help='Number of reporting FIs')
     parser.add_argument('--output', required=True, help='Output file path')
-    parser.add_argument('--crs-version', choices=list(SUPPORTED_CRS_VERSIONS), default='2.0',
-                        help='CRS schema version to generate (default: 2.0). '
+    parser.add_argument('--crs-version', choices=list(SUPPORTED_CRS_VERSIONS),
+                        default=default_crs_version(),
+                        help='CRS schema version to generate (default: %s, the standard '
+                             'schema today; the default becomes 3.0 on %s). '
                              '3.0 uses the urn:oecd:ties:crs:v3 namespace and emits the '
                              'fields CRS 3.0 made mandatory (SelfCert, DDProcedure, '
-                             'AccountType, CtrlgPersonType).')
+                             'AccountType, CtrlgPersonType).'
+                             % (default_crs_version(), CRS3_STANDARD_FROM.isoformat()))
     
     # Optional arguments for random mode
     parser.add_argument('--reporting-fi-tins', help='Comma-separated list of FI TINs')

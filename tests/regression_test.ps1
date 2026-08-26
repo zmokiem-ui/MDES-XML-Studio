@@ -135,7 +135,7 @@ Write-Section "SECTION 1: CRS MODULE"
 
 # 1.1 Basic random generation
 Write-TestHeader "1.1 CRS Random Generation (basic)"
-$null = python -m crs_generator.cli --mode random --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs_basic.xml" 2>&1
+$null = python -m crs_generator.cli --mode random --crs-version 2.0 --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs_basic.xml" 2>&1
 Assert-FileExists "$OutputDir\crs_basic.xml" "CRS basic random generation"
 Assert-XmlContains "$OutputDir\crs_basic.xml" "CRS_OECD" "CRS XML has CRS_OECD namespace"
 Assert-XmlContains "$OutputDir\crs_basic.xml" "SendingCompanyIN" "CRS XML has SendingCompanyIN"
@@ -258,16 +258,19 @@ $out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\c
 Assert-JsonField $out "is_valid" "true" "CRS 3.0 file validates"
 Assert-JsonField $out "version" '"3.0"' "CRS 3.0 version auto-detected"
 
-Write-TestHeader "1B.4 CRS 2.0 Still Defaults and Detects as 2.0"
+Write-TestHeader "1B.4 CRS 2.0 Still Generates and Detects as 2.0"
 $out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_basic.xml" --output dummy 2>&1 | Out-String
 Assert-JsonField $out "version" '"2.0"' "CRS 2.0 file still detected as 2.0"
 
 Write-TestHeader "1B.5 CRS 3.0 Correction and Deletion"
 $out = python -m crs_generator.cli --mode correction --xml-input "$OutputDir\crs3_basic.xml" --output "$OutputDir\crs3_corr.xml" --correct-individual 1 --correct-organisation 1 --modify-balance --test-mode 2>&1 | Out-String
 Assert-JsonSuccess $out "CRS 3.0 correction generation"
+Assert-JsonField $out "crs_version" '"3.0"' "CRS 3.0 correction reports its schema version"
 Assert-XmlContains "$OutputDir\crs3_corr.xml" "urn:oecd:ties:crs:v3" "CRS 3.0 correction keeps v3 namespace"
 $out = python -m crs_generator.cli --mode correction --xml-input "$OutputDir\crs3_basic.xml" --output "$OutputDir\crs3_del.xml" --delete-individual 1 --test-mode 2>&1 | Out-String
 Assert-JsonSuccess $out "CRS 3.0 deletion generation"
+Assert-JsonField $out "crs_version" '"3.0"' "CRS 3.0 deletion reports its schema version"
+Assert-XmlContains "$OutputDir\crs3_del.xml" "urn:oecd:ties:crs:v3" "CRS 3.0 deletion keeps v3 namespace"
 
 Write-TestHeader "1B.6 CRS 3.0 CSV Round Trip"
 $null = python -m crs_generator.cli --mode preview --crs-version 3.0 --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 2 --individual-accounts 2 --organisation-accounts 2 --controlling-persons 1 --output "$OutputDir\crs3_csv.csv" 2>&1
@@ -279,7 +282,14 @@ $out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\c
 Assert-JsonField $out "is_valid" "true" "CRS 3.0 CSV output is valid"
 Assert-JsonField $out "version" '"3.0"' "CRS 3.0 CSV output detected as 3.0"
 
-Write-TestHeader "1B.7 CRS 3.0 Error Injection"
+Write-TestHeader "1B.7 CRS Default Version Follows The Cutover Date"
+$expected = python -c "from crs_generator.generator import default_crs_version; print(default_crs_version())" 2>&1 | Out-String
+$expected = $expected.Trim()
+$null = python -m crs_generator.cli --mode random --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 1 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs_default_version.xml" 2>&1
+$out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\crs_default_version.xml" --output dummy 2>&1 | Out-String
+Assert-JsonField $out "version" ('"' + $expected + '"') "CRS default version is $expected without --crs-version"
+
+Write-TestHeader "1B.8 CRS 3.0 Error Injection"
 $out = python -m crs_generator.error_injector --input "$OutputDir\crs3_basic.xml" --output "$OutputDir\ei_crs3.xml" --module crs --file-type xml --preset missing_required --level 5 --options "{}" 2>&1 | Out-String
 Assert-JsonSuccess $out "CRS 3.0 error injection"
 $out = python -m crs_generator.cli --mode validate-xml --xml-input "$OutputDir\ei_crs3.xml" --output dummy 2>&1 | Out-String

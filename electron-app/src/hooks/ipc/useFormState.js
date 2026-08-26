@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { t } from '../../i18n/translations'
+import { defaultCrsVersion } from '../../utils/crsVersion'
 
 const currentYear = () => new Date().getFullYear().toString()
 
 const createCrsFormData = () => ({
-  // CRS schema version to generate. 2.0 stays the default; 3.0 is opt-in and
-  // supported by both the random-data and CSV paths.
-  crsVersion: '2.0',
+  // CRS schema version to generate. Follows the calendar-driven default (2.0
+  // today, 3.0 from 2027-01-01); the other version stays selectable as the
+  // legacy choice. Both the random-data and CSV paths support either.
+  crsVersion: defaultCrsVersion(),
   sendingCompanyIN: '',
   transmittingCountry: '',
   receivingCountry: '',

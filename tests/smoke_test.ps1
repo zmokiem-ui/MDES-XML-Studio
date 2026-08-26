@@ -140,7 +140,7 @@ New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 # 1. CRS MODULE
 # ============================================================
 Write-TestHeader "1. CRS Generation (Random)"
-$out = python -m crs_generator.cli --mode random --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs_new.xml" 2>&1 | Out-String
+$out = python -m crs_generator.cli --mode random --crs-version 2.0 --sending-country NL --receiving-country DE --tax-year 2024 --mytin 123456789 --num-fis 1 --individual-accounts 2 --organisation-accounts 1 --controlling-persons 1 --output "$OutputDir\crs_new.xml" 2>&1 | Out-String
 Assert-FileExists "$OutputDir\crs_new.xml" "CRS random XML generation"
 Assert-XsdValid "$OutputDir\crs_new.xml" "CRS XSD validity"
 Assert-NoMdesFindings "$OutputDir\crs_new.xml" "CRS 2.0 MDES business rules"

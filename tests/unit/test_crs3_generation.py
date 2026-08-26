@@ -6,6 +6,8 @@ tests assert against the schema and against MDES's own version-gated rule 60017
 rather than against hand-written expectations.
 """
 
+from datetime import timedelta
+
 import pytest
 from lxml import etree
 
@@ -13,11 +15,16 @@ from crs_generator import xsd_validator as xv
 from crs_generator.correction_generator import CRSCorrectionGenerator, CorrectionOptions
 from crs_generator.error_injector import ErrorInjector
 from crs_generator.generator import (
+    CRS3_STANDARD_FROM,
     CRS_NAMESPACES,
     CRS_TEMPLATES,
     CRSGenerator,
     GeneratorConfig,
+    LEGACY_CRS_VERSION,
+    STANDARD_CRS_VERSION,
     SUPPORTED_CRS_VERSIONS,
+    crs3_is_standard,
+    default_crs_version,
 )
 from crs_generator.mdes_rules import check_file
 from crs_generator.xml_validator import CRSXMLValidator
@@ -48,9 +55,28 @@ def build(tmp_path, version, **overrides):
 
 # --- Configuration ----------------------------------------------------------
 
-def test_default_version_is_2_0():
-    """Existing callers must keep getting CRS 2.0 without asking for it."""
-    assert GeneratorConfig(output_path="out/unused.xml").crs_version == "2.0"
+def test_default_version_follows_the_cutover_date():
+    """2.0 until 2027-01-01, 3.0 from then on - without a release in between."""
+    day_before = CRS3_STANDARD_FROM - timedelta(days=1)
+    assert default_crs_version(day_before) == LEGACY_CRS_VERSION
+    assert default_crs_version(CRS3_STANDARD_FROM) == STANDARD_CRS_VERSION
+    assert default_crs_version(CRS3_STANDARD_FROM + timedelta(days=1)) == STANDARD_CRS_VERSION
+
+    assert not crs3_is_standard(day_before)
+    assert crs3_is_standard(CRS3_STANDARD_FROM)
+
+
+def test_config_default_version_matches_the_calendar():
+    """A caller that does not ask for a version gets today's standard schema."""
+    assert GeneratorConfig(output_path="out/unused.xml").crs_version == default_crs_version()
+
+
+def test_both_versions_stay_selectable_across_the_cutover():
+    """Neither version is ever dropped; the cutover only moves the default."""
+    for version in (LEGACY_CRS_VERSION, STANDARD_CRS_VERSION):
+        assert version in SUPPORTED_CRS_VERSIONS
+        config = GeneratorConfig(crs_version=version, output_path="out/unused.xml")
+        assert config.crs_version == version
 
 
 @pytest.mark.parametrize("version", SUPPORTED_CRS_VERSIONS)
@@ -71,7 +97,7 @@ def test_unsupported_version_is_rejected():
 
 def test_default_output_path_is_version_distinct():
     """A 3.0 run must not silently overwrite the 2.0 file for the same year."""
-    v2 = GeneratorConfig(sending_country="NL", tax_year=2024).output_path
+    v2 = GeneratorConfig(sending_country="NL", tax_year=2024, crs_version="2.0").output_path
     v3 = GeneratorConfig(sending_country="NL", tax_year=2024, crs_version="3.0").output_path
     assert v2 != v3
 
@@ -252,10 +278,44 @@ def test_correction_round_trip_keeps_the_source_version(tmp_path, version):
         output_path=str(output),
     ))
     assert result.success, result.error_message
+    # Reported back so the UI can name the version rather than leave the tester
+    # guessing which schema they just produced a correction for.
+    assert result.crs_version == version
 
     validated = xv.validate_file(output)
     assert validated.version == version
     assert validated.valid, validated.errors
+
+
+@pytest.mark.parametrize("version", SUPPORTED_CRS_VERSIONS)
+def test_deletion_round_trip_keeps_the_source_version(tmp_path, version):
+    """Deletions are the other half of a CRS702 and must hold for 3.0 too."""
+    source = build(tmp_path, version)
+    output = tmp_path / f"crs_{version}_deletion.xml"
+
+    result = CRSCorrectionGenerator().generate_correction(str(source), CorrectionOptions(
+        delete_individual_accounts=2,
+        delete_organisation_accounts=2,
+        test_mode=True,
+        output_path=str(output),
+    ))
+    assert result.success, result.error_message
+    assert result.deletions_made == 4
+    assert result.crs_version == version
+
+    validated = xv.validate_file(output)
+    assert validated.version == version
+    assert validated.valid, validated.errors
+
+    # Every deleted AccountReport carries the test-environment delete code and
+    # points back at what it replaces (MDES 80010 rejects a mixed CRS702).
+    tree = etree.parse(str(output))
+    ns = {"crs": CRS_NAMESPACES[version], "stf": "urn:oecd:ties:crsstf:v5"}
+    indics = [e.text for e in tree.findall(".//crs:AccountReport/crs:DocSpec/stf:DocTypeIndic", ns)]
+    assert indics and set(indics) == {"OECD13"}
+    corr_refs = [e.text for e in tree.findall(".//crs:AccountReport/crs:DocSpec/stf:CorrDocRefId", ns)]
+    assert len(corr_refs) == len(indics)
+    assert all(corr_refs)
 
 
 def test_error_injector_can_strip_v3_mandatory_fields(tmp_path):

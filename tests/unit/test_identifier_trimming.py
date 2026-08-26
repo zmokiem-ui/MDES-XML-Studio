@@ -96,7 +96,9 @@ def test_generated_refids_contain_no_whitespace(tmp_path):
     assert refids, "expected the generated file to contain RefIds"
     assert not any(ch.isspace() for ref in refids for ch in ref), refids
 
-    sending_company = root.find(".//{urn:oecd:ties:crs:v2}SendingCompanyIN")
+    sending_company = next(
+        el for el in root.iter() if etree.QName(el).localname == "SendingCompanyIN"
+    )
     assert sending_company.text == "20000100"
 
     # And the MDES checker agrees the file is clean.

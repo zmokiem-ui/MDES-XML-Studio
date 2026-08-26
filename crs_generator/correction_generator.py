@@ -12,6 +12,7 @@ import string
 import uuid
 import copy
 
+from .generator import default_crs_version
 from .xml_validator import CRSXMLValidator, ValidationResult
 
 
@@ -48,6 +49,10 @@ class CorrectionResult:
     corrections_made: int = 0
     deletions_made: int = 0
     fi_corrected: bool = False
+    # Schema version of the generated correction. Always the source file's own
+    # version - a CRS702 has to stay in the namespace of the CRS701 it corrects,
+    # so this is reported rather than chosen.
+    crs_version: str = ""
 
 
 class CRSCorrectionGenerator:
@@ -87,9 +92,21 @@ class CRSCorrectionGenerator:
 
     def __init__(self):
         self.validator = CRSXMLValidator()
-        self.version = "2.0"
-        self.namespaces = self.NAMESPACES_V2
+        # A correction always inherits the version of the file it corrects - a
+        # CRS702 has to match the CRS701 it points at, so this is only the value
+        # in effect before a source file has been read.
+        self.version = default_crs_version()
+        self.namespaces = self._namespaces_for(self.version)
         self.test_mode = True  # Will be set from options
+
+    def _namespaces_for(self, version: str) -> Dict[str, str]:
+        """Namespace map for a detected source version.
+
+        An unrecognised version falls back to CRS 1.0, which is where the
+        pre-versioned files sit; 2.0 and 3.0 are both looked up directly, so a
+        CRS 3.0 source is never silently corrected in a 1.0 namespace.
+        """
+        return self.NAMESPACES_BY_VERSION.get(version, self.NAMESPACES_V1)
     
     def _get_doc_type_indic(self, base_type: str) -> str:
         """Get DocTypeIndic value based on test mode.
@@ -149,7 +166,8 @@ class CRSCorrectionGenerator:
         
         # Set version and namespaces
         self.version = validation.xml_version
-        self.namespaces = self.NAMESPACES_BY_VERSION.get(self.version, self.NAMESPACES_V1)
+        self.namespaces = self._namespaces_for(self.version)
+        result.crs_version = self.version
         self.test_mode = options.test_mode
         
         # Read source file
@@ -202,7 +220,8 @@ class CRSCorrectionGenerator:
         
         # Set version
         self.version = validation.xml_version
-        self.namespaces = self.NAMESPACES_BY_VERSION.get(self.version, self.NAMESPACES_V1)
+        self.namespaces = self._namespaces_for(self.version)
+        result.crs_version = self.version
         
         # Parse and generate
         try:

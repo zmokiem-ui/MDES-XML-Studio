@@ -15,7 +15,7 @@ from lxml import etree
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict
 import random
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from faker import Faker
 import logging
 from multiprocessing import Pool, cpu_count
@@ -35,6 +35,33 @@ logger = logging.getLogger(__name__)
 # upload by root namespace *or* @version (see camel config.xml), so both have
 # to match the version being generated.
 SUPPORTED_CRS_VERSIONS = ("2.0", "3.0")
+
+# Which of those two is "the" schema, and which one is the leftover.
+#
+# CRS 3.0 applies to reporting periods from 2026 and is first exchanged in 2027,
+# so MDES production still runs on 2.0 for the rest of this year. Rather than
+# shipping a release in January purely to change a default, the cutover date
+# lives here and the default follows the calendar on its own: 2.0 until
+# 2027-01-01, 3.0 from then on, with the other version always still selectable.
+#
+# Everything that needs "the default CRS version" - the generator config, the
+# CLI, the CSV reader/writer, the correction generator, the Electron UI - reads
+# it from default_crs_version() rather than hardcoding a number, so the cutover
+# happens in one place. The Electron side mirrors these three constants in
+# electron-app/src/utils/crsVersion.js; keep the two in step.
+CRS3_STANDARD_FROM = date(2027, 1, 1)
+LEGACY_CRS_VERSION = "2.0"
+STANDARD_CRS_VERSION = "3.0"
+
+
+def crs3_is_standard(today: Optional[date] = None) -> bool:
+    """Has CRS 3.0 become the standard schema yet?"""
+    return (today or date.today()) >= CRS3_STANDARD_FROM
+
+
+def default_crs_version(today: Optional[date] = None) -> str:
+    """The CRS version a caller gets when it does not ask for one."""
+    return STANDARD_CRS_VERSION if crs3_is_standard(today) else LEGACY_CRS_VERSION
 
 
 # --- Domestic vs foreign ----------------------------------------------------
@@ -141,9 +168,9 @@ class GeneratorConfig:
     # Domestic stays the default so existing callers are unaffected.
     file_type: str = "domestic"
 
-    # Schema version to generate. Defaults to 2.0 so existing callers keep
-    # producing what they produced before; 3.0 is opt-in.
-    crs_version: str = "2.0"
+    # Schema version to generate. Left unset it follows the calendar-driven
+    # default (see default_crs_version): 2.0 today, 3.0 from 2027-01-01.
+    crs_version: str = field(default_factory=default_crs_version)
 
     # ReportingFI TINs (one per ReportingFI)
     reporting_fi_tins: List[str] = field(default_factory=list)

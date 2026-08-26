@@ -10,7 +10,7 @@ from typing import Optional
 import uuid
 
 from .csv_parser import CRSDataFromCSV, CRSCSVParser, ReportingFIData, AccountData
-from .generator import CRS_NAMESPACES, SUPPORTED_CRS_VERSIONS
+from .generator import CRS_NAMESPACES, SUPPORTED_CRS_VERSIONS, default_crs_version
 
 
 class CRSXMLFromCSV:
@@ -25,8 +25,10 @@ class CRSXMLFromCSV:
     }
 
     def __init__(self, csv_path: Path, output_path: Path,
-                 crs_version: str = '2.0', test_mode: bool = True):
-        crs_version = str(crs_version).strip()
+                 crs_version: Optional[str] = None, test_mode: bool = True):
+        # None means "whatever the standard schema is today" - see
+        # default_crs_version() in generator.py for the cutover.
+        crs_version = str(crs_version or default_crs_version()).strip()
         if crs_version not in SUPPORTED_CRS_VERSIONS:
             raise ValueError(
                 f"Unsupported crs_version {crs_version!r}; "
@@ -338,14 +340,16 @@ class CRSXMLFromCSV:
 
 
 def generate_from_csv(csv_path: str, output_path: str,
-                      crs_version: str = '2.0', test_mode: bool = True) -> Path:
+                      crs_version: Optional[str] = None,
+                      test_mode: bool = True) -> Path:
     """
     Main function to generate CRS XML from CSV file.
 
     Args:
         csv_path: Path to input CSV file
         output_path: Path for output XML file
-        crs_version: CRS schema version to emit ('2.0' or '3.0')
+        crs_version: CRS schema version to emit ('2.0' or '3.0'); None picks
+            the standard version for today (see default_crs_version)
         test_mode: Emit test-environment DocTypeIndic (OECD11) rather than
             production (OECD1)
 

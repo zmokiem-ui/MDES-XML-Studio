@@ -8,8 +8,8 @@ pairs a Python generation/validation backend (`crs_generator`) with an Electron/
 
 | Module | Schema | Notes |
 | --- | --- | --- |
-| CRS | `CrsXML_v2.0` | default; new + corrections |
-| CRS 3.0 | `CrsXML_v3.0` | opt-in via `--crs-version 3.0`; `urn:oecd:ties:crs:v3` |
+| CRS | `CrsXML_v2.0` | default until 2027-01-01, then the legacy choice; new + corrections/deletions |
+| CRS 3.0 | `CrsXML_v3.0` | `--crs-version 3.0`; becomes the default on 2027-01-01; `urn:oecd:ties:crs:v3` |
 | FATCA-CRS Combined | `FatcaCrs_v2.2` | default FATCA flow (FC upload) |
 | FATCA-CRS Combined 3.0 | `FatcaCrs_v3.0` | opt-in via `--fc-version 3.0`; same namespace as 2.2, version is in `@version` |
 | IRS FATCA (`FATCA_OECD`) | `FatcaXML_v2.0.1` | second FATCA flow; MDES hard-checks `@version="2.0.1"` |
@@ -58,6 +58,34 @@ validation (by namespace, falling back to `@version`), so 2.0 and 3.0 files can
 be mixed freely; only generation needs the explicit switch. Rule **60017** —
 an `OECD606` (specified electronic money product) account number requires
 `AccountType` `CRS1101` — applies to 3.0 only, matching MDES's own gating.
+
+### Which version is the default
+
+CRS 3.0 applies to reporting periods from 2026 and is first exchanged in 2027,
+so MDES production still runs on 2.0 for the rest of this year. The switchover is
+on the calendar rather than in a release: `CRS3_STANDARD_FROM` in
+`crs_generator/generator.py` holds the date (2027-01-01), and everything that
+needs a default reads it from `default_crs_version()`.
+
+| | Default | The other choice |
+| --- | --- | --- |
+| before 2027-01-01 | 2.0 | 3.0, offered as *upcoming* |
+| from 2027-01-01 | 3.0 | 2.0, offered as *legacy* |
+
+Neither version is ever removed, and nothing is pinned to the default: passing
+`--crs-version` (or picking the version in the UI) always wins. The Electron side
+mirrors the same three constants in `electron-app/src/utils/crsVersion.js` so the
+dropdown labels each version correctly on both sides of the cutover; keep the two
+files in step.
+
+### Corrections and deletions
+
+A CRS702 has to stay in the schema version of the CRS701 it corrects, so the
+corrections page does not offer a version picker: `--mode correction` reads the
+version off the source file and generates a matching correction or deletion. Feed
+it a 3.0 file and you get a 3.0 CRS702. The generated version is reported back as
+`crs_version` in the CLI's JSON result and named in the app's success dialog, so
+there is no guessing which schema a correction came out as.
 
 ### CRS 3.0 from CSV
 

@@ -9,6 +9,8 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
+from .generator import default_crs_version
+
 
 @dataclass
 class PaymentData:
@@ -174,9 +176,11 @@ class CRSCSVParser:
         [f'CRS8{i:02d}' for i in range(1, 14)] + ['CRS800']
     )
 
-    def __init__(self, csv_path: Path, crs_version: str = '2.0'):
+    def __init__(self, csv_path: Path, crs_version: Optional[str] = None):
+        # None means "whatever the standard schema is today" - see
+        # default_crs_version() in generator.py for the cutover.
         self.csv_path = Path(csv_path)
-        self.crs_version = str(crs_version).strip()
+        self.crs_version = str(crs_version or default_crs_version()).strip()
         self.errors: List[str] = []
         self.warnings: List[str] = []
 
@@ -663,7 +667,7 @@ def generate_csv_preview(
     individual_accounts: int,
     organisation_accounts: int,
     controlling_persons: int = 1,
-    crs_version: str = '2.0'
+    crs_version: Optional[str] = None
 ) -> List[Dict[str, str]]:
     """
     Generate CSV preview data using Faker for random data.
@@ -682,7 +686,7 @@ def generate_csv_preview(
     # is trimmed here too rather than only on the XML path.
     mytin = normalize_identifier(mytin)
 
-    is_v3 = str(crs_version).strip() == '3.0'
+    is_v3 = str(crs_version or default_crs_version()).strip() == '3.0'
     # Organisation accounts only get a controlling person when one was asked
     # for; without one the holder is reported as CRS103 (MDES 60005/60006).
     include_controlling_person = controlling_persons > 0

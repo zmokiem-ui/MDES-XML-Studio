@@ -46,6 +46,8 @@ import { ModuleSelectHeader } from './components/layout/ModuleSelectHeader'
 import { MainHeader } from './components/layout/MainHeader'
 import { ModuleSelectGrid } from './components/layout/ModuleSelectGrid'
 import { AppContext } from './context/AppContext'
+
+import { crsVersionLabelKey, crsVersionOptions, isLegacyCrsVersion } from './utils/crsVersion'
 import { useUpdater } from './hooks/ipc/useUpdater'
 import { useBugReport } from './hooks/ipc/useBugReport'
 import { useFormState } from './hooks/ipc/useFormState'
@@ -2121,7 +2123,19 @@ function App() {
 
       setModalType('success')
 
-      setModalMessage(`${t(language, 'modals.correctionGenerated')}\n\n${t(language, 'modals.correctionsCount', { count: result.corrections_made })}\n${t(language, 'modals.deletionsCount', { count: result.deletions_made })}${result.fi_corrected ? '\n' + t(language, 'modals.fiCorrected') : ''}`)
+      // Name the schema version the correction came out as. It is inherited
+
+      // from the source file, so this is the only place a tester sees whether
+
+      // they just produced a CRS 3.0 or a CRS 2.0 correction.
+
+      const versionLine = result.crs_version
+
+        ? '\n' + t(language, 'modals.correctionVersion', { version: result.crs_version })
+
+        : ''
+
+      setModalMessage(`${t(language, 'modals.correctionGenerated')}\n\n${t(language, 'modals.correctionsCount', { count: result.corrections_made })}\n${t(language, 'modals.deletionsCount', { count: result.deletions_made })}${result.fi_corrected ? '\n' + t(language, 'modals.fiCorrected') : ''}${versionLine}`)
 
       setShowModal(true)
 
@@ -7364,9 +7378,11 @@ function App() {
 
                     >
 
-                      <option value="2.0">{t(language, 'form.crsVersion20')}</option>
+                      {crsVersionOptions().map(({ value }) => (
 
-                      <option value="3.0">{t(language, 'form.crsVersion30')}</option>
+                        <option key={value} value={value}>{t(language, crsVersionLabelKey(value))}</option>
+
+                      ))}
 
                     </select>
 
@@ -7633,9 +7649,11 @@ function App() {
 
                         >
 
-                          <option value="2.0">{t(language, 'form.crsVersion20')}</option>
+                          {crsVersionOptions().map(({ value }) => (
 
-                          <option value="3.0">{t(language, 'form.crsVersion30')}</option>
+                            <option key={value} value={value}>{t(language, crsVersionLabelKey(value))}</option>
+
+                          ))}
 
                         </select>
 
@@ -8331,11 +8349,35 @@ function App() {
 
                       <span className={`text-xs px-2 py-0.5 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} ${theme.textMuted}`}>
 
-                        v{xmlValidation.version}
+                        {activeModule === 'crs'
+
+                          ? `CRS ${xmlValidation.version}${isLegacyCrsVersion(xmlValidation.version) ? ` · ${t(language, 'form.crsVersionLegacyTag')}` : ''}`
+
+                          : `v${xmlValidation.version}`}
 
                       </span>
 
                     </div>
+
+
+
+                    {/* A CRS702 has to stay in the namespace of the CRS701 it
+
+                        corrects, so the version is read off the source file rather
+
+                        than chosen here. Say so, otherwise a tester looking for a
+
+                        CRS 3.0 correction has no idea where the choice lives. */}
+
+                    {activeModule === 'crs' && xmlValidation.can_generate_correction && (
+
+                      <p className={`text-xs ${theme.textMuted} mb-3`}>
+
+                        {t(language, 'corrections.versionInherited', { version: xmlValidation.version })}
+
+                      </p>
+
+                    )}
 
 
 

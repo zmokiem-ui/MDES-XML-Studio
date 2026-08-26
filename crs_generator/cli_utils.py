@@ -215,7 +215,10 @@ def format_correction_result(result) -> Dict[str, Any]:
             'output_path': str(result.output_path),
             'corrections_made': result.corrections_made,
             'deletions_made': result.deletions_made,
-            'fi_corrected': result.fi_corrected
+            'fi_corrected': result.fi_corrected,
+            # The schema version the correction came out as, so the UI can name
+            # it instead of leaving the tester to guess.
+            'crs_version': getattr(result, 'crs_version', '') or '',
         }
     else:
         return {

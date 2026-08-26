@@ -409,7 +409,7 @@ ipcMain.handle('generate-csv-preview', async (event, formData) => {
       '--individual-accounts', formData.individualAccounts || '0',
       '--organisation-accounts', formData.organisationAccounts || '0',
       '--controlling-persons', formData.controllingPersons || '1',
-      '--crs-version', formData.crsVersion || '2.0',
+      ...(formData.crsVersion ? ['--crs-version', formData.crsVersion] : []),
       '--output', tempCsvPath,
       '--preview-limit', '20',
       '--preview-json'
@@ -442,7 +442,7 @@ ipcMain.handle('save-csv-preview', async (event, formData) => {
       '--individual-accounts', formData.individualAccounts || '0',
       '--organisation-accounts', formData.organisationAccounts || '0',
       '--controlling-persons', formData.controllingPersons || '1',
-      '--crs-version', formData.crsVersion || '2.0',
+      ...(formData.crsVersion ? ['--crs-version', formData.crsVersion] : []),
       '--output', dialogResult.filePath
     ],
     parseJson: false,
