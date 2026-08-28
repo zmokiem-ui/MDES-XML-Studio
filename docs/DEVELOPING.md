@@ -58,6 +58,33 @@ The MDES test env expects OECD10-13 / FATCA11-14; production expects OECD0-3 /
 FATCA1-4 (rules 50010/50011). Test is the **default**. Pass `--production` to emit
 production indicators. `--test-mode` is a deprecated no-op alias.
 
+### RefIds and randomness
+
+`crs_generator/ref_ids.py` owns both, because they used to fail together: every
+generator defaulted to a fixed seed and every DocRefId counter restarted at 1,
+so two runs with the same country, year and SendingCompanyIN produced the same
+people *and* the same identifiers — and MDES refuses a RefId it has already
+accepted.
+
+Each run now draws a **run id** (`yymmddHHMMSS` + six random uppercase
+characters) and a fresh **data seed**:
+
+| Identifier | Layout |
+| --- | --- |
+| MessageRefId | `TransmittingCountry + TaxYear + SendingCompanyIN + runId` (rule 80017) |
+| DocRefId | `MessageRefId + 9-digit sequence` — sharing the prefix satisfies 80001 by construction |
+| Corrected / deleted DocRefId | `originalDocRefId + _MARKER_ + runId`, with `CorrDocRefId` = the original |
+| **Resent** DocRefId | **unchanged** — see below |
+
+Resent data (`OECD0`/`OECD10`) is the same document sent again, so it keeps the
+DocRefId it is resending and carries no `CorrDocRefId`. A CRS702 resends its
+ReportingFI alongside the corrected accounts; minting a new DocRefId there is
+rejected once per ReportingFI on upload.
+
+`--seed N` (all three generation CLIs) reproduces a run's sample data. Every run
+prints the seed it used. RefIds are minted fresh even under a pinned seed —
+a reproduced file still has to be uploadable.
+
 ## Tests
 
 ```bash
@@ -76,6 +103,12 @@ npm install
 npm run electron:dev     # Vite dev server + Electron with DevTools
 npm run build            # production Vite build (dist/)
 ```
+
+Package inspection has two deliberately separate modes. General inspection
+checks the ZIP layout, metadata, decryption, signature and source XML. Target
+comparison additionally runs the package facts against a saved MDES target's
+properties file and read-only database, so the UI can distinguish “valid CTS
+package” from “would work on this instance now”.
 
 ### E2E (Playwright, launches the real app)
 
@@ -99,6 +132,11 @@ when packaged, `sys._MEIPASS` when frozen).
 pip install -e .[build]
 python build_python_backend.py
 ```
+
+`npm run electron:build` runs this backend build automatically before
+electron-builder, so a local installer cannot silently carry an older
+`python-dist/` directory. CI release jobs may continue to call the backend
+builder as their explicit pipeline step before `npm run build`.
 
 ## CI
 

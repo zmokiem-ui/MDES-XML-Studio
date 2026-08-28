@@ -86,6 +86,40 @@ The following file patterns are excluded from git via `.gitignore`:
 - `secrets.json`, `credentials.json`, `auth.json`
 - `*-secrets.json`, `*.secret`
 
+#### The one exception: `crs_generator/certificates/`
+
+The CTS certificate pack is committed, so `.gitignore` re-includes `*.p12` and
+`*.crt` **inside that directory only**. This is deliberate, and it is narrow:
+
+- They are internal-CA certificates (`CN=ca.internal.blyce.local`) issued for
+  the MDES **test** environment. They authenticate nothing in production.
+- ART's `TestData/Certificates` already tracks the same material, so committing
+  them changes no exposure that did not already exist.
+- Without them, packaging does not work on a fresh install, which is the point
+  of moving it into the app.
+
+**Their passwords are not in this repository and must not be added to it.** A
+committed password would turn committed test keys into committed usable
+credentials.
+
+Three ways in, none of which put a password in the repository:
+
+- **The desktop app**: *Settings → Certificates → Import passwords* reads an ART
+  `TestData/Certificates/Passwords.csv` in the main process and stores each
+  country via Electron `safeStorage`, bound to the user's OS account. The file
+  is read once; its contents never reach the renderer and are never copied here.
+- **The CLI and the test suite**: `$MDES_PASSWORDS_FILE` names that same CSV.
+- **One country at a time**: `$MDES_SIGNING_PASSWORD_NL`, or
+  `$MDES_SIGNING_PASSWORD` / `--signing-password-stdin` for a single call.
+
+`$MDES_PASSWORDS_FILE` has **no default and must not be given one**. A default
+would point somewhere inside the checkout - most naturally next to the
+certificates in `crs_generator/certificates/`, a directory this repository does
+commit - and the first person to follow it would push the passwords.
+
+If these certificates are ever reissued for anything beyond the test estate,
+this exception has to go with them.
+
 ### Build Artifacts
 - `dist/`, `dist-electron/`, `out/`
 - `*.exe`, `*.dmg`, `*.AppImage`

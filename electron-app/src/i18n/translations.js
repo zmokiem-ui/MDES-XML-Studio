@@ -531,7 +531,7 @@ export const translations = {
       formTitle: 'Bug Report',
       issueTitle: 'Issue Title',
       issueTitlePlaceholder: 'Brief description of the issue',
-      description: 'Description',
+      descriptionLabel: 'Description',
       descriptionPlaceholder: 'Detailed description of what happened',
       stepsToReproduce: 'Steps to Reproduce',
       stepsPlaceholder: 'How can we reproduce this issue?',
@@ -586,12 +586,12 @@ export const translations = {
       downloadProgress: 'Download progress: {percent}%',
       whatsNew: 'Recent Improvements',
       changelog: [
-        'CRS 3.0 becomes the default on 1 January 2027; nothing to change by hand',
-        'CRS 2.0 stays selectable after that, labelled as the legacy schema',
-        'The version dropdown now says which schema MDES actually expects today',
-        'Corrections and deletions work on CRS 3.0 files and stay in CRS 3.0',
-        'The corrections page names the schema version before and after you generate',
-        'Pick either version yourself at any time; the default is only a starting point'
+        'Package tab: sign and encrypt a delivery MDES accepts, no separate cipher tool',
+        'Inspect any package to check its signature, metadata and payload before sending',
+        'Certificates screen shows expiry per country and stores signing passwords',
+        'Developer mode checks a delivery against a real MDES instance before you build it',
+        'Failures now name the MDES error code and what to change to clear it',
+        'Settings is split into collapsible sections instead of one long scroll'
       ]
     }
   },
@@ -1121,7 +1121,7 @@ export const translations = {
       formTitle: 'Bugrapport',
       issueTitle: 'Probleem Titel',
       issueTitlePlaceholder: 'Korte beschrijving van het probleem',
-      description: 'Beschrijving',
+      descriptionLabel: 'Beschrijving',
       descriptionPlaceholder: 'Gedetailleerde beschrijving van wat er gebeurde',
       stepsToReproduce: 'Stappen om te Reproduceren',
       stepsPlaceholder: 'Hoe kunnen we dit probleem reproduceren?',
@@ -1176,12 +1176,12 @@ export const translations = {
       downloadProgress: 'Downloadvoortgang: {percent}%',
       whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'CRS 3.0 wordt de standaard op 1 januari 2027; u hoeft niets aan te passen',
-        'CRS 2.0 blijft daarna selecteerbaar, aangeduid als het verouderde schema',
-        'De versiekeuzelijst laat nu zien welk schema MDES vandaag verwacht',
-        'Correcties en verwijderingen werken op CRS 3.0-bestanden en blijven CRS 3.0',
-        'De correctiepagina noemt de schemaversie voor en na het genereren',
-        'U kiest zelf altijd een versie; de standaard is alleen een vertrekpunt'
+        'Tabblad Pakket: onderteken en versleutel een levering die MDES accepteert',
+        'Bekijk elk pakket en controleer handtekening, metadata en inhoud voor verzending',
+        'Het certificatenscherm toont de vervaldatum per land en bewaart ondertekenwachtwoorden',
+        'Ontwikkelaarsmodus toetst een levering aan een echte MDES-instantie voor u bouwt',
+        'Fouten noemen nu de MDES-foutcode en wat u moet aanpassen om die te verhelpen',
+        'Instellingen is opgedeeld in inklapbare secties in plaats van een lange pagina'
       ]
     }
   },
@@ -1709,7 +1709,7 @@ export const translations = {
       formTitle: 'Reporte de Error',
       issueTitle: 'Título del Problema',
       issueTitlePlaceholder: 'Breve descripción del problema',
-      description: 'Descripción',
+      descriptionLabel: 'Descripción',
       descriptionPlaceholder: 'Descripción detallada de lo que sucedió',
       stepsToReproduce: 'Pasos para Reproducir',
       stepsPlaceholder: '¿Cómo podemos reproducir este problema?',
@@ -1764,12 +1764,12 @@ export const translations = {
       downloadProgress: 'Progreso de descarga: {percent}%',
       whatsNew: 'Mejoras Recientes',
       changelog: [
-        'CRS 3.0 sera el valor predeterminado el 1 de enero de 2027; no cambie nada',
-        'CRS 2.0 seguira disponible despues, indicado como el esquema heredado',
-        'La lista de versiones ahora indica que esquema espera MDES actualmente',
-        'Las correcciones y eliminaciones funcionan en archivos CRS 3.0 y siguen en CRS 3.0',
-        'La pagina de correcciones nombra la version del esquema antes y despues de generar',
-        'Usted elige la version cuando quiera; el valor predeterminado es solo un punto de partida'
+        'Pestana Paquete: firme y cifre una entrega que MDES acepta, sin herramienta aparte',
+        'Inspeccione cualquier paquete y revise firma, metadatos y contenido antes de enviarlo',
+        'La pantalla de certificados muestra el vencimiento por pais y guarda las contrasenas',
+        'El modo desarrollador contrasta la entrega con una instancia MDES real antes de construir',
+        'Los fallos ahora indican el codigo de error MDES y que cambiar para resolverlo',
+        'Configuracion se divide en secciones plegables en lugar de una sola pagina larga'
       ]
     }
   }

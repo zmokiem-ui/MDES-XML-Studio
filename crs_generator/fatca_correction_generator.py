@@ -20,6 +20,8 @@ import random
 from datetime import datetime, timezone
 from faker import Faker
 
+from .ref_ids import correction_ref_id, new_run_id, resolve_seed
+
 
 @dataclass
 class FATCACorrectionOptions:
@@ -58,12 +60,16 @@ class FATCACorrectionGenerator:
     }
     
     def __init__(self, seed: int = None):
-        self.seed = seed or random.randint(1, 999999)
+        self.seed = resolve_seed(seed)
         self.rng = random.Random(self.seed)
         Faker.seed(self.seed)
         self.faker = Faker('en_US')
         self.ns = self.NAMESPACES
         self.docref_counter = 0
+        # One token per correction run, stamped into every RefId the run mints
+        # so correcting the same source twice cannot reuse identifiers MDES has
+        # already accepted. Replaced at the start of each generation.
+        self.run_id = new_run_id()
     
     def generate_correction(self, source_path: str, options: FATCACorrectionOptions) -> FATCACorrectionResult:
         """Generate a correction file from source FATCA-CRS XML."""
@@ -85,7 +91,11 @@ class FATCACorrectionGenerator:
             if None in ns:
                 ns.pop(None, None)
             self.ns = {**self.NAMESPACES, **ns}
-            
+
+            # A fresh run id per generation: two corrections of the same source
+            # must not produce the same RefIds.
+            self.run_id = new_run_id()
+
             # Get original MessageRefId for CorrMessageRefId
             orig_msg_ref = self._get_message_ref_id(root)
             
@@ -145,7 +155,10 @@ class FATCACorrectionGenerator:
             tax_year = (reporting_period.text[:4]
                         if reporting_period is not None and reporting_period.text
                         else str(datetime.now().year))
-            msg_ref.text = f"{tc}{tax_year}{sin}CORR{self.rng.randint(100000, 999999)}"
+            # The run id, not a six-digit draw: a correction has to carry a
+            # MessageRefId MDES has never seen, and 900k values reused across
+            # every run of every install is not that.
+            msg_ref.text = f"{tc}{tax_year}{sin}CORR{self.run_id}"
         
         # Update MessageTypeIndic to CRS702 (correction)
         msg_type_indic = msg_header.find('sfa_ftc:MessageTypeIndic', namespaces=self.ns)
@@ -314,8 +327,18 @@ class FATCACorrectionGenerator:
         """Mark the ReportingFI as a resend (OECD0/OECD10).
 
         In a CRS702 correction the FI itself is not changed but must accompany
-        the corrected accounts; it is resent with a resend DocTypeIndic, a fresh
-        unique DocRefId, and no CorrDocRefId (MDES rules 80008/80010/80026).
+        the corrected accounts, so it is resent: a resend DocTypeIndic and no
+        CorrDocRefId (MDES rules 80008/80010).
+
+        Its **DocRefId is left exactly as it was**, because MDES requires it:
+
+            "If there is Resent Data for a ReportingFI (OECD0 or OECD10), then
+            the DocRefId of the ReportingFI must be identical to the DocRefId
+            of this ReportingFI in the message that is corrected or
+            supplemented."
+
+        Appending a _RESEND suffix — which this used to do — produced one
+        rejection per ReportingFI on every correction upload.
         """
         doc_spec = reporting_fi.find('sfa_ftc:DocSpec', namespaces=self.ns)
         if doc_spec is None:
@@ -327,10 +350,6 @@ class FATCACorrectionGenerator:
         corr = doc_spec.find('sfa_ftc:CorrDocRefId', namespaces=self.ns)
         if corr is not None:
             doc_spec.remove(corr)
-        doc_ref = doc_spec.find('sfa_ftc:DocRefId', namespaces=self.ns)
-        if doc_ref is not None and doc_ref.text:
-            self.docref_counter += 1
-            doc_ref.text = f"{doc_ref.text}_RESEND{self.docref_counter:04d}"
 
     def _void_account(self, account: etree._Element, orig_msg_ref: str,
                       options: FATCACorrectionOptions):
@@ -351,10 +370,10 @@ class FATCACorrectionGenerator:
         if doc_type is not None:
             doc_type.text = 'OECD12' if options.test_mode else 'OECD2'
         
-        # Generate new DocRefId
+        # Generate new DocRefId. The run id is what keeps a second correction of
+        # the same source file from reusing the first one's identifiers.
         if doc_ref is not None:
-            self.docref_counter += 1
-            doc_ref.text = f"{orig_doc_ref}_CORR{self.docref_counter:04d}"
+            doc_ref.text = correction_ref_id(orig_doc_ref, 'CORR', self.run_id)
         
         # Add CorrDocRefId
         corr_doc_ref = doc_spec.find('sfa_ftc:CorrDocRefId', namespaces=self.ns)
@@ -381,8 +400,7 @@ class FATCACorrectionGenerator:
         
         # Generate new DocRefId
         if doc_ref is not None:
-            self.docref_counter += 1
-            doc_ref.text = f"{orig_doc_ref}_VOID{self.docref_counter:04d}"
+            doc_ref.text = correction_ref_id(orig_doc_ref, 'VOID', self.run_id)
         
         # Add CorrDocRefId
         corr_doc_ref = doc_spec.find('sfa_ftc:CorrDocRefId', namespaces=self.ns)

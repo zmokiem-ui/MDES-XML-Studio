@@ -20,7 +20,9 @@ import {
 
   Languages, Camera,
 
-  Zap, Star, Library, Code
+  Zap, Star, Library, Code,
+
+  Palette, KeyRound, Server
 
 } from 'lucide-react'
 
@@ -57,6 +59,12 @@ import { UpdateBanner } from './components/layout/UpdateBanner'
 import { ThemePicker } from './components/settings/ThemePicker'
 import { LanguagePicker } from './components/settings/LanguagePicker'
 import { PartnerJurisdictionsSettings } from './components/settings/PartnerJurisdictionsSettings'
+import { CertificatesSettings } from './components/settings/CertificatesSettings'
+import { MdesTargetSettings } from './components/settings/MdesTargetSettings'
+import { SettingsSection, SettingToggle, SettingsBlock, useSettingsSections } from './components/settings/SettingsSection'
+import { PackagePanel } from './components/PackagePanel'
+import { TargetBuildCard } from './components/TargetBuildCard'
+import { MdesErrorGuide } from './components/MdesErrorGuide'
 
 import {
 
@@ -1051,7 +1059,12 @@ function App() {
 
       animationsEnabled: true,
 
-      partnerJurisdictions: DEFAULT_PARTNER_JURISDICTIONS
+      partnerJurisdictions: DEFAULT_PARTNER_JURISDICTIONS,
+
+      // Developer mode reveals the MDES target panel and the one-click build.
+      // Off by default: it is for people with an MDES instance in front of them.
+
+      developerMode: false
 
     }
 
@@ -1083,6 +1096,18 @@ function App() {
 
     return defaults
 
+  })
+
+  // Which settings sections start open. Appearance and version answer the two
+  // questions people arrive with; the rest open when they are needed.
+  const settingsSections = useSettingsSections({
+    general: true,
+    csv: false,
+    jurisdictions: false,
+    certificates: false,
+    developer: false,
+    mdesTarget: false,
+    updates: true,
   })
 
 
@@ -2433,470 +2458,295 @@ function App() {
 
           </header>
 
-          <main className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+          <main className="max-w-4xl mx-auto px-6 py-8 space-y-4">
 
-            <div className={`${theme.card} rounded-xl border p-6`}>
-
-              <div className="flex items-center justify-between mb-4">
-
-                <h3 className={`text-lg font-semibold ${theme.text}`}>{t(language, 'settings.theme')}</h3>
-
-                <button
-
-                  onClick={() => setLiveAnimations(!liveAnimations)}
-
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-
-                    liveAnimations
-
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-
-                  }`}
-
-                  title={liveAnimations ? t(language, 'settingsMisc.animationsDisable') : t(language, 'settingsMisc.animationsEnable')}
-
-                >
-
-                  <span className="text-lg">{liveAnimations ? '✨' : '🎬'}</span>
-
-                  <span className="text-sm">{liveAnimations ? 'Live Animations ON' : 'Live Animations OFF'}</span>
-
-                </button>
-
-              </div>
-
-              <ThemePicker theme={theme} selectedTheme={selectedTheme} themes={THEMES} onSelect={setSelectedTheme} />
-
+            {/* Tools sit above the sections: they are one-click destinations,
+                not settings, and should never be behind a fold. */}
+            <div className={`${theme.card} rounded-xl border shadow-sm px-4 py-3 flex items-center gap-2 flex-wrap`}>
+              <span className={`text-xs font-semibold uppercase tracking-wide ${theme.textMuted} mr-1`}>
+                Tools
+              </span>
+              <button
+                onClick={() => setShowDashboard(true)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${theme.buttonSecondary}`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                {t(language, 'dashboard.title')}
+              </button>
+              <button
+                onClick={() => setShowKeyboardShortcuts(true)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${theme.buttonSecondary}`}
+              >
+                <Keyboard className="w-4 h-4" />
+                {t(language, 'settings.keyboardShortcuts')}
+              </button>
+              <button
+                onClick={() => settingsSections.setAll(!settingsSections.allOpen)}
+                className={`ml-auto px-3 py-2 rounded-lg text-xs font-medium transition-colors ${theme.buttonSecondary}`}
+              >
+                {settingsSections.allOpen ? 'Collapse all' : 'Expand all'}
+              </button>
             </div>
 
-            <div className={`${theme.card} rounded-xl border p-6`}>
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>Tools & Features</h3>
-
-              <p className={`text-sm ${theme.textMuted} mb-4`}>Access advanced tools and utilities</p>
-
-              <div className="grid grid-cols-2 gap-3">
-
-                <button
-
-                  onClick={() => setShowDashboard(true)}
-
-                  className={`p-4 rounded-lg border-2 ${theme.border} ${theme.cardHover} transition-all hover:scale-105 hover:shadow-md`}
-
-                >
-
-                  <div className="flex items-center gap-3">
-
-                    <BarChart3 className={`w-6 h-6 ${theme.accentText}`} />
-
-                    <div className="text-left">
-
-                      <p className={`font-semibold ${theme.text}`}>{t(language, 'dashboard.title')}</p>
-
-                      <p className={`text-xs ${theme.textMuted}`}>{t(language, 'dashboard.statistics')} & {t(language, 'dashboard.recentActivity')}</p>
-
-                    </div>
-
-                  </div>
-
-                </button>
-
-                <button
-
-                  onClick={() => setShowKeyboardShortcuts(true)}
-
-                  className={`p-4 rounded-lg border-2 ${theme.border} ${theme.cardHover} transition-all hover:scale-105 hover:shadow-md`}
-
-                >
-
-                  <div className="flex items-center gap-3">
-
-                    <Keyboard className={`w-6 h-6 ${theme.accentText}`} />
-
-                    <div className="text-left">
-
-                      <p className={`font-semibold ${theme.text}`}>{t(language, 'settings.keyboardShortcuts')}</p>
-
-                      <p className={`text-xs ${theme.textMuted}`}>{t(language, 'help.shortcuts')}</p>
-
-                    </div>
-
-                  </div>
-
-                </button>
-
-              </div>
-
-            </div>
-
-            {/* Language Settings */}
-
-            <div className={`${theme.card} rounded-xl border p-6`}>
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'settings.language')}</h3>
-
-              <p className={`text-sm ${theme.textMuted} mb-4`}>{t(language, 'common.select')} {t(language, 'settings.language').toLowerCase()}</p>
-
-              <LanguagePicker theme={theme} language={language} onSelect={setLanguage} />
-
-            </div>
-
-
-
-            <div className={`${theme.card} rounded-xl border p-6`}>
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-4`}>{t(language, 'settings.general')}</h3>
-
-              <div className="space-y-4">
-
-                <label className="flex items-center justify-between">
-
-                  <span className={theme.text}>{t(language, 'common.show')} {t(language, 'settings.appearance').toLowerCase()}</span>
-
+            {/* General: everything about how the app looks and reads */}
+            <SettingsSection
+              icon={Palette}
+              title={t(language, 'settings.general')}
+              description="Theme, language and interface motion"
+              summary={`${THEMES[selectedTheme]?.emoji || ''} ${THEMES[selectedTheme]?.name || selectedTheme}`}
+              open={settingsSections.isOpen('general')}
+              onToggle={() => settingsSections.toggle('general')}
+            >
+              <SettingsBlock
+                divided={false}
+                title={t(language, 'settings.theme')}
+                action={(
                   <button
-
-                    onClick={() => setSettings(prev => ({ ...prev, animationsEnabled: !prev.animationsEnabled }))}
-
-                    className={`w-12 h-6 rounded-full transition-colors relative ${settings.animationsEnabled ? 'bg-blue-600' : 'bg-gray-400'}`}
-
+                    onClick={() => setLiveAnimations(!liveAnimations)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                      liveAnimations
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                    }`}
+                    title={liveAnimations ? t(language, 'settingsMisc.animationsDisable') : t(language, 'settingsMisc.animationsEnable')}
                   >
-
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${settings.animationsEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
-
+                    <span className="text-lg">{liveAnimations ? '✨' : '🎬'}</span>
+                    <span className="text-sm">{liveAnimations ? 'Live Animations ON' : 'Live Animations OFF'}</span>
                   </button>
+                )}
+              >
+                <ThemePicker theme={theme} selectedTheme={selectedTheme} themes={THEMES} onSelect={setSelectedTheme} />
+              </SettingsBlock>
 
-                </label>
+              <SettingsBlock
+                title={t(language, 'settings.language')}
+                description="The language of the interface. Generated files are unaffected."
+              >
+                <LanguagePicker theme={theme} language={language} onSelect={setLanguage} />
+              </SettingsBlock>
 
-              </div>
+              <SettingsBlock>
+                <SettingToggle
+                  label="Interface animations"
+                  description="Fade and slide transitions when screens and panels change."
+                  checked={settings.animationsEnabled}
+                  onChange={(value) => setSettings(prev => ({ ...prev, animationsEnabled: value }))}
+                />
+              </SettingsBlock>
+            </SettingsSection>
 
-            </div>
-
-            <div className={`${theme.card} rounded-xl border p-6`}>
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>CSV {t(language, 'validation.title')}</h3>
-
-              <p className={`text-sm ${theme.textMuted} mb-4`}>Control CSV validation for CRS, FATCA, and CBC uploads</p>
-
-              <div className="space-y-4">
-
-                <label className="flex items-center justify-between">
-
-                  <div>
-
-                    <span className={theme.text}>{t(language, 'actions.validate')} CSV {t(language, 'actions.upload')}</span>
-
-                    <p className={`text-xs ${theme.textMuted} mt-1`}>
-
-                      {settings.autoValidateCsv
-
-                        ? t(language, 'settingsMisc.csvAutoValidateOn')
-
-                        : t(language, 'settingsMisc.csvAutoValidateOff')}
-
-                    </p>
-
-                  </div>
-
-                  <button
-
-                    onClick={() => setSettings(prev => ({ ...prev, autoValidateCsv: !prev.autoValidateCsv }))}
-
-                    className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ml-4 ${settings.autoValidateCsv ? 'bg-blue-600' : 'bg-gray-400'}`}
-
-                  >
-
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${settings.autoValidateCsv ? 'translate-x-6' : 'translate-x-0.5'}`} />
-
-                  </button>
-
-                </label>
-
-              </div>
-
+            {/* CSV validation: the one switch that changes what gets generated */}
+            <SettingsSection
+              icon={FileCheck}
+              title="CSV validation"
+              description="Whether uploaded CRS, FATCA and CBC CSVs are checked before XML is generated"
+              summary={settings.autoValidateCsv ? 'On' : 'Off'}
+              open={settingsSections.isOpen('csv')}
+              onToggle={() => settingsSections.toggle('csv')}
+            >
+              <SettingToggle
+                label="Validate uploaded CSV files"
+                description={settings.autoValidateCsv
+                  ? t(language, 'settingsMisc.csvAutoValidateOn')
+                  : t(language, 'settingsMisc.csvAutoValidateOff')}
+                checked={settings.autoValidateCsv}
+                onChange={(value) => setSettings(prev => ({ ...prev, autoValidateCsv: value }))}
+              />
               {!settings.autoValidateCsv && (
-
                 <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-
-                  <p className={`text-sm text-amber-600 dark:text-amber-400`}>
-
-                    <strong>Warning:</strong> With validation disabled, faulty CSV data will be passed through to generate XMLs with intentional errors. Useful for testing error handling.
-
+                  <p className="text-sm text-amber-600 dark:text-amber-400">
+                    <strong>Warning:</strong> With validation off, faulty CSV data is passed straight
+                    through and the XML is generated with those errors in it. Useful for testing how
+                    a receiving system handles bad files.
                   </p>
-
                 </div>
-
               )}
+            </SettingsSection>
 
-            </div>
+            {/* Partner jurisdictions */}
+            <SettingsSection
+              icon={Flag}
+              title={t(language, 'jurisdictions.title')}
+              description={t(language, 'jurisdictions.description')}
+              summary={`${settings.partnerJurisdictions?.length || 0} ${t(language, 'jurisdictions.selectedCountries').toLowerCase()}`}
+              open={settingsSections.isOpen('jurisdictions')}
+              onToggle={() => settingsSections.toggle('jurisdictions')}
+            >
+              <PartnerJurisdictionsSettings embedded />
+            </SettingsSection>
 
+            {/* CTS packaging: certificates and the passwords that unlock them */}
+            <SettingsSection
+              icon={KeyRound}
+              title="Certificates"
+              description="Used to sign and encrypt CTS delivery packages. A country can only send once its signing password is stored here."
+              open={settingsSections.isOpen('certificates')}
+              onToggle={() => settingsSections.toggle('certificates')}
+              testId="certificates-section"
+            >
+              <CertificatesSettings embedded />
+            </SettingsSection>
 
+            {/* Developer mode gates the MDES target section below it */}
+            <SettingsSection
+              icon={Code}
+              title="Developer mode"
+              description="For working against a real MDES instance"
+              summary={settings.developerMode ? 'On' : 'Off'}
+              open={settingsSections.isOpen('developer')}
+              onToggle={() => settingsSections.toggle('developer')}
+            >
+              <SettingToggle
+                testId="developer-mode-toggle"
+                label="Connect to an MDES instance"
+                description={settings.developerMode
+                  ? 'Reads the properties file and database of an MDES instance, so packages are built to the rules it enforces and checked before they are uploaded.'
+                  : 'Off. Turn on to bind the app to an MDES instance and build upload-ready packages in one click.'}
+                checked={settings.developerMode}
+                onChange={(value) => setSettings(prev => ({ ...prev, developerMode: value }))}
+              />
+            </SettingsSection>
 
-            <PartnerJurisdictionsSettings />
+            {settings.developerMode && (
+              <SettingsSection
+                icon={Server}
+                title="MDES target"
+                description="Point the app at an MDES instance so packages are built to the rules that instance enforces, not just to the format."
+                open={settingsSections.isOpen('mdesTarget')}
+                onToggle={() => settingsSections.toggle('mdesTarget')}
+                testId="mdes-target-section"
+              >
+                <MdesTargetSettings embedded />
+              </SettingsSection>
+            )}
 
-
-
-            {/* Updates & Version */}
-
-            <div className={`${theme.card} rounded-xl border p-6`} data-testid="update-section">
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'updates.title')}</h3>
-
-              <p className={`text-sm ${theme.textMuted} mb-4`}>{t(language, 'updates.title')}</p>
-
-
-
+            {/* Updates & version */}
+            <SettingsSection
+              icon={Download}
+              title={t(language, 'updates.title')}
+              description="Release notes, automatic update checks and manual checks"
+              summary={appVersion ? `v${appVersion}` : '—'}
+              open={settingsSections.isOpen('updates')}
+              onToggle={() => settingsSections.toggle('updates')}
+              testId="update-section"
+            >
               <div className="space-y-4">
-
                 {/* Current Version */}
-
                 <div className={`flex items-center justify-between p-3 rounded-lg ${theme.bg}`}>
-
                   <div>
-
                     <span className={`font-medium ${theme.text}`}>{t(language, 'updates.version')}</span>
-
                     <p className={`text-xs ${theme.textMuted} mt-0.5`}>MDES XML Studio</p>
-
                   </div>
-
                   <span className={`px-3 py-1 rounded-full text-sm font-mono font-medium ${theme.badge}`} data-testid="app-version">
-
                     {appVersion ? `v${appVersion}` : '—'}
-
                   </span>
-
                 </div>
-
-
 
                 {/* What's New - Changelog */}
-
                 <div className={`p-4 rounded-lg border ${theme.border} ${theme.bg}`}>
-
                   <h4 className={`font-medium ${theme.text} mb-2 flex items-center gap-2`}>
-
                     <Sparkles className="w-4 h-4 text-yellow-500" />
-
                     {t(language, 'updates.whatsNew')}
-
                   </h4>
-
                   <div className={`text-sm ${theme.textMuted} space-y-1.5`}>
-
                     {(t(language, 'updates.changelog') || []).map((item, i) => (
-
                       <div key={i} className="flex items-start gap-2">
-
-                        <span className="text-green-500 mt-0.5">•</span>
-
+                        <span className="text-green-500 mt-0.5">&bull;</span>
                         <span>{item}</span>
-
                       </div>
-
                     ))}
-
                   </div>
-
                 </div>
-
-
 
                 {/* Auto-Update Toggle */}
-
-                <label className="flex items-center justify-between">
-
-                  <div>
-
-                    <span className={theme.text}>{t(language, 'updates.autoUpdate')}</span>
-
-                    <p className={`text-xs ${theme.textMuted} mt-1`}>
-
-                      {autoUpdateEnabled
-
-                        ? t(language, 'settingsMisc.autoUpdateOn')
-
-                        : t(language, 'settingsMisc.autoUpdateOff')}
-
-                    </p>
-
-                  </div>
-
-                  <button
-
-                    onClick={() => handleToggleAutoUpdate(!autoUpdateEnabled)}
-
-                    type="button"
-
-                    data-testid="auto-update-toggle"
-
-                    aria-pressed={autoUpdateEnabled}
-
-                    className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ml-4 ${autoUpdateEnabled ? 'bg-blue-600' : 'bg-gray-400'}`}
-
-                  >
-
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${autoUpdateEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
-
-                  </button>
-
-                </label>
-
-
+                <SettingToggle
+                  testId="auto-update-toggle"
+                  label={t(language, 'updates.autoUpdate')}
+                  description={autoUpdateEnabled
+                    ? t(language, 'settingsMisc.autoUpdateOn')
+                    : t(language, 'settingsMisc.autoUpdateOff')}
+                  checked={autoUpdateEnabled}
+                  onChange={(value) => handleToggleAutoUpdate(value)}
+                />
 
                 {/* Check for Updates Button */}
-
-                <div className="flex items-center gap-3">
-
+                <div className="flex items-center gap-3 flex-wrap">
                   <button
-
                     onClick={handleCheckForUpdates}
-
                     type="button"
-
                     data-testid="check-for-updates"
-
                     disabled={updateStatus === 'checking' || updateStatus === 'downloading'}
-
                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
-
                       updateStatus === 'checking' || updateStatus === 'downloading'
-
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-
                         : theme.buttonPrimary
-
                     }`}
-
                   >
-
                     {updateStatus === 'checking' ? (
-
                       <><Loader2 className="w-4 h-4 animate-spin" /> {t(language, 'updates.checking')}</>
-
                     ) : updateStatus === 'downloading' ? (
-
                       <><Loader2 className="w-4 h-4 animate-spin" /> {t(language, 'updates.downloading')} {updateProgress}%</>
-
                     ) : (
-
                       <><RefreshCw className="w-4 h-4" /> {t(language, 'updates.checkForUpdates')}</>
-
                     )}
-
                   </button>
 
-
-
                   {/* Status Messages */}
-
                   {updateStatus === 'current' && !updateError && (
-
                     <span className={`text-sm ${theme.textMuted}`}>
-
                       <CheckCircle2 className="w-4 h-4 inline mr-1 text-green-500" />
-
                       {t(language, 'updates.upToDate')}
-
                     </span>
-
                   )}
-
                   {updateStatus === 'ready' && (
-
                     <button
-
                       onClick={() => window.electronAPI?.installUpdate()}
-
                       className="px-4 py-2 rounded-lg font-medium text-sm bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 transition-all"
-
                     >
-
                       <Download className="w-4 h-4" />
-
                       {t(language, 'updates.installAndRestart')} v{updateInfo?.version}
-
                     </button>
-
                   )}
-
                   {updateStatus === 'error' && (
-
                     <span className="text-sm text-red-500" data-testid="update-error">
-
                       <AlertCircle className="w-4 h-4 inline mr-1" />
-
                       {updateError || t(language, 'settingsMisc.updateCheckFailed')}
-
                     </span>
-
                   )}
-
                 </div>
 
-
-
                 {/* Download Progress */}
-
                 {updateStatus === 'downloading' && (
-
                   <div className="space-y-1">
-
                     <div className="flex justify-between text-xs">
-
                       <span className={theme.textMuted}>{t(language, 'updates.downloading')} v{updateInfo?.version}</span>
-
                       <span className={theme.text}>{updateProgress}%</span>
-
                     </div>
-
-                    <div className={`w-full h-2 rounded-full bg-gray-200 overflow-hidden`}>
-
+                    <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
                       <div className="h-full bg-blue-600 rounded-full transition-all duration-300" style={{ width: `${updateProgress}%` }} />
-
                     </div>
-
                   </div>
-
                 )}
-
               </div>
+            </SettingsSection>
 
-            </div>
-
-
-
-            {/* Bug Reporting Section */}
-
-            <div className={`${theme.card} rounded-xl border p-6 shadow-sm`} data-testid="bug-report-section">
-
-              <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>{t(language, 'bugReport.title')}</h3>
-
-              <p className={`text-sm ${theme.textMuted} mb-4`}>
-
-                {t(language, 'bugReport.description')}
-
-              </p>
-
-
-
+            {/* Bug reporting stays open: it is the one thing someone reaches for
+                when the rest of the app has already gone wrong. */}
+            <div className={`${theme.card} rounded-xl border shadow-sm px-5 py-4 flex items-center justify-between gap-4 flex-wrap`} data-testid="bug-report-section">
+              <div className="min-w-0">
+                <h3 className={`font-semibold ${theme.text}`}>{t(language, 'bugReport.title')}</h3>
+                <p className={`text-sm ${theme.textMuted} mt-0.5`}>
+                  {t(language, 'bugReport.description')}
+                </p>
+              </div>
               <button
-
                 onClick={() => setShowBugReportForm(true)}
-
                 data-testid="report-bug-button"
-
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${theme.buttonPrimary}`}
-
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${theme.buttonPrimary}`}
               >
-
                 <AlertCircle className="w-4 h-4" />
-
                 {t(language, 'bugReport.button')}
-
               </button>
-
             </div>
 
           </main>
@@ -2969,7 +2819,7 @@ function App() {
 
                     <label className={`block text-sm font-medium ${theme.text} mb-1`}>
 
-                      {t(language, 'bugReport.description')} *
+                      {t(language, 'bugReport.descriptionLabel')} *
 
                     </label>
 
@@ -9801,6 +9651,24 @@ function App() {
           <div className={`space-y-6 ${settings.animationsEnabled ? 'animate-fade-in' : ''}`}>
 
             <ErrorInjector theme={theme} language={language} module={activeModule} />
+
+          </div>
+
+        )}
+
+
+
+        {/* Encrypt & package page */}
+
+        {currentPage === 'package' && (
+
+          <div className={`space-y-6 ${settings.animationsEnabled ? 'animate-fade-in' : ''}`}>
+
+            {settings.developerMode && <TargetBuildCard />}
+
+            <PackagePanel />
+
+            <MdesErrorGuide />
 
           </div>
 

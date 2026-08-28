@@ -24,6 +24,7 @@ import logging
 import uuid
 
 from .identifiers import normalize_identifier, normalize_identifiers
+from .ref_ids import resolve_seed
 from .reportable_jurisdictions import get_reportable_jurisdictions, get_all_country_codes
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -125,10 +126,13 @@ class CBCGeneratorConfig:
     # Test mode
     test_mode: bool = True  # Use OECD11 instead of OECD1
 
-    # Determinism
-    seed: int = 42
+    # Determinism. Left unset, every run draws a fresh seed so two files never
+    # carry the same entities and figures; set it to reproduce a run exactly.
+    seed: Optional[int] = None
 
     def __post_init__(self):
+        self.seed = resolve_seed(self.seed)
+
         # Trim identifiers before they are concatenated into MessageRefId /
         # DocRefId — see crs_generator.identifiers.
         self.sending_entity_in = normalize_identifier(self.sending_entity_in)

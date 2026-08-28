@@ -47,6 +47,34 @@ pytest tests/unit/ -k "validation"
 - **Multi-language**: Unicode names, non-Latin scripts
 - **Error handling**: Invalid country codes, empty inputs
 
+### `test_cts_packaging.py`
+- **Format invariants**: 48-byte `key || iv`, AES-256-CBC, compressed payload,
+  entry names and order, the enveloping XML-DSig profile MDES verifies
+- **Deliberate defects**: each `--defect` produces the failure MDES reports
+- **Golden fixture**: decrypts a real delivery from the reference .NET tool and
+  pins its hashes. Needs a password for NL; **skips** without one, so a clean
+  checkout still runs everything else
+
+Set `MDES_PASSWORDS_FILE` to an ART `TestData/Certificates/Passwords.csv` and
+every country resolves at once, instead of one `MDES_SIGNING_PASSWORD_XX` per
+country. `python -m crs_generator.cts_cli passwords` reports what a machine can
+sign without printing any of it.
+
+### `test_cts_certificates.py`
+- **Expiry gate**: fails 90 days before any bundled certificate runs out. This
+  is the test that stops a renewal being discovered by a rejected upload
+- **Store behaviour**: `GB`/`US` filename prefixes, PEM sniffed regardless of
+  extension, a certificate-only export reported as such rather than as a wrong
+  password
+
+### `test_mdes_target.py`
+- **Properties parsing** (runs anywhere): repeated keys where the last wins,
+  `${...}` interpolation, and the several spellings MDES uses for one boolean
+- **Database-backed checks** (skip without `MDES_TEST_DB`): that a missing
+  CTS.CLR assembly blocks, that the deployed assembly decides which certificate
+  columns are read, and that a sender whose stored certificate differs from ours
+  is reported as MDES 50004
+
 ## Test Categories
 
 Tests use pytest markers for categorization:

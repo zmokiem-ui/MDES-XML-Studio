@@ -1,4 +1,4 @@
-import { ArrowLeft, Rocket, FileEdit, AlertTriangle, Code, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Rocket, FileEdit, AlertTriangle, Code, RefreshCw, Package } from 'lucide-react'
 import { t } from '../../i18n/translations'
 
 export function MainHeader({
@@ -16,6 +16,9 @@ export function MainHeader({
     { id: 'generator', icon: Rocket, label: t(language || 'en', 'nav.generator') },
     { id: 'corrections', icon: FileEdit, label: t(language || 'en', 'nav.correction') },
     { id: 'faulty-xml', icon: AlertTriangle, label: t(language, 'settingsMisc.faultyXml') },
+    // Packaging is the step between a generated file and an MDES upload, so it
+    // sits right after the things that produce files.
+    { id: 'package', icon: Package, label: 'Package' },
     { id: 'editor', icon: Code, label: 'Editor' },
     ...(activeModule === 'crs' ? [{ id: 'tools', icon: RefreshCw, label: t(language || 'en', 'tools.title') }] : []),
   ]

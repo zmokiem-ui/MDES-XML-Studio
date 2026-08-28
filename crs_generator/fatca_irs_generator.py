@@ -19,6 +19,7 @@ from datetime import datetime, timedelta, timezone
 from faker import Faker
 import logging
 from .identifiers import normalize_identifier, normalize_identifiers
+from .ref_ids import new_run_id, resolve_seed
 from .reportable_jurisdictions import get_reportable_jurisdictions, get_all_country_codes
 from .fatca_generator import _sanitize_text_nodes
 
@@ -102,13 +103,22 @@ class FATCAGeneratorConfig:
     # Performance
     show_progress: bool = True
     progress_every: int = 500
-    seed: int = 42
+    # Left unset, every run draws a fresh seed so two files never carry the same
+    # people and institutions. Set it to reproduce a run exactly.
+    seed: Optional[int] = None
+    # Token that makes this run's RefIds unique across runs — see
+    # crs_generator.ref_ids.
+    run_id: str = ""
     pretty_print: bool = True
-    
+
     # Test mode (FATCA11-14 vs FATCA1-4)
     test_mode: bool = True
-    
+
     def __post_init__(self):
+        self.seed = resolve_seed(self.seed)
+        if not self.run_id:
+            self.run_id = new_run_id()
+
         # Trim identifiers before they are concatenated into MessageRefId /
         # DocRefId — see crs_generator.identifiers.
         self.sending_company_in = normalize_identifier(self.sending_company_in)
@@ -161,7 +171,11 @@ class FATCAGeneratorConfig:
 class FATCADataGenerator:
     """Generates realistic random data for FATCA fields."""
     
-    def __init__(self, seed: int = 42, config: Optional[FATCAGeneratorConfig] = None):
+    def __init__(self, seed: Optional[int] = None, config: Optional[FATCAGeneratorConfig] = None):
+        # None means a fresh seed, not the old fixed 42 that made every run
+        # produce the same names — see crs_generator.ref_ids.resolve_seed.
+        seed = resolve_seed(seed)
+        self.seed = seed
         self.rng = random.Random(seed)
         Faker.seed(seed)
         self.faker = Faker('en_US')
@@ -285,10 +299,17 @@ class FATCAGenerator:
         return tree, ns
     
     def _next_docref_id(self) -> str:
-        """Generate next unique DocRefId."""
+        """Generate next unique DocRefId.
+
+        IRS convention: the filer's GIIN, a period, then anything that makes the
+        rest unique. The run id is in there because the counter alone restarts
+        at 1 every run, so two files from the same filer and year used to carry
+        identical DocRefIds.
+        """
         self.docref_counter += 1
         giin_base = self.config.reporting_fi_tins[0].replace('.', '')[:10] if self.config.reporting_fi_tins else "FATCA"
-        return f"{giin_base}.{self.config.tax_year}.{self.docref_counter:06d}"
+        return (f"{giin_base}.{self.config.tax_year}."
+                f"{self.config.run_id}.{self.docref_counter:06d}")
     
     def _get_doc_type_indic(self, doc_type: str = 'new') -> str:
         """Get appropriate DocTypeIndic based on test mode."""
@@ -661,9 +682,13 @@ class FATCAGenerator:
             recv_country.text = self.config.receiving_country
         
         # MessageRefId
+        # The run id, not a six-digit draw off the seeded RNG: a pinned seed
+        # used to reproduce the MessageRefId too, and 900k values is thin cover
+        # for an identifier MDES will not accept twice.
         msg_ref = msg_spec.find('sfa:MessageRefId', namespaces=ns)
         if msg_ref is not None:
-            msg_ref.text = f"{self.config.sending_country}{self.config.tax_year}{self.config.sending_company_in}{self.data_gen.rng.randint(100000, 999999)}"
+            msg_ref.text = (f"{self.config.sending_country}{self.config.tax_year}"
+                            f"{self.config.sending_company_in}{self.config.run_id}")
         
         # ReportingPeriod
         reporting_period = msg_spec.find('sfa:ReportingPeriod', namespaces=ns)

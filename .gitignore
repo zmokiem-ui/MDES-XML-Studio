@@ -12,6 +12,8 @@ entry_crs_cli.py
 entry_cbc_cli.py
 entry_fatca_cli.py
 entry_error_injector.py
+entry_cts_cli.py
+entry_mdes_target_cli.py
 
 # ========================
 # Node / Electron
@@ -34,6 +36,7 @@ electron-app/python-dist/
 electron-app/electron/update-feed.json
 electron-app/dist/
 electron-app/dist-electron/
+electron-app/dist-electron-retry/
 *.exe
 *.dmg
 *.AppImage
@@ -56,6 +59,26 @@ auth.json
 config.local.json
 *-secrets.json
 *.secret
+
+# The CTS certificate pack is a deliberate, narrow exception to the *.p12 /
+# *.pem rules above. These are internal-CA certificates for the MDES *test*
+# environment, shipped so packaging works without a manual import; ART tracks
+# the same material. Their passwords are NOT in this repository - the app keeps
+# them in the OS credential store. See crs_generator/certificates/README.md.
+# Everything outside this one directory stays ignored.
+!crs_generator/certificates/**/*.p12
+!crs_generator/certificates/**/*.pfx
+!crs_generator/certificates/**/*.pem
+!crs_generator/certificates/**/*.crt
+
+# The exception above covers certificates only. Their passwords must never join
+# them - a password file next to the keys turns committed test certificates into
+# committed usable credentials. See SECURITY.md.
+Passwords.csv
+passwords.csv
+**/Passwords.csv
+**/passwords.csv
+cts-passwords*
 
 # ========================
 # OS files
@@ -85,3 +108,5 @@ temp_preview.csv
 electron-app/test-results/
 electron-app/e2e-test-results/
 electron-app/e2e-tests/output/
+# Playwright writes its run state to the repo root as well as under electron-app/.
+test-results/

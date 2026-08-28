@@ -82,8 +82,24 @@ def add_generation_arguments(parser: argparse.ArgumentParser,
         parser.add_argument('--individual-accounts', type=int, default=0, 
                             help='Individual accounts per FI')
     if include_organisation:
-        parser.add_argument('--organisation-accounts', type=int, default=0, 
+        parser.add_argument('--organisation-accounts', type=int, default=0,
                             help='Organisation accounts per FI')
+
+    add_seed_argument(parser)
+
+
+def add_seed_argument(parser: argparse.ArgumentParser) -> None:
+    """Add --seed, the switch between fresh and reproducible sample data.
+
+    Omitted, every run draws its own seed and so its own people, institutions
+    and balances — the generators used to default to a fixed seed, which is why
+    consecutive files came out with the same names. Pass the seed a run reported
+    to reproduce that run's data; RefIds are still minted fresh either way,
+    because MDES will not accept the same ones twice.
+    """
+    parser.add_argument('--seed', type=int, default=None,
+                        help='Random seed for the sample data (default: a new '
+                             'one each run; pass a reported seed to reproduce it)')
 
 
 @dataclass

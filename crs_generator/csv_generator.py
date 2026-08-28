@@ -7,10 +7,10 @@ from pathlib import Path
 from lxml import etree
 from datetime import datetime, timezone
 from typing import Optional
-import uuid
 
 from .csv_parser import CRSDataFromCSV, CRSCSVParser, ReportingFIData, AccountData
 from .generator import CRS_NAMESPACES, SUPPORTED_CRS_VERSIONS, default_crs_version
+from .ref_ids import new_run_id
 
 
 class CRSXMLFromCSV:
@@ -40,7 +40,11 @@ class CRSXMLFromCSV:
         self.crs_version = crs_version
         self.test_mode = test_mode
         self.doc_ref_counter = 0
-        self.random_id = str(uuid.uuid4().int)[:9].zfill(9)
+        # Unique to this run. It goes into the MessageRefId *and* every
+        # DocRefId built on it: the DocRefIds used to be prefix + counter only,
+        # so regenerating from the same CSV produced identifiers MDES had
+        # already accepted and refused to take again.
+        self.run_id = new_run_id()
 
         # Only the crs namespace moves between versions; the supporting schemas
         # are shared by 2.0 and 3.0.
@@ -105,13 +109,22 @@ class CRSXMLFromCSV:
         return root
     
     def _get_next_doc_ref_id(self, data: CRSDataFromCSV) -> str:
-        """Generate next DocRefId"""
+        """Generate next DocRefId.
+
+        Built on the same prefix + run id as the MessageRefId, which satisfies
+        the MDES shared-prefix rule (80001) by construction and keeps the
+        identifier unique across runs, not just within this file.
+        """
         self.doc_ref_counter += 1
+        return f"{self._message_ref_id(data)}{self.doc_ref_counter:09d}"
+
+    def _message_ref_id(self, data: CRSDataFromCSV) -> str:
+        """The delivery's MessageRefId: the MDES 80017 prefix plus the run id."""
         return (
             f"{data.message_spec.transmitting_country}"
             f"{data.message_spec.tax_year}"
             f"{data.message_spec.sending_company_in}"
-            f"{str(self.doc_ref_counter).zfill(9)}"
+            f"{self.run_id}"
         )
     
     def _add_message_spec(self, root: etree._Element, data: CRSDataFromCSV) -> None:
@@ -126,13 +139,7 @@ class CRSXMLFromCSV:
         etree.SubElement(msg_spec, '{%s}MessageType' % crs).text = 'CRS'
         
         # MessageRefId
-        msg_ref_id = (
-            f"{data.message_spec.transmitting_country}"
-            f"{data.message_spec.tax_year}"
-            f"{data.message_spec.sending_company_in}"
-            f"{self.random_id}000000001"
-        )
-        etree.SubElement(msg_spec, '{%s}MessageRefId' % crs).text = msg_ref_id
+        etree.SubElement(msg_spec, '{%s}MessageRefId' % crs).text = self._message_ref_id(data)
         
         etree.SubElement(msg_spec, '{%s}MessageTypeIndic' % crs).text = 'CRS701'
         etree.SubElement(msg_spec, '{%s}ReportingPeriod' % crs).text = f"{data.message_spec.tax_year}-12-31"

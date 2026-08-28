@@ -1,6 +1,6 @@
 {
   "name": "mdes-xml-studio",
-  "version": "2.4.0",
+  "version": "3.0.0",
   "description": "MDES XML Studio - Professional XML generation for CRS, FATCA, and CBC reporting",
   "main": "electron/main.js",
   "scripts": {
@@ -8,7 +8,8 @@
     "build": "vite build",
     "electron": "electron .",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
-    "electron:build": "npm run build && npm run update-feed && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --x64",
+    "build:backend": "python ../build_python_backend.py",
+    "electron:build": "npm run build:backend && npm run build && npm run update-feed && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --x64",
     "test:e2e": "playwright test",
     "test:e2e:smoke": "playwright test smoke.e2e.js",
     "test:e2e:regression": "playwright test regression.e2e.js",
@@ -66,6 +67,13 @@
       {
         "from": "python-dist/",
         "to": "python-dist/",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../crs_generator/certificates/",
+        "to": "certificates/",
         "filter": [
           "**/*"
         ]

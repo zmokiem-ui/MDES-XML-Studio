@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "crs-testdata-generator"
-version = "2.1.0"
+version = "3.0.0"
 description = "Generate CRS / FATCA / CbC AEOI test XML for MDES intake validation"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -19,9 +19,17 @@ dependencies = [
     "multiprocess>=0.70.14,<0.71",
     "psutil>=5.9,<7",
     "orjson>=3.9,<4",
+    # CTS/IDES packaging: RSA + AES + PKCS#12. Upper bound so a major
+    # release cannot silently change padding or PKCS#12 behaviour.
+    "cryptography>=42,<47",
 ]
 
 [project.optional-dependencies]
+# `pip install -e .[mdes-target]` to read an MDES portal database in
+# developer mode. Optional on purpose: the import is guarded.
+mdes-target = [
+    "pyodbc>=5,<6",
+]
 # `pip install -e .[test]` for the unit/XSD-validity suites.
 test = [
     "pytest>=8,<10",
@@ -36,6 +44,8 @@ crs-gen = "crs_generator.cli:main"
 fatca-gen = "crs_generator.fatca_cli:main"
 cbc-gen = "crs_generator.cbc_cli:main"
 crs-error-injector = "crs_generator.error_injector:main"
+cts-package = "crs_generator.cts_cli:main"
+mdes-target = "crs_generator.mdes_target_cli:main"
 
 [tool.setuptools.packages.find]
 include = ["crs_generator*"]
@@ -50,6 +60,8 @@ exclude = ["tests*", "electron-app*"]
     "template CBC/**/*.xml",
     "template FATCA/**/*.xml",
     "template corrections/**/*.xml",
+    # Seed certificate pack for CTS packaging (see cts/certificates.py).
+    "certificates/**/*",
 ]
 
 # Pytest configuration lives in pytest.ini (testpaths = tests/unit).

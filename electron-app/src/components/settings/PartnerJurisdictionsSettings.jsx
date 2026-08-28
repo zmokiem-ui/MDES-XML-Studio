@@ -4,7 +4,7 @@ import { COUNTRIES, DEFAULT_PARTNER_JURISDICTIONS, getCountryName, searchCountri
 import { useApp } from '../../context/AppContext'
 import { t } from '../../i18n/translations'
 
-export function PartnerJurisdictionsSettings() {
+export function PartnerJurisdictionsSettings({ embedded = false }) {
   const { theme, language, settings, setSettings } = useApp()
   const [search, setSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
@@ -28,13 +28,19 @@ export function PartnerJurisdictionsSettings() {
   }
 
   return (
-    <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
-      <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>
-        {t(language, 'jurisdictions.title')}
-      </h3>
-      <p className={`text-sm ${theme.textMuted} mb-4`}>
-        {t(language, 'jurisdictions.description')}
-      </p>
+    <div className={embedded ? '' : `${theme.card} rounded-xl border p-6 shadow-sm`}>
+      {/* Standalone, this block is its own card; inside a settings section the
+          section header already says what it is. */}
+      {!embedded && (
+        <>
+          <h3 className={`text-lg font-semibold ${theme.text} mb-2`}>
+            {t(language, 'jurisdictions.title')}
+          </h3>
+          <p className={`text-sm ${theme.textMuted} mb-4`}>
+            {t(language, 'jurisdictions.description')}
+          </p>
+        </>
+      )}
 
       <div className="relative mb-4">
         <input

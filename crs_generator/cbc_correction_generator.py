@@ -14,6 +14,8 @@ from datetime import datetime, timezone
 from faker import Faker
 import csv
 
+from .ref_ids import correction_ref_id, new_run_id, resolve_seed
+
 
 # CBC namespaces
 CBC_NS = "urn:oecd:ties:cbc:v2"
@@ -59,12 +61,16 @@ class CBCCorrectionGenerator:
     """Generates CBC correction and deletion files."""
     
     def __init__(self, seed: int = None):
-        self.seed = seed or random.randint(1, 999999)
+        self.seed = resolve_seed(seed)
         self.rng = random.Random(self.seed)
         Faker.seed(self.seed)
         self.faker = Faker('en_US')
         self.ns = NAMESPACES.copy()
         self.docref_counter = 0
+        # One token per correction run, stamped into every RefId the run mints,
+        # so correcting the same source twice cannot reuse identifiers MDES has
+        # already accepted. Replaced at the start of each generation.
+        self.run_id = new_run_id()
     
     def generate_correction(
         self,
@@ -96,7 +102,11 @@ class CBCCorrectionGenerator:
                 ns['cbc'] = ns[None]
                 del ns[None]
             self.ns = {**NAMESPACES, **ns}
-            
+
+            # A fresh run id per generation: two corrections of the same source
+            # must not produce the same RefIds.
+            self.run_id = new_run_id()
+
             # Get original MessageRefId
             orig_msg_ref = self._get_message_ref_id(root)
             
@@ -172,8 +182,9 @@ class CBCCorrectionGenerator:
         # Update MessageRefId
         for elem in msg_spec.iter():
             if elem.tag.endswith('MessageRefId'):
-                # Generate new MessageRefId
-                elem.text = f"{orig_msg_ref}_CORR{self.rng.randint(100000, 999999)}"
+                # Generate new MessageRefId. The run id, not a six-digit draw:
+                # a correction has to carry one MDES has never seen.
+                elem.text = f"{orig_msg_ref}_CORR{self.run_id}"
                 break
         
         # Update MessageTypeIndic to CBC402 (corrections)
@@ -258,11 +269,14 @@ class CBCCorrectionGenerator:
                         child.text = doc_type_indic
                         break
                 
-                # Update DocRefId to new value
+                # Update DocRefId to new value. The run id is what keeps a
+                # second correction of the same source from reusing the first
+                # one's identifiers — a four-digit counter restarts at 1.
                 if doc_ref_elem is not None and orig_doc_ref:
                     self.docref_counter += 1
                     suffix = 'CORR' if correction_type == 'correction' else 'VOID'
-                    doc_ref_elem.text = f"{orig_doc_ref}_{suffix}{self.docref_counter:04d}"
+                    doc_ref_elem.text = correction_ref_id(orig_doc_ref, suffix,
+                                                          self.run_id)
                 
                 # Add CorrDocRefId if not present
                 corr_doc_ref_exists = False

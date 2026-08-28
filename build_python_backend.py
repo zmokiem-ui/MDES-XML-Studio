@@ -1,11 +1,13 @@
 """
 Build Python backend into standalone executables for Electron distribution.
 
-Creates 4 executables in electron-app/python-dist/:
+Creates 6 executables in electron-app/python-dist/:
   - crs_cli.exe       (CRS generation, validation, corrections, previews)
   - cbc_cli.exe       (CBC generation, validation, corrections)
   - fatca_cli.exe     (FATCA generation, validation, corrections)
   - error_injector.exe (Error injection for testing)
+  - cts_cli.exe       (CTS/IDES encryption and packaging for MDES upload)
+  - mdes_target_cli.exe (Reads an MDES instance and builds packages it accepts)
 
 Usage:
   python build_python_backend.py
@@ -30,14 +32,16 @@ DATA_DIRS = [
     ('crs_generator/template FATCA', 'crs_generator/template FATCA'),
     ('crs_generator/template corrections', 'crs_generator/template corrections'),
     ('crs_generator/validators', 'crs_generator/validators'),
+    # The seed certificate pack. The desktop app copies its own copy from
+    # extraResources, but cts_cli.exe must also work when run on its own.
+    ('crs_generator/certificates', 'crs_generator/certificates'),
 ]
 
 # Hidden imports required by the CLI modules
 HIDDEN_IMPORTS = [
     'lxml', 'lxml.etree', 'lxml._elementpath',
     'faker', 'faker.providers',
-    'multiprocessing', 'multiprocess',
-    'psutil', 'orjson', 'tqdm',
+    'multiprocessing', 'tqdm',
     'csv', 'json', 'xml.etree.ElementTree',
     'crs_generator',
     'crs_generator.generator',
@@ -58,6 +62,27 @@ HIDDEN_IMPORTS = [
     'crs_generator.fatca_validator',
     'crs_generator.fatca_correction_generator',
     'crs_generator.error_injector',
+    'crs_generator.cts_cli',
+    'crs_generator.cts',
+    'crs_generator.cts.certificates',
+    'crs_generator.cts.metadata',
+    'crs_generator.cts.naming',
+    'crs_generator.cts.packager',
+    'crs_generator.cts.signing',
+    'crs_generator.mdes_target_cli',
+    'crs_generator.mdes_target',
+    'crs_generator.mdes_target.database',
+    'crs_generator.mdes_target.preflight',
+    'crs_generator.mdes_target.profile',
+    'crs_generator.mdes_target.props',
+    # cryptography loads its Rust backend through these; PyInstaller does not
+    # find them from the high-level imports alone.
+    'cryptography',
+    'cryptography.hazmat.bindings._rust',
+    'cryptography.hazmat.primitives.serialization.pkcs12',
+    'cryptography.hazmat.primitives.ciphers',
+    'cryptography.hazmat.primitives.asymmetric.padding',
+    'cryptography.x509',
 ]
 
 # CLI modules to build: (entry_script, output_name)
@@ -66,7 +91,19 @@ CLI_MODULES = [
     ('entry_cbc_cli.py', 'cbc_cli'),
     ('entry_fatca_cli.py', 'fatca_cli'),
     ('entry_error_injector.py', 'error_injector'),
+    ('entry_cts_cli.py', 'cts_cli'),
+    ('entry_mdes_target_cli.py', 'mdes_target_cli'),
 ]
+
+# pyodbc is optional: MDES targets need it, nothing else does. Passing
+# --hidden-import for a module that is not installed makes PyInstaller fail, so
+# it is only added when it is actually importable.
+try:
+    import pyodbc  # noqa: F401
+    HIDDEN_IMPORTS.append('pyodbc')
+except ImportError:
+    print('  [note] pyodbc not installed - MDES target support will be unavailable '
+          'in the bundled executables.')
 
 
 def create_entry_scripts():
@@ -76,6 +113,8 @@ def create_entry_scripts():
         'entry_cbc_cli.py': 'from crs_generator.cbc_cli import main; raise SystemExit(main())',
         'entry_fatca_cli.py': 'from crs_generator.fatca_cli import main; raise SystemExit(main())',
         'entry_error_injector.py': 'from crs_generator.error_injector import main; raise SystemExit(main())',
+        'entry_cts_cli.py': 'from crs_generator.cts_cli import main; raise SystemExit(main())',
+        'entry_mdes_target_cli.py': 'from crs_generator.mdes_target_cli import main; raise SystemExit(main())',
     }
     paths = []
     for filename, code in scripts.items():
@@ -87,7 +126,8 @@ def create_entry_scripts():
 
 def cleanup_entry_scripts():
     """Remove temporary entry-point scripts."""
-    for name in ['entry_crs_cli.py', 'entry_cbc_cli.py', 'entry_fatca_cli.py', 'entry_error_injector.py']:
+    for name in ['entry_crs_cli.py', 'entry_cbc_cli.py', 'entry_fatca_cli.py', 'entry_error_injector.py',
+                 'entry_cts_cli.py', 'entry_mdes_target_cli.py']:
         p = PROJECT_ROOT / name
         if p.exists():
             p.unlink()

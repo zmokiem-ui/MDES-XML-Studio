@@ -27,6 +27,7 @@ from datetime import datetime, timedelta, timezone
 from faker import Faker
 import logging
 from .identifiers import normalize_identifier, normalize_identifiers
+from .ref_ids import RefIdFactory, new_run_id, resolve_seed
 from .reportable_jurisdictions import get_reportable_jurisdictions, get_all_country_codes
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -215,13 +216,22 @@ class FATCAGeneratorConfig:
     # Performance
     show_progress: bool = True
     progress_every: int = 500
-    seed: int = 42
+    # Left unset, every run draws a fresh seed so two files never carry the same
+    # people and institutions. Set it to reproduce a run exactly.
+    seed: Optional[int] = None
+    # Token that makes this run's RefIds unique across runs — see
+    # crs_generator.ref_ids.
+    run_id: str = ""
     pretty_print: bool = True
-    
+
     # Test mode (OECD11-13 vs OECD1-3)
     test_mode: bool = True
-    
+
     def __post_init__(self):
+        self.seed = resolve_seed(self.seed)
+        if not self.run_id:
+            self.run_id = new_run_id()
+
         self.fc_version = str(self.fc_version).strip()
         if self.fc_version not in SUPPORTED_FC_VERSIONS:
             raise ValueError(
@@ -283,16 +293,20 @@ class FATCAGeneratorConfig:
 class FATCADataGenerator:
     """Generates realistic random data for FATCA-CRS fields."""
     
-    def __init__(self, seed: int = 42, config: Optional[FATCAGeneratorConfig] = None):
+    def __init__(self, seed: Optional[int] = None, config: Optional[FATCAGeneratorConfig] = None):
+        # None means a fresh seed, not the old fixed 42 that made every run
+        # produce the same names — see crs_generator.ref_ids.resolve_seed.
+        seed = resolve_seed(seed)
+        self.seed = seed
         self.rng = random.Random(seed)
         Faker.seed(seed)
         self.faker = Faker('en_US')
         self.config = config
-        
+
         self._cache = {}
         self._precompute_caches()
         self._all_countries = get_all_country_codes()
-        
+
     def _precompute_caches(self):
         """Pre-generate pools of data."""
         pool_size = 1000
@@ -399,9 +413,19 @@ class FATCAGenerator:
             'sfa': 'urn:oecd:ties:stffatcatypes:v2',
             'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
         }
-        
-        self.docref_counter = 0
-        
+
+        # MessageRefId and DocRefIds for this delivery. The run id inside them
+        # is what stops a second run with the same country, year and
+        # SendingCompanyIN from reusing RefIds MDES has already accepted.
+        self.refids = RefIdFactory(
+            config.sending_country, config.tax_year, config.sending_company_in,
+            run_id=config.run_id, sequence_width=16)
+
+    @property
+    def docref_counter(self) -> int:
+        """How many DocRefIds this generator has minted."""
+        return self.refids.counter
+
     @property
     def is_fc3(self) -> bool:
         return self.config.fc_version == "3.0"
@@ -425,13 +449,7 @@ class FATCAGenerator:
     
     def _next_docref_id(self) -> str:
         """Generate next unique DocRefId."""
-        self.docref_counter += 1
-        return (
-            f"{self.config.sending_country}"
-            f"{self.config.tax_year}"
-            f"{self.config.sending_company_in}"
-            f"{self.docref_counter:016d}"
-        )
+        return self.refids.next_doc_ref_id()
     
     def _get_doc_type_indic(self, doc_type: str = 'new') -> str:
         """Get appropriate DocTypeIndic based on test mode."""
@@ -931,14 +949,13 @@ class FATCAGenerator:
             contact.text = self.data_gen.contact_text()
         
         # MessageRefId
+        # Every DocRefId in the file is built on this value, which is how the
+        # MDES shared-prefix rule (80001) is satisfied by construction. Drawn
+        # from the run id rather than the seeded RNG, which used to hand a
+        # pinned seed the same MessageRefId on every run.
         msg_ref = msg_header.find('sfa_ftc:MessageRefId', namespaces=ns)
         if msg_ref is not None:
-            msg_ref.text = (
-                f"{self.config.sending_country}"
-                f"{self.config.tax_year}"
-                f"{self.config.sending_company_in}"
-                f"{self.data_gen.rng.randint(1, 9999999999):010d}"
-            )
+            msg_ref.text = self.refids.message_ref_id
         
         # MessageTypeIndic (CRS701 for new, CRS702 for correction)
         msg_type_indic = msg_header.find('sfa_ftc:MessageTypeIndic', namespaces=ns)

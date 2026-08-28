@@ -110,6 +110,10 @@ _PROD_DOCTYPES = {"OECD0", "OECD1", "OECD2", "OECD3"}
 _TEST_DOCTYPES = {"OECD10", "OECD11", "OECD12", "OECD13"}
 _NEW_DOCTYPES = {"OECD1", "OECD11"}
 _CORR_DOCTYPES = {"OECD2", "OECD3", "OECD12", "OECD13"}
+# Resent data: the same document sent again. It keeps the DocRefId it is
+# resending — MDES compares the two across messages, which no single-file check
+# can see — and carries no CorrDocRefId, which this file can check.
+_RESEND_DOCTYPES = {"OECD0", "OECD10"}
 
 
 def check_mdes_rules(
@@ -177,7 +181,17 @@ def check_mdes_rules(
                 findings.append(Finding("80025", "error",
                     f"{tag} '{bad[0]}' contains whitespace{extra}."))
         if message_ref:
-            if sending_company and tax_year:
+            if file_type == "foreign" and transmitting and receiving and tax_year:
+                valid_prefixes = {
+                    f"{transmitting}{tax_year}{receiving}",
+                    f"{transmitting}{int(tax_year) - 1 if tax_year.isdigit() else tax_year}{receiving}",
+                }
+                if not any(message_ref.startswith(p) for p in valid_prefixes):
+                    findings.append(Finding("50008", "error",
+                        "For a foreign CRS delivery, MessageRefId must start with "
+                        "TransmittingCountry + TaxYear + ReceivingCountry "
+                        f"('{transmitting}{tax_year}{receiving}...')."))
+            elif sending_company and tax_year:
                 valid_prefixes = {
                     f"{transmitting}{tax_year}{sending_company}",
                     f"{transmitting}{int(tax_year) - 1 if tax_year.isdigit() else tax_year}{sending_company}",
@@ -187,19 +201,28 @@ def check_mdes_rules(
                         "MessageRefId must start with TransmittingCountry + TaxYear "
                         "+ SendingCompanyIN."))
 
-    # --- 80001: DocRefId prefix rules ---
+    # --- 80001: DocRefId prefix rules ---------------------------------------
+    # Mirrors TRUNK's ``RegEx RefID.bixml``: country of delivery + reporting
+    # year (or previous year) + SendingCompanyIN. This is intentionally not the
+    # whole MessageRefId prefix for a foreign CRS delivery, whose next component
+    # is the receiving authority instead.
     if is_crs_family:
+        doc_prefixes: set[str] = set()
+        if transmitting and tax_year and sending_company:
+            doc_prefixes.add(f"{transmitting}{tax_year}{sending_company}")
+            if tax_year.isdigit():
+                doc_prefixes.add(
+                    f"{transmitting}{int(tax_year) - 1}{sending_company}"
+                )
         for tag in ("DocRefId", "CorrDocRefId"):
             for ref in _all_texts(root, tag):
                 if not ref:
                     continue
-                if message_ref and ref[:6] != message_ref[:6]:
-                    findings.append(Finding("80001", "warning",
-                        f"{tag} '{ref}' first 6 chars differ from MessageRefId."))
-                if transmitting and not ref.startswith(transmitting):
-                    findings.append(Finding("80001", "warning",
-                        f"{tag} '{ref}' does not start with TransmittingCountry "
-                        f"'{transmitting}'."))
+                if doc_prefixes and not any(ref.startswith(p) for p in doc_prefixes):
+                    expected = f"{transmitting}{tax_year}{sending_company}..."
+                    findings.append(Finding("80001", "error",
+                        f"{tag} '{ref}' must start with TransmittingCountry + "
+                        f"TaxYear + SendingCompanyIN ('{expected}')."))
 
     # --- 80000: duplicate DocRefId in the same file ---
     docrefs = [r for r in _all_texts(root, "DocRefId") if r]
@@ -207,14 +230,28 @@ def check_mdes_rules(
     for r in sorted(dupes):
         findings.append(Finding("80000", "error", f"DocRefId '{r}' used more than once."))
 
+    # --- 80026: resent data must not point at anything ----------------------
+    # A resend (OECD0/OECD10) is the same document being sent again, not a
+    # replacement for another one: it carries the DocRefId it is resending and
+    # no CorrDocRefId. Checked per DocSpec so the DocTypeIndic and the
+    # CorrDocRefId that belong together are the ones compared.
+    for doc_spec in _find_all(root, "DocSpec"):
+        if _child_text(doc_spec, "DocTypeIndic") not in _RESEND_DOCTYPES:
+            continue
+        corr = _child_text(doc_spec, "CorrDocRefId")
+        if corr:
+            findings.append(Finding("80026", "error",
+                f"Resent document '{_child_text(doc_spec, 'DocRefId') or ''}' "
+                f"carries a CorrDocRefId ('{corr}'); resent data must not."))
+
     # --- 50010 / 50011: test vs production DocTypeIndic must match environment ---
     has_prod = any(d in _PROD_DOCTYPES for d in doctypes)
     has_test = any(d in _TEST_DOCTYPES for d in doctypes)
     if environment_is_test and has_prod:
-        findings.append(Finding("50010", "error",
+        findings.append(Finding("50011", "error",
             "Production DocTypeIndic (OECD0-3) in a test environment; use OECD10-13."))
     if not environment_is_test and has_test:
-        findings.append(Finding("50011", "error",
+        findings.append(Finding("50010", "error",
             "Test DocTypeIndic (OECD10-13) in a production environment; use OECD0-3."))
 
     # --- 80010: MessageTypeIndic <-> DocTypeIndic compatibility (CRS/FC) ---

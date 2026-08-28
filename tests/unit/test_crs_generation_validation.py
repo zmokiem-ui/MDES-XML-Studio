@@ -3,6 +3,7 @@
 from crs_generator.generator import CRSGenerator, GeneratorConfig
 from crs_generator.xml_validator import CRSXMLValidator
 from crs_generator import xsd_validator as xv
+from crs_generator.cts.source_validation import validate_foreign_crs
 
 
 def test_organisation_without_controlling_persons_is_valid_non_crs101(tmp_path):
@@ -110,6 +111,55 @@ def test_foreign_delivery_is_schema_valid_and_crosses_a_border(tmp_path):
             for e in next(e for e in root.iter() if _local(e) == "MessageSpec")}
     assert spec["TransmittingCountry"] == "IT"
     assert spec["ReceivingCountry"] == "CW"
+    assert spec["MessageRefId"].startswith("IT2021CW")
+
+
+def test_foreign_delivery_separates_message_and_document_prefixes(tmp_path):
+    """50008 uses receiver in MessageRefId; 80001 uses SendingCompanyIN in DocRefs."""
+    path = CRSGenerator(_foreign_config(
+        tmp_path / "foreign_ref.xml", mytin="999999999",
+    )).generate(use_parallel=False)
+
+    from lxml import etree
+    root = etree.parse(str(path)).getroot()
+    message_ref = next(
+        (e.text or "").strip() for e in root.iter() if _local(e) == "MessageRefId"
+    )
+    doc_refs = [
+        (e.text or "").strip() for e in root.iter() if _local(e) == "DocRefId"
+    ]
+
+    assert message_ref.startswith("IT2021CW")
+    assert not message_ref.startswith("IT2021999999999")
+    assert doc_refs and all(ref.startswith("IT2021999999999") for ref in doc_refs)
+    assert all(not ref.startswith(message_ref) for ref in doc_refs)
+
+
+def test_packager_validation_derives_and_locks_foreign_xml_facts(tmp_path):
+    path = CRSGenerator(_foreign_config(tmp_path / "foreign_source.xml")).generate(
+        use_parallel=False
+    )
+    validation = validate_foreign_crs(path)
+
+    assert validation.valid, validation.errors
+    assert validation.facts.sender == "IT"
+    assert validation.facts.receiver == "CW"
+    assert validation.facts.communication_type == "CRS"
+    assert validation.facts.tax_year == "2021"
+    assert validation.facts.schema_version == "2.0"
+
+
+def test_packager_validation_rejects_domestic_crs_xml(tmp_path):
+    path = CRSGenerator(GeneratorConfig(
+        sending_country="NL", receiving_country="NL", tax_year=2024,
+        mytin="999999999", num_reporting_fis=1,
+        individual_accounts_per_fi=1, organisation_accounts_per_fi=0,
+        output_path=tmp_path / "domestic.xml", show_progress=False,
+    )).generate(use_parallel=False)
+
+    validation = validate_foreign_crs(path)
+    assert not validation.valid
+    assert any("not a foreign CRS delivery" in error for error in validation.errors)
 
 
 def test_foreign_delivery_satisfies_the_mdes_residence_rules(tmp_path):

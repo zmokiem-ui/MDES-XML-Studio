@@ -23,6 +23,7 @@ import string
 import tempfile
 import shutil
 from .identifiers import normalize_identifier, normalize_identifiers
+from .ref_ids import RefIdFactory, derive_seed, new_run_id, resolve_seed
 from .reportable_jurisdictions import get_reportable_jurisdictions, get_all_country_codes
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -200,10 +201,23 @@ class GeneratorConfig:
     # Performance
     show_progress: bool = True
     progress_every: int = 500  # Show progress every N accounts
-    seed: int = 42
+    # Left unset, every run draws a fresh seed, so two files never carry the
+    # same people and institutions. Set it to reproduce a run exactly; the
+    # resolved value is stored back here and reported by the CLI.
+    seed: Optional[int] = None
+    # Token that makes this run's RefIds unique across runs — see
+    # crs_generator.ref_ids. Set it only to reproduce a delivery's identifiers.
+    run_id: str = ""
     pretty_print: bool = True  # Enabled by default for readability
-    
+
     def __post_init__(self):
+
+        # Resolved here rather than in the generator so the values survive the
+        # trip to the parallel workers (the config is what gets pickled) and so
+        # the caller can read back which seed a run actually used.
+        self.seed = resolve_seed(self.seed)
+        if not self.run_id:
+            self.run_id = new_run_id()
 
         self.crs_version = str(self.crs_version).strip()
         if self.crs_version not in SUPPORTED_CRS_VERSIONS:
@@ -294,7 +308,11 @@ class GeneratorConfig:
 class DataGenerator:
     """Generates realistic random data for CRS fields."""
     
-    def __init__(self, seed: int = 42, config: Optional[GeneratorConfig] = None):
+    def __init__(self, seed: Optional[int] = None, config: Optional[GeneratorConfig] = None):
+        # None means a fresh seed, not the old fixed 42 that made every run
+        # produce the same names — see crs_generator.ref_ids.resolve_seed.
+        seed = resolve_seed(seed)
+        self.seed = seed
         self.rng = random.Random(seed)
         Faker.seed(seed)
         self.faker = Faker('en_US')
@@ -403,10 +421,19 @@ class CRSGenerator:
     High-performance CRS XML generator using validated templates.
     """
     
-    def __init__(self, config: GeneratorConfig):
+    def __init__(self, config: GeneratorConfig, worker_id: int = 0):
+        """
+        Args:
+            config: what to generate.
+            worker_id: which parallel chunk this instance is producing. Workers
+                each rebuild the generator from the same config, so without an
+                offset they would all draw the same people from the same seed
+                and mint the same DocRefIds. Both are shifted by it.
+        """
         self.config = config
-        self.data_gen = DataGenerator(config.seed, config)
-        
+        self.worker_id = worker_id
+        self.data_gen = DataGenerator(derive_seed(config.seed, worker_id), config)
+
         # Namespace map. Only the crs prefix moves between versions — the
         # supporting schemas are shared by 2.0 and 3.0.
         self.ns = {
@@ -418,8 +445,18 @@ class CRSGenerator:
             'ftc': 'urn:oecd:ties:fatca:v1'
         }
         
-        # ID counter for unique DocRefIds
-        self.docref_counter = 0
+        # Domestic reporting-entity uploads use SendingCompanyIN in the
+        # MessageRefId prefix (80017). A foreign authority-to-authority delivery
+        # uses the receiving jurisdiction instead (50008): NL2024CW...
+        # DocRefIds are different: TRUNK's 80001 rule always requires delivery
+        # country + tax year + SendingCompanyIN, including for foreign uploads.
+        reference_owner = (
+            config.receiving_country if config.file_type == "foreign" else config.mytin
+        )
+        self.refids = RefIdFactory(
+            config.sending_country, config.tax_year, reference_owner,
+            run_id=config.run_id, doc_owner=config.mytin)
+        self.refids.offset_for_worker(worker_id)
 
     def _doc_type_indic(self) -> str:
         """New-data DocTypeIndic: OECD11 in test env, OECD1 in production (MDES 50010/50011)."""
@@ -444,11 +481,14 @@ class CRSGenerator:
         
         return tree, ns
     
+    @property
+    def docref_counter(self) -> int:
+        """How many DocRefIds this instance has minted."""
+        return self.refids.counter
+
     def _next_docref_id(self) -> str:
         """Generate next unique DocRefId."""
-        self.docref_counter += 1
-        base = f"{self.config.sending_country}{self.config.tax_year}{self.config.mytin}"
-        return f"{base}{self.docref_counter:09d}"
+        return self.refids.next_doc_ref_id()
     
     def _randomize_element_text(self, elem: etree._Element):
         """Replace placeholder text in element with realistic data."""
@@ -944,10 +984,11 @@ class CRSGenerator:
             if elem is not None:
                 elem.text = value
         
-        # Update MessageRefId
+        # Update MessageRefId. Foreign files deliberately use a different owner
+        # component than DocRefIds; only country + year is shared between them.
         msg_ref = msg_spec.find('crs:MessageRefId', namespaces=ns)
         if msg_ref is not None:
-            msg_ref.text = self._next_docref_id()
+            msg_ref.text = self.refids.message_ref_id
     
     def _update_reporting_fi(self, rfi: etree._Element, ns: dict, fi_index: int):
         """Update ReportingFI with config values and random data."""
@@ -1058,6 +1099,9 @@ class CRSGenerator:
         logger.info(f"   MYTIN: {self.config.mytin}")
         logger.info(f"   ReportingFIs: {self.config.num_reporting_fis}")
         logger.info(f"   Total Accounts: {total_accounts:,}")
+        # Reported so a run that turned up something interesting can be
+        # reproduced with --seed; a fresh one is drawn otherwise.
+        logger.info(f"   Seed: {self.config.seed}")
         logger.info(f"     • Individual: {self.config.num_reporting_fis * self.config.individual_accounts_per_fi:,}")
         logger.info(f"     • Organisation: {self.config.num_reporting_fis * self.config.organisation_accounts_per_fi:,}")
         if self.config.controlling_persons_per_org > 0:
@@ -1342,13 +1386,13 @@ def _generate_chunk_worker(chunk_data: dict) -> Path:
     individual_template = etree.fromstring(chunk_data['individual_template'], parser)
     org_template = etree.fromstring(chunk_data['org_template'], parser)
     
-    # Create a mini generator for this worker
-    worker_gen = CRSGenerator(config)
-    # Give each worker a disjoint 10-million-wide DocRefId range. The counter is
-    # rendered as 9 digits, so up to ~99 workers x 10M IDs stay collision-free
-    # (the previous 100k stride collided once any worker emitted >100k IDs).
-    worker_gen.docref_counter = worker_id * 10_000_000  # Offset to avoid ID collisions
-    
+    # Create a mini generator for this worker. worker_id gives it both a
+    # disjoint 10-million-wide DocRefId range (the counter is rendered as 9
+    # digits, so ~99 workers stay collision-free) and its own data seed —
+    # without the latter every worker drew the same names and the merged file
+    # repeated its whole population once per chunk.
+    worker_gen = CRSGenerator(config, worker_id=worker_id)
+
     # Create root for this chunk. The chunk files are intermediates whose
     # CrsBody elements get streamed into the real root, but they still have to
     # carry the right crs namespace or the merge step's iterparse tag filter

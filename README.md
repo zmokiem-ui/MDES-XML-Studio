@@ -46,8 +46,8 @@ python -m crs_generator.cli --mode random --file-type foreign \
   --organisation-accounts 5 --output out/foreign.xml
 ```
 
-Signing, encryption and ZIP packaging are out of scope — the app produces the
-plaintext XML, and you encrypt it with the existing cipher tool.
+Signing, encryption and ZIP packaging happen in the app too — see
+[Encrypt and package](#encrypt-and-package) below.
 
 CRS 3.0 keeps the v2 supporting schemas but moves to its own root namespace and
 makes account classification mandatory: `SelfCert` on every account holder and
@@ -146,6 +146,128 @@ the 2.2 schema and every new element reported as unexpected.
 
 Generate with `--fc-version 3.0`, or pick the version in the FATCA form. The
 same AccountType/account-number/payment constraints as CRS apply.
+
+## Encrypt and package
+
+MDES does not accept plaintext XML. A delivery arrives as a ZIP holding three
+entries, and the payload inside it is itself a signed, compressed, encrypted
+document. The **Package** tab does the whole thing, so there is no longer a step
+outside the app between generating a file and uploading it.
+
+```bash
+python -m crs_generator.cts_cli pack --source out/foreign.xml   --sender NL --receiver GL --type CRS --tax-year 2024 --output out/
+```
+
+The result is `NL_CRS_{timestamp}_{random}.zip` containing, in this order:
+
+| Entry | What it is |
+| --- | --- |
+| `NL_CRS_Metadata.xml` | CTS metadata; `SenderFileId` embeds the document's own `MessageRefId` |
+| `GL_CRS_Key` | `RSA-PKCS1v1.5(aesKey ‖ iv)` under the **receiver's** certificate — 48 plaintext bytes |
+| `NL_CRS_Payload` | `AES-256-CBC` over a ZIP holding the XML-DSig-signed document |
+
+Those names are how MDES finds the parts, so they are derived rather than typed.
+CbC swaps the `_CRS_` infix for `_CBC_`; FATCA drops it entirely and the sender
+becomes `US`. A status message keeps the base module inside the ZIP even though
+the outer filename says `CRSStatus`.
+
+Two invariants are worth knowing, because MDES only reports them after upload:
+the payload must be **compressed before it is encrypted** (error 50003), and the
+key file must be **CBC with a 48-byte concatenated key and IV** (error 50013).
+
+`unpack` reads a package back — metadata needs nothing, the payload needs the
+receiver's private key. It is how you read the status messages and NTJ
+notifications MDES sends you:
+
+```bash
+python -m crs_generator.cts_cli unpack --package NL_CRS_....zip --country GL
+```
+
+### Certificates
+
+Signing uses the sender's private key; encryption uses the receiver's public
+certificate. Both ship with the app, one directory per country under
+`crs_generator/certificates/`, and are copied into your user profile on first
+run so **Settings → Certificates** can replace one without waiting for a
+release. That screen also shows each certificate's key size and expiry, and
+warns at 90 days; `tests/unit/test_cts_certificates.py` fails at the same point
+so a renewal cannot be forgotten. The current pack runs to February 2030.
+
+Passwords are not in this repository. Enter one per country in that screen — it
+is kept in the OS credential store — or pass `$MDES_SIGNING_PASSWORD` to the
+CLI.
+
+### Deliberately broken packages
+
+`--defect` produces a package that is wrong in one specific way, to exercise
+MDES's file-level error handling: `ecb_mode` and `short_key` (50013),
+`uncompressed_payload` (50003), `tamper_signature` (50004), `wrong_receiver`
+(50012), `corrupt_key` (50002). This is the part the standalone cipher tool
+could not do.
+
+## Developer mode: build for a specific MDES instance
+
+A package can be perfectly formed and still be rejected, because the rules that
+decide acceptance are not in the file. They are in the MDES instance you are
+uploading to.
+
+The concrete case, on a real local database: thirteen partner countries have the
+**Netherlands** certificate registered against them. Signing as IT with the
+genuine Italian certificate produces a delivery MDES rejects with error 50004,
+and nothing about the file is wrong. Only the instance's database knows that.
+
+**Settings → Developer mode** turns this on. A **target** binds the app to one
+instance — its properties file plus a read-only database connection — and
+everything else is derived from it:
+
+| Read from | What it decides |
+| --- | --- |
+| `Country_Code_Provision` | the receiver, and which certificate to encrypt to |
+| `Verdrag` | which treaties the instance accepts |
+| `Test_Environment` / `OtapMode` | the legal DocTypeIndic range (50010 / 50011) |
+| `FirstYearDelivery`, `MaxFileSizeCTSTransmissionMB` | tax-year and size limits |
+| `HCTA_FATCA_EntityID`, `FATCAEntityReceiverId_USA` | the IDES entity ids |
+| `DOORGEEFLANDEN` | which senders are accepted, and **which certificate each is verified against** |
+| `DS_CA_CERTIFICATE` | the instance's own certificate |
+| `sys.assemblies` | whether CTS.CLR is deployed, and which schema it expects |
+
+Those database queries are the ones `CTS.CLR.dll` issues itself, read out of the
+assembly rather than guessed. **The column pair changed in CTS.CLR 1.6.9.0**, so
+the deployed assembly is identified by its own bytes and the right columns are
+read for it — pairing a 1.6.9.0 database with an older assembly finds no sender
+certificate at all, and nothing in the file explains why.
+
+A database with **no** CTS.CLR assembly cannot decrypt an upload however correct
+the package is, so preflight blocks on it and target detection lists databases
+that have one first.
+
+Preflight then reports each rule with the error it predicts, and blocks the
+build when one fails. There is a separate override, because deliberately-broken
+packages remain a feature.
+
+```bash
+python -m crs_generator.mdes_target_cli discover
+python -m crs_generator.mdes_target_cli save --name "CW demo"     --props C:/MDES/props/PFGU.properties     --server "localhost\SQLEXPRESS" --database MDES-DEMO
+python -m crs_generator.mdes_target_cli preflight --target "CW demo"
+python -m crs_generator.mdes_target_cli build --target "CW demo" --output out/
+```
+
+`build` is the one-click path and takes no other input: it asks the target what
+would be accepted — including which sender's certificate actually matches — then
+generates and packages exactly that. `package` does the same for an XML you
+already have.
+
+Reading the database needs `pyodbc` and a SQL Server ODBC driver. Both are
+optional: without them everything else still works and only this panel reports
+itself unavailable. The connection is opened read-only, and the code contains no
+statement other than `SELECT` — **this app never writes to an MDES database.**
+
+### Setting it up on another machine
+
+**Detect** scans for properties files and for local SQL Server databases that
+have the MDES tables, and proposes targets from what it finds. Targets are saved
+in your user profile, never in the repository, and a SQL password is kept in the
+OS credential store alongside the certificate passwords.
 
 ## Download (end users)
 

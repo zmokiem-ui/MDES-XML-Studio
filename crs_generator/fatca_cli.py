@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 from .cli_utils import (
-    output_json, error_exit, parse_comma_list,
+    output_json, error_exit, parse_comma_list, add_seed_argument,
     CorrectionConfig, format_validation_result, format_correction_result
 )
 from .fatca_generator import SUPPORTED_FC_VERSIONS
@@ -95,14 +95,17 @@ def generate_fatca_random_mode(args):
         account_holder_country_mode=args.account_holder_mode or 'random',
         account_holder_countries=account_holder_countries if account_holder_countries else None,
         output_path=Path(args.output),
-        test_mode=args.test_mode
+        test_mode=args.test_mode,
+        seed=getattr(args, 'seed', None),
     )
-    
+
     generator = FATCAGenerator(config)
 
     try:
         output_path = generator.generate()
         print(f"Generated FATCA XML: {output_path}")
+        # Printed so an interesting run can be reproduced with --seed.
+        print(f"Seed: {config.seed}")
         sys.exit(0)
     except Exception as e:
         print(f"Error: {str(e)}", file=sys.stderr)
@@ -134,11 +137,14 @@ def _generate_irs_fatca_mode(args):
         account_holder_countries=account_holder_countries if account_holder_countries else None,
         output_path=Path(args.output),
         test_mode=args.test_mode,
+        seed=getattr(args, 'seed', None),
     )
 
     try:
         output_path = IRSGenerator(config).generate()
         print(f"Generated FATCA XML: {output_path}")
+        # Printed so an interesting run can be reproduced with --seed.
+        print(f"Seed: {config.seed}")
         sys.exit(0)
     except Exception as e:
         print(f"Error: {str(e)}", file=sys.stderr)
@@ -192,6 +198,7 @@ def main():
     # no-op alias kept for backward compatibility (test is default).
     parser.add_argument('--production', action='store_true', default=False,
                         help='Use production DocTypeIndic (FATCA1-4) instead of test (FATCA11-14)')
+    add_seed_argument(parser)
     parser.add_argument('--test-mode', action='store_true', default=False,
                         help='(Deprecated) Test data indicators are the default; this flag is a no-op')
 

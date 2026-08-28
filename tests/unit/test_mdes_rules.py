@@ -76,9 +76,14 @@ def test_messageref_format_flagged_80017():
     assert "80017" in _codes(mr.check_mdes_rules(root, "CRS"))
 
 
-def test_production_doctype_in_test_env_flagged_50010():
+def test_production_doctype_in_test_env_flagged_50011():
     root = _doc(doctypes=("OECD1",))
-    assert "50010" in _codes(mr.check_mdes_rules(root, "CRS", environment_is_test=True))
+    assert "50011" in _codes(mr.check_mdes_rules(root, "CRS", environment_is_test=True))
+
+
+def test_test_doctype_in_production_env_flagged_50010():
+    root = _doc(doctypes=("OECD11",))
+    assert "50010" in _codes(mr.check_mdes_rules(root, "CRS", environment_is_test=False))
 
 
 def test_crs702_with_new_doctype_flagged_80010():
@@ -132,6 +137,28 @@ def test_foreign_delivery_across_countries_is_not_flagged():
     findings = mr.check_mdes_rules(_country_pair_doc("IT", "CW"), "CRS",
                                    file_type="foreign")
     assert "FILETYPE-01" not in _codes(findings)
+
+
+def test_foreign_delivery_wrong_authority_prefix_is_flagged_50008():
+    root = _country_pair_doc("IT", "CW")
+    spec = next(iter(root))
+    etree.SubElement(spec, f"{{{NS}}}MessageRefId").text = "IT2024999999999UNIQUE"
+    etree.SubElement(spec, f"{{{NS}}}ReportingPeriod").text = "2024-12-31"
+
+    findings = mr.check_mdes_rules(root, "CRS", file_type="foreign")
+
+    assert "50008" in _codes(findings)
+
+
+def test_foreign_delivery_authority_prefix_passes_50008():
+    root = _country_pair_doc("IT", "CW")
+    spec = next(iter(root))
+    etree.SubElement(spec, f"{{{NS}}}MessageRefId").text = "IT2024CWUNIQUE"
+    etree.SubElement(spec, f"{{{NS}}}ReportingPeriod").text = "2024-12-31"
+
+    findings = mr.check_mdes_rules(root, "CRS", file_type="foreign")
+
+    assert "50008" not in _codes(findings)
 
 
 def test_domestic_filing_may_name_the_same_country_twice():

@@ -11,6 +11,7 @@ from pathlib import Path
 from .cli_utils import (
     output_json, error_exit, parse_comma_list,
     add_correction_arguments, add_account_holder_arguments, add_generation_arguments,
+    add_seed_argument,
     CorrectionConfig, format_validation_result, format_correction_result
 )
 from .generator import (
@@ -203,6 +204,7 @@ def main():
                         help='Use production DocTypeIndic (OECD1/2/3) instead of test (OECD11/12/13)')
     parser.add_argument('--test-mode', action='store_true', default=False,
                         help='(Deprecated) Test data indicators are the default; this flag is a no-op')
+    add_seed_argument(parser)
 
     args = parser.parse_args()
     # Resolve the single source of truth used throughout the CLI.
@@ -364,18 +366,22 @@ def generate_random_mode(args):
             test_mode=args.test_mode,
             show_progress=True,
             progress_every=500,
+            seed=getattr(args, 'seed', None),
             pretty_print=True
         )
-        
+
         generator = CRSGenerator(config)
         result_path = generator.generate(use_parallel=use_parallel, num_workers=num_workers)
-        
+
         file_size = result_path.stat().st_size / (1024 * 1024)
-        
+
         print(f"\nGeneration complete!")
         print(f"File: {result_path}")
         print(f"Size: {file_size:.2f} MB")
         print(f"Total accounts: {total_accounts:,}")
+        # The config resolved a fresh seed if none was given; printing it is
+        # what makes an interesting run reproducible with --seed.
+        print(f"Seed: {config.seed}")
         
         sys.exit(0)
         

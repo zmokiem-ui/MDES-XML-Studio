@@ -4,3 +4,8 @@ tqdm>=4.66.0
 multiprocess>=0.70.14
 psutil>=5.9.0
 orjson>=3.9.0
+cryptography>=42.0.0
+# Optional: MDES targets (developer mode) read the portal database over ODBC.
+# Everything else works without it - crs_generator.mdes_target degrades to
+# 'unavailable' rather than failing to import.
+pyodbc>=5.0.0

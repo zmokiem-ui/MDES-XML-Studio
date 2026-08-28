@@ -88,6 +88,17 @@ publishing until every client has been seen on 2.3.0 or later.
   CI variables.
 - **Never commit `electron-app/electron/update-feed.json`.** It is generated at
   package time and holds a token. It is gitignored; keep it that way.
+- **`crs_generator/mdes_target/database.py` is read-only and must stay that
+  way.** It reads a live MDES portal database; the connection is opened
+  `readonly=True` and the module contains no statement other than `SELECT`.
+  Never add one. Its queries mirror the SQL inside `CTS.CLR.dll` — if MDES
+  changes them, read the assembly again rather than guessing.
+- **`crs_generator/certificates/` is a deliberate exception to the `*.p12`
+  ignore rule** — do not "fix" it. They are internal-CA certificates for the
+  MDES test environment, shipped so packaging works on a fresh install.
+  `SECURITY.md` explains the reasoning. Their **passwords stay out of the repo**;
+  the app keeps them in the OS credential store and the CLI reads
+  `$MDES_SIGNING_PASSWORD`.
 
 ### Before you push a pipeline change
 

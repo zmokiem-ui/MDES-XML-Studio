@@ -14,6 +14,7 @@ from lxml import etree
 
 from .cbc_generator import generate_cbc_xml
 from .cbc_correction_generator import generate_cbc_correction, load_doc_ref_ids_from_csv
+from .cli_utils import add_seed_argument
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -70,6 +71,7 @@ Examples:
                            help='MNE Group name')
     gen_parser.add_argument('--entity-name',
                            help='Reporting entity name')
+    add_seed_argument(gen_parser)
     
     # Correction command
     corr_parser = subparsers.add_parser('correct', help='Generate CBC correction/deletion')
@@ -142,7 +144,8 @@ def cmd_generate(args) -> int:
             test_mode=not args.production,
             reporting_role=args.role,
             mne_group_name=args.mne_name or '',
-            reporting_entity_name=args.entity_name or ''
+            reporting_entity_name=args.entity_name or '',
+            seed=getattr(args, 'seed', None),
         )
         print(f"\nSuccess! Generated: {output_path}")
         return 0

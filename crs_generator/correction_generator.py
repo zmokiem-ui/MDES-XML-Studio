@@ -8,11 +8,10 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import random
-import string
-import uuid
 import copy
 
 from .generator import default_crs_version
+from .ref_ids import correction_ref_id, new_run_id
 from .xml_validator import CRSXMLValidator, ValidationResult
 
 
@@ -98,6 +97,10 @@ class CRSCorrectionGenerator:
         self.version = default_crs_version()
         self.namespaces = self._namespaces_for(self.version)
         self.test_mode = True  # Will be set from options
+        # One token per correction run, stamped into every RefId the run mints,
+        # so correcting the same source file twice cannot produce the same
+        # identifiers twice. Replaced at the start of each generation.
+        self.run_id = new_run_id()
 
     def _namespaces_for(self, version: str) -> Dict[str, str]:
         """Namespace map for a detected source version.
@@ -243,6 +246,8 @@ class CRSCorrectionGenerator:
         for prefix, uri in self.namespaces.items():
             ET.register_namespace(prefix, uri)
         
+        self.run_id = new_run_id()
+
         # Create new root with same structure
         correction_root = copy.deepcopy(source_root)
         
@@ -452,6 +457,20 @@ class CRSCorrectionGenerator:
         for account in accounts_to_remove:
             parent_element.remove(account)
     
+    def _current_doc_ref(self, doc_spec: ET.Element, fallback_data: Dict) -> str:
+        """The DocRefId the document currently carries — what a CorrDocRefId points at.
+
+        Taken from the element itself. The parsed-data dictionaries are indexed
+        positionally against the source tree, so any drift between the two (a
+        body without a ReportingGroup, an unparsed AccountReport) would aim a
+        correction at the wrong original. The parsed value is only a fallback
+        for a DocSpec that has no DocRefId at all.
+        """
+        doc_ref = doc_spec.find('{%s}DocRefId' % self.namespaces['stf'])
+        if doc_ref is not None and doc_ref.text and doc_ref.text.strip():
+            return doc_ref.text.strip()
+        return (fallback_data or {}).get('doc_ref_id', '')
+
     def _correct_reporting_fi(self, reporting_fi: ET.Element, fi_data: Dict, options: CorrectionOptions):
         """Apply corrections to ReportingFI"""
         ns = self.namespaces
@@ -459,8 +478,11 @@ class CRSCorrectionGenerator:
         # Update DocSpec
         doc_spec = reporting_fi.find('{%s}DocSpec' % ns['crs'])
         if doc_spec is not None:
-            original_doc_ref = fi_data.get('doc_ref_id', '')
-            
+            # Read off the element being corrected, not off the parsed-data
+            # index: CorrDocRefId has to point at *this* document, and an
+            # index that drifted would silently point it at another one.
+            original_doc_ref = self._current_doc_ref(doc_spec, fi_data)
+
             # Set DocTypeIndic to corrected (OECD2 or OECD12 for test)
             doc_type = doc_spec.find('{%s}DocTypeIndic' % ns['stf'])
             if doc_type is not None:
@@ -495,8 +517,20 @@ class CRSCorrectionGenerator:
         """Resend the ReportingFI (OECD0/OECD10).
 
         In a CRS702 the FI itself is unchanged but must accompany the corrected
-        accounts; it is resent with a resend DocTypeIndic, a fresh unique
-        DocRefId, and no CorrDocRefId (MDES rules 80008/80010/80026).
+        accounts, so it is resent rather than corrected: a resend DocTypeIndic
+        and no CorrDocRefId (MDES rules 80008/80010).
+
+        Its **DocRefId is left exactly as it was**. Resent data is the same
+        document being sent again, not a new one, and MDES enforces that:
+
+            "If there is Resent Data for a ReportingFI (OECD0 or OECD10), then
+            the DocRefId of the ReportingFI must be identical to the DocRefId
+            of this ReportingFI in the message that is corrected or
+            supplemented."
+
+        Minting a fresh DocRefId here — which this used to do — produced one
+        rejection per ReportingFI on every correction upload. The uniqueness
+        rule that governs new documents does not reach a resend.
         """
         ns = self.namespaces
         doc_spec = reporting_fi.find('{%s}DocSpec' % ns['crs'])
@@ -508,9 +542,6 @@ class CRSCorrectionGenerator:
         corr_ref = doc_spec.find('{%s}CorrDocRefId' % ns['stf'])
         if corr_ref is not None:
             doc_spec.remove(corr_ref)
-        doc_ref = doc_spec.find('{%s}DocRefId' % ns['stf'])
-        if doc_ref is not None and doc_ref.text:
-            doc_ref.text = self._generate_new_ref_id(doc_ref.text, 'RFIRESEND')
 
     def _correct_account(self, account: ET.Element, acct_data: Dict, options: CorrectionOptions):
         """Apply corrections to an AccountReport"""
@@ -519,13 +550,13 @@ class CRSCorrectionGenerator:
         # Update DocSpec
         doc_spec = account.find('{%s}DocSpec' % ns['crs'])
         if doc_spec is not None:
-            original_doc_ref = acct_data.get('doc_ref_id', '')
-            
+            original_doc_ref = self._current_doc_ref(doc_spec, acct_data)
+
             # Set DocTypeIndic to corrected (OECD2 or OECD12 for test)
             doc_type = doc_spec.find('{%s}DocTypeIndic' % ns['stf'])
             if doc_type is not None:
                 doc_type.text = self._get_doc_type_indic('corrected')
-            
+
             # Update DocRefId
             doc_ref = doc_spec.find('{%s}DocRefId' % ns['stf'])
             if doc_ref is not None:
@@ -583,8 +614,8 @@ class CRSCorrectionGenerator:
         # Update DocSpec for deletion
         doc_spec = account.find('{%s}DocSpec' % ns['crs'])
         if doc_spec is not None:
-            original_doc_ref = acct_data.get('doc_ref_id', '')
-            
+            original_doc_ref = self._current_doc_ref(doc_spec, acct_data)
+
             # Set DocTypeIndic to deleted (OECD3 or OECD13 for test)
             doc_type = doc_spec.find('{%s}DocTypeIndic' % ns['stf'])
             if doc_type is not None:
@@ -602,22 +633,26 @@ class CRSCorrectionGenerator:
             corr_ref.text = original_doc_ref
     
     def _update_doc_spec_for_resend(self, account: ET.Element, acct_data: Dict):
-        """Update DocSpec for accounts that are being resent without changes"""
+        """Update DocSpec for an AccountReport resent unchanged.
+
+        Same shape as _resend_reporting_fi: a resend DocTypeIndic (a 'new' one
+        would trip MDES 80010 inside a CRS702), no CorrDocRefId, and the
+        DocRefId left alone — resent data has to carry the DocRefId of the
+        document it resends.
+        """
         ns = self.namespaces
-        
+
         doc_spec = account.find('{%s}DocSpec' % ns['crs'])
-        if doc_spec is not None:
-            original_doc_ref = acct_data.get('doc_ref_id', '')
-            
-            # Set DocTypeIndic to new (OECD1 or OECD11 for test)
-            doc_type = doc_spec.find('{%s}DocTypeIndic' % ns['stf'])
-            if doc_type is not None:
-                doc_type.text = self._get_doc_type_indic('new')
-            
-            # Update DocRefId to be unique
-            doc_ref = doc_spec.find('{%s}DocRefId' % ns['stf'])
-            if doc_ref is not None:
-                doc_ref.text = self._generate_new_ref_id(original_doc_ref, 'ARRESEND')
+        if doc_spec is None:
+            return
+
+        doc_type = doc_spec.find('{%s}DocTypeIndic' % ns['stf'])
+        if doc_type is not None:
+            doc_type.text = self._get_doc_type_indic('resend')
+
+        corr_ref = doc_spec.find('{%s}CorrDocRefId' % ns['stf'])
+        if corr_ref is not None:
+            doc_spec.remove(corr_ref)
     
     def _modify_person_address(self, person: ET.Element, ns: Dict):
         """Modify address for a person (Individual)"""
@@ -644,17 +679,14 @@ class CRSCorrectionGenerator:
                 address_free.text = f"Corrected: {address_free.text}"
     
     def _generate_new_ref_id(self, original: str, suffix: str) -> str:
-        """Generate a new unique reference ID based on original"""
-        timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
-        random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-        
-        # Keep some of the original for traceability, but ensure uniqueness
-        if original:
-            # Take first 50 chars of original if longer
-            base = original[:50] if len(original) > 50 else original
-            return f"{base}_{suffix}_{timestamp}_{random_part}"
-        else:
-            return f"{suffix}_{timestamp}_{random_part}"
+        """A new RefId for a corrected or deleted document, based on the original.
+
+        Every RefId in one correction run carries the same run id, so the file's
+        identifiers are internally consistent and correcting the same source
+        twice still produces two sets MDES will both accept. Resent documents do
+        not come through here — see _resend_reporting_fi.
+        """
+        return correction_ref_id(original, suffix, self.run_id)
     
     def _write_xml(self, root: ET.Element, output_path: str):
         """Write XML to file with proper formatting"""

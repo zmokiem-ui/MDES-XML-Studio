@@ -21,6 +21,18 @@ def _ask_int(prompt: str, default: int) -> int:
             print("❌ Please enter a valid integer.")
 
 
+def _ask_optional_int(prompt: str):
+    """Ask for an integer that may be left blank, returning None when it is."""
+    while True:
+        answer = input(f"{prompt}: ").strip()
+        if not answer:
+            return None
+        try:
+            return int(answer)
+        except ValueError:
+            print("❌ Please enter a valid integer, or leave it blank.")
+
+
 def _ask_float(prompt: str, default: float) -> float:
     """Ask for a float."""
     while True:
@@ -149,12 +161,14 @@ def run_wizard() -> Path:
     
     if show_advanced:
         closed_ratio = _ask_float("Closed account ratio (0.0-1.0)", 0.1)
-        seed = _ask_int("Random seed (for reproducibility)", 42)
+        # Blank means a fresh seed, so consecutive files carry different people
+        # and institutions. Answering 42 every time is what made them identical.
+        seed = _ask_optional_int("Random seed (blank = new data each run)")
         progress_every = _ask_int("Show progress every N accounts", 500)
         pretty_print = _ask_yes_no("Enable pretty printing (formatted XML)?", True)
     else:
         closed_ratio = 0.1
-        seed = 42
+        seed = None
         progress_every = 500
         pretty_print = True
 

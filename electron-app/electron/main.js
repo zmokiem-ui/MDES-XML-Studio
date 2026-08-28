@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu, shell, clipboard } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell, clipboard, safeStorage } = require('electron');
 
 Menu.setApplicationMenu(null);
 const path = require('path');
@@ -67,6 +67,8 @@ const MODULE_TO_EXE = {
   'crs_generator.cbc_cli': 'cbc_cli.exe',
   'crs_generator.fatca_cli': 'fatca_cli.exe',
   'crs_generator.error_injector': 'error_injector.exe',
+  'crs_generator.cts_cli': 'cts_cli.exe',
+  'crs_generator.mdes_target_cli': 'mdes_target_cli.exe',
 };
 
 /**
@@ -567,9 +569,11 @@ function findPythonExecutable() {
  * @param {boolean} [options.parseJson=true] - Whether to parse output as JSON
  * @param {string} [options.outputPath] - Path to output file for file stats
  * @param {boolean} [options.allowNonZeroJson=false] - Resolve JSON output even when the CLI exits non-zero
+ * @param {object} [options.env] - Extra environment variables. Used to pass secrets
+ *   (certificate passwords) out of band, since argv is visible to every process.
  * @returns {Promise<object>} - Parsed result or raw output
  */
-function runPythonCommand({ module, args, event = null, parseJson = true, outputPath = null, allowNonZeroJson = false }) {
+function runPythonCommand({ module, args, event = null, parseJson = true, outputPath = null, allowNonZeroJson = false, env = null }) {
   return new Promise((resolve, reject) => {
     let exePath, spawnArgs, cwd;
 
@@ -594,7 +598,7 @@ function runPythonCommand({ module, args, event = null, parseJson = true, output
 
     const pythonProcess = spawn(exePath, spawnArgs, {
       cwd,
-      env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+      env: { ...process.env, PYTHONIOENCODING: 'utf-8', ...(env || {}) }
     });
 
     let stdout = '';
@@ -1282,6 +1286,646 @@ ipcMain.handle('open-file', async (event, filePath) => {
     return { success: false, error: error.message };
   }
 });
+
+
+// ============================================================
+// CTS / IDES PACKAGING IPC HANDLERS
+// ============================================================
+// MDES only accepts encrypted, signed, zipped deliveries. The Python side
+// (crs_generator.cts) builds them; everything here is about getting the
+// certificates and their passwords to it safely.
+
+// The store the app actually works from: a user-writable copy in userData, so
+// a tester can replace an expiring certificate without waiting for a release.
+function ctsStoreRoot() {
+  return path.join(app.getPath('userData'), 'certificates');
+}
+
+// The read-only pack shipped with the app, used to seed the store once.
+function ctsSeedRoot() {
+  return isDev
+    ? path.join(__dirname, '..', '..', 'crs_generator', 'certificates')
+    : path.join(process.resourcesPath, 'certificates');
+}
+
+// Seed on first use only. Re-seeding would silently undo a replacement the
+// user made deliberately, so a store that already has content is never touched.
+function ensureCtsStore() {
+  const store = ctsStoreRoot();
+  try {
+    if (fs.existsSync(store) && fs.readdirSync(store).length > 0) return store;
+    const seed = ctsSeedRoot();
+    if (!fs.existsSync(seed)) return store;
+    fs.mkdirSync(store, { recursive: true });
+    fs.cpSync(seed, store, { recursive: true });
+    console.log(`Seeded certificate store from ${seed}`);
+  } catch (error) {
+    console.error('Could not seed the certificate store:', error.message);
+  }
+  return store;
+}
+
+// Signing passwords are per-country and belong to the user, not the repository.
+// safeStorage binds them to the OS account; without it we keep them in memory
+// for the session only rather than writing plaintext to disk.
+const _ctsSessionPasswords = new Map();
+
+function ctsPasswordsPath() {
+  return path.join(app.getPath('userData'), 'cts-passwords.enc');
+}
+
+function loadCtsPasswords() {
+  if (!safeStorage.isEncryptionAvailable()) {
+    return Object.fromEntries(_ctsSessionPasswords);
+  }
+  try {
+    const blob = fs.readFileSync(ctsPasswordsPath());
+    return JSON.parse(safeStorage.decryptString(blob));
+  } catch {
+    return {};
+  }
+}
+
+function saveCtsPassword(country, password) {
+  const code = String(country || '').toUpperCase();
+  if (!code) throw new Error('A country is required');
+  if (!safeStorage.isEncryptionAvailable()) {
+    _ctsSessionPasswords.set(code, password);
+    return { persisted: false };
+  }
+  const all = loadCtsPasswords();
+  if (password) {
+    all[code] = password;
+  } else {
+    delete all[code];
+  }
+  fs.writeFileSync(ctsPasswordsPath(), safeStorage.encryptString(JSON.stringify(all)));
+  return { persisted: true };
+}
+
+function ctsPasswordFor(country) {
+  const code = String(country || '').toUpperCase();
+  const stored = loadCtsPasswords();
+  return stored[code] || _ctsSessionPasswords.get(code) || '';
+}
+
+// One place decides what the Python side sees: the store location always, and a
+// password only when we hold one for the country in question. It travels in the
+// environment rather than argv, which is readable by every process.
+function ctsEnv(country) {
+  const env = { MDES_CERT_STORE: ensureCtsStore() };
+  const password = country ? ctsPasswordFor(country) : '';
+  if (password) env.MDES_SIGNING_PASSWORD = password;
+  return env;
+}
+
+// What is in the store, and what is close to expiry.
+ipcMain.handle('cts-list-certificates', async (event, country = null) => {
+  const args = ['certificates'];
+  if (country) args.push('--country', country);
+  return runPythonCommand({
+    module: 'crs_generator.cts_cli',
+    args,
+    env: ctsEnv(country),
+    allowNonZeroJson: true
+  });
+});
+
+// Whether a country can sign, i.e. whether the stored password actually opens
+// its certificate. Answers without handing the password back to the renderer.
+ipcMain.handle('cts-check-password', async (event, country) => {
+  if (!ctsPasswordFor(country)) {
+    return { success: false, hasPassword: false, error: 'No password stored for this country' };
+  }
+  const result = await runPythonCommand({
+    module: 'crs_generator.cts_cli',
+    args: ['certificates', '--country', country],
+    env: ctsEnv(country),
+    allowNonZeroJson: true
+  });
+  const canSign = (result.certificates || []).some(c => c.role === 'signing');
+  return { ...result, hasPassword: true, canSign };
+});
+
+ipcMain.handle('cts-set-password', async (event, options) => {
+  try {
+    const { country, password } = options || {};
+    return { success: true, ...saveCtsPassword(country, password) };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Which countries already have a password, so the UI can show the gap without
+// reading any of the values.
+ipcMain.handle('cts-countries-with-passwords', async () => {
+  try {
+    return { success: true, countries: Object.keys(loadCtsPasswords()) };
+  } catch (error) {
+    return { success: false, error: error.message, countries: [] };
+  }
+});
+
+// Replace a country's certificate files in the user's store.
+// Importing a password file. The estate keeps its certificate passwords in an
+// ART checkout at TestData/Certificates/Passwords.csv, and typing eleven of them
+// into the screen below - correctly, on every tester's machine - is not a plan.
+//
+// The file is read here in the main process and never reaches the renderer. The
+// Python side is asked which entry actually opens each country, because at least
+// one country is listed twice with two different passwords and only the second
+// one works; storing whichever came first would leave that country quietly
+// unable to sign.
+function parsePasswordFile(filePath) {
+  const text = fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '');
+  const byCountry = new Map();
+  for (const line of text.split('\n')) {
+    if (!line.trim()) continue;
+    const [rawCountry, rawPassword] = line.split(',');
+    const country = String(rawCountry || '').trim().replace(/^"|"$/g, '').toUpperCase();
+    const password = String(rawPassword || '').trim().replace(/^"|"$/g, '');
+    if (!password || !/^[A-Z]{2}$/.test(country)) continue;  // skips the header
+    const candidates = byCountry.get(country) || [];
+    if (!candidates.includes(password)) candidates.push(password);
+    byCountry.set(country, candidates);
+  }
+  return byCountry;
+}
+
+ipcMain.handle('cts-import-passwords', async (event, filePath = null) => {
+  let source = filePath;
+  if (!source) {
+    const chosen = await dialog.showOpenDialog(mainWindow, {
+      title: 'Import certificate passwords',
+      message: 'Select an ART TestData/Certificates/Passwords.csv',
+      filters: [
+        { name: 'Password list', extensions: ['csv'] },
+        { name: 'All Files', extensions: ['*'] }
+      ],
+      properties: ['openFile']
+    });
+    if (!chosen.filePaths || chosen.filePaths.length === 0) {
+      return { success: false, cancelled: true };
+    }
+    source = chosen.filePaths[0];
+  }
+
+  try {
+    grantPath(path.dirname(source));
+    const byCountry = parsePasswordFile(source);
+    if (byCountry.size === 0) {
+      return {
+        success: false,
+        error: 'No country/password rows in that file. Expected two columns, '
+             + 'an ISO country code and its certificate password.'
+      };
+    }
+
+    // Ask which candidate opens each country, by position. No password crosses
+    // this boundary in either direction.
+    const verified = await runPythonCommand({
+      module: 'crs_generator.cts_cli',
+      args: ['passwords', '--file', source],
+      env: { MDES_CERT_STORE: ensureCtsStore() },
+      allowNonZeroJson: true
+    });
+    const working = (verified && verified.workingCandidate) || {};
+
+    const imported = [];
+    const failed = [];
+    let persisted = true;
+    for (const [country, candidates] of byCountry) {
+      const index = working[country];
+      if (index === undefined || !candidates[index]) {
+        failed.push(country);
+        continue;
+      }
+      const result = saveCtsPassword(country, candidates[index]);
+      persisted = persisted && result.persisted;
+      imported.push(country);
+    }
+
+    return {
+      success: imported.length > 0,
+      file: source,
+      imported: imported.sort(),
+      failed: failed.sort(),
+      persisted,
+      warnings: [
+        ...[...byCountry].filter(([, c]) => c.length > 1).map(([country]) =>
+          `${country} is listed more than once with different passwords; the one `
+          + `that opens the certificate was kept.`),
+        ...(failed.length ? [
+          `No password in the file opens ${failed.join(', ')}. `
+          + `Either the certificate is a different generation, or the file is stale.`
+        ] : []),
+        ...(persisted ? [] : [
+          'The OS credential store is unavailable, so these are held for this '
+          + 'session only and will be gone after a restart.'
+        ])
+      ]
+    };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('cts-import-certificates', async (event, country) => {
+  const code = String(country || '').toUpperCase();
+  if (!/^[A-Z]{2}$/.test(code)) {
+    return { success: false, error: 'Select a two-letter country code first' };
+  }
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: `Import certificates for ${code}`,
+    filters: [
+      { name: 'Certificates', extensions: ['p12', 'pfx', 'crt', 'cer', 'pem'] },
+      { name: 'All Files', extensions: ['*'] }
+    ],
+    properties: ['openFile', 'multiSelections']
+  });
+  if (!result.filePaths || result.filePaths.length === 0) {
+    return { success: false, cancelled: true };
+  }
+
+  try {
+    const target = path.join(ensureCtsStore(), code);
+    fs.mkdirSync(target, { recursive: true });
+    const copied = [];
+    for (const source of result.filePaths) {
+      grantPath(path.dirname(source));
+      fs.copyFileSync(source, path.join(target, path.basename(source)));
+      copied.push(path.basename(source));
+    }
+    return { success: true, country: code, files: copied };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('cts-open-store', async () => {
+  try {
+    await shell.openPath(ensureCtsStore());
+    return { success: true, path: ctsStoreRoot() };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Reset the store to the pack shipped with this version.
+ipcMain.handle('cts-restore-bundled-certificates', async () => {
+  try {
+    const store = ctsStoreRoot();
+    if (fs.existsSync(store)) fs.rmSync(store, { recursive: true, force: true });
+    ensureCtsStore();
+    return { success: true, path: store };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('cts-select-package-file', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Select a delivery package',
+    filters: [
+      { name: 'Delivery packages', extensions: ['zip'] },
+      { name: 'All Files', extensions: ['*'] }
+    ],
+    properties: ['openFile']
+  });
+  if (result.filePaths && result.filePaths.length > 0) {
+    grantPath(path.dirname(result.filePaths[0]));
+    return result.filePaths[0];
+  }
+  return null;
+});
+
+ipcMain.handle('cts-select-output-folder', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Where should the package be written?',
+    properties: ['openDirectory', 'createDirectory']
+  });
+  if (result.filePaths && result.filePaths.length > 0) {
+    grantPath(result.filePaths[0]);
+    return result.filePaths[0];
+  }
+  return null;
+});
+
+// Validate the selected source before the form derives any package settings.
+// The Python validator owns the CRS/XSD/MDES rules; the renderer only displays
+// its immutable facts.
+ipcMain.handle('cts-validate-source', async (event, sourceFile) => {
+  if (!sourceFile) return { success: false, valid: false, error: 'Select an XML file to package' };
+  return runPythonCommand({
+    module: 'crs_generator.cts_cli',
+    args: ['validate-source', '--source', sourceFile],
+    allowNonZeroJson: true
+  });
+});
+
+// Build a delivery package.
+ipcMain.handle('cts-pack', async (event, options) => {
+  let {
+    sourceFile, sender, receiver, communicationType = 'CRS', taxYear,
+    outputDir = null, messageRefId = null, defects = []
+  } = options || {};
+
+  if (!sourceFile) return { success: false, error: 'Select an XML file to package' };
+
+  // Validate first so a malformed/domestic/mismatched source is reported as
+  // such, even when its purported sender has no stored certificate password.
+  if (communicationType === 'CRS') {
+    const validation = await runPythonCommand({
+      module: 'crs_generator.cts_cli',
+      args: ['validate-source', '--source', sourceFile],
+      allowNonZeroJson: true
+    });
+    if (!validation.success) return validation;
+    sender = validation.facts.sender;
+    receiver = validation.facts.receiver;
+    taxYear = validation.facts.taxYear;
+  }
+
+  if (!ctsPasswordFor(sender)) {
+    return {
+      success: false,
+      error: `No signing password stored for ${String(sender).toUpperCase()}. `
+           + 'Add it under Settings then Certificates.'
+    };
+  }
+
+  const args = [
+    'pack',
+    '--source', sourceFile,
+    '--type', communicationType,
+    '--tax-year', String(taxYear)
+  ];
+  if (sender) args.push('--sender', sender);
+  if (receiver) args.push('--receiver', receiver);
+  if (outputDir) args.push('--output', outputDir);
+  if (messageRefId) args.push('--message-ref-id', messageRefId);
+  for (const defect of defects) args.push('--defect', defect);
+
+  return runPythonCommand({
+    module: 'crs_generator.cts_cli',
+    args,
+    event,
+    env: ctsEnv(sender),
+    allowNonZeroJson: true
+  });
+});
+
+// Inspect a package. Reading the metadata needs nothing; decrypting needs the
+// receiver's private key, so it is only attempted when a country is given.
+ipcMain.handle('cts-unpack', async (event, options) => {
+  const { packageFile, country = null, extractTo = null } = options || {};
+  if (!packageFile) return { success: false, error: 'Select a package to inspect' };
+
+  const args = ['unpack', '--package', packageFile];
+  if (country) args.push('--country', country);
+  if (extractTo) args.push('--extract-to', extractTo);
+
+  return runPythonCommand({
+    module: 'crs_generator.cts_cli',
+    args,
+    env: ctsEnv(country),
+    allowNonZeroJson: true
+  });
+});
+
+
+
+// ============================================================
+// MDES TARGET IPC HANDLERS  (developer mode)
+// ============================================================
+// A "target" binds the app to a real MDES instance - its properties file plus a
+// read-only database connection - so a package can be checked against the rules
+// that instance actually enforces before it is built. See
+// crs_generator/mdes_target/.
+
+const MDES_TARGET_MODULE = 'crs_generator.mdes_target_cli';
+
+// SQL passwords are per-target and belong to the user. Same treatment as the
+// certificate passwords above: safeStorage where available, memory otherwise.
+const _mdesTargetSessionPasswords = new Map();
+
+function mdesTargetPasswordsPath() {
+  return path.join(app.getPath('userData'), 'mdes-target-passwords.enc');
+}
+
+function loadMdesTargetPasswords() {
+  if (!safeStorage.isEncryptionAvailable()) {
+    return Object.fromEntries(_mdesTargetSessionPasswords);
+  }
+  try {
+    return JSON.parse(safeStorage.decryptString(fs.readFileSync(mdesTargetPasswordsPath())));
+  } catch {
+    return {};
+  }
+}
+
+function saveMdesTargetPassword(name, password) {
+  if (!name) throw new Error('A target name is required');
+  if (!safeStorage.isEncryptionAvailable()) {
+    _mdesTargetSessionPasswords.set(name, password);
+    return { persisted: false };
+  }
+  const all = loadMdesTargetPasswords();
+  if (password) all[name] = password; else delete all[name];
+  fs.writeFileSync(mdesTargetPasswordsPath(), safeStorage.encryptString(JSON.stringify(all)));
+  return { persisted: true };
+}
+
+// The environment the Python side sees: where targets and certificates live,
+// plus whichever passwords this call legitimately needs. Nothing travels in argv.
+function mdesTargetEnv(targetName = null, senderCountry = null) {
+  const env = {
+    MDES_TARGET_STORE: app.getPath('userData'),
+    MDES_CERT_STORE: ensureCtsStore()
+  };
+  const dbPassword = targetName ? (loadMdesTargetPasswords()[targetName] || '') : '';
+  if (dbPassword) env.MDES_TARGET_PASSWORD = dbPassword;
+  const signingPassword = senderCountry ? ctsPasswordFor(senderCountry) : '';
+  if (signingPassword) env.MDES_SIGNING_PASSWORD = signingPassword;
+  return env;
+}
+
+function runMdesTarget(args, { target = null, sender = null, event = null } = {}) {
+  return runPythonCommand({
+    module: MDES_TARGET_MODULE,
+    args,
+    event,
+    env: mdesTargetEnv(target, sender),
+    allowNonZeroJson: true
+  });
+}
+
+ipcMain.handle('mdes-target-discover', async (event, options) => {
+  const { propsRoot = null, server = null } = options || {};
+  const args = ['discover'];
+  if (propsRoot) args.push('--props-root', propsRoot);
+  if (server) args.push('--server', server);
+  return runMdesTarget(args);
+});
+
+ipcMain.handle('mdes-target-list', async () => runMdesTarget(['list']));
+
+ipcMain.handle('mdes-target-save', async (event, target) => {
+  const { name, propsPath, server, database, driver, username } = target || {};
+  const missing = [];
+  if (!name) missing.push('Name');
+  if (!propsPath) missing.push('Properties file');
+  if (!server) missing.push('SQL Server');
+  if (!database) missing.push('Database');
+  if (missing.length) {
+    return { success: false, error: `Still needed: ${missing.join(', ')}.`, missing };
+  }
+  const args = ['save', '--name', name];
+  if (propsPath) args.push('--props', propsPath);
+  if (server) args.push('--server', server);
+  if (database) args.push('--database', database);
+  if (driver) args.push('--driver', driver);
+  if (username) args.push('--username', username);
+  return runMdesTarget(args, { target: name });
+});
+
+ipcMain.handle('mdes-target-delete', async (event, name) =>
+  runMdesTarget(['delete', '--name', name]));
+
+// Try a connection before committing to it. A target saved with empty fields is
+// the failure mode this exists to prevent.
+ipcMain.handle('mdes-target-test', async (event, draft) => {
+  const { propsPath, server, database, driver, username, password } = draft || {};
+  const missing = [];
+  if (!propsPath) missing.push('Properties file');
+  if (!server) missing.push('SQL Server');
+  if (!database) missing.push('Database');
+  if (missing.length) {
+    return {
+      success: false,
+      error: `Still needed: ${missing.join(', ')}.`,
+      missing
+    };
+  }
+  const args = ['test', '--props', propsPath, '--server', server, '--database', database];
+  if (driver) args.push('--driver', driver);
+  if (username) args.push('--username', username);
+  return runPythonCommand({
+    module: MDES_TARGET_MODULE,
+    args,
+    env: {
+      MDES_TARGET_STORE: app.getPath('userData'),
+      MDES_CERT_STORE: ensureCtsStore(),
+      ...(password ? { MDES_TARGET_PASSWORD: password } : {})
+    },
+    allowNonZeroJson: true
+  });
+});
+
+ipcMain.handle('mdes-target-set-password', async (event, options) => {
+  try {
+    const { name, password } = options || {};
+    return { success: true, ...saveMdesTargetPassword(name, password) };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('mdes-target-resolve', async (event, name) =>
+  runMdesTarget(['resolve', '--target', name], { target: name }));
+
+ipcMain.handle('mdes-target-preflight', async (event, options) => {
+  const { target, sender = null, receiver = null, communicationType = 'CRS',
+          taxYear = null, messageRefId = null, doctypeIndics = [] } = options || {};
+  if (!target) return { success: false, error: 'Select a target first' };
+  const args = ['preflight', '--target', target, '--type', communicationType];
+  if (sender) args.push('--sender', sender);
+  if (receiver) args.push('--receiver', receiver);
+  if (taxYear) args.push('--tax-year', String(taxYear));
+  if (messageRefId) args.push('--message-ref-id', messageRefId);
+  for (const indic of doctypeIndics || []) args.push('--doctype-indic', indic);
+  return runMdesTarget(args, { target, sender });
+});
+
+// The one-click path. Preflight runs first so we know which country the target
+// wants us to send as, and therefore which signing password to hand over - the
+// caller does not have to know either.
+async function withResolvedSender(options, run) {
+  const { target, sender = null } = options || {};
+  if (!target) return { success: false, error: 'Select a target first' };
+  let chosen = sender;
+  if (!chosen) {
+    const preflight = await runMdesTarget(
+      ['preflight', '--target', target, '--type', options.communicationType || 'CRS'],
+      { target }
+    );
+    chosen = preflight.sender || null;
+    if (!chosen) {
+      return {
+        success: false,
+        error: 'No sending country on this target has a certificate matching ours.',
+        ...preflight
+      };
+    }
+  }
+  if (!ctsPasswordFor(chosen)) {
+    return {
+      success: false,
+      error: `No signing password stored for ${chosen}. Add it under Settings, Certificates.`,
+      sender: chosen
+    };
+  }
+  return run(chosen);
+}
+
+ipcMain.handle('mdes-target-build', async (event, options) => {
+  const opts = options || {};
+  return withResolvedSender(opts, (sender) => {
+    const args = ['build', '--target', opts.target, '--sender', sender,
+                  '--type', opts.communicationType || 'CRS'];
+    if (opts.receiver) args.push('--receiver', opts.receiver);
+    if (opts.taxYear) args.push('--tax-year', String(opts.taxYear));
+    if (opts.outputDir) args.push('--output', opts.outputDir);
+    if (opts.individualAccounts) args.push('--individual-accounts', String(opts.individualAccounts));
+    if (opts.organisationAccounts) args.push('--organisation-accounts', String(opts.organisationAccounts));
+    if (opts.reportingFis) args.push('--reporting-fis', String(opts.reportingFis));
+    if (opts.tin) args.push('--tin', opts.tin);
+    if (opts.force) args.push('--force');
+    return runMdesTarget(args, { target: opts.target, sender, event });
+  });
+});
+
+ipcMain.handle('mdes-target-package', async (event, options) => {
+  const opts = options || {};
+  if (!opts.sourceFile) return { success: false, error: 'Select an XML file' };
+  return withResolvedSender(opts, (sender) => {
+    const args = ['package', '--target', opts.target, '--source', opts.sourceFile,
+                  '--sender', sender, '--type', opts.communicationType || 'CRS'];
+    if (opts.receiver) args.push('--receiver', opts.receiver);
+    if (opts.taxYear) args.push('--tax-year', String(opts.taxYear));
+    if (opts.outputDir) args.push('--output', opts.outputDir);
+    if (opts.force) args.push('--force');
+    return runMdesTarget(args, { target: opts.target, sender, event });
+  });
+});
+
+ipcMain.handle('mdes-target-select-props-file', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Select the MDES properties file',
+    defaultPath: fs.existsSync('C:\\MDES\\props') ? 'C:\\MDES\\props' : undefined,
+    filters: [
+      { name: 'Properties files', extensions: ['properties'] },
+      { name: 'All Files', extensions: ['*'] }
+    ],
+    properties: ['openFile']
+  });
+  if (result.filePaths && result.filePaths.length > 0) {
+    grantPath(path.dirname(result.filePaths[0]));
+    return result.filePaths[0];
+  }
+  return null;
+});
+
 
 // ============================================================
 // FILE MANAGER IPC HANDLERS
