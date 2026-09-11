@@ -891,6 +891,8 @@ ipcMain.handle('generate-fatca', async (event, formData) => {
     '--variant', formData.variant === 'fatca-oecd' ? 'fatca-oecd' : 'fatca-crs',
     // FC schema version; ignored by the fatca-oecd variant.
     '--fc-version', formData.fcVersion || '2.2',
+    // FatcaXML release; ignored by the fatca-crs variant.
+    '--oecd-version', formData.oecdVersion || '2.0.1',
     '--sending-country', formData.transmittingCountry || 'NL',
     '--receiving-country', formData.receivingCountry || 'US',
     '--tax-year', formData.reportingPeriod || new Date().getFullYear().toString(),

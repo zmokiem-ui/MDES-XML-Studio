@@ -6003,7 +6003,7 @@ function App() {
 
                     <option value="fatca-crs">FATCA-CRS Combined (FC upload)</option>
 
-                    <option value="fatca-oecd">IRS FATCA (FATCA_OECD, v2.0.1)</option>
+                    <option value="fatca-oecd">IRS FATCA (FATCA_OECD)</option>
 
                   </select>
 
@@ -6034,6 +6034,38 @@ function App() {
                     {fatcaFormData.fcVersion === '3.0' && (
 
                       <p className={`text-xs ${theme.textMuted} mt-1`}>{t(language, 'form.fcVersion30Hint')}</p>
+
+                    )}
+
+                  </div>
+
+                )}
+
+                {fatcaFormData.variant === 'fatca-oecd' && (
+
+                  <div className="col-span-2">
+
+                    <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.oecdVersion')}</label>
+
+                    <select
+
+                      className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+
+                      value={fatcaFormData.oecdVersion}
+
+                      onChange={(e) => setFatcaFormData({...fatcaFormData, oecdVersion: e.target.value})}
+
+                    >
+
+                      <option value="2.0.1">{t(language, 'form.oecdVersion201')}</option>
+
+                      <option value="2.0">{t(language, 'form.oecdVersion20')}</option>
+
+                    </select>
+
+                    {fatcaFormData.oecdVersion === '2.0' && (
+
+                      <p className={`text-xs ${theme.textMuted} mt-1`}>{t(language, 'form.oecdVersion20Hint')}</p>
 
                     )}
 

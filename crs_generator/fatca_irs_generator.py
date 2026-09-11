@@ -68,6 +68,24 @@ FATCA_PAYMENT_TYPES = [
     'FATCA504',  # Other
 ]
 
+# FatcaXML releases this generator can emit. Both share the fatca:v2 namespace
+# and are structurally identical: 2.0.1 only re-points its imports at
+# isofatcatypes v1.2, which renames five countries (CABO VERDE, CZECHIA, NORTH
+# MACEDONIA, ESWATINI, TÜRKİYE), adds country code XX and adds the BYN/MRU/STN/
+# UYW/VED/VES currencies. Because nothing structural changed, the only marker
+# distinguishing the two on the wire is @version — which is why it is written
+# from config rather than left as the template's value.
+SUPPORTED_FATCA_OECD_VERSIONS = ("2.0", "2.0.1")
+
+# @version -> the schema the file advertises in xsi:schemaLocation.
+FATCA_OECD_SCHEMA_FILES = {
+    "2.0": "FatcaXML_v2.0.xsd",
+    "2.0.1": "FatcaXML_v2.0.1.xsd",
+}
+
+FATCA_OECD_NAMESPACE = "urn:oecd:ties:fatca:v2"
+XSI_NAMESPACE = "http://www.w3.org/2001/XMLSchema-instance"
+
 
 @dataclass
 class FATCAGeneratorConfig:
@@ -77,7 +95,14 @@ class FATCAGeneratorConfig:
     receiving_country: str = "US"  # Always US for FATCA
     tax_year: int = 2021
     sending_company_in: str = "000000.00000.TA.531"  # GIIN format
-    
+
+    # FatcaXML release to emit. MDES validates every FATCA_OECD upload against
+    # 2.0.1 (camel config.xml routes the FATCA_OECD branch straight at
+    # FatcaXML_v2.0.1.xsd with no 2.0 fallback), so 2.0 is for reproducing
+    # older deliveries and for testing how a consumer handles the previous
+    # release — not for a green MDES upload.
+    oecd_version: str = "2.0.1"
+
     # ReportingFI TINs/GIINs (one per ReportingFI)
     reporting_fi_tins: List[str] = field(default_factory=list)
     filer_category: str = "FATCA601"  # Default filer category
@@ -118,6 +143,13 @@ class FATCAGeneratorConfig:
         self.seed = resolve_seed(self.seed)
         if not self.run_id:
             self.run_id = new_run_id()
+
+        self.oecd_version = str(self.oecd_version).strip()
+        if self.oecd_version not in SUPPORTED_FATCA_OECD_VERSIONS:
+            raise ValueError(
+                f"Unsupported oecd_version {self.oecd_version!r}; "
+                f"expected one of {', '.join(SUPPORTED_FATCA_OECD_VERSIONS)}"
+            )
 
         # Trim identifiers before they are concatenated into MessageRefId /
         # DocRefId — see crs_generator.identifiers.
@@ -594,8 +626,7 @@ class FATCAGenerator:
 
         tree, ns = self._load_base_template()
         root = tree.getroot()
-        # MDES enforces @version='2.0.1' on FATCA_OECD uploads.
-        root.set('version', '2.0.1')
+        self._apply_schema_version(root)
 
         # Update MessageSpec
         self._update_message_spec(root, ns)
@@ -660,6 +691,23 @@ class FATCAGenerator:
         
         return self.config.output_path
     
+    def _apply_schema_version(self, root: etree._Element):
+        """Stamp @version and xsi:schemaLocation for the configured release.
+
+        The template is a 2.0 document, so both have to be rewritten: MDES
+        reads @version off the root (its VersionValid rule compares it against
+        the version it expects for the upload type), and leaving
+        schemaLocation pointing at FatcaXML_v2.0.xsd while @version said 2.0.1
+        made every generated file contradict itself.
+        """
+        version = self.config.oecd_version
+        root.set('version', version)
+        schema_file = FATCA_OECD_SCHEMA_FILES[version]
+        root.set(
+            f"{{{XSI_NAMESPACE}}}schemaLocation",
+            f"{FATCA_OECD_NAMESPACE} {schema_file}",
+        )
+
     def _update_message_spec(self, root: etree._Element, ns: dict):
         """Update MessageSpec with config values."""
         msg_spec = root.find('.//ftc:MessageSpec', namespaces=ns)

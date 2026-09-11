@@ -13,6 +13,7 @@ pairs a Python generation/validation backend (`crs_generator`) with an Electron/
 | FATCA-CRS Combined | `FatcaCrs_v2.2` | default FATCA flow (FC upload) |
 | FATCA-CRS Combined 3.0 | `FatcaCrs_v3.0` | opt-in via `--fc-version 3.0`; same namespace as 2.2, version is in `@version` |
 | IRS FATCA (`FATCA_OECD`) | `FatcaXML_v2.0.1` | second FATCA flow; MDES hard-checks `@version="2.0.1"` |
+| IRS FATCA 2.0 | `FatcaXML_v2.0` | opt-in via `--oecd-version 2.0`; superseded release, same namespace, codelists only |
 | CbC | `CbcXML_v2.0` | new + corrections/deletions |
 
 All generated output is validated against the official XSDs bundled under

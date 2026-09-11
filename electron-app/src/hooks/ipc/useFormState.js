@@ -29,6 +29,9 @@ const createFatcaFormData = () => ({
   // FATCA-CRS combined schema version. 2.2 stays the default; 3.0 is opt-in and
   // applies to the fatca-crs variant only.
   fcVersion: '2.2',
+  // FatcaXML release for the fatca-oecd variant. 2.0.1 is what MDES accepts;
+  // 2.0 is the superseded release, kept for reproducing older deliveries.
+  oecdVersion: '2.0.1',
   sendingCompanyIN: '',
   transmittingCountry: '',
   receivingCountry: 'US',

@@ -80,6 +80,10 @@ export const translations = {
       fcVersion22: '2.2 — current MDES production schema',
       fcVersion30: '3.0 — adds mandatory account classification',
       fcVersion30Hint: 'FC 3.0 keeps the same namespace as 2.2 and is identified by @version. It adds mandatory SelfCert, DDProcedure and AccountType fields, makes CtrlgPersonType repeatable, and allows an optional JointAccount.',
+      oecdVersion: 'FatcaXML Schema Version',
+      oecdVersion201: '2.0.1 — version MDES accepts',
+      oecdVersion20: '2.0 — superseded release',
+      oecdVersion20Hint: 'FatcaXML 2.0 and 2.0.1 are structurally identical; 2.0.1 only updates the country and currency code lists (adds XX, BYN, MRU, STN, UYW, VED, VES). MDES validates every FATCA_OECD upload against 2.0.1, so use 2.0 only to reproduce an older delivery.',
       crsVersion20Standard: '2.0 — current MDES production schema',
       crsVersion20Legacy: '2.0 — legacy schema, for correcting older data',
       crsVersion30Standard: '3.0 — current MDES production schema',
@@ -586,12 +590,10 @@ export const translations = {
       downloadProgress: 'Download progress: {percent}%',
       whatsNew: 'Recent Improvements',
       changelog: [
-        'Package tab: sign and encrypt a delivery MDES accepts, no separate cipher tool',
-        'Inspect any package to check its signature, metadata and payload before sending',
-        'Certificates screen shows expiry per country and stores signing passwords',
-        'Developer mode checks a delivery against a real MDES instance before you build it',
-        'Failures now name the MDES error code and what to change to clear it',
-        'Settings is split into collapsible sections instead of one long scroll'
+        'IRS FATCA: choose FatcaXML 2.0.1 or the superseded 2.0 when generating',
+        'Generated IRS FATCA files now advertise the schema matching their version',
+        'Each IRS FATCA version is checked against its own schema instead of always 2.0.1',
+        'The version picker spells out that MDES accepts 2.0.1 uploads only'
       ]
     }
   },
@@ -670,6 +672,10 @@ export const translations = {
       fcVersion22: '2.2 — huidig MDES productieschema',
       fcVersion30: '3.0 — voegt verplichte rekeningclassificatie toe',
       fcVersion30Hint: 'FC 3.0 gebruikt dezelfde namespace als 2.2 en wordt herkend via @version. Het voegt verplichte velden SelfCert, DDProcedure en AccountType toe, maakt CtrlgPersonType herhaalbaar en staat een optionele JointAccount toe.',
+      oecdVersion: 'FatcaXML Schemaversie',
+      oecdVersion201: '2.0.1 — versie die MDES accepteert',
+      oecdVersion20: '2.0 — vervallen versie',
+      oecdVersion20Hint: 'FatcaXML 2.0 en 2.0.1 zijn structureel identiek; 2.0.1 werkt alleen de land- en valutacodelijsten bij (voegt XX, BYN, MRU, STN, UYW, VED, VES toe). MDES valideert elke FATCA_OECD-upload tegen 2.0.1, gebruik 2.0 dus alleen om een oudere levering te reproduceren.',
       crsVersion20Standard: '2.0 — huidig MDES productieschema',
       crsVersion20Legacy: '2.0 — verouderd schema, voor het corrigeren van oudere gegevens',
       crsVersion30Standard: '3.0 — huidig MDES productieschema',
@@ -1176,12 +1182,10 @@ export const translations = {
       downloadProgress: 'Downloadvoortgang: {percent}%',
       whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'Tabblad Pakket: onderteken en versleutel een levering die MDES accepteert',
-        'Bekijk elk pakket en controleer handtekening, metadata en inhoud voor verzending',
-        'Het certificatenscherm toont de vervaldatum per land en bewaart ondertekenwachtwoorden',
-        'Ontwikkelaarsmodus toetst een levering aan een echte MDES-instantie voor u bouwt',
-        'Fouten noemen nu de MDES-foutcode en wat u moet aanpassen om die te verhelpen',
-        'Instellingen is opgedeeld in inklapbare secties in plaats van een lange pagina'
+        'IRS FATCA: kies FatcaXML 2.0.1 of de vervallen versie 2.0 bij het genereren',
+        'Gegenereerde IRS FATCA-bestanden verwijzen nu naar het schema van hun eigen versie',
+        'Elke IRS FATCA-versie wordt tegen het eigen schema gecontroleerd, niet altijd 2.0.1',
+        'De versiekeuze vermeldt dat MDES alleen uploads met 2.0.1 accepteert'
       ]
     }
   },
@@ -1258,6 +1262,10 @@ export const translations = {
       fcVersion22: '2.2 — esquema de produccion MDES actual',
       fcVersion30: '3.0 — anade clasificacion obligatoria de cuentas',
       fcVersion30Hint: 'FC 3.0 mantiene el mismo espacio de nombres que 2.2 y se identifica por @version. Anade los campos obligatorios SelfCert, DDProcedure y AccountType, hace CtrlgPersonType repetible y permite un JointAccount opcional.',
+      oecdVersion: 'Version del Esquema FatcaXML',
+      oecdVersion201: '2.0.1 — version que acepta MDES',
+      oecdVersion20: '2.0 — version sustituida',
+      oecdVersion20Hint: 'FatcaXML 2.0 y 2.0.1 son estructuralmente identicos; 2.0.1 solo actualiza las listas de codigos de pais y moneda (anade XX, BYN, MRU, STN, UYW, VED, VES). MDES valida cada carga FATCA_OECD contra 2.0.1, use 2.0 solo para reproducir una entrega anterior.',
       crsVersion20Standard: '2.0 — esquema de producción MDES actual',
       crsVersion20Legacy: '2.0 — esquema heredado, para corregir datos anteriores',
       crsVersion30Standard: '3.0 — esquema de producción MDES actual',
@@ -1764,12 +1772,10 @@ export const translations = {
       downloadProgress: 'Progreso de descarga: {percent}%',
       whatsNew: 'Mejoras Recientes',
       changelog: [
-        'Pestana Paquete: firme y cifre una entrega que MDES acepta, sin herramienta aparte',
-        'Inspeccione cualquier paquete y revise firma, metadatos y contenido antes de enviarlo',
-        'La pantalla de certificados muestra el vencimiento por pais y guarda las contrasenas',
-        'El modo desarrollador contrasta la entrega con una instancia MDES real antes de construir',
-        'Los fallos ahora indican el codigo de error MDES y que cambiar para resolverlo',
-        'Configuracion se divide en secciones plegables en lugar de una sola pagina larga'
+        'IRS FATCA: elija FatcaXML 2.0.1 o la version sustituida 2.0 al generar',
+        'Los archivos IRS FATCA generados ahora apuntan al esquema de su propia version',
+        'Cada version IRS FATCA se valida contra su propio esquema y no siempre contra 2.0.1',
+        'El selector de version indica que MDES solo acepta cargas con 2.0.1'
       ]
     }
   }

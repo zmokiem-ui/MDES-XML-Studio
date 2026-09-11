@@ -13,6 +13,7 @@ from .cli_utils import (
     CorrectionConfig, format_validation_result, format_correction_result
 )
 from .fatca_generator import SUPPORTED_FC_VERSIONS
+from .fatca_irs_generator import SUPPORTED_FATCA_OECD_VERSIONS
 
 
 def validate_fatca_xml_mode(args):
@@ -113,7 +114,7 @@ def generate_fatca_random_mode(args):
 
 
 def _generate_irs_fatca_mode(args):
-    """Generate pure IRS FATCA (FATCA_OECD, FatcaXML v2.0.1) XML data."""
+    """Generate pure IRS FATCA (FATCA_OECD) XML data, v2.0.1 or legacy v2.0."""
     from .fatca_irs_generator import (
         FATCAGeneratorConfig as IRSConfig,
         FATCAGenerator as IRSGenerator,
@@ -123,6 +124,7 @@ def _generate_irs_fatca_mode(args):
     account_holder_countries = parse_comma_list(args.account_holder_countries, uppercase=True)
 
     config = IRSConfig(
+        oecd_version=getattr(args, 'oecd_version', None) or '2.0.1',
         sending_country=args.sending_country or 'NL',
         receiving_country=args.receiving_country or 'US',
         tax_year=args.tax_year or 2024,
@@ -164,7 +166,13 @@ def main():
                              'versions, so it is carried in @version.')
     parser.add_argument('--variant', choices=['fatca-crs', 'fatca-oecd'], default='fatca-crs',
                         help='FATCA format: fatca-crs (FATCA-CRS combined, FC upload) or '
-                             'fatca-oecd (pure IRS FATCA_OECD v2.0.1)')
+                             'fatca-oecd (pure IRS FATCA_OECD)')
+    parser.add_argument('--oecd-version', choices=list(SUPPORTED_FATCA_OECD_VERSIONS),
+                        default='2.0.1',
+                        help='FatcaXML release for the fatca-oecd variant (default: 2.0.1). '
+                             '2.0 is the superseded release, kept for reproducing older '
+                             'deliveries; MDES validates FATCA_OECD uploads against 2.0.1 '
+                             'only. Applies to the fatca-oecd variant only.')
     
     # Random mode arguments
     parser.add_argument('--sending-country', help='Transmitting country code')
