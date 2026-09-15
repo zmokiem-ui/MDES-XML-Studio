@@ -46,6 +46,24 @@ def test_us_indicia_preset_creates_be_informed_90023_conflict(tmp_path):
     assert '90023' in result['corruptionsApplied'][0]
 
 
+def test_us_indicia_preset_makes_generated_holder_conflict_explicit(tmp_path):
+    source = _write_xml(
+        tmp_path,
+        'fatca.xml',
+        '<AccountHolder><Organisation><ResCountryCode>DE</ResCountryCode>'
+        '<AcctHolderTypeFATCA>FATCA104</AcctHolderTypeFATCA></Organisation></AccountHolder>',
+    )
+    output = tmp_path / 'corrupt.xml'
+
+    result = ErrorInjector('fatca', 'xml', 3).corrupt_file(
+        str(source), str(output), 'us_indicia_errors', {}
+    )
+
+    assert result['success'] is True
+    assert '<ResCountryCode>US</ResCountryCode>' in output.read_text(encoding='utf-8')
+    assert 'AcctHolderTypeFATCA' not in output.read_text(encoding='utf-8')
+
+
 def test_cbc_duplicate_entity_preset_targets_const_entity(tmp_path):
     source = _write_xml(
         tmp_path,

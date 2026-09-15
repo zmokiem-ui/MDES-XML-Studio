@@ -664,6 +664,47 @@ def message_ref_id_in_use(cursor, message_ref_id: str) -> bool:
     return False
 
 
+_MESSAGE_REF_TABLES = (
+    ("CRS_DOCUMENT_PROPERTIES", "MESSAGEREFID"),
+    ("CSM_MESSAGESPEC", "MESSAGEREFID"),
+    ("CBC_UPLOAD_MESSAGE", "MESSAGEREFID"),
+    ("CBCSM_MESSAGESPEC", "MESSAGEREFID"),
+)
+
+
+def used_message_ref_id(cursor, prefix: str | None = None) -> str | None:
+    """One MessageRefId this instance has already seen, for provoking 50009.
+
+    ``prefix`` is preferred rather than required: an id from another country
+    pair or year is still a real collision, but MDES would reject its *format*
+    first, so the caller needs to know which kind it got. Returns ``None`` when
+    the instance has no messages on record.
+    """
+    for table, column in _MESSAGE_REF_TABLES:
+        if not _table_exists(cursor, table):
+            continue
+        if prefix:
+            cursor.execute(
+                f"SELECT TOP 1 [{column}] FROM [{table}] "
+                f"WHERE [{column}] LIKE ? ORDER BY [{column}] DESC",
+                f"{prefix}%",
+            )
+            row = cursor.fetchone()
+            if row and row[0]:
+                return str(row[0]).strip()
+    for table, column in _MESSAGE_REF_TABLES:
+        if not _table_exists(cursor, table):
+            continue
+        cursor.execute(
+            f"SELECT TOP 1 [{column}] FROM [{table}] "
+            f"WHERE [{column}] IS NOT NULL ORDER BY [{column}] DESC"
+        )
+        row = cursor.fetchone()
+        if row and row[0]:
+            return str(row[0]).strip()
+    return None
+
+
 def read_facts(connection, database: str) -> DatabaseFacts:
     """Everything preflight needs, in one pass."""
     cursor = connection.cursor()

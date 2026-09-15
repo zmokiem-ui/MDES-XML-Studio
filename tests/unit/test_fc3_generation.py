@@ -119,6 +119,23 @@ def test_v3_emits_the_newly_mandatory_fields(tmp_path):
             assert cp.findtext("f:SelfCert", namespaces=FC_NS)
 
 
+@pytest.mark.parametrize("version", SUPPORTED_FC_VERSIONS)
+def test_organisation_has_one_residence_country_for_trunk_import(tmp_path, version):
+    """FC Organisation maps to one ResCountryCode in the TRUNK importer."""
+    organisations = [
+        holder.find("f:Organisation", FC_NS)
+        for report in reports(generate(tmp_path, version))
+        for holder in report.findall("f:AccountHolder", FC_NS)
+        if holder.find("f:Organisation", FC_NS) is not None
+    ]
+
+    assert organisations
+    assert all(
+        len(org.findall("f:ResCountryCode", FC_NS)) == 1
+        for org in organisations
+    )
+
+
 def test_v2_2_does_not_gain_v3_fields(tmp_path):
     xml = generate(tmp_path, "2.2").read_text(encoding="utf-8")
     for tag in ("SelfCert", "DDProcedure", "AccountType", "JointAccount"):

@@ -102,6 +102,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   mdesTargetResolve: (name) => ipcRenderer.invoke('mdes-target-resolve', name),
   mdesTargetPreflight: (options) => ipcRenderer.invoke('mdes-target-preflight', options),
   mdesTargetBuild: (options) => ipcRenderer.invoke('mdes-target-build', options),
+  mdesTargetProvocations: (options) => ipcRenderer.invoke('mdes-target-provocations', options),
   mdesTargetPackage: (options) => ipcRenderer.invoke('mdes-target-package', options),
   mdesTargetSelectPropsFile: () => ipcRenderer.invoke('mdes-target-select-props-file'),
 

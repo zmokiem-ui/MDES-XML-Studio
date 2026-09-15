@@ -144,19 +144,9 @@ class TargetResolution:
 
     @property
     def own_country(self) -> str:
-        """The instance's country, preferring the properties file.
-
-        The properties file is the instance's own declaration of what it is; the
-        database corroborates. History is deliberately last, because a restored
-        database carries deliveries addressed to whatever country it used to
-        serve - ``MDES-DEMO`` holds both ``NL->CW`` and ``NL->MH``.
-        """
+        """Routing is declared by properties, never by a certificate filename."""
         if self.properties and self.properties.own_country:
             return self.properties.own_country
-        if self.facts:
-            candidates = self.facts.own_country_candidates()
-            if candidates:
-                return candidates[0][0]
         return ""
 
     def country_evidence(self) -> list[dict]:

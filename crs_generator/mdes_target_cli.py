@@ -33,6 +33,7 @@ from .cts.certificates import CertificateStoreError
 from .cts.packager import PackagingError, pack_from_store
 from .cts.source_validation import validate_foreign_crs
 from .mdes_target.database import DatabaseUnavailable, available_drivers
+from .mdes_target import provoke
 from .mdes_target.preflight import run_preflight
 from .mdes_target.profile import (
     ProfileError,
@@ -184,6 +185,7 @@ def cmd_preflight(args) -> int:
         tax_year=args.tax_year,
         message_ref_id=args.message_ref_id,
         package_doctype_indics=args.doctype_indic,
+        existing_package=getattr(args, "existing_package", False),
     )
     payload = result.to_dict()
     payload["success"] = True
@@ -235,7 +237,7 @@ def _generate_xml(resolution, result, output_dir: Path, args) -> Path:
         return CRSGenerator(config).generate(use_parallel=False)
 
 
-def _package(resolution, result, source: Path, output_dir: Path) -> dict:
+def _package(resolution, result, source: Path, output_dir: Path, defects=()) -> dict:
     # FATCA/IDES metadata carries entity ids rather than country codes. They were
     # previously hardcoded from a captured delivery; the instance's own
     # properties file is the correct source, so use it when we have one.
@@ -254,6 +256,8 @@ def _package(resolution, result, source: Path, output_dir: Path) -> dict:
         communication_type=result.communication_type,
         tax_year=result.tax_year,
         signing_password=os.environ.get(SIGNING_PASSWORD_ENV),
+        encryption_country=result.encryption_country or None,
+        defects=tuple(defects),
         **ides,
     )
     written = package.write(output_dir)
@@ -267,6 +271,7 @@ def _package(resolution, result, source: Path, output_dir: Path) -> dict:
             package.entries["payload"],
         ],
         "senderFileId": package.sender_file_id,
+        "defects": [defect.value for defect in package.defects],
     }
 
 
@@ -282,12 +287,77 @@ def _blocked_response(result, target: str) -> int:
     return 1
 
 
+def _used_message_ref_id(resolution, result) -> str | None:
+    """A MessageRefId this instance has accepted, preferring this country pair."""
+    from .mdes_target.database import used_message_ref_id
+    from .mdes_target.preflight import connect_for
+
+    try:
+        connection = connect_for(resolution, _db_password())
+        if connection is None:
+            return None
+        prefix = f"{result.sender}{result.tax_year}{result.receiver}"
+        return used_message_ref_id(connection.cursor(), prefix)
+    except Exception:
+        # The provocation reports "nothing to collide with", which is the same
+        # thing from the caller's point of view and says what to do about it.
+        return None
+
+
+def _provocation_context(resolution, result, provocation) -> provoke.Context:
+    return provoke.Context(
+        sender=result.sender,
+        receiver=result.receiver,
+        tax_year=str(result.tax_year),
+        file_type="foreign" if result.sender != result.receiver else "domestic",
+        environment_is_test=(
+            resolution.properties.is_test_environment
+            if resolution.properties else True
+        ),
+        used_message_ref_id=(
+            _used_message_ref_id(resolution, result)
+            if provocation.confirm == "database" else None
+        ),
+    )
+
+
+def cmd_provocations(args) -> int:
+    """The deliberate faults available, and which ones fit a given target."""
+    file_type = getattr(args, "file_type", None)
+    environment_is_test = None
+    if getattr(args, "target", None):
+        try:
+            profile = get_profile(args.target)
+        except ProfileError as exc:
+            return _fail(str(exc))
+        if profile.props_path:
+            try:
+                environment_is_test = load_properties(
+                    profile.props_path
+                ).is_test_environment
+            except (PropsError, OSError):
+                environment_is_test = None
+    print(json.dumps({
+        "success": True,
+        "provocations": provoke.catalogue(file_type, environment_is_test),
+        "environmentIsTest": environment_is_test,
+    }, indent=2, default=str))
+    return 0
+
+
 def cmd_build(args) -> int:
     """One click: ask the target what it accepts, then generate and package it."""
     try:
         resolution = _resolved(args.target)
     except ProfileError as exc:
         return _fail(str(exc))
+
+    provocation = None
+    if getattr(args, "provoke", None):
+        try:
+            provocation = provoke.find(args.provoke)
+        except provoke.ProvocationError as exc:
+            return _fail(str(exc))
 
     result = run_preflight(
         resolution,
@@ -311,18 +381,36 @@ def cmd_build(args) -> int:
 
     output_dir = Path(args.output) if args.output else Path.cwd()
     source_validation = None
+    applied = None
+    # A document-layer fault is meant to fail validation, so the gate that
+    # normally stops a bad delivery has to stand down for exactly that build -
+    # and only for the document, never for the envelope, which is checked the
+    # same way whatever we are provoking.
+    enforce_source_validation = provocation is None or provocation.layer != "xml"
     try:
         source = _generate_xml(resolution, result, output_dir, args)
+        if provocation is not None:
+            applied = provoke.apply_to_file(
+                source, provocation,
+                _provocation_context(resolution, result, provocation),
+            )
         if args.type.upper() == "CRS":
             source_validation = validate_foreign_crs(source)
-            if not source_validation.valid:
+            if not source_validation.valid and enforce_source_validation:
                 return _fail(
                     "The generated XML failed the packageability checks: "
                     + "; ".join(source_validation.errors),
                     **result.to_dict(),
                     sourceValidation=source_validation.to_dict(),
                 )
-        package = _package(resolution, result, source, output_dir)
+        package = _package(
+            resolution, result, source, output_dir,
+            defects=provocation.defects if provocation else (),
+        )
+    except provoke.ProvocationError as exc:
+        return _fail(
+            f"Could not provoke MDES {provocation.code}: {exc}", **result.to_dict()
+        )
     except (CertificateStoreError, PackagingError) as exc:
         return _fail(str(exc), **result.to_dict())
     except Exception as exc:
@@ -335,6 +423,9 @@ def cmd_build(args) -> int:
     payload["sourceFile"] = str(source)
     if source_validation is not None:
         payload["sourceValidation"] = source_validation.to_dict()
+        payload["sourceValidationEnforced"] = enforce_source_validation
+    if applied is not None:
+        payload["provoked"] = applied.to_dict()
     payload["forced"] = bool(args.force and result.blocked)
     print(json.dumps(payload, indent=2, default=str))
     return 0
@@ -484,6 +575,8 @@ Examples:
     preflight = subparsers.add_parser("preflight", help="Check a delivery against a target")
     _add_delivery_args(preflight)
     preflight.add_argument("--message-ref-id", help="Check this MessageRefId for reuse")
+    preflight.add_argument("--existing-package", action="store_true",
+                           help="Do not infer an existing ZIP encryption key from routing labels")
     preflight.set_defaults(func=cmd_preflight)
 
     build = subparsers.add_parser("build", help="Generate and package in one step")
@@ -495,7 +588,18 @@ Examples:
     build.add_argument("--organisation-accounts", type=int, default=5)
     build.add_argument("--force", action="store_true",
                        help="Build even when preflight fails")
+    build.add_argument("--provoke", metavar="CODE",
+                       choices=[p.code for p in provoke.PROVOCATIONS],
+                       help="Deliberately provoke this MDES error code")
     build.set_defaults(func=cmd_build)
+
+    provocations = subparsers.add_parser(
+        "provocations", help="List the MDES errors a build can deliberately provoke")
+    provocations.add_argument("--target", "-t",
+                              help="Mark which faults fit this target")
+    provocations.add_argument("--file-type", choices=["foreign", "domestic"],
+                              help="The delivery shape the build will produce")
+    provocations.set_defaults(func=cmd_provocations)
 
     package = subparsers.add_parser("package", help="Package an existing XML for a target")
     _add_delivery_args(package)

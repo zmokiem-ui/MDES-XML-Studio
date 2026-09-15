@@ -72,6 +72,7 @@ class PreflightResult:
     communication_type: str = "CRS"
     tax_year: int | None = None
     doctype_indics: list[str] = field(default_factory=list)
+    encryption_country: str = ""
 
     @property
     def blocked(self) -> bool:
@@ -91,6 +92,7 @@ class PreflightResult:
             "checks": [c.to_dict() for c in self.checks],
             "sender": self.sender,
             "receiver": self.receiver,
+            "encryptionCountry": self.encryption_country,
             "communicationType": self.communication_type,
             "taxYear": self.tax_year,
             "docTypeIndics": self.doctype_indics,
@@ -178,25 +180,37 @@ def _check_cts_assembly(resolution: TargetResolution) -> Check:
     )
 
 
-def _mismatched_pairing(resolution: TargetResolution) -> tuple[str, str] | None:
-    """``(props_country, database_country)`` when the two halves disagree.
+class TargetCertificateUnavailable(CertificateStoreError):
+    """We could not read the certificate the target holds, so we cannot choose.
 
-    A target is a properties file *and* a database, and they have to describe the
-    same instance. Pairing MH's properties file with a CW database is not a
-    certificate problem, even though a certificate check is where it first shows
-    up - and "replace the certificate" would be the wrong repair.
+    A subclass, so callers that only want "which country, or none" keep catching
+    ``CertificateStoreError`` and get nothing. The encryption check catches this
+    separately, because "we could not look" and "we looked and nothing matched"
+    need different answers: an unreachable database reported as a certificate
+    problem sends the repair off towards the certificate store.
     """
-    properties = resolution.properties
+
+
+def encryption_country_for(resolution: TargetResolution, receiver: str) -> str:
+    """Select by certificate fingerprint, independently of XML routing labels."""
     facts = resolution.facts
-    if properties is None or facts is None or not properties.own_country:
-        return None
-    candidates = facts.own_country_candidates()
-    if not candidates:
-        return None
-    database_country = candidates[0][0]
-    if database_country and database_country != properties.own_country:
-        return properties.own_country, database_country
-    return None
+    if facts is None or facts.own_certificate is None:
+        raise TargetCertificateUnavailable(
+            "The instance's own certificate could not be read from the database."
+        )
+    candidates = dict.fromkeys([receiver.upper(), *cert_store.list_countries()])
+    for country in candidates:
+        try:
+            certificate = cert_store.load_encryption_certificate(country)
+        except CertificateStoreError:
+            continue
+        if certificate.fingerprint(hashes.SHA256()).hex() == facts.own_certificate.fingerprint_sha256:
+            return country
+    raise CertificateStoreError(
+        "No local public certificate matches the certificate this instance holds "
+        f"({facts.own_certificate.filename}), so nothing we could encrypt to would "
+        f"be able to unwrap the AES key."
+    )
 
 
 def _check_database_readable(resolution: TargetResolution) -> Check:
@@ -230,39 +244,55 @@ def _check_database_readable(resolution: TargetResolution) -> Check:
     )
 
 
-def _check_target_pairing(resolution: TargetResolution) -> Check:
-    """Are the properties file and the database the same instance?
+def _check_target_pairing(
+    resolution: TargetResolution, receiver: str, encryption_country: str
+) -> Check:
+    """Do the properties file and the database describe the same instance?
 
-    Run before everything else, because when this fails the later checks are all
-    describing the symptom rather than the cause.
+    Routing is declared by the properties file; a certificate's filename or the
+    database's delivery history cannot establish it. But when the certificate
+    the database holds belongs to a different country in the store, that is
+    either an instance deliberately holding another country's keypair - which a
+    test environment legitimately does - or a properties file paired with
+    somebody else's database. Nothing in the data tells those apart, so this
+    warns and names both halves: passing silently hides a real misconfiguration,
+    and failing blocks a target that is only unusual.
     """
-    if resolution.properties is None or resolution.facts is None:
+    properties = resolution.properties
+    if properties is None or not properties.own_country:
         return Check(
-            "target-pairing", "Target pairing", CheckOutcome.SKIP,
-            "Needs both a properties file and a reachable database.",
+            "target-pairing", "Target configuration", CheckOutcome.FAIL,
+            "A properties file declaring the receiving country is required. "
+            "Certificate filenames and delivery history cannot establish current routing.",
+            remedy="Select the properties file used by the target application.",
         )
-    mismatch = _mismatched_pairing(resolution)
-    if mismatch is None:
+    own = resolution.own_country
+    if encryption_country and encryption_country != receiver.upper():
         return Check(
-            "target-pairing", "Target pairing", CheckOutcome.PASS,
-            f"The properties file and {resolution.facts.database} both describe "
-            f"a {resolution.own_country} instance.",
+            "target-pairing", "Target configuration", CheckOutcome.WARN,
+            f"{properties.path.name} configures a {own} instance, but the "
+            f"certificate {resolution.facts.database} holds is the store's "
+            f"{encryption_country} certificate. That is right if this instance "
+            f"deliberately holds {encryption_country}'s keypair; it is also what "
+            f"a properties file paired with another instance's database looks "
+            f"like, and nothing here can tell the two apart.",
+            remedy=f"Confirm these are the properties the running application "
+                   f"uses. If they are not, point the target at the properties "
+                   f"file for the {encryption_country} instance. Do not change "
+                   f"any certificate to silence this.",
         )
-
-    props_country, database_country = mismatch
-    properties_name = resolution.properties.path.name
-    evidence = "; ".join(
-        f"{country} ({why})" for country, why in resolution.facts.own_country_candidates()
-    )
+    if not encryption_country:
+        return Check(
+            "target-pairing", "Target configuration", CheckOutcome.PASS,
+            f"Routing uses {own} from {properties.path.name}, which must be the "
+            f"properties the running application uses. Which certificate the "
+            f"instance holds is reported separately.",
+        )
     return Check(
-        "target-pairing", "Target pairing", CheckOutcome.FAIL,
-        f"This target pairs {properties_name}, which configures a "
-        f"{props_country} instance, with {resolution.facts.database}, which is a "
-        f"{database_country} database ({evidence}). They are different instances, "
-        f"so no package built from this target can be right.",
-        remedy=f"Point the target at the properties file for the "
-               f"{database_country} instance, or at a {props_country} database. "
-               f"Nothing needs changing in the database or the certificate store.",
+        "target-pairing", "Target configuration", CheckOutcome.PASS,
+        f"Routing uses {own} from {properties.path.name}, and "
+        f"{resolution.facts.database} holds the store's {encryption_country} "
+        f"certificate to match.",
     )
 
 
@@ -274,19 +304,21 @@ def _check_receiver(resolution: TargetResolution, receiver: str) -> Check:
             "Could not determine which country this instance is, so the receiver "
             "could not be checked.",
         )
-    if _mismatched_pairing(resolution) is not None:
-        return Check(
-            "receiver", "Receiving country", CheckOutcome.SKIP,
-            "Cannot be checked until the target pairs a properties file and a "
-            "database that describe the same instance.",
-        )
     if receiver.upper() != own:
+        # Not 50012, which is what "misrouted" reads like. MDES never compares
+        # the document's ReceivingCountry with its own: the encrypted-upload
+        # handler overwrites that field with CountryCodeProvision before any rule
+        # sees it, so Val_IncorrectCountry compares the instance with itself.
+        # What actually fails is the MessageRefId prefix, which is checked as
+        # TransmittingCountry + tax year + *the instance* - so an identifier
+        # naming another receiver comes back as "Invalid MessageRefID format".
         return Check(
             "receiver", "Receiving country", CheckOutcome.FAIL,
             f"This instance is {own}, but the delivery is addressed to "
-            f"{receiver.upper()}. MDES treats a delivery meant for another "
-            f"jurisdiction as misrouted.",
-            mdes_error="50012",
+            f"{receiver.upper()}. MDES will read the delivery as one for itself "
+            f"and check the MessageRefId prefix against {own}, which an "
+            f"identifier naming {receiver.upper()} cannot satisfy.",
+            mdes_error="50008",
             remedy=f"Set the receiver to {own}.",
         )
     return Check(
@@ -296,47 +328,30 @@ def _check_receiver(resolution: TargetResolution, receiver: str) -> Check:
 
 
 def _check_encryption_certificate(resolution: TargetResolution, receiver: str) -> Check:
-    facts = resolution.facts
-    if facts is None or facts.own_certificate is None:
+    try:
+        country = encryption_country_for(resolution, receiver)
+    except TargetCertificateUnavailable as exc:
+        # Not being able to look is not a certificate-store problem. The database
+        # check above already owns this, and predicting 50002 here would send the
+        # repair towards the certificates instead of the connection.
         return Check(
             "encryption-certificate", "Encryption certificate", CheckOutcome.SKIP,
-            "The instance's own certificate could not be read from the database.",
+            str(exc),
         )
-    try:
-        ours = cert_store.load_encryption_certificate(receiver)
     except CertificateStoreError as exc:
         return Check(
             "encryption-certificate", "Encryption certificate", CheckOutcome.FAIL,
             str(exc), mdes_error="50002",
-            remedy=f"Import {receiver.upper()}'s certificate under Settings, Certificates.",
+            remedy="Import the public certificate matching that file under "
+                   "Settings, Certificates. Leave the routing country as it is - "
+                   "this is a gap in the certificate store, not a routing mistake.",
         )
-
-    theirs = facts.own_certificate
-    if ours.fingerprint(hashes.SHA256()).hex() != theirs.fingerprint_sha256:
-        # A mis-paired target surfaces here first, and the honest repair is to
-        # fix the pairing. Advising a certificate swap would corrupt a correct
-        # certificate store to paper over a configuration mistake.
-        if _mismatched_pairing(resolution) is not None:
-            return Check(
-                "encryption-certificate", "Encryption certificate", CheckOutcome.SKIP,
-                f"We would encrypt to '{ours.subject.rfc4514_string()}' while this "
-                f"database's own certificate is '{theirs.common_name}'. That is the "
-                f"target pairing above, not a certificate problem - do not change "
-                f"any certificate to make this pass.",
-            )
-        return Check(
-            "encryption-certificate", "Encryption certificate", CheckOutcome.FAIL,
-            f"We would encrypt to '{_subject(ours)}', but this instance's own "
-            f"certificate is '{theirs.common_name}' ({theirs.filename}). It would "
-            f"not be able to unwrap the AES key.",
-            mdes_error="50002",
-            remedy=f"Import the certificate this instance actually holds "
-                   f"({theirs.filename}) as {receiver.upper()}'s certificate under "
-                   f"Settings, Certificates.",
-        )
+    theirs = resolution.facts.own_certificate
     return Check(
         "encryption-certificate", "Encryption certificate", CheckOutcome.PASS,
-        f"Matches the instance's own certificate ({theirs.common_name}).",
+        f"Encrypt using the {country} store certificate ({theirs.common_name}), "
+        f"verified by SHA-256 fingerprint against {resolution.facts.database}. "
+        f"The receiving country and key-entry label remain {receiver.upper()}.",
     )
 
 
@@ -683,6 +698,7 @@ def run_preflight(
     tax_year: int | None = None,
     message_ref_id: str | None = None,
     package_doctype_indics: list[str] | None = None,
+    existing_package: bool = False,
 ) -> PreflightResult:
     """Check a delivery against a target, filling in whatever was not supplied.
 
@@ -699,18 +715,28 @@ def run_preflight(
     if tax_year is None:
         tax_year = _default_tax_year(resolution)
 
+    try:
+        encryption_country = encryption_country_for(resolution, receiver)
+    except CertificateStoreError:
+        encryption_country = ""
+
     checks = [
         _check_database_readable(resolution),
-        _check_target_pairing(resolution),
+        _check_target_pairing(resolution, receiver, encryption_country),
         _check_cts_assembly(resolution),
         _check_receiver(resolution, receiver),
-        _check_encryption_certificate(resolution, receiver),
+        (Check(
+            "encryption-certificate", "Encryption certificate", CheckOutcome.SKIP,
+            "An existing ZIP does not identify its encryption certificate. "
+            "Decrypt it with the target private key to verify compatibility; "
+            "routing labels alone cannot prove this.",
+        ) if existing_package else _check_encryption_certificate(resolution, receiver)),
         _check_sender_accepted(resolution, sender),
         _check_signing_certificate_matches(resolution, sender),
         _check_module(resolution, communication_type),
         _check_doctype_range(resolution, module, package_doctype_indics),
         _check_tax_year(resolution, tax_year),
-        _check_certificate_expiry(resolution, sender, receiver),
+        _check_certificate_expiry(resolution, sender, encryption_country or receiver),
         _check_message_ref_id(resolution, message_ref_id),
     ]
 
@@ -731,6 +757,7 @@ def run_preflight(
         communication_type=communication_type,
         tax_year=tax_year,
         doctype_indics=doctypes,
+        encryption_country="" if existing_package else encryption_country,
     )
 
 

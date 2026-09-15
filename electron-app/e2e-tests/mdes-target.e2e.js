@@ -109,7 +109,7 @@ test('preflight answers with the instance own rules', async () => {
   expect(result.checks.length).toBeGreaterThan(5);
 
   // Receiver is forced to whatever the instance is; a delivery for anyone else
-  // is MDES 50012.
+  // fails the MessageRefId prefix, which MDES checks against itself (50008).
   const resolved = await api('mdesTargetResolve', TARGET_NAME);
   expect(result.receiver).toBe(resolved.ownCountry);
 
@@ -120,13 +120,16 @@ test('preflight answers with the instance own rules', async () => {
   }
 });
 
-test('addressing another country is refused, naming 50012', async () => {
+test('addressing another country is refused, naming 50008', async () => {
+  // 50012 is what "misrouted" reads like, and it is the wrong prediction: the
+  // portal replaces the document's ReceivingCountry with its own country code
+  // before checking it, so what actually fails is the MessageRefId prefix.
   const resolved = await api('mdesTargetResolve', TARGET_NAME);
   const wrong = resolved.ownCountry === 'ZZ' ? 'YY' : 'ZZ';
   const result = await api('mdesTargetPreflight', { target: TARGET_NAME, receiver: wrong });
   const receiver = result.checks.find(c => c.id === 'receiver');
   expect(receiver.outcome).toBe('fail');
-  expect(receiver.mdesError).toBe('50012');
+  expect(receiver.mdesError).toBe('50008');
   expect(result.blocked).toBe(true);
 });
 
@@ -147,19 +150,59 @@ test('one call builds a package the app can open again', async () => {
   expect(built.entries[0]).toBe(`${built.sender}_CRS_Metadata.xml`);
   expect(built.entries[1]).toBe(`${built.receiver}_CRS_Key`);
 
-  // The receiver is the instance itself, and its signing certificate is the same
-  // keypair as its encryption certificate, so the app can reopen what it built.
-  const receiverPassword = process.env[`MDES_SIGNING_PASSWORD_${built.receiver}`];
+  // Routing may say MH while the test instance actually holds the CW keypair.
+  const encryptionCountry = built.encryptionCountry || built.receiver;
+  const receiverPassword = process.env[`MDES_SIGNING_PASSWORD_${encryptionCountry}`];
   if (receiverPassword) {
-    await api('ctsSetPassword', built.receiver, receiverPassword);
+    await api('ctsSetPassword', encryptionCountry, receiverPassword);
     const opened = await api('ctsUnpack', {
-      packageFile: built.filePath, country: built.receiver,
+      packageFile: built.filePath, country: encryptionCountry,
     });
     expect(opened.success).toBe(true);
     expect(opened.signature.valid).toBe(true);
     expect(opened.metadata.CTSSenderCountryCd).toBe(built.sender);
     expect(opened.metadata.CTSReceiverCountryCd).toBe(built.receiver);
   }
+});
+
+test('the provokable errors reach the renderer, marked for this target', async () => {
+  // The catalogue and its applicability rules live in the backend so they are
+  // stated once, next to the MDES rules. This proves the UI is reading that
+  // one source rather than a list of its own.
+  const result = await api('mdesTargetProvocations', {
+    target: TARGET_NAME, fileType: 'foreign',
+  });
+  expect(result.success).toBe(true);
+
+  const byCode = Object.fromEntries(result.provocations.map(p => [p.code, p]));
+  expect(byCode['50004'].stage).toBe('Package');
+  expect(byCode['80025'].applicable).toBe(true);
+
+  // 80017 is the domestic prefix rule, so it cannot fire on a cross-border
+  // upload; the reason has to travel with it or the disabled option reads as a bug.
+  expect(byCode['80017'].applicable).toBe(false);
+  expect(byCode['80017'].reason).toContain('50008');
+
+  // 50012 is listed but permanently blocked: MDES compares its own country code
+  // with itself, so a package built for it would be accepted.
+  expect(byCode['50012'].blocked).toBe(true);
+  expect(byCode['50012'].applicable).toBe(false);
+
+  // The test/production pair is decided by the instance, not by the UI.
+  const testEnvironment = result.environmentIsTest;
+  if (testEnvironment !== null) {
+    expect(byCode['50011'].applicable).toBe(testEnvironment);
+    expect(byCode['50010'].applicable).toBe(!testEnvironment);
+  }
+});
+
+test('inspection does not infer an existing package encryption certificate', async () => {
+  const result = await api('mdesTargetPreflight', {
+    target: TARGET_NAME, existingPackage: true,
+  });
+  expect(result.success).toBe(true);
+  expect(result.checks.find(c => c.id === 'encryption-certificate').outcome).toBe('skip');
+  expect(result.encryptionCountry).toBe('');
 });
 
 test('developer mode gates the whole feature', async () => {

@@ -63,7 +63,12 @@ class Defect(str, Enum):
     SHORT_KEY = "short_key"                    # 50013 - key without the IV appended
     UNCOMPRESSED_PAYLOAD = "uncompressed_payload"  # 50003 - payload not zipped
     TAMPER_SIGNATURE = "tamper_signature"      # 50004 - signature no longer verifies
-    WRONG_RECEIVER = "wrong_receiver"          # 50012 - metadata names another country
+    # The CTS envelope's own receiver field. This does *not* provoke 50012:
+    # MDES-CLEAN approved an upload carrying CTSReceiverCountryCd=ZZ on
+    # 2026-09-09, because a manual portal upload has already been routed and the
+    # delivery check reads the document's ReceivingCountry instead. Still a real
+    # envelope fault, and the seam the automated CTS transport path would see.
+    WRONG_RECEIVER = "wrong_receiver"
     CORRUPT_KEY = "corrupt_key"                # 50002 - key file cannot be unwrapped
 
 
@@ -284,6 +289,7 @@ def pack_from_store(
     tax_year: int | str,
     signing_password: str | None,
     store: Path | None = None,
+    encryption_country: str | None = None,
     **kwargs,
 ) -> PackageResult:
     """:func:`pack`, with both certificates resolved from the certificate store."""
@@ -295,7 +301,7 @@ def pack_from_store(
     signing_key, signing_certificate = load_signing_material(
         sender, signing_password, store
     )
-    encryption_certificate = load_encryption_certificate(receiver, store)
+    encryption_certificate = load_encryption_certificate(encryption_country or receiver, store)
     return pack(
         source_xml,
         sender=sender,
@@ -381,7 +387,10 @@ def _layout_checks(
             checks.append(_inspection_check(
                 "receiver-consistency", "fail",
                 f"Metadata addresses {metadata_receiver}, but the key member is addressed "
-                f"to {key_receiver}; MDES will treat this as a receiver mismatch (50012).",
+                f"to {key_receiver}. The envelope contradicts itself. It is not a "
+                f"predicted 50012: MDES-CLEAN accepted a package like this, because "
+                f"the portal reads the receiver as its own country code and never "
+                f"compares it with what the envelope claims.",
             ))
         elif metadata_receiver and key_receiver:
             checks.append(_inspection_check(

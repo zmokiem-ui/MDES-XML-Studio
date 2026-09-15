@@ -484,20 +484,72 @@ class ErrorInjector:
         parent_map = self._build_parent_map(root)
         # Be Informed rule 90023: a US-resident AccountHolder must have an
         # AcctHolderTypeFATCA. Remove it to create a real business-rule error.
-        if self._option_enabled(options, 'missingAcctHolderType', 'missingSubstantialOwner'):
-            for holder in self._find_all_by_local_name(root, 'AccountHolder'):
-                has_us_residence = any(
+        # The generated fixture normally has no US-resident holder, so first
+        # make one explicitly instead of relying on generator-side test data.
+        if not self._option_enabled(options, 'missingAcctHolderType', 'missingSubstantialOwner'):
+            return
+
+        holders = self._find_all_by_local_name(root, 'AccountHolder')
+        target = next(
+            (
+                holder for holder in holders
+                if any(
                     self._local_name(elem.tag) == 'ResCountryCode' and elem.text == 'US'
                     for elem in holder.iter()
                 )
-                if not has_us_residence:
-                    continue
-                for child in list(holder):
-                    if self._local_name(child.tag) == 'AcctHolderTypeFATCA':
-                        holder.remove(child)
-                        self.corruptions_applied.append(
-                            'Removed AcctHolderTypeFATCA from a US-resident account holder (rule 90023)'
-                        )
+            ),
+            None,
+        )
+
+        if target is None:
+            target = next(
+                (
+                    holder for holder in holders
+                    if any(
+                        self._local_name(elem.tag) in {'Individual', 'Organisation'}
+                        for elem in holder
+                    )
+                ),
+                None,
+            )
+            if target is None:
+                return
+
+            account_holder = next(
+                (
+                    elem for elem in target
+                    if self._local_name(elem.tag) in {'Individual', 'Organisation'}
+                ),
+                None,
+            )
+            if account_holder is None:
+                return
+
+            residence = next(
+                (
+                    elem for elem in account_holder.iter()
+                    if self._local_name(elem.tag) == 'ResCountryCode'
+                ),
+                None,
+            )
+            if residence is None:
+                tag_match = re.match(r'\{.*\}', account_holder.tag)
+                residence_tag = f'{tag_match.group(0)}ResCountryCode' if tag_match else 'ResCountryCode'
+                residence = ET.SubElement(account_holder, residence_tag)
+            residence.text = 'US'
+            self.corruptions_applied.append(
+                'Changed an account holder residence country to US for rule 90023'
+            )
+
+        for elem in list(target.iter()):
+            if self._local_name(elem.tag) != 'AcctHolderTypeFATCA':
+                continue
+            parent = parent_map.get(elem)
+            if parent is not None:
+                parent.remove(elem)
+                self.corruptions_applied.append(
+                    'Removed AcctHolderTypeFATCA from a US-resident account holder (rule 90023)'
+                )
     
     def _corrupt_revenues(self, root, ns, options):
         """Corrupt CBC revenue amounts"""

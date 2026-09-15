@@ -20,7 +20,9 @@ const DEFECTS = [
   { value: 'short_key', label: 'Key without the IV', code: '50013' },
   { value: 'uncompressed_payload', label: 'Payload not compressed', code: '50003' },
   { value: 'tamper_signature', label: 'Broken signature', code: '50004' },
-  { value: 'wrong_receiver', label: 'Metadata names another country', code: '50012' },
+  // No code: the portal reads the receiver as its own country code and never
+  // compares it with the envelope, so MDES-CLEAN accepted a package like this.
+  { value: 'wrong_receiver', label: 'Metadata names another country', code: null },
   { value: 'corrupt_key', label: 'Corrupted key file', code: '50002' },
 ]
 
@@ -117,6 +119,7 @@ export function PackagePanel() {
     const preflight = identity
       ? window.electronAPI.mdesTargetPreflight({
         target: inspectionTarget,
+        existingPackage: true,
         sender: identity.sender || null,
         receiver: identity.receiver || null,
         communicationType: identity.communicationType || 'CRS',
@@ -471,7 +474,9 @@ export function PackagePanel() {
                       onChange={() => toggleDefect(value)}
                     />
                     <span className={`text-sm ${theme.text}`}>{label}</span>
-                    <span className={`text-xs ${theme.textMuted} ml-auto`}>MDES {code}</span>
+                    <span className={`text-xs ${theme.textMuted} ml-auto`}>
+                      {code ? `MDES ${code}` : 'no MDES code'}
+                    </span>
                   </label>
                 ))}
               </div>

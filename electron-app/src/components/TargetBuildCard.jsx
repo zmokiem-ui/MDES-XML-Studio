@@ -22,6 +22,18 @@ const OUTCOME_STYLES = {
   skip: { icon: MinusCircle, className: 'opacity-50' },
 }
 
+/** Why a fault is greyed out, in the dropdown itself — a disabled option with
+ *  no reason reads as a bug rather than as a rule. */
+function applicabilityHint(item) {
+  if (item.applicable) return ''
+  // A blocked fault is not "wrong target", it is "no target can show this" —
+  // saying so stops someone hunting for the instance that would enable it.
+  if (item.blocked) return ' (an upload cannot report this)'
+  if (item.requiresEnvironment) return ` (needs a ${item.requiresEnvironment} instance)`
+  if (item.requiresFileType) return ` (needs a ${item.requiresFileType} delivery)`
+  return ' (does not apply here)'
+}
+
 export function TargetBuildCard({ onPackageBuilt }) {
   const { theme } = useApp()
   const [targets, setTargets] = useState([])
@@ -33,6 +45,11 @@ export function TargetBuildCard({ onPackageBuilt }) {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [expanded, setExpanded] = useState(true)
+  // The faults this build can deliberately provoke. The catalogue - including
+  // which ones fit this target - comes from the backend, so the applicability
+  // rules are stated once, next to the MDES rules they come from.
+  const [provocations, setProvocations] = useState([])
+  const [provoke, setProvoke] = useState('')
   // Reading the target list spawns the backend, so it takes a moment. Until it
   // answers we must not claim there are none - that reads as "not configured"
   // to someone who configured it a minute ago.
@@ -68,6 +85,30 @@ export function TargetBuildCard({ onPackageBuilt }) {
 
   useEffect(() => { if (selected) check(selected) }, [selected, check])
 
+  // Whether a fault applies depends on the delivery this target produces: the
+  // domestic prefix rules cannot fire on a cross-border upload, and the
+  // test/production pair depends on the instance. Both are known only once
+  // preflight has answered, so the catalogue is re-read with it.
+  const sender = preflight?.sender
+  const receiver = preflight?.receiver
+  useEffect(() => {
+    if (!selected) return
+    const fileType = sender && receiver
+      ? (sender === receiver ? 'domestic' : 'foreign')
+      : null
+    window.electronAPI.mdesTargetProvocations({ target: selected, fileType })
+      .then(response => {
+        const list = response.provocations || []
+        setProvocations(list)
+        // Keep the choice only if it still fits what this target can produce.
+        setProvoke(current => {
+          const match = list.find(item => item.code === current)
+          return match && match.applicable ? current : ''
+        })
+      })
+      .catch(() => setProvocations([]))
+  }, [selected, sender, receiver])
+
   const build = async (force = false) => {
     setBuilding(true)
     setError(null)
@@ -76,6 +117,7 @@ export function TargetBuildCard({ onPackageBuilt }) {
       const response = await window.electronAPI.mdesTargetBuild({
         target: selected,
         outputDir: outputDir || null,
+        provoke: provoke || null,
         force,
       })
       if (response.success) {
@@ -110,6 +152,8 @@ export function TargetBuildCard({ onPackageBuilt }) {
 
   const blocked = preflight?.blocked
   const failures = (preflight?.checks || []).filter(c => c.outcome === 'fail')
+  const warnings = (preflight?.checks || []).filter(c => c.outcome === 'warn')
+  const chosen = provocations.find(item => item.code === provoke) || null
 
   return (
     <div className={`${theme.card} rounded-xl border p-6 shadow-sm`}>
@@ -158,6 +202,45 @@ export function TargetBuildCard({ onPackageBuilt }) {
         </div>
       </div>
 
+      {/* Negative testing: build a delivery that fails for one known reason.
+          One at a time, because MDES reports only the first check that fails —
+          a package carrying two faults cannot tell you which rule caught it. */}
+      <div className="mb-4">
+        <label htmlFor="provoke-error" className={`block text-sm font-medium ${theme.text} mb-1`}>
+          Provoke an error (optional)
+        </label>
+        <select
+          id="provoke-error"
+          data-testid="provoke-select"
+          value={provoke}
+          onChange={(event) => setProvoke(event.target.value)}
+          className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+        >
+          <option value="">None — build a valid package</option>
+          {[...new Set(provocations.map(item => item.stage))].map(stage => (
+            <optgroup key={stage} label={stage}>
+              {provocations.filter(item => item.stage === stage).map(item => (
+                <option key={item.code} value={item.code} disabled={!item.applicable}>
+                  {item.code} — {item.title}{applicabilityHint(item)}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+        {chosen ? (
+          <div className="mt-2 p-3 rounded-lg border border-amber-500/40 bg-amber-500/10">
+            <p className={`text-xs ${theme.text}`}>{chosen.method}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">{chosen.expect}</p>
+          </div>
+        ) : (
+          <p className={`text-xs ${theme.textMuted} mt-1`}>
+            Builds a delivery MDES should reject for one known reason, so the upload
+            result tells you which rule fired. The fault is verified before the
+            package is written.
+          </p>
+        )}
+      </div>
+
       {preflight?.sender && (
         <div className={`p-3 rounded-lg border ${theme.input} mb-4`}>
           <p className={`text-sm ${theme.text}`}>
@@ -185,7 +268,11 @@ export function TargetBuildCard({ onPackageBuilt }) {
             Preflight
             {blocked
               ? <span className="text-red-500 ml-1">{failures.length} blocking</span>
-              : <span className="text-green-500 ml-1">all clear</span>}
+              : warnings.length
+                // "all clear" over a collapsed warning hides the one thing the
+                // build cannot decide for itself - a mixed target, say.
+                ? <span className="text-amber-500 ml-1">{warnings.length} to confirm</span>
+                : <span className="text-green-500 ml-1">all clear</span>}
           </button>
           {expanded && (
             <ul className="space-y-1.5">
@@ -205,7 +292,7 @@ export function TargetBuildCard({ onPackageBuilt }) {
                         )}
                       </p>
                       <p className={`text-xs ${theme.textMuted}`}>{check.detail}</p>
-                      {check.remedy && check.outcome === 'fail' && (
+                      {check.remedy && (check.outcome === 'fail' || check.outcome === 'warn') && (
                         <p className="text-xs text-amber-500">{check.remedy}</p>
                       )}
                     </div>
@@ -224,7 +311,10 @@ export function TargetBuildCard({ onPackageBuilt }) {
           className={`flex-1 px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 ${theme.buttonPrimary} disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           <Zap className="w-4 h-4" />
-          {building ? 'Building...' : checking ? 'Checking...' : 'Build and package'}
+          {building ? 'Building...'
+            : checking ? 'Checking...'
+              : provoke ? `Build faulty package (${provoke})`
+                : 'Build and package'}
         </button>
         {blocked && (
           <button
@@ -245,14 +335,34 @@ export function TargetBuildCard({ onPackageBuilt }) {
       )}
 
       {result && (
-        <div className="mt-4 p-4 rounded-lg border border-green-500/40 bg-green-500/10 space-y-2">
+        <div className={`mt-4 p-4 rounded-lg border space-y-2 ${
+          result.provoked
+            ? 'border-amber-500/40 bg-amber-500/10'
+            : 'border-green-500/40 bg-green-500/10'
+        }`}>
           <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-green-500" />
+            {/* A deliberately faulty package is not a success in green: it is
+                only useful if the reader knows it is meant to be rejected. */}
+            {result.provoked
+              ? <AlertTriangle className="w-4 h-4 text-amber-500" />
+              : <Check className="w-4 h-4 text-green-500" />}
             <span className={`text-sm font-medium ${theme.text}`}>{result.fileName}</span>
             {result.forced && (
               <span className="text-xs text-amber-500">built despite failing checks</span>
             )}
           </div>
+          {result.provoked && (
+            <div className="text-xs space-y-1" data-testid="provoked-summary">
+              <p className={`font-medium ${theme.text}`}>
+                Deliberately faulty: MDES {result.provoked.code} — {result.provoked.title}
+              </p>
+              {result.provoked.change && (
+                <p className={theme.textMuted}>{result.provoked.change}</p>
+              )}
+              <p className={theme.textMuted}>{result.provoked.confirmedBy}</p>
+              <p className="text-amber-600 dark:text-amber-400">{result.provoked.expect}</p>
+            </div>
+          )}
           <dl className={`text-xs ${theme.textMuted} space-y-1`}>
             <div><dt className="inline font-medium">Entries: </dt>
               <dd className="inline font-mono">{(result.entries || []).join(', ')}</dd></div>

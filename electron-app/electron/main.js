@@ -1838,13 +1838,15 @@ ipcMain.handle('mdes-target-resolve', async (event, name) =>
 
 ipcMain.handle('mdes-target-preflight', async (event, options) => {
   const { target, sender = null, receiver = null, communicationType = 'CRS',
-          taxYear = null, messageRefId = null, doctypeIndics = [] } = options || {};
+          taxYear = null, messageRefId = null, doctypeIndics = [],
+          existingPackage = false } = options || {};
   if (!target) return { success: false, error: 'Select a target first' };
   const args = ['preflight', '--target', target, '--type', communicationType];
   if (sender) args.push('--sender', sender);
   if (receiver) args.push('--receiver', receiver);
   if (taxYear) args.push('--tax-year', String(taxYear));
   if (messageRefId) args.push('--message-ref-id', messageRefId);
+  if (existingPackage) args.push('--existing-package');
   for (const indic of doctypeIndics || []) args.push('--doctype-indic', indic);
   return runMdesTarget(args, { target, sender });
 });
@@ -1893,8 +1895,20 @@ ipcMain.handle('mdes-target-build', async (event, options) => {
     if (opts.reportingFis) args.push('--reporting-fis', String(opts.reportingFis));
     if (opts.tin) args.push('--tin', opts.tin);
     if (opts.force) args.push('--force');
+    if (opts.provoke) args.push('--provoke', opts.provoke);
     return runMdesTarget(args, { target: opts.target, sender, event });
   });
+});
+
+// Which MDES errors this build can deliberately provoke. The applicability
+// rules live in the backend catalogue, so the UI never has to reason about
+// which fault fits which target.
+ipcMain.handle('mdes-target-provocations', async (event, options) => {
+  const { target = null, fileType = null } = options || {};
+  const args = ['provocations'];
+  if (target) args.push('--target', target);
+  if (fileType) args.push('--file-type', fileType);
+  return runMdesTarget(args, { target });
 });
 
 ipcMain.handle('mdes-target-package', async (event, options) => {

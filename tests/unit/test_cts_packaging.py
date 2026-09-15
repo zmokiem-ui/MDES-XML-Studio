@@ -148,7 +148,7 @@ def test_package_identity_uses_key_entry_as_the_decryption_receiver():
         ["NL_CRS_Metadata.xml", "CW_CRS_Key", "NL_CRS_Payload"],
         {
             "CTSSenderCountryCd": "NL",
-            "CTSReceiverCountryCd": "ZZ",  # deliberate 50012 metadata defect
+            "CTSReceiverCountryCd": "ZZ",  # deliberately contradicts the key entry
             "CTSCommunicationTypeCd": "CRS",
             "TaxYear": "2024",
         },
@@ -174,7 +174,9 @@ def test_inspection_reports_a_metadata_and_key_receiver_mismatch(
     opened = unpack(result.data, receiver_key)
     check = next(c for c in opened.checks if c["id"] == "receiver-consistency")
     assert check["outcome"] == "fail"
-    assert "50012" in check["detail"]
+    assert "envelope contradicts itself" in check["detail"]
+    # And it must not promise a code the portal does not report for this.
+    assert "50012" not in check["detail"].replace("not a predicted 50012", "")
 
 
 def test_non_strict_inspection_keeps_metadata_when_decryption_fails(

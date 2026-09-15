@@ -595,12 +595,12 @@ export const translations = {
       downloadProgress: 'Download progress: {percent}%',
       whatsNew: 'Recent Improvements',
       changelog: [
-        'FATCA-CRS now asks for the supplying reporting entity TIN',
-        'Each Reporting FI now has its own required GIIN field',
-        'Generated files no longer silently use made-up Reporting FI GIINs',
-        'TIN and GIIN values are explained separately in the FATCA form',
-        'Multiple Reporting FIs retain their GIINs when the count changes',
-        'Identifiers are trimmed before they are written to the XML'
+        'FATCA-CRS Organisation records now match the Be Informed import model',
+        'Target builds now choose the encryption certificate from target evidence',
+        'Preflight checks explain routing, certificate, and database decisions',
+        'MDES target builds can create documented test faults by error code',
+        'Generated CRS, FATCA, and CBC packages are checked through the packaged app',
+        'Error-injection tests now create reproducible business-rule conflicts'
       ]
     }
   },
@@ -1194,12 +1194,12 @@ export const translations = {
       downloadProgress: 'Downloadvoortgang: {percent}%',
       whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'FATCA-CRS vraagt nu om het TIN van de aanleverende rapporterende entiteit',
-        'Elke rapporterende FI heeft nu een eigen verplicht GIIN-veld',
-        'Bestanden gebruiken niet langer ongemerkt verzonnen GIINs voor rapporterende FIs',
-        'TIN- en GIIN-waarden worden apart uitgelegd in het FATCA-formulier',
-        'Meerdere rapporterende FIs behouden hun GIINs wanneer het aantal verandert',
-        'Identificatienummers worden opgeschoond voordat ze in de XML komen'
+        'FATCA-CRS-organisatierecords sluiten nu aan op het importmodel van Be Informed',
+        'Doelbuilds kiezen nu het versleutelingscertificaat op basis van doelgegevens',
+        'Preflightcontroles leggen routering, certificaat- en databankkeuzes uit',
+        'MDES-doelbuilds kunnen gedocumenteerde testfouten per foutcode maken',
+        'Gegenereerde CRS-, FATCA- en CBC-pakketten worden in de verpakte app gecontroleerd',
+        'Foutinjectietests maken nu reproduceerbare bedrijfsregelconflicten'
       ]
     }
   },
@@ -1791,12 +1791,12 @@ export const translations = {
       downloadProgress: 'Progreso de descarga: {percent}%',
       whatsNew: 'Mejoras Recientes',
       changelog: [
-        'FATCA-CRS ahora solicita el TIN de la entidad reportante remitente',
-        'Cada IF reportante tiene ahora su propio campo GIIN obligatorio',
-        'Los archivos ya no usan silenciosamente GIIN inventados para las IF reportantes',
-        'El formulario FATCA explica por separado los valores TIN y GIIN',
-        'Las IF reportantes conservan sus GIIN al cambiar la cantidad',
-        'Los identificadores se limpian antes de escribirse en el XML'
+        'Los registros Organisation de FATCA-CRS ahora coinciden con el modelo de importación de Be Informed',
+        'Las compilaciones de destino eligen el certificado de cifrado según la evidencia del destino',
+        'Las comprobaciones previas explican las decisiones de enrutamiento, certificado y base de datos',
+        'Las compilaciones de destino MDES pueden crear fallos de prueba documentados por código',
+        'Los paquetes CRS, FATCA y CBC generados se comprueban en la aplicación empaquetada',
+        'Las pruebas de inyección de errores crean conflictos de reglas de negocio reproducibles'
       ]
     }
   }

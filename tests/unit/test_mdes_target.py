@@ -306,79 +306,48 @@ def test_a_missing_cts_assembly_blocks(resolution):
         assert assembly_check.outcome is not CheckOutcome.FAIL
 
 
-def test_a_mispaired_target_is_diagnosed_as_pairing_not_certificates():
-    """A properties file and a database describing different instances.
-
-    This surfaces first as a certificate mismatch, and the tempting repair -
-    swapping a certificate until it passes - corrupts a correct certificate
-    store to hide a configuration mistake. The pairing check has to own it, and
-    the certificate check has to stand down.
-    """
-    import os as _os
-
+def test_certificate_labels_do_not_override_properties(resolution):
     from crs_generator.mdes_target.preflight import CheckOutcome, run_preflight
-    from crs_generator.mdes_target.profile import TargetProfile, resolve_target
-
-    server, database = _target_from_env()
-    other_props = _os.environ.get("MDES_TEST_PROPS_OTHER_COUNTRY")
-    if not other_props:
-        # Synthesised rather than borrowed. This used to require
-        # $MDES_TEST_PROPS_OTHER_COUNTRY to name a real properties file for
-        # another country, which made the test hostage to a file outside the
-        # repository: the day somebody re-pointed that file at this database's
-        # own country, the fixture silently became a matched pair and the test
-        # failed for a reason that had nothing to do with the code. A file we
-        # write ourselves cannot be re-pointed under us.
-        real = _os.environ.get("MDES_TEST_PROPS")
-        if not real:
-            pytest.skip("Set MDES_TEST_PROPS to a readable properties file.")
-        source = Path(real).read_text(encoding="utf-8", errors="replace")
-        elsewhere = "\n".join(
-            line for line in source.splitlines()
-            if not line.strip().lower().startswith(
-                ("country_code_provision", "appcountry"))
-        )
-        # MH: a country the certificate store does hold, but that no database
-        # here serves. A country with no certificates at all would trip the
-        # encryption-certificate check first and test the wrong thing.
-        written = _tmp_properties(
-            elsewhere + "\nCountry_Code_Provision=MH\nAppCountry=mh\n"
-        )
-        other_props = str(written)
-    resolution = resolve_target(
-        TargetProfile(name="mispaired", props_path=other_props,
-                      server=server, database=database)
-    )
-    if resolution.facts is None:
-        pytest.skip("Database not reachable")
-
+    if resolution.properties is None or resolution.facts is None:
+        pytest.skip("Target not fully resolvable")
     result = run_preflight(resolution)
+    assert result.receiver == resolution.properties.own_country
     pairing = next(c for c in result.checks if c.id == "target-pairing")
-    assert pairing.outcome is CheckOutcome.FAIL
-    assert result.blocked
-
-    # The remedy must point at the pairing and explicitly not at the certificates.
-    assert "certificate store" in (pairing.remedy or "")
-
-    # And the downstream checks must defer rather than mis-advise.
-    for check_id in ("receiver", "encryption-certificate"):
-        check = next(c for c in result.checks if c.id == check_id)
-        assert check.outcome is CheckOutcome.SKIP, check_id
-        assert "Replace" not in (check.remedy or "")
+    assert pairing.outcome is not CheckOutcome.FAIL
 
 
-def test_a_correctly_paired_target_passes_the_pairing_check(resolution):
+def test_the_pairing_check_never_blocks_a_resolvable_target(resolution):
+    """It reports what the two halves are, and only a missing half is fatal.
+
+    This target may legitimately be a mixed instance - MH properties over a
+    database holding another country's keypair - so the check warns and names
+    both halves rather than blocking. Only an absent properties file is a
+    failure, because then there is nothing declaring the routing at all.
+    """
     from crs_generator.mdes_target.preflight import CheckOutcome, run_preflight
 
     if resolution.properties is None or resolution.facts is None:
         pytest.skip("Target not fully resolvable")
-    pairing = next(
-        c for c in run_preflight(resolution).checks if c.id == "target-pairing"
-    )
-    assert pairing.outcome is CheckOutcome.PASS
+    result = run_preflight(resolution)
+    pairing = next(c for c in result.checks if c.id == "target-pairing")
+    assert pairing.outcome in (CheckOutcome.PASS, CheckOutcome.WARN)
+    if pairing.outcome is CheckOutcome.WARN:
+        # Naming the country whose certificate the database holds is the whole
+        # value of the warning; without it there is nothing to act on.
+        assert result.encryption_country
+        assert result.encryption_country in pairing.detail
+        assert result.receiver in pairing.detail
+        assert "certificate to silence this" in (pairing.remedy or "")
 
 
-def test_addressing_the_wrong_receiver_predicts_50012(resolution):
+def test_addressing_the_wrong_receiver_predicts_50008(resolution):
+    """Not 50012, which is what "misrouted" sounds like.
+
+    The portal overwrites the document's ReceivingCountry with its own country
+    code before any rule reads it, so the misrouting check compares the instance
+    with itself. What fails is the MessageRefId prefix, whose receiving half is
+    the instance.
+    """
     from crs_generator.mdes_target.preflight import CheckOutcome, run_preflight
 
     if not resolution.own_country:
@@ -387,7 +356,7 @@ def test_addressing_the_wrong_receiver_predicts_50012(resolution):
     result = run_preflight(resolution, receiver=wrong)
     check = next(c for c in result.checks if c.id == "receiver")
     assert check.outcome is CheckOutcome.FAIL
-    assert check.mdes_error == "50012"
+    assert check.mdes_error == "50008"
 
 
 def test_preflight_compares_package_doctypes_with_target_environment(resolution):

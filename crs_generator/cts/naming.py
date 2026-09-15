@@ -195,7 +195,8 @@ def infer_package_identity(entries: list[str], metadata: dict[str, str]) -> dict
     """Recognise package facts before decrypting it.
 
     The key-entry country chooses the private key.  It remains authoritative
-    when deliberately incorrect metadata is present for a 50012 test.
+    when the metadata deliberately names somebody else, which is what a
+    ``WRONG_RECEIVER`` package does.
     """
     key_receiver = ""
     entry_sender = ""
