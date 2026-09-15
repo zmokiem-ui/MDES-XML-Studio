@@ -24,7 +24,16 @@ export function useGeneration({
   onResult,
 }) {
   const handleGenerateFATCA = async () => {
-    if (!fatcaFormData.transmittingCountry || !fatcaFormData.outputPath) {
+    const fiCount = parseInt(fatcaFormData.numReportingFIs) || 1
+    const reportingFIGIINs = (fatcaFormData.reportingFITINs || [])
+      .slice(0, fiCount)
+      .map(value => value.trim())
+
+    if (!fatcaFormData.sendingCompanyIN ||
+        !fatcaFormData.transmittingCountry ||
+        !fatcaFormData.outputPath ||
+        reportingFIGIINs.length !== fiCount ||
+        reportingFIGIINs.some(value => !value)) {
       onResult('error', t(language, 'errors.pleaseFillRequiredFieldsFATCA'))
       return
     }
@@ -40,6 +49,7 @@ export function useGeneration({
         ...fatcaFormData,
         transmittingCountry: fatcaFormData.transmittingCountry.toUpperCase(),
         receivingCountry: fatcaFormData.receivingCountry.toUpperCase(),
+        reportingFITINs: reportingFIGIINs,
         numReportingFIs: parseInt(fatcaFormData.numReportingFIs) || 1,
         individualAccounts: parseInt(fatcaFormData.individualAccounts) || 0,
         organisationAccounts: parseInt(fatcaFormData.organisationAccounts) || 0,
@@ -51,8 +61,6 @@ export function useGeneration({
 
       const individualCount = parseInt(fatcaFormData.individualAccounts) || 0
       const organisationCount = parseInt(fatcaFormData.organisationAccounts) || 0
-      const fiCount = parseInt(fatcaFormData.numReportingFIs) || 1
-
       updateStats({
         totalXmlGenerated: globalStats.totalXmlGenerated + 1,
         totalIndividualAccounts: globalStats.totalIndividualAccounts + individualCount,

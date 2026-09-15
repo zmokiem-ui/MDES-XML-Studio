@@ -37,7 +37,9 @@ const createFatcaFormData = () => ({
   receivingCountry: 'US',
   reportingPeriod: currentYear(),
   numReportingFIs: '1',
-  reportingFITINs: [],
+  // FATCA ReportingFI/TIN contains the FI's GIIN. Keep it separate from
+  // MessageHeader/SendingCompanyIN, which is the supplying entity identifier.
+  reportingFITINs: [''],
   filerCategory: 'FATCA601',
   individualAccounts: '',
   organisationAccounts: '',

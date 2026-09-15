@@ -538,7 +538,7 @@ test.describe.serial('FULL E2E REGRESSION', () => {
     await expect(window.locator('text=Generator').first()).toBeVisible();
   });
 
-  test('7.2 FATCA - Fill in Message Header (country, GIIN)', async () => {
+  test('7.2 FATCA - Fill in Message Header and Reporting FI identifiers', async () => {
     // Scroll to top first
     await window.evaluate(() => window.scrollTo(0, 0));
     await window.waitForTimeout(300);
@@ -571,6 +571,12 @@ test.describe.serial('FULL E2E REGRESSION', () => {
         await txFallback.first().fill('NL');
       } catch { /* may be pre-filled */ }
     }
+
+    const supplyingTin = window.locator('label:has-text("Supplying Reporting Entity TIN")').locator('..').locator('input');
+    await supplyingTin.fill('23015421');
+
+    const reportingFIGIIN = window.locator('label:has-text("Reporting FI GIIN")').locator('..').locator('input');
+    await reportingFIGIIN.fill('12ABCDE.12345.LE.840');
     await window.waitForTimeout(VISIBLE_DELAY);
   });
 

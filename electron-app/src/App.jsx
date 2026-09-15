@@ -6075,7 +6075,11 @@ function App() {
 
                 <div>
 
-                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>{t(language, 'form.sendingCompanyGIIN')} *</label>
+                  <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>
+                    {fatcaFormData.variant === 'fatca-crs'
+                      ? t(language, 'form.sendingCompanyTIN')
+                      : t(language, 'form.sendingCompanyGIIN')} *
+                  </label>
 
                   <input
 
@@ -6083,7 +6087,7 @@ function App() {
 
                     className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
 
-                    placeholder="000000.00000.TA.531"
+                    placeholder={fatcaFormData.variant === 'fatca-crs' ? 'e.g., 23015421' : '000000.00000.TA.531'}
 
                     value={fatcaFormData.sendingCompanyIN}
 
@@ -6092,6 +6096,12 @@ function App() {
                     onBlur={(e) => setFatcaFormData({...fatcaFormData, sendingCompanyIN: e.target.value.trim()})}
 
                   />
+
+                  <p className={`text-xs ${theme.textMuted} mt-1`}>
+                    {fatcaFormData.variant === 'fatca-crs'
+                      ? t(language, 'form.sendingCompanyTINHint')
+                      : t(language, 'form.sendingCompanyGIINHint')}
+                  </p>
 
                 </div>
 
@@ -6191,11 +6201,50 @@ function App() {
 
                     value={fatcaFormData.numReportingFIs}
 
-                    onChange={(e) => setFatcaFormData({...fatcaFormData, numReportingFIs: e.target.value})}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      const count = Math.max(0, parseInt(value, 10) || 0)
+                      setFatcaFormData({
+                        ...fatcaFormData,
+                        numReportingFIs: value,
+                        reportingFITINs: Array.from(
+                          { length: count },
+                          (_, index) => fatcaFormData.reportingFITINs[index] || ''
+                        ),
+                      })
+                    }}
 
                   />
 
                 </div>
+
+                {fatcaFormData.reportingFITINs.map((giin, index) => (
+                  <div key={index}>
+                    <label className={`block text-sm font-medium ${theme.textMuted} mb-1`}>
+                      {t(language, 'form.reportingFIGIIN')} {index + 1} *
+                    </label>
+                    <input
+                      type="text"
+                      className={`w-full px-4 py-2 rounded-lg border ${theme.input}`}
+                      value={giin}
+                      onChange={(e) => {
+                        const reportingFITINs = [...fatcaFormData.reportingFITINs]
+                        reportingFITINs[index] = e.target.value
+                        setFatcaFormData({...fatcaFormData, reportingFITINs})
+                      }}
+                      onBlur={(e) => {
+                        const reportingFITINs = [...fatcaFormData.reportingFITINs]
+                        reportingFITINs[index] = e.target.value.trim().toUpperCase()
+                        setFatcaFormData({...fatcaFormData, reportingFITINs})
+                      }}
+                      placeholder="XXXXXX.XXXXX.XX.XXX"
+                    />
+                  </div>
+                ))}
+
+                <p className={`col-span-2 text-xs ${theme.textMuted}`}>
+                  {t(language, 'form.reportingFIGIINHint')}
+                </p>
 
                 <div>
 

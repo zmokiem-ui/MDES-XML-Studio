@@ -136,7 +136,8 @@ test.describe('E2E Regression Test - Full Application', () => {
 
   test('3.2 FATCA - Generator form fields', async () => {
     await navigateToModule(window, 'FATCA');
-    await expect(window.locator('text=Sending Company GIIN').first()).toBeVisible();
+    await expect(window.locator('text=Supplying Reporting Entity TIN').first()).toBeVisible();
+    await expect(window.locator('text=Reporting FI GIIN').first()).toBeVisible();
     await expect(window.locator('text=Filer Category').first()).toBeVisible();
     await expect(window.locator('text=Controlling Persons per Org').first()).toBeVisible();
     await expect(window.locator('button:has-text("Generate FATCA")')).toBeVisible();
@@ -319,7 +320,8 @@ test.describe('E2E Regression Test - Full Application', () => {
     await navigateToModule(window, 'FATCA');
 
     await navigateToPage(window, 'Generator');
-    await expect(window.locator('text=Sending Company GIIN').first()).toBeVisible();
+    await expect(window.locator('text=Supplying Reporting Entity TIN').first()).toBeVisible();
+    await expect(window.locator('text=Reporting FI GIIN').first()).toBeVisible();
 
     await navigateToPage(window, 'Correction');
     await window.waitForTimeout(500);

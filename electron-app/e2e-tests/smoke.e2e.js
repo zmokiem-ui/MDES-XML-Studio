@@ -81,7 +81,8 @@ test.describe('E2E Smoke Test', () => {
     await expect(window.locator('button:has-text("Faulty XML")')).toBeVisible();
 
     // Verify FATCA-specific fields
-    await expect(window.locator('text=Sending Company GIIN').first()).toBeVisible();
+    await expect(window.locator('text=Supplying Reporting Entity TIN').first()).toBeVisible();
+    await expect(window.locator('text=Reporting FI GIIN').first()).toBeVisible();
     await expect(window.locator('text=Filer Category').first()).toBeVisible();
   });
 

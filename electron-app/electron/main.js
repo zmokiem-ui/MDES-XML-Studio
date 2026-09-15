@@ -906,7 +906,7 @@ ipcMain.handle('generate-fatca', async (event, formData) => {
   ];
 
   if (formData.reportingFITINs && formData.reportingFITINs.length > 0) {
-    args.push('--reporting-fi-tins', formData.reportingFITINs.join(','));
+    args.push('--reporting-fi-tins', trimIdList(formData.reportingFITINs).join(','));
   }
 
   if (formData.accountHolderMode !== 'random') {

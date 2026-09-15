@@ -104,6 +104,11 @@ export const translations = {
       fatcaMessageHeader: 'FATCA Message Header',
       cbcMessageHeader: 'CBC Message Header',
       sendingCompanyGIIN: 'Sending Company GIIN',
+      sendingCompanyTIN: 'Supplying Reporting Entity TIN',
+      sendingCompanyTINHint: 'Enter the local TIN/identifier of the reporting entity uploading the file to MDES.',
+      sendingCompanyGIINHint: 'Enter the GIIN or FATCA entity identifier of the sender.',
+      reportingFIGIIN: 'Reporting FI GIIN',
+      reportingFIGIINHint: 'Enter the real GIIN registered for each Reporting FI. This is separate from the supplying entity TIN above.',
       sendingEntityTIN: 'Sending Entity TIN',
       transmittingCountry: 'Transmitting Country',
       reportingPeriod: 'Reporting Period (Year)',
@@ -590,10 +595,12 @@ export const translations = {
       downloadProgress: 'Download progress: {percent}%',
       whatsNew: 'Recent Improvements',
       changelog: [
-        'IRS FATCA: choose FatcaXML 2.0.1 or the superseded 2.0 when generating',
-        'Generated IRS FATCA files now advertise the schema matching their version',
-        'Each IRS FATCA version is checked against its own schema instead of always 2.0.1',
-        'The version picker spells out that MDES accepts 2.0.1 uploads only'
+        'FATCA-CRS now asks for the supplying reporting entity TIN',
+        'Each Reporting FI now has its own required GIIN field',
+        'Generated files no longer silently use made-up Reporting FI GIINs',
+        'TIN and GIIN values are explained separately in the FATCA form',
+        'Multiple Reporting FIs retain their GIINs when the count changes',
+        'Identifiers are trimmed before they are written to the XML'
       ]
     }
   },
@@ -696,6 +703,11 @@ export const translations = {
       fatcaMessageHeader: 'FATCA Berichtkop',
       cbcMessageHeader: 'CBC Berichtkop',
       sendingCompanyGIIN: 'Verzendend Bedrijf GIIN',
+      sendingCompanyTIN: 'TIN van aanleverende rapporterende entiteit',
+      sendingCompanyTINHint: 'Vul het lokale TIN/identificatienummer in van de rapporterende entiteit die het bestand bij MDES aanlevert.',
+      sendingCompanyGIINHint: 'Vul de GIIN of FATCA-entiteitsidentificatie van de verzender in.',
+      reportingFIGIIN: 'GIIN rapporterende FI',
+      reportingFIGIINHint: 'Vul de echte, geregistreerde GIIN in voor elke rapporterende FI. Dit is niet hetzelfde als het TIN van de aanleverende entiteit hierboven.',
       sendingEntityTIN: 'Verzendende Entiteit TIN',
       transmittingCountry: 'Verzendend Land',
       reportingPeriod: 'Rapportageperiode (Jaar)',
@@ -1182,10 +1194,12 @@ export const translations = {
       downloadProgress: 'Downloadvoortgang: {percent}%',
       whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'IRS FATCA: kies FatcaXML 2.0.1 of de vervallen versie 2.0 bij het genereren',
-        'Gegenereerde IRS FATCA-bestanden verwijzen nu naar het schema van hun eigen versie',
-        'Elke IRS FATCA-versie wordt tegen het eigen schema gecontroleerd, niet altijd 2.0.1',
-        'De versiekeuze vermeldt dat MDES alleen uploads met 2.0.1 accepteert'
+        'FATCA-CRS vraagt nu om het TIN van de aanleverende rapporterende entiteit',
+        'Elke rapporterende FI heeft nu een eigen verplicht GIIN-veld',
+        'Bestanden gebruiken niet langer ongemerkt verzonnen GIINs voor rapporterende FIs',
+        'TIN- en GIIN-waarden worden apart uitgelegd in het FATCA-formulier',
+        'Meerdere rapporterende FIs behouden hun GIINs wanneer het aantal verandert',
+        'Identificatienummers worden opgeschoond voordat ze in de XML komen'
       ]
     }
   },
@@ -1286,6 +1300,11 @@ export const translations = {
       fatcaMessageHeader: 'Encabezado del Mensaje FATCA',
       cbcMessageHeader: 'Encabezado del Mensaje CBC',
       sendingCompanyGIIN: 'GIIN de la Empresa Emisora',
+      sendingCompanyTIN: 'TIN de la Entidad Reportante Remitente',
+      sendingCompanyTINHint: 'Introduzca el TIN o identificador local de la entidad reportante que carga el archivo en MDES.',
+      sendingCompanyGIINHint: 'Introduzca el GIIN o identificador de entidad FATCA del remitente.',
+      reportingFIGIIN: 'GIIN de la IF reportante',
+      reportingFIGIINHint: 'Introduzca el GIIN real registrado de cada IF reportante. Es distinto del TIN de la entidad remitente indicado arriba.',
       sendingEntityTIN: 'TIN de la Entidad Emisora',
       transmittingCountry: 'País Transmisor',
       reportingPeriod: 'Período de Reporte (Año)',
@@ -1772,10 +1791,12 @@ export const translations = {
       downloadProgress: 'Progreso de descarga: {percent}%',
       whatsNew: 'Mejoras Recientes',
       changelog: [
-        'IRS FATCA: elija FatcaXML 2.0.1 o la version sustituida 2.0 al generar',
-        'Los archivos IRS FATCA generados ahora apuntan al esquema de su propia version',
-        'Cada version IRS FATCA se valida contra su propio esquema y no siempre contra 2.0.1',
-        'El selector de version indica que MDES solo acepta cargas con 2.0.1'
+        'FATCA-CRS ahora solicita el TIN de la entidad reportante remitente',
+        'Cada IF reportante tiene ahora su propio campo GIIN obligatorio',
+        'Los archivos ya no usan silenciosamente GIIN inventados para las IF reportantes',
+        'El formulario FATCA explica por separado los valores TIN y GIIN',
+        'Las IF reportantes conservan sus GIIN al cambiar la cantidad',
+        'Los identificadores se limpian antes de escribirse en el XML'
       ]
     }
   }
