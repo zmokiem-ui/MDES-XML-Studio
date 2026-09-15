@@ -136,6 +136,7 @@ def cmd_pack(args) -> int:
             signing_password=_resolve_password(args),
             store=_store_path(args),
             message_ref_id=args.message_ref_id,
+            encryption_country=getattr(args, "encryption_country", None),
             defects=defects,
         )
     except (CertificateStoreError, PackagingError) as exc:
@@ -166,6 +167,9 @@ def cmd_pack(args) -> int:
         "receiver": receiver.upper(),
         "communicationType": communication_type,
         "taxYear": args.tax_year,
+        "encryptedFor": (
+            getattr(args, "encryption_country", None) or receiver
+        ).upper(),
         "defects": [d.value for d in result.defects],
     }
     print(json.dumps(payload, indent=2))
@@ -440,6 +444,12 @@ Examples:
     pack_parser.add_argument(
         "--message-ref-id",
         help="Override the MessageRefId used in SenderFileId (default: from the XML)",
+    )
+    pack_parser.add_argument(
+        "--encryption-country",
+        help="Country whose certificate wraps the AES key (default: --receiver). "
+             "Use when the environment under test holds a different private key "
+             "than the nominal receiver - MDES picks its key from the _Key member.",
     )
     pack_parser.add_argument(
         "--defect", action="append", choices=[d.value for d in Defect],
