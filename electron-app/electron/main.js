@@ -1636,7 +1636,9 @@ ipcMain.handle('cts-pack', async (event, options) => {
 
   // Validate first so a malformed/domestic/mismatched source is reported as
   // such, even when its purported sender has no stored certificate password.
-  if (communicationType === 'CRS') {
+  // Status messages are exempt: MDES writes those, and they are a different
+  // document that the validator has no family for.
+  if (!/Status$/.test(communicationType)) {
     const validation = await runPythonCommand({
       module: 'crs_generator.cts_cli',
       args: ['validate-source', '--source', sourceFile],
@@ -1644,8 +1646,14 @@ ipcMain.handle('cts-pack', async (event, options) => {
     });
     if (!validation.success) return validation;
     sender = validation.facts.sender;
-    receiver = validation.facts.receiver;
     taxYear = validation.facts.taxYear;
+    // The document decides what it is; the renderer only relays it.
+    communicationType = validation.facts.communicationType || communicationType;
+    // A FATCA delivery is addressed to the IRS, so its ReceivingCountry is not
+    // the country whose key opens the package - keep the caller's receiver.
+    if (validation.facts.receiverLocked !== false || !receiver) {
+      receiver = validation.facts.receiver;
+    }
   }
 
   if (!ctsPasswordFor(sender)) {

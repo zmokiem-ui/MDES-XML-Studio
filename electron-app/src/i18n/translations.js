@@ -595,12 +595,12 @@ export const translations = {
       downloadProgress: 'Download progress: {percent}%',
       whatsNew: 'Recent Improvements',
       changelog: [
-        'FATCA-CRS Organisation records now match the Be Informed import model',
-        'Target builds now choose the encryption certificate from target evidence',
-        'Preflight checks explain routing, certificate, and database decisions',
-        'MDES target builds can create documented test faults by error code',
-        'Generated CRS, FATCA, and CBC packages are checked through the packaged app',
-        'Error-injection tests now create reproducible business-rule conflicts'
+        'The Package tab now accepts FATCA and CBC files, not only CRS',
+        'The package check names the delivery it recognised instead of assuming CRS',
+        'FATCA packages let you pick the country whose key opens them',
+        'Choosing the wrong delivery type now tells you which type to use',
+        'Domestic FATCA-CRS files are refused with the reason: MDES takes them as they are',
+        'Target builds refuse a treaty they cannot generate instead of mislabelling it'
       ]
     }
   },
@@ -1194,12 +1194,12 @@ export const translations = {
       downloadProgress: 'Downloadvoortgang: {percent}%',
       whatsNew: 'Recente Verbeteringen',
       changelog: [
-        'FATCA-CRS-organisatierecords sluiten nu aan op het importmodel van Be Informed',
-        'Doelbuilds kiezen nu het versleutelingscertificaat op basis van doelgegevens',
-        'Preflightcontroles leggen routering, certificaat- en databankkeuzes uit',
-        'MDES-doelbuilds kunnen gedocumenteerde testfouten per foutcode maken',
-        'Gegenereerde CRS-, FATCA- en CBC-pakketten worden in de verpakte app gecontroleerd',
-        'Foutinjectietests maken nu reproduceerbare bedrijfsregelconflicten'
+        'Het tabblad Verpakken accepteert nu ook FATCA- en CBC-bestanden, niet alleen CRS',
+        'De pakketcontrole benoemt de herkende levering in plaats van CRS aan te nemen',
+        'Bij FATCA-pakketten kiest u zelf het land waarvan de sleutel het pakket opent',
+        'Een verkeerd gekozen leveringstype vertelt nu welk type u nodig hebt',
+        'Binnenlandse FATCA-CRS-bestanden worden geweigerd met reden: MDES neemt ze zoals ze zijn',
+        'Doelbuilds weigeren een verdrag dat ze niet kunnen genereren in plaats van het verkeerd te labelen'
       ]
     }
   },
@@ -1791,12 +1791,12 @@ export const translations = {
       downloadProgress: 'Progreso de descarga: {percent}%',
       whatsNew: 'Mejoras Recientes',
       changelog: [
-        'Los registros Organisation de FATCA-CRS ahora coinciden con el modelo de importación de Be Informed',
-        'Las compilaciones de destino eligen el certificado de cifrado según la evidencia del destino',
-        'Las comprobaciones previas explican las decisiones de enrutamiento, certificado y base de datos',
-        'Las compilaciones de destino MDES pueden crear fallos de prueba documentados por código',
-        'Los paquetes CRS, FATCA y CBC generados se comprueban en la aplicación empaquetada',
-        'Las pruebas de inyección de errores crean conflictos de reglas de negocio reproducibles'
+        'La pestaña Paquete ahora acepta archivos FATCA y CBC, no solo CRS',
+        'La comprobación del paquete nombra la entrega reconocida en lugar de suponer CRS',
+        'Los paquetes FATCA permiten elegir el país cuya clave los abre',
+        'Elegir el tipo de entrega equivocado ahora indica qué tipo usar',
+        'Los archivos FATCA-CRS nacionales se rechazan con el motivo: MDES los toma tal cual',
+        'Las compilaciones de destino rechazan un tratado que no pueden generar en vez de etiquetarlo mal'
       ]
     }
   }

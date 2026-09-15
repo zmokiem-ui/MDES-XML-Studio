@@ -31,7 +31,7 @@ from pathlib import Path
 
 from .cts.certificates import CertificateStoreError
 from .cts.packager import PackagingError, pack_from_store
-from .cts.source_validation import validate_foreign_crs
+from .cts.source_validation import message_type_for, validate_delivery_source
 from .mdes_target.database import DatabaseUnavailable, available_drivers
 from .mdes_target import provoke
 from .mdes_target.preflight import run_preflight
@@ -347,6 +347,15 @@ def cmd_provocations(args) -> int:
 
 def cmd_build(args) -> int:
     """One click: ask the target what it accepts, then generate and package it."""
+    # _generate_xml only knows how to write CRS. Packaging a CRS document under
+    # another treaty's name produces a delivery that is wrong in a way MDES
+    # reports as something else entirely, so refuse instead. Other families are
+    # packaged from a document the caller already generated, via `package`.
+    if message_type_for(args.type) not in ("", "CRS"):
+        return _fail(
+            f"build generates CRS documents only; generate the {args.type} XML "
+            f"first and package it with `package --source`."
+        )
     try:
         resolution = _resolved(args.target)
     except ProfileError as exc:
@@ -394,8 +403,8 @@ def cmd_build(args) -> int:
                 source, provocation,
                 _provocation_context(resolution, result, provocation),
             )
-        if args.type.upper() == "CRS":
-            source_validation = validate_foreign_crs(source)
+        if message_type_for(args.type):
+            source_validation = validate_delivery_source(source)
             if not source_validation.valid and enforce_source_validation:
                 return _fail(
                     "The generated XML failed the packageability checks: "
@@ -448,19 +457,29 @@ def cmd_package(args) -> int:
     # Validate the file before opening the target database. A malformed or
     # non-packageable source is a local file error, not a target-connectivity
     # error, and the user should get that answer even when the target is absent.
-    if args.type.upper() == "CRS":
-        source_validation = validate_foreign_crs(source)
+    expected_message_type = message_type_for(args.type)
+    if expected_message_type:
+        source_validation = validate_delivery_source(source)
         if not source_validation.valid:
             return _fail(
-                "The selected XML is not a packageable foreign CRS delivery: "
+                "The selected XML is not a packageable delivery: "
                 + "; ".join(source_validation.errors),
                 sourceValidation=source_validation.to_dict(),
             )
         facts = source_validation.facts
+        if facts.message_type != expected_message_type:
+            return _fail(
+                f"--type {args.type} was requested, but the XML is a "
+                f"{facts.delivery_label}; use --type {facts.communication_type}.",
+                sourceValidation=source_validation.to_dict(),
+            )
         mismatches = []
         if args.sender and args.sender.upper() != facts.sender:
             mismatches.append(f"sender is {args.sender.upper()}, XML says {facts.sender}")
-        if args.receiver and args.receiver.upper() != facts.receiver:
+        # A FATCA package is addressed to the IRS in its metadata; the receiver
+        # names the country whose key opens it, so it is chosen here rather than
+        # read off the document (see cts.source_validation).
+        if facts.receiver_locked and args.receiver and args.receiver.upper() != facts.receiver:
             mismatches.append(
                 f"receiver is {args.receiver.upper()}, XML says {facts.receiver}"
             )
@@ -472,7 +491,9 @@ def cmd_package(args) -> int:
                 + "; ".join(mismatches),
                 sourceValidation=source_validation.to_dict(),
             )
-        sender, receiver, tax_year = facts.sender, facts.receiver, int(facts.tax_year)
+        sender, tax_year = facts.sender, int(facts.tax_year)
+        if facts.receiver_locked or not receiver:
+            receiver = facts.receiver
 
     try:
         resolution = _resolved(args.target)

@@ -31,13 +31,17 @@ function baseModule(communicationType) {
   return communicationType.replace(/Status$/, '')
 }
 
+// The validator names the delivery it recognised; this is only the fallback for
+// a document it has not been shown yet.
+const TYPE_LABELS = { CRS: 'CRS delivery', RPT: 'FATCA delivery', CBC: 'CbC delivery' }
+
 export function PackagePanel() {
   const { theme } = useApp()
 
   const [sourceFile, setSourceFile] = useState('')
   const [sender, setSender] = useState('')
   const [receiver, setReceiver] = useState('')
-  const [communicationType, setCommunicationType] = useState('CRS')
+  const [communicationType, setCommunicationType] = useState('')
   const [taxYear, setTaxYear] = useState(String(new Date().getFullYear() - 1))
   const [outputDir, setOutputDir] = useState('')
   const [defects, setDefects] = useState([])
@@ -50,6 +54,7 @@ export function PackagePanel() {
   const [checkingTarget, setCheckingTarget] = useState(false)
 
   const [signingCountries, setSigningCountries] = useState([])
+  const [storeCountries, setStoreCountries] = useState([])
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
@@ -65,12 +70,14 @@ export function PackagePanel() {
   const [checkingInspectionTarget, setCheckingInspectionTarget] = useState(false)
 
   const loadStore = useCallback(async () => {
-    const [passwords, targetList] = await Promise.all([
+    const [passwords, targetList, certificates] = await Promise.all([
       window.electronAPI.ctsCountriesWithPasswords(),
       window.electronAPI.mdesTargetList().catch(() => ({ targets: [] })),
+      window.electronAPI.ctsListCertificates().catch(() => ({ countries: [] })),
     ])
     setSigningCountries(passwords.countries || [])
     setTargets(targetList.targets || [])
+    setStoreCountries(certificates.countries || [])
   }, [])
 
   useEffect(() => { loadStore() }, [loadStore])
@@ -87,8 +94,8 @@ export function PackagePanel() {
     window.electronAPI.mdesTargetPreflight({
       target: selectedTarget,
       sender: sourceValidation.facts.sender,
-      receiver: sourceValidation.facts.receiver,
-      communicationType: 'CRS',
+      receiver: receiver || sourceValidation.facts.receiver,
+      communicationType: sourceValidation.facts.communicationType,
       taxYear: sourceValidation.facts.taxYear,
       messageRefId: sourceValidation.facts.messageRefId,
       doctypeIndics: sourceValidation.facts.docTypeIndics || [],
@@ -101,7 +108,7 @@ export function PackagePanel() {
     })
 
     return () => { cancelled = true }
-  }, [selectedTarget, sourceValidation])
+  }, [selectedTarget, sourceValidation, receiver])
 
   useEffect(() => {
     let cancelled = false
@@ -146,7 +153,7 @@ export function PackagePanel() {
   }, [inspection, inspectionMode, inspectionTarget])
 
   const entries = useMemo(() => {
-    if (!sender || !receiver) return null
+    if (!sender || !receiver || !communicationType) return null
     const module = baseModule(communicationType)
     const infix = module === 'FATCA' ? '' : `_${module}`
     return [
@@ -157,6 +164,15 @@ export function PackagePanel() {
   }, [sender, receiver, communicationType])
 
   const canSign = sender && signingCountries.includes(sender.toUpperCase())
+  const facts = sourceValidation?.success ? sourceValidation.facts : null
+  const deliveryLabel = facts?.deliveryLabel || TYPE_LABELS[communicationType] || 'delivery'
+  // Only FATCA leaves the receiver open: its metadata is addressed to the IRS,
+  // and the _Key member names whoever holds the key that opens the package -
+  // the receiving MDES instance, which the document never mentions.
+  const receiverIsChosen = facts?.receiverLocked === false
+  const receiverChoices = [...new Set(
+    [...storeCountries, receiver].filter(Boolean),
+  )].sort()
 
   const pickSource = async () => {
     const filePath = await window.electronAPI.selectXmlFile()
@@ -165,7 +181,7 @@ export function PackagePanel() {
     setSender('')
     setReceiver('')
     setTaxYear('')
-    setCommunicationType('CRS')
+    setCommunicationType('')
     setSourceValidation(null)
     setTargetPreflight(null)
     setResult(null)
@@ -178,6 +194,7 @@ export function PackagePanel() {
         setSender(validation.facts.sender)
         setReceiver(validation.facts.receiver)
         setTaxYear(validation.facts.taxYear)
+        setCommunicationType(validation.facts.communicationType)
       }
     } catch (caught) {
       setSourceValidation({ success: false, valid: false, error: caught.message, errors: [caught.message] })
@@ -334,14 +351,38 @@ export function PackagePanel() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {lockedFactInput(sender, 'Sender', 'From XML')}
-            {lockedFactInput(receiver, 'Receiver', 'From XML')}
-            {lockedFactInput(communicationType === 'CRS' ? 'CRS delivery' : communicationType, 'Type', 'From XML')}
+            {receiverIsChosen ? (
+              <div>
+                <label className={`block text-sm font-medium ${theme.text} mb-1`}>
+                  Receiver (holds the key)
+                </label>
+                <select
+                  value={receiver}
+                  onChange={event => setReceiver(event.target.value)}
+                  className={`w-full px-3 py-2 rounded-lg border ${theme.input} ${theme.text}`}
+                >
+                  {receiverChoices.map(country => (
+                    <option key={country} value={country}>{country}</option>
+                  ))}
+                </select>
+              </div>
+            ) : lockedFactInput(receiver, 'Receiver', 'From XML')}
+            {lockedFactInput(TYPE_LABELS[communicationType] || communicationType, 'Type', 'From XML')}
             {lockedFactInput(taxYear, 'Tax year', 'From XML')}
           </div>
 
+          {receiverIsChosen && (
+            <p className={`text-xs ${theme.textMuted} -mt-2`}>
+              The document is addressed to the IRS, so the receiver is not read
+              from it: pick the country whose private key the receiving MDES
+              instance holds. Its certificate wraps the AES key, and the wrong
+              one is an unopenable package.
+            </p>
+          )}
+
           {validatingSource && (
             <div className={`p-3 rounded-lg border ${theme.input} text-sm ${theme.textMuted}`}>
-              Validating XML schema and foreign CRS rules...
+              Validating XML schema and MDES delivery rules...
             </div>
           )}
 
@@ -349,9 +390,12 @@ export function PackagePanel() {
             <div className="p-3 rounded-lg border border-green-500/40 bg-green-500/10 flex items-start gap-2">
               <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
               <div className={`text-sm ${theme.text}`}>
-                <p className="font-medium">Valid foreign CRS delivery: {sender} → {receiver}</p>
+                <p className="font-medium">Valid {deliveryLabel}: {sender} → {receiver}</p>
                 <p className={`text-xs ${theme.textMuted}`}>
-                  Schema {sourceValidation.facts.schemaVersion}; reporting year {taxYear}; package values are locked to the XML.
+                  Schema {sourceValidation.facts.schemaVersion}; reporting year {taxYear};
+                  {receiverIsChosen
+                    ? ' every package value except the receiver is locked to the XML.'
+                    : ' package values are locked to the XML.'}
                 </p>
               </div>
             </div>
@@ -404,7 +448,7 @@ export function PackagePanel() {
             <div className="p-3 rounded-lg border border-red-500/40 bg-red-500/10 flex items-start gap-2">
               <X className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
               <div className="text-sm text-red-600 dark:text-red-400">
-                <p className="font-medium">This XML cannot be packaged as a foreign CRS delivery.</p>
+                <p className="font-medium">This XML cannot be packaged as a delivery.</p>
                 <ul className="mt-1 list-disc pl-5">
                   {(sourceValidation.errors?.length ? sourceValidation.errors : [sourceValidation.error]).map(item => (
                     <li key={item}>{item}</li>

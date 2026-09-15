@@ -3,7 +3,7 @@
 from crs_generator.generator import CRSGenerator, GeneratorConfig
 from crs_generator.xml_validator import CRSXMLValidator
 from crs_generator import xsd_validator as xv
-from crs_generator.cts.source_validation import validate_foreign_crs
+from crs_generator.cts.source_validation import validate_delivery_source
 
 
 def test_organisation_without_controlling_persons_is_valid_non_crs101(tmp_path):
@@ -139,7 +139,7 @@ def test_packager_validation_derives_and_locks_foreign_xml_facts(tmp_path):
     path = CRSGenerator(_foreign_config(tmp_path / "foreign_source.xml")).generate(
         use_parallel=False
     )
-    validation = validate_foreign_crs(path)
+    validation = validate_delivery_source(path)
 
     assert validation.valid, validation.errors
     assert validation.facts.sender == "IT"
@@ -157,7 +157,7 @@ def test_packager_validation_rejects_domestic_crs_xml(tmp_path):
         output_path=tmp_path / "domestic.xml", show_progress=False,
     )).generate(use_parallel=False)
 
-    validation = validate_foreign_crs(path)
+    validation = validate_delivery_source(path)
     assert not validation.valid
     assert any("not a foreign CRS delivery" in error for error in validation.errors)
 

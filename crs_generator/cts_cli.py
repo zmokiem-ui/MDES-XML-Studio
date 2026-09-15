@@ -31,7 +31,11 @@ from .cts import naming
 from .cts import passwords
 from .cts.certificates import CertificateStoreError, load_signing_material
 from .cts.packager import Defect, PackagingError, pack_from_store, unpack
-from .cts.source_validation import validate_foreign_crs, validate_foreign_crs_bytes
+from .cts.source_validation import (
+    message_type_for,
+    validate_delivery_bytes,
+    validate_delivery_source,
+)
 
 PASSWORD_ENV_VAR = "MDES_SIGNING_PASSWORD"
 
@@ -86,26 +90,33 @@ def cmd_pack(args) -> int:
             + ", ".join(t for ts in naming.COMMUNICATION_TYPES.values() for t in ts)
         )
 
-    # The CRS package screen accepts a complete foreign delivery only. Derive
-    # every load-bearing value from the XML and reject attempts to override it.
-    if communication_type == "CRS":
-        validation = validate_foreign_crs(source)
+    # The package screen accepts a complete delivery only. Derive every
+    # load-bearing value from the XML and reject attempts to override it. Status
+    # messages are exempt: MDES writes those, and they are a different document.
+    expected_message_type = message_type_for(communication_type)
+    if expected_message_type:
+        validation = validate_delivery_source(source)
         if not validation.valid:
             detail = "\n".join(f"- {item}" for item in validation.errors)
-            return _fail(
-                "The selected XML is not a packageable foreign CRS delivery:\n" + detail
-            )
+            return _fail("The selected XML is not a packageable delivery:\n" + detail)
         facts = validation.facts
+        if facts.message_type != expected_message_type:
+            return _fail(
+                f"--type {communication_type} was requested, but the XML is a "
+                f"{facts.delivery_label}; use --type {facts.communication_type}."
+            )
+        # The receiver is only a fact where it is the routing. For FATCA the
+        # _Key member names whoever can open the package, which is the receiving
+        # instance rather than the IRS the document is addressed to, so an
+        # explicit --receiver stands and the XML merely supplies the default.
+        derived = {"sender": facts.sender, "tax year": facts.tax_year}
         requested = {
             "sender": (sender or "").upper(),
-            "receiver": (receiver or "").upper(),
             "tax year": str(args.tax_year or ""),
         }
-        derived = {
-            "sender": facts.sender,
-            "receiver": facts.receiver,
-            "tax year": facts.tax_year,
-        }
+        if facts.receiver_locked:
+            derived["receiver"] = facts.receiver
+            requested["receiver"] = (receiver or "").upper()
         mismatches = [
             f"{name} was {requested[name]!r}, but the XML says {value!r}"
             for name, value in derived.items()
@@ -119,7 +130,8 @@ def cmd_pack(args) -> int:
             return _fail(
                 "Package facts cannot override the selected XML: " + "; ".join(mismatches)
             )
-        sender, receiver, args.tax_year = facts.sender, facts.receiver, facts.tax_year
+        sender, args.tax_year = facts.sender, facts.tax_year
+        receiver = facts.receiver if facts.receiver_locked else (receiver or facts.receiver)
 
     try:
         defects = tuple(Defect(d) for d in (args.defect or ()))
@@ -213,17 +225,20 @@ def cmd_unpack(args) -> int:
         written = str(target)
 
     source_validation = None
-    if result.source_xml is not None and result.identity.get("communicationType") == "CRS":
-        source_validation = validate_foreign_crs_bytes(
+    if result.source_xml is not None and message_type_for(
+        result.identity.get("communicationType", "")
+    ):
+        source_validation = validate_delivery_bytes(
             result.source_xml, "Decrypted source XML"
         )
+        label = source_validation.facts.delivery_label or "delivery"
         result.checks.append({
             "id": "xml-validation",
             "outcome": "pass" if source_validation.valid else "fail",
             "detail": (
-                "The decrypted CRS source passes XSD and MDES foreign-delivery rules."
+                f"The decrypted source passes XSD and the MDES {label} rules."
                 if source_validation.valid else
-                "The decrypted CRS source is not packageable: "
+                "The decrypted source is not packageable: "
                 + "; ".join(source_validation.errors)
             ),
         })
@@ -280,7 +295,7 @@ def cmd_validate_source(args) -> int:
     source = Path(args.source)
     if not source.is_file():
         return _fail(f"Source file not found: {source}")
-    result = validate_foreign_crs(source)
+    result = validate_delivery_source(source)
     print(json.dumps(result.to_dict(), indent=2))
     return 0 if result.valid else 1
 
@@ -459,7 +474,7 @@ Examples:
     pack_parser.set_defaults(func=cmd_pack)
 
     validate_parser = subparsers.add_parser(
-        "validate-source", help="Validate and identify a foreign CRS source XML"
+        "validate-source", help="Validate and identify a delivery source XML"
     )
     validate_parser.add_argument("--source", "-s", required=True, help="Source XML file")
     validate_parser.set_defaults(func=cmd_validate_source)
